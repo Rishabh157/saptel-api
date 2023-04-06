@@ -36,9 +36,9 @@ const update = {
   }),
   body: Joi.object().keys({
     companyName: Joi.string().lowercase().required(),
-    websiteUrl: Joi.string(),
-    companyLogo: Joi.string(),
-    gstNo: Joi.string().lowercase().required(),
+    websiteUrl: Joi.string().uri().allow(""),
+    companyLogo: Joi.string().uri().allow(""),
+    gstNo: Joi.string().required(),
     address: Joi.string().lowercase().required(),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
