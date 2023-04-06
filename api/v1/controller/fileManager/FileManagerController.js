@@ -1,6 +1,6 @@
 const httpStatus = require('http-status')
 const ApiError = require('../../utils/ApiError')
-const fileManagerServices = require('../../services/FilemanagerService')
+const fileManagerServices = require('../../services/FileManagerService')
 const moment = require('moment')
 const config = require('../../../../config/config')
 //-------------------------------------------------
