@@ -1,7 +1,6 @@
 const otpService = require('../../services/OtpService')
 const httpStatus = require('http-status')
 const ApiError = require('../../../utils/ApiError')
-const { generateOTP } = require('../../helper/OtpGenerateHelper')
 const moment = require('moment')
 
 exports.getOtp = async (userId, userType) => {
