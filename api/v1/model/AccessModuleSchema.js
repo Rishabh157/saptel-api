@@ -7,6 +7,22 @@ const AccessmoduleSchema = new mongoose.Schema(
     action: { type: String, required: true, trim: true, uppercase: true },
     route: { type: String, required: true, trim: true, lowercase: true },
     method: { type: String, required: true, trim: true, uppercase: true },
+    moduleDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    moduleRank: { type: Number, required: true, default: 1 },
+    featureDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    featureRank: { type: Number, required: true, default: 1 },
+    featureName: { type: String, required: true, trim: true, lowercase: true },
+
     fields: {
       type: [
         {
@@ -42,13 +58,8 @@ const AccessmoduleSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-const searchKeys = [
-  "moduleName",
-  "action",
-  "route",
-  "method",
-  "fields",
-];
-module.exports.searchKeys = [...searchKeys]
+const allFields = Object.keys(AccessmoduleSchema.obj);
+const searchKeys = ["moduleName", "action", "route", "method", "fields"];
 module.exports = mongoose.model("Accessmodule", AccessmoduleSchema);
+module.exports.searchKeys = [...searchKeys];
+module.exports.allFields = [...allFields];

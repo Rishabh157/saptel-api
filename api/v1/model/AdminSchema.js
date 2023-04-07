@@ -56,6 +56,6 @@ const AdminSchema = new mongoose.Schema(
   }
 )
 const searchKeys = ['firstName', 'lastName', 'mobile', 'email']
-module.exports.searchKeys = [...searchKeys]
 
 module.exports = mongoose.model('Admin', AdminSchema)
+module.exports.searchKeys = [...searchKeys]

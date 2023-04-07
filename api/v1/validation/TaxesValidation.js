@@ -7,23 +7,7 @@ const commonValidation = require("./CommonValidation");
  * create new document
  */
 const create = {
-  body: Joi.object().keys({
-    moduleName: Joi.string().lowercase().required(),
-    action: Joi.string().lowercase().required(),
-    route: Joi.string().lowercase().required(),
-    method: Joi.string().lowercase().required(),
-    moduleDisplayName: Joi.string().lowercase().required(),
-    moduleRank: Joi.number().required(),
-    featureDisplayName: Joi.string().lowercase().required(),
-    featureRank: Joi.number().required(),
-    featureName: Joi.string().lowercase().required(),
-    fields: Joi.array().items(
-      Joi.object().keys({
-        displayName: Joi.string().allow(""),
-        fieldName: Joi.string().allow(""),
-      })
-    ),
-  }),
+  body: Joi.object().keys({ taxName: Joi.string().lowercase().required() }),
 };
 
 /**
@@ -33,23 +17,7 @@ const update = {
   params: Joi.object().keys({
     id: Joi.required().custom(commonValidation.objectId),
   }),
-  body: Joi.object().keys({
-    moduleName: Joi.string().lowercase().required(),
-    action: Joi.string().lowercase().required(),
-    route: Joi.string().lowercase().required(),
-    method: Joi.string().lowercase().required(),
-    moduleDisplayName: Joi.string().lowercase().required(),
-    moduleRank: Joi.number().required(),
-    featureDisplayName: Joi.string().lowercase().required(),
-    featureRank: Joi.number().required(),
-    featureName: Joi.string().lowercase().required(),
-    fields: Joi.array().items(
-      Joi.object().keys({
-        displayName: Joi.string().allow(""),
-        fieldName: Joi.string().allow(""),
-      })
-    ),
-  }),
+  body: Joi.object().keys({ taxName: Joi.string().lowercase().required() }),
 };
 
 /**
@@ -103,6 +71,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
+      taxName: Joi.string().optional(),
     })
     .optional(),
 };

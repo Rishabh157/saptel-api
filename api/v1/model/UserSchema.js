@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema(
 )
 
 const searchKeys = ['firstName', 'lastName', 'mobile', 'email']
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model('User', UserSchema)
+module.exports.searchKeys = [...searchKeys]
 
 // model schema ends here

@@ -22,5 +22,5 @@ const AttributesGroupSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["groupeName", "attributes"];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("AttributesGroup", AttributesGroupSchema);
+module.exports.searchKeys = [...searchKeys]

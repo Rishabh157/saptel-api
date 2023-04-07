@@ -74,7 +74,7 @@ const searchKeys = [
   "ifscNumber",
   "accountType",
 ];
-module.exports.searchKeys = [...searchKeys];
 module.exports = mongoose.model("Company", CompanySchema);
+module.exports.searchKeys = [...searchKeys];
 
 // model schema ends here

@@ -17,5 +17,5 @@ const CountrySchema = new mongoose.Schema(
 );
 
 const searchKeys = ["countryName"];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("Country", CountrySchema);
+module.exports.searchKeys = [...searchKeys]
