@@ -18,5 +18,5 @@ const StateSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["stateName", "countryId"];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("State", StateSchema);
+module.exports.searchKeys = [...searchKeys]

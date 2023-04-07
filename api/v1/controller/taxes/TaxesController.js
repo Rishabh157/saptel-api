@@ -2,10 +2,10 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/ApiError");
-const accessmoduleService = require("../../services/AccessModuleService");
-const { searchKeys, allFields } = require("../../model/AccessModuleSchema");
+const taxesService = require("../../services/TaxesService");
+const { searchKeys } = require("../../model/TaxesSchema");
 const errorRes = require("../../../utils/resError");
-const { getQuery, isAllFieldsExists } = require("../../helper/utils");
+const { getQuery } = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -20,78 +20,16 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      moduleName,
-      action,
-      route,
-      method,
-      fields,
-      moduleDisplayName,
-      moduleRank,
-      featureDisplayName,
-      featureRank,
-      featureName,
-    } = req.body;
+    let { taxName } = req.body;
     /**
      * check duplicate exist
      */
-    
-    // let allFieldsCheck = isAllFieldsExists(allFields, fields)
-    // if(!allFieldsCheck.status){
-    //   throw new ApiError(httpStatus.OK, allFieldsCheck.message);
-    // }
-    
-    let dataExist = await accessmoduleService.isExists(
-      ["action", "featureName"],
-      false,
-      true
-    );
+    let dataExist = await taxesService.isExists([{ taxName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    let routemethodExist = await accessmoduleService.isExists(
-      ["route", "method"],
-      false,
-      true
-    );
-    if (routemethodExist.exists && routemethodExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, routemethodExist.existsSummary);
-    }
-    let moduleNameFeatureNameExist = await accessmoduleService.isExists(
-      ["moduleRank", "featureName"],
-      false,
-      true
-    );
-    if (
-      moduleNameFeatureNameExist.exists &&
-      moduleNameFeatureNameExist.existsSummary
-    ) {
-      throw new ApiError(
-        httpStatus.OK,
-        moduleNameFeatureNameExist.existsSummary
-      );
-    }
-    let featurefound = await accessmoduleService.getOneByMultiField({
-      featureName: featureName,
-    });
-    if (featurefound && featurefound.featureRank !== featureRank) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Feature rank must be same in it's all module"
-      );
-    }
-    if (
-      featurefound &&
-      featurefound.featureDisplayName !== featureDisplayName
-    ) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Feature display name must be same in it's all module"
-      );
-    }
-
     //------------------create data-------------------
-    let dataCreated = await accessmoduleService.createNewData({ ...req.body });
+    let dataCreated = await taxesService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -105,7 +43,6 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
-    console.log(err)
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
@@ -118,19 +55,19 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { moduleName, action, route, method, fields } = req.body;
+    let { taxName } = req.body;
 
     let idToBeSearch = req.params.id;
 
     //------------------Find data-------------------
-    let datafound = await accessmoduleService.getOneByMultiField({
+    let datafound = await taxesService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Accessmodule not found.`);
+      throw new ApiError(httpStatus.OK, `Taxes not found.`);
     }
 
-    let dataUpdated = await accessmoduleService.getOneAndUpdate(
+    let dataUpdated = await taxesService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -224,7 +161,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["moduleName", "action", "route", "method"];
+    let numberFileds = ["taxName"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -263,9 +200,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await accessmoduleService.aggregateQuery(
-      finalAggregateQuery
-    );
+    let dataFound = await taxesService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -284,7 +219,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await accessmoduleService.aggregateQuery(finalAggregateQuery);
+    let result = await taxesService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -316,7 +251,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await accessmoduleService.findAllWithQuery(matchQuery);
+    let dataExist = await taxesService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -342,10 +277,10 @@ exports.get = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await accessmoduleService.getOneByMultiField({ _id }))) {
+    if (!(await taxesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await accessmoduleService.getOneAndDelete({ _id });
+    let deleted = await taxesService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -369,13 +304,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await accessmoduleService.getOneByMultiField({ _id });
+    let dataExist = await taxesService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await accessmoduleService.getOneAndUpdate(
+    let statusChanged = await taxesService.getOneAndUpdate(
       { _id },
       { isActive }
     );

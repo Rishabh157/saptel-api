@@ -22,5 +22,5 @@ const AttributesSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["attributeName"];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("Attributes", AttributesSchema);
+module.exports.searchKeys = [...searchKeys]

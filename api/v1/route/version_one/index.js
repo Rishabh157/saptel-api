@@ -9,6 +9,8 @@ const districtRoute = require("./DistrictRoute");
 const tehsilRoute = require("./TehsilRoute");
 const pincodeRoute = require("./PincodeRoute");
 const areaRoute = require("./AreaRoute");
+const productCategoryRoute = require("./ProductCategoryRoute");
+const taxesRoute = require("./TaxesRoute");
 const attributesGroupRoute = require("./AttributesGroupRoute");
 const attributesRoute = require("./AttributesRoute");
 const adminRoute = require("./AdminRoute");
@@ -70,7 +72,15 @@ const defaultRoutes = [
     path: "/area",
     route: areaRoute,
   },
-
+  {
+    path: "/product-code",
+    route: productCategoryRoute,
+  },
+  {
+    path: "/taxes",
+    route: taxesRoute,
+  },
+  
   {
     path: "/attributes-group",
     route: attributesGroupRoute,

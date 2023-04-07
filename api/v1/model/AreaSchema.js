@@ -29,5 +29,5 @@ const searchKeys = [
   "stateId",
   "countryId",
 ];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("Area", AreaSchema);
+module.exports.searchKeys = [...searchKeys]

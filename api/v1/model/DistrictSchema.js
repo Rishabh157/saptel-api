@@ -19,5 +19,5 @@ const DistrictSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["districtName", "stateId", "countryId"];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("District", DistrictSchema);
+module.exports.searchKeys = [...searchKeys]

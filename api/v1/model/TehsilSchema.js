@@ -25,5 +25,5 @@ const searchKeys = [
   "stateId",
   "countryId",
 ];
-module.exports.searchKeys = [...searchKeys]
 module.exports = mongoose.model("Tehsil", TehsilSchema);
+module.exports.searchKeys = [...searchKeys]
