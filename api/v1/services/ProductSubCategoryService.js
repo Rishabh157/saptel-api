@@ -1,64 +1,64 @@
-const District = require('../model/DistrictSchema')
+const ProductSubCategory = require('../model/ProductSubCategorySchema')
 const { combineObjects } = require('../helper/utils')
 
 //-------------------------------------------
 /**
- * Get One District by single field
+ * Get One ProductSubCategory by single field
  * @param {string} fieldName
  * @param {string} fieldValue
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getOneBySingleField = async (fieldName, fieldValue) => {
-  return District.findOne({ [fieldName]: fieldValue, isDeleted: false })
+  return ProductSubCategory.findOne({ [fieldName]: fieldValue, isDeleted: false })
   }
   //-------------------------------------------
   /**
- * Get One District by multiple Fields field
+ * Get One ProductSubCategory by multiple Fields field
  * @param {object} matchObj
  * @param {object} projectObj
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getOneByMultiField = async (matchObj, projectObj) => {
-  return District.findOne({ ...matchObj, isDeleted: false }, { ...projectObj })
+  return ProductSubCategory.findOne({ ...matchObj, isDeleted: false }, { ...projectObj })
   }
   
   //-------------------------------------------
   /**
- * Create District
+ * Create ProductSubCategory
  * @param {object} bodyData
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const createNewData = async bodyData => {
-  return District.create({ ...bodyData })
+  return ProductSubCategory.create({ ...bodyData })
   }
   //-------------------------------------------
   /**
- * get by id District
+ * get by id ProductSubCategory
  * @param {ObjectId} id
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getById = async id => {
-  return District.findById(id)
+  return ProductSubCategory.findById(id)
   }
   //-------------------------------------------
   /**
- * Update District by id
+ * Update ProductSubCategory by id
  * @param {ObjectId} id
  * @param {Object} updateBody
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getByIdAndUpdate = async (id, updateBody) => {
-  return District.findByIdAndUpdate({ _id: id }, { ...updateBody }, { new: true })
+  return ProductSubCategory.findByIdAndUpdate({ _id: id }, { ...updateBody }, { new: true })
   }
   //-------------------------------------------
   /**
  * find One and update
  * @param {object} matchObj
  * @param {Object} updateBody
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getOneAndUpdate = async (matchObj, updateBody) => {
-  return District.findOneAndUpdate(
+  return ProductSubCategory.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -69,10 +69,10 @@ const { combineObjects } = require('../helper/utils')
  * find One and update
  * @param {object} matchObj
  * @param {Object} updateBody
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const onlyUpdateOne = async (matchObj, updateBody) => {
-  return District.updateOne(
+  return ProductSubCategory.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -82,19 +82,19 @@ const { combineObjects } = require('../helper/utils')
   /**
  * Delete by id
  * @param {ObjectId} id
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getByIdAndDelete = async id => {
-  return District.findByIdAndDelete(id)
+  return ProductSubCategory.findByIdAndDelete(id)
   }
   //-------------------------------------------
   /**
  * find one and delete
  * @param {object} matchObj
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const getOneAndDelete = async matchObj => {
-  return District.findOneAndUpdate(
+  return ProductSubCategory.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -105,36 +105,36 @@ const { combineObjects } = require('../helper/utils')
  * find one and delete
  * @param {object} matchObj
  * @param {object} projectObj
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const findAllWithQuery = async (matchObj, projectObj) => {
-  return District.find({ ...matchObj, isDeleted: false }, { ...projectObj })
+  return ProductSubCategory.find({ ...matchObj, isDeleted: false }, { ...projectObj })
   }
   //-------------------------------------------
   /**
  * find one and delete
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const findAll = async () => {
-  return District.find()
+  return ProductSubCategory.find()
   }
   //-------------------------------------------
   /**
  * find one and delete
  * @param {Array} aggregateQueryArray
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const aggregateQuery = async aggregateQueryArray => {
-  return District.aggregate(aggregateQueryArray)
+  return ProductSubCategory.aggregate(aggregateQueryArray)
   }
   //-------------------------------------------
   /**
  * find one and delete
  * @param {Array} insertDataArray
- * @returns {Promise<District>}
+ * @returns {Promise<ProductSubCategory>}
  */
  const createMany = async insertDataArray => {
-  return District.insertMany(insertDataArray)
+  return ProductSubCategory.insertMany(insertDataArray)
   }
   //-------------------------------------------
   /**
@@ -145,7 +145,7 @@ const { combineObjects } = require('../helper/utils')
                             }
  */
  const findCount = async matchObj => {
-  return District.find({ ...matchObj, isDeleted: false }).count()
+  return ProductSubCategory.find({ ...matchObj, isDeleted: false }).count()
   }
   //-------------------------------------------
   /**

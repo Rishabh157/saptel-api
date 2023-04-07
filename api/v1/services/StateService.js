@@ -1,5 +1,5 @@
 const State = require("../model/StateSchema");
-const { ...combinedObj } = require("../helper/utils");
+const { combineObjects } = require('../helper/utils')
 
 //-------------------------------------------
 /**

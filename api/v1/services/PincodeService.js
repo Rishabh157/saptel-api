@@ -1,5 +1,5 @@
 const Pincode = require("../model/PincodeSchema");
-const { ...combinedObj } = require("../helper/utils");
+const { combineObjects } = require('../helper/utils')
 
 //-------------------------------------------
 /**
