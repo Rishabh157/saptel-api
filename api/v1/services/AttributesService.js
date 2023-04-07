@@ -1,5 +1,5 @@
 const Attributes = require("../model/AttributesSchema");
-const { ...combinedObj } = require("../helper/utils");
+const { combineObjects } = require('../helper/utils')
 
 //-------------------------------------------
 /**
