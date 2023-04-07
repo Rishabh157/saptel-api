@@ -9,6 +9,7 @@ const districtRoute = require("./DistrictRoute");
 const tehsilRoute = require("./TehsilRoute");
 const pincodeRoute = require("./PincodeRoute");
 const areaRoute = require("./AreaRoute");
+const cartonBoxRoute = require("./CartonBoxRoute");
 const productSubCategoryRoute = require("./ProductSubCategoryRoute");
 const productGroupRoute = require("./ProductGroupRoute");
 const productCategoryRoute = require("./ProductCategoryRoute");
@@ -94,6 +95,10 @@ const defaultRoutes = [
   {
     path: "/item",
     route: itemRoute,
+  },
+  {
+    path: "/carton-box",
+    route: cartonBoxRoute,
   },
   {
     path: "/attributes-group",
