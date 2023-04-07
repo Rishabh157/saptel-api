@@ -4,8 +4,8 @@ const ProductSubCategorySchema = new mongoose.Schema(
     subCategoryCode: {
       type: String,
       required: true,
-      trim: true,
-      lowercase: true,
+      trim: true
+      
     },
     subCategoryName: {
       type: String,
@@ -16,16 +16,16 @@ const ProductSubCategorySchema = new mongoose.Schema(
     parentCategory: {
       type: String,
       required: true,
-      trim: true,
-      lowercase: true,
+      trim: true
+      
     },
     applicableTaxes: {
       type: String,
       required: true,
-      trim: true,
-      lowercase: true,
+      trim: true
+      
     },
-    hsnCode: { type: String, required: true, trim: true, lowercase: true },
+    hsnCode: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -13,6 +13,7 @@ const productSubCategoryRoute = require("./ProductSubCategoryRoute");
 const productGroupRoute = require("./ProductGroupRoute");
 const productCategoryRoute = require("./ProductCategoryRoute");
 const taxesRoute = require("./TaxesRoute");
+const itemRoute = require("./ItemRoute");
 const attributesGroupRoute = require("./AttributesGroupRoute");
 const attributesRoute = require("./AttributesRoute");
 const adminRoute = require("./AdminRoute");
@@ -89,6 +90,10 @@ const defaultRoutes = [
   {
     path: "/product-group",
     route: productGroupRoute,
+  },
+  {
+    path: "/item",
+    route: itemRoute,
   },
   {
     path: "/attributes-group",
