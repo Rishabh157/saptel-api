@@ -12,6 +12,7 @@ const areaRoute = require("./AreaRoute");
 const productRoute = require("./ProductRoute");
 const languageRoute = require("./LanguageRoute");
 const cartonBoxRoute = require("./CartonBoxRoute");
+const barCodeRoute = require("./BarCodeRoute");
 const asrRequestRoute = require("./AsrRequestRoute");
 const productSubCategoryRoute = require("./ProductSubCategoryRoute");
 const productGroupRoute = require("./ProductGroupRoute");
@@ -118,6 +119,10 @@ const defaultRoutes = [
   {
     path: "/product",
     route: productRoute,
+  },
+  {
+    path: "/bar-code",
+    route: barCodeRoute,
   },
   {
     path: "/attribute",
