@@ -3,9 +3,10 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/ApiError");
 const accessmoduleService = require("../../services/AccessModuleService");
-const { searchKeys, allFields } = require("../../model/AccessModuleSchema");
+const { searchKeys } = require("../../model/AccessModuleSchema");
 const errorRes = require("../../../utils/resError");
 const { getQuery, isAllFieldsExists } = require("../../helper/utils");
+const accessModuleHelper = require("./AccessModuleHelper");
 
 const {
   getSearchQuery,
@@ -35,12 +36,14 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    
-    // let allFieldsCheck = isAllFieldsExists(allFields, fields)
-    // if(!allFieldsCheck.status){
-    //   throw new ApiError(httpStatus.OK, allFieldsCheck.message);
-    // }
-    
+    let allCollections = await accessModuleHelper.collectionNameArray(
+      moduleName
+    );
+    let allFieldsCheck = isAllFieldsExists(allCollections, fields);
+    if (!allFieldsCheck.status) {
+      throw new ApiError(httpStatus.OK, allFieldsCheck.message);
+    }
+
     let dataExist = await accessmoduleService.isExists(
       ["action", "featureName"],
       false,
@@ -105,7 +108,6 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
-    console.log(err)
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;

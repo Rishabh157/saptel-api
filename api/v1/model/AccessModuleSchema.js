@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const AccessmoduleSchema = new mongoose.Schema(
   {
-    moduleName: { type: String, required: true, trim: true, uppercase: true },
+    moduleName: { type: String, required: true, trim: true },
     action: { type: String, required: true, trim: true, uppercase: true },
     route: { type: String, required: true, trim: true, lowercase: true },
     method: { type: String, required: true, trim: true, uppercase: true },

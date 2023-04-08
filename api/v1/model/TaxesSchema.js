@@ -17,5 +17,5 @@ const TaxesSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["taxName"];
-module.exports = mongoose.model("Taxes", TaxesSchema);
+module.exports = mongoose.model("Tax", TaxesSchema);
 module.exports.searchKeys = [...searchKeys];
