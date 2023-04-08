@@ -2,8 +2,8 @@ const config = require('../../../../config/config')
 const logger = require('../../../../config/logger')
 const httpStatus = require('http-status')
 const ApiError = require('../../../utils/apiError')
-const asrRequestService = require('../../services/AsrRequestService')
-const { searchKeys } = require('../../model/AsrRequestSchema')
+const dealersCategoryService = require('../../services/DealersCategoryService')
+const { searchKeys } = require('../../model/DealersCategorySchema')
 const errorRes = require('../../../utils/resError')
 const { getQuery } = require('../../helper/utils')
 
@@ -20,16 +20,19 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { arsDetails } = req.body
+    let { dealersCategory, investAmount, numberOfOrders, deliveryPercentage } =
+      req.body
     /**
      * check duplicate exist
      */
-    let dataExist = await asrRequestService.isExists([])
+    let dataExist = await dealersCategoryService.isExists([])
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary)
     }
     //------------------create data-------------------
-    let dataCreated = await asrRequestService.createNewData({ ...req.body })
+    let dataCreated = await dealersCategoryService.createNewData({
+      ...req.body
+    })
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -55,15 +58,20 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { arsDetails } = req.body
-    let datafound = await asrRequestService.getOneByMultiField({
+    let { dealersCategory, investAmount, numberOfOrders, deliveryPercentage } =
+      req.body
+
+    let idToBeSearch = req.params.id
+
+    //------------------Find data-------------------
+    let datafound = await dealersCategoryService.getOneByMultiField({
       _id: idToBeSearch
     })
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `AsrRequest not found.`)
+      throw new ApiError(httpStatus.OK, `DealersCategory not found.`)
     }
 
-    let dataUpdated = await asrRequestService.getOneAndUpdate(
+    let dataUpdated = await dealersCategoryService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false
@@ -157,7 +165,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = []
-    let numberFileds = ['productName']
+    let numberFileds = ['dealersCategory']
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds)
     if (filterQuery && filterQuery.length) {
@@ -196,7 +204,9 @@ exports.allFilterPagination = async (req, res) => {
     })
 
     //-----------------------------------
-    let dataFound = await asrRequestService.aggregateQuery(finalAggregateQuery)
+    let dataFound = await dealersCategoryService.aggregateQuery(
+      finalAggregateQuery
+    )
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`)
     }
@@ -215,9 +225,11 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit })
     }
 
-    let result = await asrRequestService.aggregateQuery(finalAggregateQuery)
+    let result = await dealersCategoryService.aggregateQuery(
+      finalAggregateQuery
+    )
     if (result.length) {
-      return res.status(httpStatus.OK).send({
+      return res.status(200).send({
         data: result,
         totalPage: totalpages,
         status: true,
@@ -247,7 +259,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query)
     }
 
-    let dataExist = await asrRequestService.findAllWithQuery(matchQuery)
+    let dataExist = await dealersCategoryService.findAllWithQuery(matchQuery)
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, 'Data not found.')
@@ -273,10 +285,10 @@ exports.get = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id
-    if (!(await asrRequestService.getOneByMultiField({ _id }))) {
+    if (!(await dealersCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, 'Data not found.')
     }
-    let deleted = await asrRequestService.getOneAndDelete({ _id })
+    let deleted = await dealersCategoryService.getOneAndDelete({ _id })
     if (!deleted) {
       throw new ApiError(httpStatus.OK, 'Some thing went wrong.')
     }
@@ -300,13 +312,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id
-    let dataExist = await asrRequestService.getOneByMultiField({ _id })
+    let dataExist = await dealersCategoryService.getOneByMultiField({ _id })
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, 'Data not found.')
     }
     let isActive = dataExist.isActive ? false : true
 
-    let statusChanged = await asrRequestService.getOneAndUpdate(
+    let statusChanged = await dealersCategoryService.getOneAndUpdate(
       { _id },
       { isActive }
     )

@@ -8,10 +8,10 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    arsDetails: Joi.array().items({
-      productName: Joi.string().lowercase().required(),
-      quantity: Joi.number().required(),
-    }),
+    dealersCategory: Joi.string().custom(commonValidation.objectId).required(),
+    investAmount: Joi.number().required(),
+    numberOfOrders: Joi.number().required(),
+    deliveryPercentage: Joi.number().required(),
   }),
 };
 
@@ -23,10 +23,10 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    arsDetails: Joi.array().items({
-      productName: Joi.string().lowercase().required(),
-      quantity: Joi.number().required(),
-    }),
+    dealersCategory: Joi.string().custom(commonValidation.objectId).required(),
+    investAmount: Joi.number().required(),
+    numberOfOrders: Joi.number().required(),
+    deliveryPercentage: Joi.number().required(),
   }),
 };
 

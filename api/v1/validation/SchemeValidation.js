@@ -8,9 +8,31 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    arsDetails: Joi.array().items({
-      productName: Joi.string().lowercase().required(),
-      quantity: Joi.number().required(),
+    schemeCode: Joi.string().required(),
+    schemeName: Joi.string().lowercase().required(),
+    category: Joi.string().custom(commonValidation.objectId).required(),
+    subCategory: Joi.string().custom(commonValidation.objectId).required(),
+    schemePrice: Joi.number().required(),
+    dimension: Joi.object().keys({
+      height: Joi.number().required(),
+      weight: Joi.number().required(),
+      depth: Joi.number().required(),
+    }),
+    weight: Joi.number().required(),
+    deliveryCharges: Joi.number().required(),
+    comboPacking: Joi.boolean().required(),
+    startDate: Joi.string().lowercase().required(),
+    endDate: Joi.string().lowercase().required(),
+    schemeDescription: Joi.string().lowercase().required(),
+    productInformation: Joi.array().items({
+      productGroup: Joi.string().required(),
+      productQuantity: Joi.number().required(),
+      mrp: Joi.number().required(),
+      pop: Joi.number().required(),
+    }),
+    faq: Joi.array().items({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
     }),
   }),
 };
@@ -23,9 +45,31 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    arsDetails: Joi.array().items({
-      productName: Joi.string().lowercase().required(),
-      quantity: Joi.number().required(),
+    schemeCode: Joi.string().required(),
+    schemeName: Joi.string().lowercase().required(),
+    category: Joi.string().custom(commonValidation.objectId).required(),
+    subCategory: Joi.string().custom(commonValidation.objectId).required(),
+    schemePrice: Joi.number().required(),
+    dimension: Joi.object().keys({
+      height: Joi.number().required(),
+      weight: Joi.number().required(),
+      depth: Joi.number().required(),
+    }),
+    weight: Joi.number().required(),
+    deliveryCharges: Joi.number().required(),
+    comboPacking: Joi.boolean().required(),
+    startDate: Joi.string().lowercase().required(),
+    endDate: Joi.string().lowercase().required(),
+    schemeDescription: Joi.string().lowercase().required(),
+    productInformation: Joi.array().items({
+      productGroup: Joi.string().required(),
+      productQuantity: Joi.number().required(),
+      mrp: Joi.number().required(),
+      pop: Joi.number().required(),
+    }),
+    faq: Joi.array().items({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
     }),
   }),
 };
@@ -81,6 +125,8 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
+      schemeCode: Joi.string().optional(),
+      schemeName: Joi.string().optional(),
     })
     .optional(),
 };

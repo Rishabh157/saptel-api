@@ -14,6 +14,8 @@ const languageRoute = require('./LanguageRoute')
 const cartonBoxRoute = require('./CartonBoxRoute')
 const barCodeRoute = require('./BarCodeRoute')
 const asrRequestRoute = require('./AsrRequestRoute')
+const schemeRoute = require('./SchemeRoute')
+const dealersCategoryRoute = require('./DealersCategoryRoute')
 const productSubCategoryRoute = require('./ProductSubCategoryRoute')
 const productGroupRoute = require('./ProductGroupRoute')
 const productCategoryRoute = require('./ProductCategoryRoute')
@@ -123,6 +125,14 @@ const defaultRoutes = [
   {
     path: '/bar-code',
     route: barCodeRoute
+  },
+  {
+    path: '/dealers-category',
+    route: dealersCategoryRoute
+  },
+  {
+    path: '/scheme',
+    route: schemeRoute
   },
   {
     path: '/attribute',
