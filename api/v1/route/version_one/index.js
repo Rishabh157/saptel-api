@@ -12,6 +12,7 @@ const areaRoute = require("./AreaRoute");
 const productRoute = require("./ProductRoute");
 const languageRoute = require("./LanguageRoute");
 const cartonBoxRoute = require("./CartonBoxRoute");
+const asrRequestRoute = require("./AsrRequestRoute");
 const productSubCategoryRoute = require("./ProductSubCategoryRoute");
 const productGroupRoute = require("./ProductGroupRoute");
 const productCategoryRoute = require("./ProductCategoryRoute");
@@ -97,6 +98,10 @@ const defaultRoutes = [
   {
     path: "/item",
     route: itemRoute,
+  },
+  {
+    path: "/asr",
+    route: asrRequestRoute,
   },
   {
     path: "/carton-box",
