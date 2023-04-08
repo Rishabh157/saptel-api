@@ -1,4 +1,4 @@
-exports.errorRes = err => {
+const errorRes = err => {
   let i = 1
   let error_msg = 'Something went wrong.'
   let statusCode =
@@ -27,3 +27,4 @@ exports.errorRes = err => {
     }
   }
 }
+module.exports = { errorRes }

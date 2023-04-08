@@ -4,7 +4,7 @@ const httpStatus = require('http-status')
 const ApiError = require('../../../utils/apiError')
 const accessmoduleService = require('../../services/AccessModuleService')
 const { searchKeys } = require('../../model/AccessModuleSchema')
-const errorRes = require('../../../utils/resError')
+const { errorRes } = require('../../../utils/resError')
 const { getQuery } = require('../../helper/utils')
 const accessModuleHelper = require('./AccessModuleHelper')
 
@@ -27,9 +27,9 @@ exports.add = async (req, res) => {
       actionName,
       actionDisplayName,
       actionDisplayRank,
-      ModelName,
-      ModelDisplayName,
-      ModelDisplayRank,
+      modelName,
+      modelDisplayName,
+      modelDisplayRank,
       fields
     } = req.body
 
@@ -37,9 +37,19 @@ exports.add = async (req, res) => {
      * check valid data
      */
 
-    let allCollections = await accessModuleHelper.collectionNameArray(
-      actionName
-    )
+    // let allCollections = await accessModuleHelper.collectionNameArray(modelName)
+
+    let collectionFound = await accessModuleHelper.isModelNameValid(modelName)
+    if (!collectionFound) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Invalid model name ${modelName}. It must be same as Schema's model name.`
+      )
+    }
+
+    let allFields = await getAllModelFields(collectionFound)
+    console.log(collectionFound, 'collectionFound')
+    return
 
     let allFieldsCheck = accessModuleHelper.isAllFieldsExists(
       allCollections,
@@ -50,7 +60,7 @@ exports.add = async (req, res) => {
     }
 
     let dataExist = await accessmoduleService.isExists(
-      ['action', 'ModelName'],
+      ['action', 'modelName'],
       false,
       true
     )
@@ -65,27 +75,27 @@ exports.add = async (req, res) => {
     if (routemethodExist.exists && routemethodExist.existsSummary) {
       throw new ApiError(httpStatus.OK, routemethodExist.existsSummary)
     }
-    let actionNameModelNameExist = await accessmoduleService.isExists(
-      ['actionDisplayRank', 'ModelName'],
+    let actionNamemodelNameExist = await accessmoduleService.isExists(
+      ['actionDisplayRank', 'modelName'],
       false,
       true
     )
     if (
-      actionNameModelNameExist.exists &&
-      actionNameModelNameExist.existsSummary
+      actionNamemodelNameExist.exists &&
+      actionNamemodelNameExist.existsSummary
     ) {
-      throw new ApiError(httpStatus.OK, actionNameModelNameExist.existsSummary)
+      throw new ApiError(httpStatus.OK, actionNamemodelNameExist.existsSummary)
     }
     let featurefound = await accessmoduleService.getOneByMultiField({
-      ModelName: ModelName
+      modelName: modelName
     })
-    if (featurefound && featurefound.ModelDisplayRank !== ModelDisplayRank) {
+    if (featurefound && featurefound.modelDisplayRank !== modelDisplayRank) {
       throw new ApiError(
         httpStatus.OK,
         "Feature rank must be same in it's all module"
       )
     }
-    if (featurefound && featurefound.ModelDisplayName !== ModelDisplayName) {
+    if (featurefound && featurefound.modelDisplayName !== modelDisplayName) {
       throw new ApiError(
         httpStatus.OK,
         "Feature display name must be same in it's all module"
@@ -107,6 +117,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`)
     }
   } catch (err) {
+    console.log(err)
     let errData = errorRes(err)
     logger.info(errData.resData)
     let { message, status, data, code, issue } = errData.resData
@@ -155,7 +166,7 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`)
     }
   } catch (err) {
-    let errData = errorRes(err)
+    let errData = await errorRes(err)
     logger.info(errData.resData)
     let { message, status, data, code, issue } = errData.resData
     return res
