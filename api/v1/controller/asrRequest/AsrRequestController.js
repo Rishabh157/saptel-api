@@ -20,7 +20,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productName, quantity } = req.body;
+    let { arsDetails } = req.body;
     /**
      * check duplicate exist
      */
@@ -55,7 +55,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { productName, quantity } = req.body;
+    let { arsDetails } = req.body;
 
     let idToBeSearch = req.params.id;
 
