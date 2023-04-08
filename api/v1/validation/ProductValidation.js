@@ -8,7 +8,7 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    productCode: Joi.string().required(),
+    productCode: Joi.string().lowercase().required(),
     productName: Joi.string().lowercase().required(),
     productCategory: Joi.string().custom(commonValidation.objectId).required(),
     productSubCategory: Joi.string()
@@ -21,7 +21,28 @@ const create = {
       weight: Joi.number().required(),
       depth: Joi.number().required(),
     }),
+    productImage: Joi.string().uri().required(),
     description: Joi.string().lowercase().required(),
+    item: Joi.array().items({
+      itemName: Joi.string().required(),
+      itemQuantity: Joi.number().required(),
+    }),
+    tax: Joi.array().items({
+      taxName: Joi.string().required(),
+      taxPercent: Joi.number().required(),
+    }),
+    faq: Joi.array().items({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
+    }),
+    video: Joi.array().items({
+      videoName: Joi.string().required(),
+      videoLink: Joi.string().uri().required(),
+    }),
+    callScript: Joi.array().items({
+      language: Joi.string().required(),
+      script: Joi.string().required(),
+    }),
   }),
 };
 
@@ -33,7 +54,7 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    productCode: Joi.string().required(),
+    productCode: Joi.string().lowercase().required(),
     productName: Joi.string().lowercase().required(),
     productCategory: Joi.string().custom(commonValidation.objectId).required(),
     productSubCategory: Joi.string()
@@ -46,7 +67,28 @@ const update = {
       weight: Joi.number().required(),
       depth: Joi.number().required(),
     }),
+    productImage: Joi.string().uri().required(),
     description: Joi.string().lowercase().required(),
+    item: Joi.array().items({
+      itemName: Joi.string().required(),
+      itemQuantity: Joi.number().required(),
+    }),
+    tax: Joi.array().items({
+      taxName: Joi.string().required(),
+      taxPercent: Joi.number().required(),
+    }),
+    faq: Joi.array().items({
+      question: Joi.string().required(),
+      answer: Joi.string().required(),
+    }),
+    video: Joi.array().items({
+      videoName: Joi.string().required(),
+      videoLink: Joi.string().uri().required(),
+    }),
+    callScript: Joi.array().items({
+      language: Joi.string().required(),
+      script: Joi.string().required(),
+    }),
   }),
 };
 

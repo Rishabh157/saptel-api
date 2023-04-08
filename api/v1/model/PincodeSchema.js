@@ -28,4 +28,4 @@ const searchKeys = [
   "countryId",
 ];
 module.exports = mongoose.model("Pincode", PincodeSchema);
-module.exports.searchKeys = [...searchKeys]
+module.exports.searchKeys = [...searchKeys];
