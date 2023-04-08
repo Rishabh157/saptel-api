@@ -3,7 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/ApiError");
 const productService = require("../../services/ProductService");
-const { searchKeys, allFields } = require("../../model/ProductSchema");
+const { searchKeys } = require("../../model/ProductSchema");
 const errorRes = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -28,15 +28,17 @@ exports.add = async (req, res) => {
       productGroup,
       productWeight,
       dimension,
+      productImage,
       description,
+      item,
+      tax,
+      faq,
+      video,
+      callScript,
     } = req.body;
     /**
      * check duplicate exist
      */
-    let allFieldsCheck = isAllFieldsExists(allFields, fields);
-    if (!allFieldsCheck.status) {
-      throw new ApiError(httpStatus.OK, allFieldsCheck.message);
-    }
     let dataExist = await productService.isExists([
       { productCode },
       { productName },
@@ -80,6 +82,11 @@ exports.update = async (req, res) => {
       productWeight,
       dimension,
       description,
+      item,
+      tax,
+      faq,
+      video,
+      callScript,
     } = req.body;
 
     let idToBeSearch = req.params.id;
