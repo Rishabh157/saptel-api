@@ -60,5 +60,7 @@ const searchKeys = [
   "dimension",
   "description",
 ];
+const allFields = Object.keys(ProductSchema.obj);
 module.exports = mongoose.model("Product", ProductSchema);
 module.exports.searchKeys = [...searchKeys];
+module.exports.allFields = [...allFields];

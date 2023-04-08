@@ -16,7 +16,15 @@ exports.getQuery = (defaultQuery, reqQuery = false) => {
 };
 
 exports.isAllFieldsExists = (allFields, fields) => {
-  const filteredArray = allFields.filter(item => item !== 'isDeleted' && item !== 'isActive');
+  const filteredArray = allFields.filter(
+    (item) =>
+      item !== "isDeleted" &&
+      item !== "isActive" &&
+      item !== "createdAt" &&
+      item !== "updatedAt" &&
+      item !== "_id" &&
+      item !== "__v"
+  );
 
   return filteredArray.reduce(
     (acc, field) => {
