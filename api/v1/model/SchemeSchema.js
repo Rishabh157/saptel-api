@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const SchemeSchema = new mongoose.Schema(
   {
     schemeCode: { type: String, required: true, trim: true },
@@ -10,21 +10,21 @@ const SchemeSchema = new mongoose.Schema(
       type: {
         height: {
           type: Number,
-          required: true,
+          required: true
         },
 
         weight: {
           type: Number,
-          required: true,
+          required: true
         },
 
         depth: {
           type: Number,
-          required: true,
-        },
+          required: true
+        }
       },
 
-      required: true,
+      required: true
     },
 
     weight: { type: Number, required: true },
@@ -36,88 +36,84 @@ const SchemeSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
+      lowercase: true
     },
     productInformation: {
       type: [
         {
-          type: {
-            productGroup: {
-              type: String,
-              required: true,
-              trim: true,
-              lowercase: true,
-            },
-
-            productQuantity: {
-              type: Number,
-              required: true,
-            },
-            mrp: {
-              type: Number,
-              required: true,
-            },
-            pop: {
-              type: Number,
-              required: true,
-            },
+          productGroup: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true
           },
-        },
+
+          productQuantity: {
+            type: Number,
+            required: true
+          },
+          mrp: {
+            type: Number,
+            required: true
+          },
+          pop: {
+            type: Number,
+            required: true
+          }
+        }
       ],
-      required: true,
+      required: true
     },
     faq: {
       type: [
         {
-          type: {
-            question: {
-              type: String,
-              required: true,
-              trim: true,
-              lowercase: true,
-            },
-
-            answer: {
-              type: String,
-              required: true,
-              trim: true,
-              lowercase: true,
-            },
+          question: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true
           },
-        },
+
+          answer: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true
+          }
+        }
       ],
-      required: true,
+      required: true
     },
 
     isDeleted: {
       type: Boolean,
-      default: false,
+      default: false
     },
     isActive: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
-);
+)
 
 const searchKeys = [
-  "schemeCode",
-  "schemeName",
-  "category",
-  "subCategory",
-  "schemePrice",
-  "dimension",
-  "weight",
-  "deliveryCharges",
-  "comboPacking",
-  "startDate",
-  "enddate",
-  "schemeDescription",
-  "productInformation",
-  "faq",
-];
-module.exports = mongoose.model("Scheme", SchemeSchema);
-module.exports.searchKeys = [...searchKeys];
+  'schemeCode',
+  'schemeName',
+  'category',
+  'subCategory',
+  'schemePrice',
+  'dimension',
+  'weight',
+  'deliveryCharges',
+  'comboPacking',
+  'startDate',
+  'enddate',
+  'schemeDescription',
+  'productInformation',
+  'faq'
+]
+module.exports = mongoose.model('Scheme', SchemeSchema)
+module.exports.searchKeys = [...searchKeys]

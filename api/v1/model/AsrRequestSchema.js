@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const AsrRequestSchema = new mongoose.Schema(
   {
     arsDetails: {
@@ -8,32 +8,30 @@ const AsrRequestSchema = new mongoose.Schema(
             type: String,
             trim: true,
             lowercase: true,
-            required: true,
+            required: true
           },
-
           quantity: {
             type: Number,
-            required: true,
-          },
-        },
+            required: true
+          }
+        }
       ],
-
-      required: true,
+      required: true
     },
     isDeleted: {
       type: Boolean,
-      default: false,
+      default: false
     },
     isActive: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
-);
+)
 
-const searchKeys = ["productName", "quantity"];
-module.exports = mongoose.model("AsrRequest", AsrRequestSchema);
-module.exports.searchKeys = [...searchKeys];
+const searchKeys = ['productName', 'quantity']
+module.exports = mongoose.model('AsrRequest', AsrRequestSchema)
+module.exports.searchKeys = [...searchKeys]

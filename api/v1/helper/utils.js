@@ -14,29 +14,3 @@ exports.getQuery = (defaultQuery, reqQuery = false) => {
   }
   return defaultQuery
 }
-
-exports.isAllFieldsExists = (allFields, fields) => {
-  const filteredArray = allFields.filter(
-    item =>
-      item !== 'isDeleted' &&
-      item !== 'isActive' &&
-      item !== 'createdAt' &&
-      item !== 'updatedAt' &&
-      item !== '_id' &&
-      item !== '__v'
-  )
-
-  return filteredArray.reduce(
-    (acc, field) => {
-      let fieldExists = fields.find(e => {
-        return e.fieldName === field
-      })
-      if (!fieldExists) {
-        acc.status = false
-        acc.message += `${field} is missing in fields array. `
-      }
-      return acc
-    },
-    { status: true, message: '' }
-  )
-}

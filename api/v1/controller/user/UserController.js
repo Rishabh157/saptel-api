@@ -21,6 +21,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue
 } = require('../../helper/filterPaginationHelper')
+const { userEnum } = require('../../helper/enumUtils')
 
 //add start
 exports.add = async (req, res) => {
@@ -102,7 +103,7 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let { firstName, lastName, mobile, email } = req.body
-    if (req.userData.userType !== 'USER') {
+    if (req.userData.userType !== userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         `You do not have authority to access this.`
@@ -179,7 +180,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       matchQuery.$and.push({ _id: mongoose.Types.ObjectId(req.userData.Id) })
     }
 
@@ -309,11 +310,11 @@ exports.get = async (req, res) => {
     //if no default query then pass {}
 
     let matchQuery = { isDeleted: false }
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       matchQuery['_id'] = req.userData.Id
     }
     if (
-      req.userData.userType !== 'USER' &&
+      req.userData.userType !== userEnum.user &&
       req.query &&
       Object.keys(req.query).length
     ) {
@@ -347,7 +348,7 @@ exports.get = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         `You do not have authority to access this.`
@@ -381,7 +382,7 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         `You do not have authority to access this.`

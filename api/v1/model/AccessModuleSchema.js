@@ -1,28 +1,53 @@
 // model schema starts here
 
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const AccessmoduleSchema = new mongoose.Schema(
   {
-    moduleName: { type: String, required: true, trim: true },
-    action: { type: String, required: true, trim: true, uppercase: true },
-    route: { type: String, required: true, trim: true, lowercase: true },
-    method: { type: String, required: true, trim: true, uppercase: true },
-    moduleDisplayName: {
+    route: {
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
+      lowercase: true
     },
-    moduleRank: { type: Number, required: true, default: 1 },
-    featureDisplayName: {
+    method: {
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
+      uppercase: true
     },
-    featureRank: { type: Number, required: true, default: 1 },
-    featureName: { type: String, required: true, trim: true, lowercase: true },
-
+    actionName: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    actionDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true
+    },
+    actionDisplayRank: {
+      type: Number,
+      required: true,
+      default: 1
+    },
+    ModelName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true
+    },
+    ModelDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true
+    },
+    ModelDisplayRank: {
+      type: Number,
+      required: true,
+      default: 1
+    },
     fields: {
       type: [
         {
@@ -30,36 +55,40 @@ const AccessmoduleSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
+            lowercase: true
           },
-        },
-        {
           fieldName: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
-          },
-        },
+            lowercase: true
+          }
+        }
       ],
-      default: [],
+      default: []
     },
-
     isDeleted: {
       type: Boolean,
-      default: false,
+      default: false
     },
     isActive: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
-);
-const allFields = Object.keys(AccessmoduleSchema.obj);
-const searchKeys = ["moduleName", "action", "route", "method", "fields"];
-module.exports = mongoose.model("Accessmodule", AccessmoduleSchema);
-module.exports.searchKeys = [...searchKeys];
-module.exports.allFields = [...allFields];
+)
+const allFields = Object.keys(AccessmoduleSchema.obj)
+const searchKeys = [
+  'actionName',
+  'actionDisplayName',
+  'actionDisplayRank',
+  'ModelName',
+  'ModelDisplayName',
+  'ModelDisplayRank'
+]
+module.exports = mongoose.model('Accessmodule', AccessmoduleSchema)
+module.exports.searchKeys = [...searchKeys]
+module.exports.allFields = [...allFields]

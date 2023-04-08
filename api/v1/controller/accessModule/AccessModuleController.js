@@ -5,7 +5,7 @@ const ApiError = require('../../../utils/apiError')
 const accessmoduleService = require('../../services/AccessModuleService')
 const { searchKeys } = require('../../model/AccessModuleSchema')
 const errorRes = require('../../../utils/resError')
-const { getQuery, isAllFieldsExists } = require('../../helper/utils')
+const { getQuery } = require('../../helper/utils')
 const accessModuleHelper = require('./AccessModuleHelper')
 
 const {
@@ -22,30 +22,35 @@ const {
 exports.add = async (req, res) => {
   try {
     let {
-      moduleName,
-      action,
       route,
       method,
-      fields,
-      moduleDisplayName,
-      moduleRank,
-      featureDisplayName,
-      featureRank,
-      featureName
+      actionName,
+      actionDisplayName,
+      actionDisplayRank,
+      ModelName,
+      ModelDisplayName,
+      ModelDisplayRank,
+      fields
     } = req.body
+
     /**
-     * check duplicate exist
+     * check valid data
      */
+
     let allCollections = await accessModuleHelper.collectionNameArray(
-      moduleName
+      actionName
     )
-    let allFieldsCheck = isAllFieldsExists(allCollections, fields)
+
+    let allFieldsCheck = accessModuleHelper.isAllFieldsExists(
+      allCollections,
+      fields
+    )
     if (!allFieldsCheck.status) {
       throw new ApiError(httpStatus.OK, allFieldsCheck.message)
     }
 
     let dataExist = await accessmoduleService.isExists(
-      ['action', 'featureName'],
+      ['action', 'ModelName'],
       false,
       true
     )
@@ -60,33 +65,27 @@ exports.add = async (req, res) => {
     if (routemethodExist.exists && routemethodExist.existsSummary) {
       throw new ApiError(httpStatus.OK, routemethodExist.existsSummary)
     }
-    let moduleNameFeatureNameExist = await accessmoduleService.isExists(
-      ['moduleRank', 'featureName'],
+    let actionNameModelNameExist = await accessmoduleService.isExists(
+      ['actionDisplayRank', 'ModelName'],
       false,
       true
     )
     if (
-      moduleNameFeatureNameExist.exists &&
-      moduleNameFeatureNameExist.existsSummary
+      actionNameModelNameExist.exists &&
+      actionNameModelNameExist.existsSummary
     ) {
-      throw new ApiError(
-        httpStatus.OK,
-        moduleNameFeatureNameExist.existsSummary
-      )
+      throw new ApiError(httpStatus.OK, actionNameModelNameExist.existsSummary)
     }
     let featurefound = await accessmoduleService.getOneByMultiField({
-      featureName: featureName
+      ModelName: ModelName
     })
-    if (featurefound && featurefound.featureRank !== featureRank) {
+    if (featurefound && featurefound.ModelDisplayRank !== ModelDisplayRank) {
       throw new ApiError(
         httpStatus.OK,
         "Feature rank must be same in it's all module"
       )
     }
-    if (
-      featurefound &&
-      featurefound.featureDisplayName !== featureDisplayName
-    ) {
+    if (featurefound && featurefound.ModelDisplayName !== ModelDisplayName) {
       throw new ApiError(
         httpStatus.OK,
         "Feature display name must be same in it's all module"
@@ -120,7 +119,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { moduleName, action, route, method, fields } = req.body
+    let { actionName, action, route, method, fields } = req.body
 
     let idToBeSearch = req.params.id
 
@@ -226,7 +225,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = []
-    let numberFileds = ['moduleName', 'action', 'route', 'method']
+    let numberFileds = ['actionName', 'action', 'route', 'method']
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds)
     if (filterQuery && filterQuery.length) {
