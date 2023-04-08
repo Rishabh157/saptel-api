@@ -1,8 +1,25 @@
 const mongoose = require("mongoose");
 const AsrRequestSchema = new mongoose.Schema(
   {
-    productName: { type: String, required: true, trim: true, lowercase: true },
-    quantity: { type: Number, required: true },
+    arsDetails: {
+      type: [
+        {
+          productName: {
+            type: String,
+            trim: true,
+            lowercase: true,
+            required: true,
+          },
+
+          quantity: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
+
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
