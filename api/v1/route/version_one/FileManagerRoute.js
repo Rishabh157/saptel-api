@@ -1,17 +1,35 @@
 const router = require('express').Router()
-const {
-  authCheckMiddleware,
-  otpVerifyToken
-} = require('../../middleware/authenticationCheck')
-const multerFile = require('../../middleware/MulterFileUpload')
 const validate = require('../../middleware/validate')
 const fileManagerValidation = require('../../validation/FileManagerValidation')
 const fileManagerController = require('../../controller/fileManager/FileManagerController')
+const multerFile = require('../../middleware/multerFileUpload')
+const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
+//-----------------------------------------------------
 
-//---------------------------------------------------
-router.get('/', authCheckMiddleware, fileManagerController.list)
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  '/',
+  authCheckMiddleware,
+  validate(fileManagerValidation.get),
+  fileManagerController.get
+)
 
-//---------------------------------------------------
+/**
+ * get all user pagination filter
+ */
+
+router.post(
+  '/',
+  authCheckMiddleware,
+  validate(fileManagerValidation.getAllFilter),
+  fileManagerController.allFilterPagination
+)
+
+/**
+ * create new document
+ */
 router.post(
   '/add',
   authCheckMiddleware,
@@ -21,17 +39,9 @@ router.post(
   fileManagerController.add
 )
 
-//---------------------------------------------------
-
-router.post(
-  '/',
-  authCheckMiddleware,
-  validate(fileManagerValidation.getAllFilter),
-  fileManagerController.allWithFilters
-)
-
-//---------------------------------------------------
-
+/**
+ * update document
+ */
 router.put(
   '/:id',
   authCheckMiddleware,
@@ -40,31 +50,25 @@ router.put(
   validate(fileManagerValidation.update),
   fileManagerController.update
 )
-//---------------------------------------------------
 
+/**
+ * update status
+ */
 router.put(
-  '/change-status/:id',
+  '/status-change/:id',
   authCheckMiddleware,
   validate(fileManagerValidation.changeStatus),
-  fileManagerController.changeActiveStatus
+  fileManagerController.statusChange
 )
 
-//---------------------------------------------------
-
-router.get(
-  '/:id',
-  authCheckMiddleware,
-  validate(fileManagerValidation.get),
-  fileManagerController.view
-)
-//---------------------------------------------------
-
+/**
+ * delete document
+ */
 router.delete(
   '/:id',
   authCheckMiddleware,
-  validate(fileManagerValidation.delete),
-  fileManagerController.delete_by_id
+  validate(fileManagerValidation.deleteDocument),
+  fileManagerController.deleteDocument
 )
-//---------------------------------------------------
 
 module.exports = router

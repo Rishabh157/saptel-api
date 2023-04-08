@@ -1,6 +1,6 @@
 const otpService = require('../../services/OtpService')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/ApiError')
+const ApiError = require('../../../utils/apiError')
 const moment = require('moment')
 
 exports.getOtp = async (userId, userType) => {
@@ -116,7 +116,7 @@ exports.getOtpValidity = async (userData, otp) => {
       return {
         message: 'OTP FOUND AND UPDATED',
         status: true,
-        statusCode: 200
+        statusCode: httpStatus.OK
       }
     }
   } catch (err) {

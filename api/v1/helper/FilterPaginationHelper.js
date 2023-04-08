@@ -106,6 +106,7 @@ const getFilterQuery = (filterBy, booleanFields, numberFileds) => {
   let queryArray = []
 
   let invalidData = ['null', null, undefined, 'undefined', '']
+
   if (filterBy !== undefined) {
     if (!Array.isArray(filterBy)) {
       throw new ApiError(httpStatus.OK, `filterBy must be an array.`)
@@ -196,6 +197,7 @@ const getDateFilterQuery = (dateFilter, allowedDateFiletrKeys) => {
       })
     }
   }
+
   return queryArray.length ? queryArray : null
 }
 

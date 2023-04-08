@@ -1,5 +1,5 @@
 const moment = require('moment')
-const config = require('../../../config/config')
+const config = require('../../config/config')
 
 exports.generateOTP = async () => {
   // Declare a digits variable

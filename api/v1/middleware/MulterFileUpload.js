@@ -7,7 +7,8 @@ const {
   videoMimetype,
   documentMimeType,
   allMimetype
-} = require('../middleware/validation')
+} = require('./validation')
+const { allFileEnum } = require('../helper/enumUtils')
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -37,16 +38,16 @@ const storage = multer.diskStorage({
   }
 })
 const fileFilter = (req, file, cb) => {
-  let { fileType, category } = req.body
+  let { fileType } = req.body
   let fileData = file.mimetype
   let mimeTypeToCheck
-  if (fileType === 'IMAGE') {
+  if (fileType === allFileEnum.image) {
     mimeTypeToCheck = imageMimetype
-  } else if (fileType === 'VIDEO') {
+  } else if (fileType === allFileEnum.video) {
     mimeTypeToCheck = videoMimetype
-  } else if (fileType === 'DOCUMENT') {
+  } else if (fileType === allFileEnum.document) {
     mimeTypeToCheck = documentMimeType
-  } else if (fileType === 'DOCUMENT') {
+  } else {
     mimeTypeToCheck = allMimetype
   }
 

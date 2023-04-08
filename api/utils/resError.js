@@ -1,8 +1,4 @@
-const httpStatus = require('http-status')
-const ApiError = require('../utils/ApiError')
-
-const errorRes = err => {
-  let msg = []
+exports.errorRes = err => {
   let i = 1
   let error_msg = 'Something went wrong.'
   let statusCode =
@@ -31,5 +27,3 @@ const errorRes = err => {
     }
   }
 }
-
-module.exports = errorRes

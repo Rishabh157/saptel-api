@@ -3,11 +3,11 @@ const logger = require('../../../../config/logger')
 const adminService = require('../../services/AdminService')
 const bcryptjs = require('bcryptjs')
 const otpHelper = require('../otp/OtpHelper')
-const { sendMsg91Function } = require('../../helper/SmsHelper')
+const { sendMsg91Function } = require('../../helper/smsHelper')
 const { tokenCreate, otpTokenCreate } = require('../../helper/tokenCreate')
 const { isAfter } = require('date-fns')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/ApiError')
+const ApiError = require('../../../utils/apiError')
 const errorRes = require('../../../utils/resError')
 
 /*********************************************************************/
@@ -133,7 +133,7 @@ exports.login = async (req, res) => {
       )
     }
 
-    return res.status(200).send({
+    return res.status(httpStatus.OK).send({
       message: `Otp sent mobile number ${mobile} successfully. Please verify.`,
       data: {
         token: token,
@@ -186,7 +186,7 @@ exports.verifyOtp = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Something went wrong`)
     }
 
-    return res.status(200).send({
+    return res.status(httpStatus.OK).send({
       message: 'Login Successfull.',
       status: true,
       data: {
@@ -412,7 +412,7 @@ exports.allFilterPagination = async (req, res) => {
 
     let result = await adminService.aggregateQuery(finalAggregateQuery)
     if (result.length) {
-      return res.status(200).send({
+      return res.status(httpStatus.OK).send({
         data: result,
         totalPage: totalpages,
         status: true,

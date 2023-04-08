@@ -1,6 +1,5 @@
-const httpStatus = require('http-status')
 const FileManager = require('../model/FileManagerSchema')
-const ApiError = require('../utils/ApiError')
+const { combineObjects } = require('../helper/utils')
 
 //-------------------------------------------
 /**
@@ -109,7 +108,11 @@ const getByIdAndDelete = async id => {
  * @returns {Promise<FileManager>}
  */
 const getOneAndDelete = async matchObj => {
-  return FileManager.findOneAndDelete({ ...updateBody })
+  return FileManager.findOneAndUpdate(
+    { ...matchObj },
+    { isDeleted: true },
+    { new: true }
+  )
 }
 
 //-------------------------------------------
@@ -163,6 +166,50 @@ const findCount = async matchObj => {
   return FileManager.find({ ...matchObj, isDeleted: false }).count()
 }
 //-------------------------------------------
+/**
+ *
+ * @param {Array} filterArray
+ * @param {Array} exceptIds
+ * @param {Boolean} combined
+ * @returns {Promise<User>}
+ */
+const isExists = async (filterArray, exceptIds = false, combined = false) => {
+  if (combined) {
+    let combinedObj = await combineObjects(filterArray)
+
+    if (exceptIds) {
+      combinedObj['_id'] = { $nin: exceptIds }
+    }
+    if (await getOneByMultiField({ ...combinedObj })) {
+      return { exists: true, existsSummary: 'Data already exist.' }
+    }
+    return { exists: false, existsSummary: '' }
+  }
+
+  let mappedArray = await Promise.all(
+    filterArray.map(async element => {
+      if (exceptIds) {
+        element['_id'] = { $nin: exceptIds }
+      }
+      if (await getOneByMultiField({ ...element })) {
+        return { exists: true, fieldName: Object.keys(element)[0] }
+      }
+      return { exists: false, fieldName: Object.keys(element)[0] }
+    })
+  )
+
+  // let exists = mappedArray.some(elem => elem.exists)
+  return mappedArray.reduce(
+    (acc, ele) => {
+      if (ele.exists) {
+        acc.exists = true
+        acc.existsSummary += `${ele.fieldName.toLowerCase()} already exist. `
+      }
+      return acc
+    },
+    { exists: false, existsSummary: '' }
+  )
+}
 
 //-------------------------------------------
 module.exports = {
@@ -179,5 +226,6 @@ module.exports = {
   findAll,
   onlyUpdateOne,
   createMany,
-  findCount
+  findCount,
+  isExists
 }
