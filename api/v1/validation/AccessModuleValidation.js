@@ -1,7 +1,7 @@
-const Joi = require('joi').extend(require('@joi/date'))
-Joi.joiDate = require('@joi/date')(Joi)
-Joi.joiObjectId = require('joi-objectid')(Joi)
-const commonValidation = require('./CommonValidation')
+const Joi = require("joi").extend(require("@joi/date"));
+Joi.joiDate = require("@joi/date")(Joi);
+Joi.joiObjectId = require("joi-objectid")(Joi);
+const commonValidation = require("./CommonValidation");
 
 /**
  * create new document
@@ -13,24 +13,24 @@ const create = {
     actionName: Joi.string().required().lowercase(),
     actionDisplayName: Joi.string().required().lowercase(),
     actionDisplayRank: Joi.number().required(),
-    ModelName: Joi.string().required().lowercase(),
+    ModelName: Joi.string().required(),
     ModelDisplayName: Joi.string().required().lowercase(),
     ModelDisplayRank: Joi.number().required(),
     fields: Joi.array().items(
       Joi.object().keys({
-        displayName: Joi.string().lowercase().allow(''),
-        fieldName: Joi.string().lowercase().allow('')
+        displayName: Joi.string().lowercase().allow(""),
+        fieldName: Joi.string().allow(""),
       })
-    )
-  })
-}
+    ),
+  }),
+};
 
 /**
  * update existing document
  */
 const update = {
   params: Joi.object().keys({
-    id: Joi.required().custom(commonValidation.objectId)
+    id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
     route: Joi.string().required().lowercase(),
@@ -38,17 +38,17 @@ const update = {
     actionName: Joi.string().required().lowercase(),
     actionDisplayName: Joi.string().required().lowercase(),
     actionDisplayRank: Joi.number().required(),
-    ModelName: Joi.string().required().lowercase(),
+    ModelName: Joi.string().required(),
     ModelDisplayName: Joi.string().required().lowercase(),
     ModelDisplayRank: Joi.number().required(),
     fields: Joi.array().items(
       Joi.object().keys({
-        displayName: Joi.string().lowercase().allow(''),
-        fieldName: Joi.string().lowercase().allow('')
+        displayName: Joi.string().lowercase().allow(""),
+        fieldName: Joi.string().allow(""),
       })
-    )
-  })
-}
+    ),
+  }),
+};
 
 /**
  * filter and pagination api
@@ -56,43 +56,43 @@ const update = {
 const getAllFilter = {
   body: Joi.object().keys({
     params: Joi.array().items(Joi.string().required()),
-    searchValue: Joi.string().allow(''),
+    searchValue: Joi.string().allow(""),
     dateFilter: Joi.object()
       .keys({
-        startDate: Joi.string().custom(commonValidation.dateFormat).allow(''),
-        endDate: Joi.string().custom(commonValidation.dateFormat).allow(''),
-        dateFilterKey: Joi.string().allow('')
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
       })
       .default({}),
     rangeFilterBy: Joi.object()
       .keys({
-        rangeFilterKey: Joi.string().allow(''),
-        rangeInitial: Joi.string().allow(''),
-        rangeEnd: Joi.string().allow('')
+        rangeFilterKey: Joi.string().allow(""),
+        rangeInitial: Joi.string().allow(""),
+        rangeEnd: Joi.string().allow(""),
       })
       .default({})
       .optional(),
-    orderBy: Joi.string().allow(''),
-    orderByValue: Joi.number().valid(1, -1).allow(''),
+    orderBy: Joi.string().allow(""),
+    orderByValue: Joi.number().valid(1, -1).allow(""),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     filterBy: Joi.array().items(
       Joi.object().keys({
-        fieldName: Joi.string().allow(''),
+        fieldName: Joi.string().allow(""),
         value: Joi.alternatives().try(
-          Joi.string().allow(''),
-          Joi.number().allow(''),
-          Joi.boolean().allow(''),
+          Joi.string().allow(""),
+          Joi.number().allow(""),
+          Joi.boolean().allow(""),
           Joi.array().items(Joi.string()).default([]),
           Joi.array().items(Joi.number()).default([]),
           Joi.array().items(Joi.boolean()).default([]),
           Joi.array().default([])
-        )
+        ),
       })
     ),
-    isPaginationRequired: Joi.boolean().default(true).optional()
-  })
-}
+    isPaginationRequired: Joi.boolean().default(true).optional(),
+  }),
+};
 
 /**
  * get either all data or single document
@@ -100,33 +100,33 @@ const getAllFilter = {
 const get = {
   query: Joi.object()
     .keys({
-      _id: Joi.string().custom(commonValidation.objectId).optional()
+      _id: Joi.string().custom(commonValidation.objectId).optional(),
     })
-    .optional()
-}
+    .optional(),
+};
 
 /**
  * delete a document
  */
 const deleteDocument = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId)
-  })
-}
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 
 /**
  * change status of document
  */
 const changeStatus = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId)
-  })
-}
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 module.exports = {
   create,
   getAllFilter,
   get,
   update,
   deleteDocument,
-  changeStatus
-}
+  changeStatus,
+};
