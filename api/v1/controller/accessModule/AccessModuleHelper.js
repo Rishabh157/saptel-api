@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const { actionMethodEnum } = require('../../helper/enumUtils')
+
 const isAllFieldsExists = (allFields, fields) => {
   const filteredArray = allFields.filter(
     item =>
@@ -24,29 +26,7 @@ const isAllFieldsExists = (allFields, fields) => {
     { status: true, message: '' }
   )
 }
-const collectionNameArray = async modelName => {
-  // Retrieve a list of all the collection names
 
-  let collections = await mongoose.modelNames()
-
-  let collectionExist = collections.find(ele => {
-    return ele.toLowerCase() === modelName.toLowerCase()
-  })
-
-  if (!collectionExist) {
-    return {
-      status: false,
-      message: 'Module does not exist in data base collection.',
-      data: []
-    }
-  }
-
-  // Retrieving the field names from the model schema
-
-  let allFields = Object.keys(mongoose.model(collectionExist).schema.paths)
-  console.log(allFields, 'allFields')
-  return allFields
-}
 const isModelNameValid = async modelName => {
   return await mongoose.modelNames().find(ele => {
     return ele.toLowerCase() === modelName.toLowerCase()
@@ -65,22 +45,39 @@ const checkBodyData = async (modelName, fields) => {
         data: []
       }
     }
-    let findAllFields = await allFields(modelFound)
-    if (!allFields || !allFields.length) {
+    let fieldsFound = await allFields(modelFound)
+    if (!fieldsFound || !fieldsFound.length) {
       return {
-        message: `Invalid model name ${modelName}. It must be same as Schema's model name.`,
+        message: `No fields found in schema.`,
         status: false,
         data: []
       }
     }
-    return { message: 'All Ok', status: true, data: [] }
-  } catch {
+    let checkFieldsInBody = await isAllFieldsExists(fieldsFound, fields)
+    if (!checkFieldsInBody.status) {
+      return {
+        message: checkFieldsInBody.message,
+        status: false,
+        data: []
+      }
+    }
+
+    return { message: 'All Ok', status: true, data: fields }
+  } catch (err) {
     return { message: 'Error Occured.', status: false, data: [] }
   }
 }
 
+const isActionMethodValid = async (actionName, method) => {
+  return actionMethodEnum[actionName.toLowerCase()]?.toLowerCase() ===
+    method.toLowerCase()
+    ? true
+    : false
+}
+
 module.exports = {
   isModelNameValid,
-  collectionNameArray,
-  isAllFieldsExists
+  isAllFieldsExists,
+  checkBodyData,
+  isActionMethodValid
 }

@@ -36,6 +36,7 @@ router.post(
  */
 router.post(
   '/add',
+
   authCheckMiddleware,
   validate(accessmoduleValidation.create),
   accessmoduleController.add

@@ -11,19 +11,16 @@ exports.accessModuleCheck = async (req, res, next) => {
      * check token exist in req body
      */
     let method = req.method
-    let baseUrl = req.baseUrl + req.route.path
-
-    const pathString = baseUrl.toLowerCase()
-
+    let route = req.baseUrl + req.route.path
     if (
       !(await accessmoduleService.getOneByMultiField({
-        route: pathString,
-        method: method.toUpperCase()
+        route: route.toLowerCase(),
+        method: method.toLowerCase()
       }))
     ) {
       throw new ApiError(
         httpStatus.OK,
-        `Please add ${pathString} route and method ${method} to the access module `
+        `Please add '${route}' route and method ${method} to the access module `
       )
     }
 
@@ -36,8 +33,8 @@ exports.accessModuleCheck = async (req, res, next) => {
       message,
       status,
       data,
-      code: 'ACCESS_MODULE_MISSING.',
-      issue: message.toUpperCase().replace(/ /gi, '_')
+      code: 'ACCESS_MODULE_MISSING',
+      issue: 'ACCESS_MODULE_MISSING'
     })
   }
 }

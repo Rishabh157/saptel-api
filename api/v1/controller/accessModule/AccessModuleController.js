@@ -37,38 +37,44 @@ exports.add = async (req, res) => {
      * check valid data
      */
 
-    // let allCollections = await accessModuleHelper.collectionNameArray(modelName)
-
-    let collectionFound = await accessModuleHelper.isModelNameValid(modelName)
-    if (!collectionFound) {
+    let isMethodActionValid = await accessModuleHelper.isActionMethodValid(
+      actionName,
+      method
+    )
+    if (!isMethodActionValid) {
       throw new ApiError(
         httpStatus.OK,
-        `Invalid model name ${modelName}. It must be same as Schema's model name.`
+        `Either action ${actionName} is invalid or its method ${method}.`
       )
     }
 
-    let allFields = await getAllModelFields(collectionFound)
-    console.log(collectionFound, 'collectionFound')
-    return
-
-    let allFieldsCheck = accessModuleHelper.isAllFieldsExists(
-      allCollections,
+    let collectionFound = await accessModuleHelper.checkBodyData(
+      modelName,
       fields
     )
-    if (!allFieldsCheck.status) {
-      throw new ApiError(httpStatus.OK, allFieldsCheck.message)
+    if (!collectionFound.status) {
+      throw new ApiError(httpStatus.OK, `${collectionFound.message}`)
     }
 
     let dataExist = await accessmoduleService.isExists(
-      ['action', 'modelName'],
+      [{ actionName }, { modelName }],
       false,
       true
     )
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary)
     }
+    let actionDisplayNameExist = await accessmoduleService.isExists(
+      [{ actionDisplayName }, { modelName }],
+      false,
+      true
+    )
+    if (actionDisplayNameExist.exists && actionDisplayNameExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, actionDisplayNameExist.existsSummary)
+    }
+
     let routemethodExist = await accessmoduleService.isExists(
-      ['route', 'method'],
+      [{ route }, { method }],
       false,
       true
     )
@@ -76,7 +82,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, routemethodExist.existsSummary)
     }
     let actionNamemodelNameExist = await accessmoduleService.isExists(
-      ['actionDisplayRank', 'modelName'],
+      [{ actionDisplayRank }, { modelName }],
       false,
       true
     )

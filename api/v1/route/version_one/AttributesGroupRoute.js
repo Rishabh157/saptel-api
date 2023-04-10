@@ -1,75 +1,72 @@
-const router = require("express").Router();
-const attributesGroupController = require("../../controller/attributesGroup/AttributesGroupController");
-const validate = require("../../middleware/validate");
-const attributesGroupValidation = require("../../validation/AttributesGroupValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
-const {
-  authCheckMiddleware,
-  otpVerifyToken,
-} = require("../../middleware/authenticationCheck");
+const router = require('express').Router()
+const attributesGroupController = require('../../controller/attributesGroup/AttributesGroupController')
+const validate = require('../../middleware/validate')
+const attributesGroupValidation = require('../../validation/AttributesGroupValidation')
+const { accessModuleCheck } = require('../../middleware/accessModuleCheck')
+const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
 
 //-----------------------------------------------------
 /**
  * get one document (if query) / all documents
  */
 router.get(
-  "/",
+  '/',
   accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.get),
   attributesGroupController.get
-);
+)
 /**
  * get all attributesGroup pagination filter
  */
 
 router.post(
-  "/",
+  '/',
   accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.getAllFilter),
   attributesGroupController.allFilterPagination
-);
+)
 
 /**
  * create new document
  */
 router.post(
-  "/add",
+  '/add',
   accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.create),
   attributesGroupController.add
-);
+)
 /**
  * update document
  */
 router.put(
-  "/:id",
+  '/:id',
   accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.update),
   attributesGroupController.update
-);
+)
 /**
  * update status
  */
 router.put(
-  "/status-change/:id",
+  '/status-change/:id',
   accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.changeStatus),
   attributesGroupController.statusChange
-);
+)
 /**
  * delete document
  */
 router.delete(
-  "/:id",
+  '/:id',
   accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.deleteDocument),
   attributesGroupController.deleteDocument
-);
+)
 
-module.exports = router;
+module.exports = router

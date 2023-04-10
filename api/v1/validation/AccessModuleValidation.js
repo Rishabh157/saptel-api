@@ -18,8 +18,9 @@ const create = {
     modelDisplayRank: Joi.number().required(),
     fields: Joi.array().items(
       Joi.object().keys({
-        displayName: Joi.string().lowercase().allow(''),
-        fieldName: Joi.string().lowercase().allow('')
+        fieldDisplayName: Joi.string().lowercase().allow(''),
+        fieldName: Joi.string().allow(''),
+        fieldRank: Joi.number().required()
       })
     )
   })
@@ -35,7 +36,10 @@ const update = {
   body: Joi.object().keys({
     route: Joi.string().required().lowercase(),
     method: Joi.string().required().lowercase(),
-    actionName: Joi.string().required().lowercase(),
+    actionName: Joi.string()
+      .custom(commonValidation.accessactionNameCheck)
+      .required()
+      .lowercase(),
     actionDisplayName: Joi.string().required().lowercase(),
     actionDisplayRank: Joi.number().required(),
     modelName: Joi.string().required().lowercase(),
@@ -43,8 +47,9 @@ const update = {
     modelDisplayRank: Joi.number().required(),
     fields: Joi.array().items(
       Joi.object().keys({
-        displayName: Joi.string().lowercase().allow(''),
-        fieldName: Joi.string().lowercase().allow('')
+        fieldDisplayName: Joi.string().lowercase().allow(''),
+        fieldName: Joi.string().allow(''),
+        fieldRank: Joi.number().required()
       })
     )
   })

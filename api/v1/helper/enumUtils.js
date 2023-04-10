@@ -12,14 +12,18 @@ const userEnum = Object.freeze({
   admin: 'ADMIN',
   superAdmin: 'SUPER_ADMIN'
 })
-const actionEnum = Object.freeze({
-  create: 'ADD',
-  update: 'UPDATE',
-  delete: 'DELETE',
-  changeStatus: 'CHANGE_STATUS',
-  getAll: 'ALL_NORMAL_LIST',
-  getOne: 'VIEW',
-  allPaginationFilter: 'ALL_PAGINATION_FILTER_LIST'
+
+/**
+ * if other the following routes created. please add all actions with their method,
+ */
+const actionMethodEnum = Object.freeze({
+  add: 'post',
+  update: 'put',
+  delete: 'delete',
+  changeStatus: 'put',
+  allList: 'get',
+  allListPaginationFilter: 'post',
+  view: 'get'
 })
 
 module.exports = {
@@ -27,5 +31,5 @@ module.exports = {
   tokenEnum,
   accountEnum,
   userEnum,
-  actionEnum
+  actionMethodEnum
 }
