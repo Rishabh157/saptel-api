@@ -136,9 +136,94 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { actionName, action, route, method, fields } = req.body
-
     let idToBeSearch = req.params.id
+
+    let {
+      route,
+      method,
+      actionName,
+      actionDisplayName,
+      actionDisplayRank,
+      modelName,
+      modelDisplayName,
+      modelDisplayRank,
+      fields
+    } = req.body
+
+    /**
+     * check valid data
+     */
+
+    let isMethodActionValid = await accessModuleHelper.isActionMethodValid(
+      actionName,
+      method
+    )
+    if (!isMethodActionValid) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Either action ${actionName} is invalid or its method ${method}.`
+      )
+    }
+
+    let collectionFound = await accessModuleHelper.checkBodyData(
+      modelName,
+      fields
+    )
+    if (!collectionFound.status) {
+      throw new ApiError(httpStatus.OK, `${collectionFound.message}`)
+    }
+
+    let dataExist = await accessmoduleService.isExists(
+      [{ actionName }, { modelName }],
+      false,
+      true
+    )
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary)
+    }
+    let actionDisplayNameExist = await accessmoduleService.isExists(
+      [{ actionDisplayName }, { modelName }],
+      false,
+      true
+    )
+    if (actionDisplayNameExist.exists && actionDisplayNameExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, actionDisplayNameExist.existsSummary)
+    }
+
+    let routemethodExist = await accessmoduleService.isExists(
+      [{ route }, { method }],
+      false,
+      true
+    )
+    if (routemethodExist.exists && routemethodExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, routemethodExist.existsSummary)
+    }
+    let actionNamemodelNameExist = await accessmoduleService.isExists(
+      [{ actionDisplayRank }, { modelName }],
+      false,
+      true
+    )
+    if (
+      actionNamemodelNameExist.exists &&
+      actionNamemodelNameExist.existsSummary
+    ) {
+      throw new ApiError(httpStatus.OK, actionNamemodelNameExist.existsSummary)
+    }
+    let featurefound = await accessmoduleService.getOneByMultiField({
+      modelName: modelName
+    })
+    if (featurefound && featurefound.modelDisplayRank !== modelDisplayRank) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Feature rank must be same in it's all module"
+      )
+    }
+    if (featurefound && featurefound.modelDisplayName !== modelDisplayName) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Feature display name must be same in it's all module"
+      )
+    }
 
     //------------------Find data-------------------
     let datafound = await accessmoduleService.getOneByMultiField({
