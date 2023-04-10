@@ -8,18 +8,17 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    moduleName: Joi.string().required(),
-    action: Joi.string().lowercase().required(),
-    route: Joi.string().lowercase().required(),
-    method: Joi.string().lowercase().required(),
-    moduleDisplayName: Joi.string().lowercase().required(),
-    moduleRank: Joi.number().required(),
-    featureDisplayName: Joi.string().lowercase().required(),
-    featureRank: Joi.number().required(),
-    featureName: Joi.string().lowercase().required(),
+    route: Joi.string().required().lowercase(),
+    method: Joi.string().required().lowercase(),
+    actionName: Joi.string().required().lowercase(),
+    actionDisplayName: Joi.string().required().lowercase(),
+    actionDisplayRank: Joi.number().required(),
+    ModelName: Joi.string().required(),
+    ModelDisplayName: Joi.string().required().lowercase(),
+    ModelDisplayRank: Joi.number().required(),
     fields: Joi.array().items(
       Joi.object().keys({
-        displayName: Joi.string().allow(""),
+        displayName: Joi.string().lowercase().allow(""),
         fieldName: Joi.string().allow(""),
       })
     ),
@@ -34,18 +33,17 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    moduleName: Joi.string().required(),
-    action: Joi.string().lowercase().required(),
-    route: Joi.string().lowercase().required(),
-    method: Joi.string().lowercase().required(),
-    moduleDisplayName: Joi.string().lowercase().required(),
-    moduleRank: Joi.number().required(),
-    featureDisplayName: Joi.string().lowercase().required(),
-    featureRank: Joi.number().required(),
-    featureName: Joi.string().lowercase().required(),
+    route: Joi.string().required().lowercase(),
+    method: Joi.string().required().lowercase(),
+    actionName: Joi.string().required().lowercase(),
+    actionDisplayName: Joi.string().required().lowercase(),
+    actionDisplayRank: Joi.number().required(),
+    ModelName: Joi.string().required(),
+    ModelDisplayName: Joi.string().required().lowercase(),
+    ModelDisplayRank: Joi.number().required(),
     fields: Joi.array().items(
       Joi.object().keys({
-        displayName: Joi.string().allow(""),
+        displayName: Joi.string().lowercase().allow(""),
         fieldName: Joi.string().allow(""),
       })
     ),

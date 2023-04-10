@@ -1,6 +1,7 @@
 const moment = require('moment')
 const logger = require('../../../config/logger')
-const valid_module_group = ['ADMIN']
+const { userEnum } = require('../helper/enumUtils')
+const valid_module_group = [userEnum.admin]
 const valid_module_name = [
   'ADD',
   'UPDATE',
@@ -26,7 +27,7 @@ const accessModuleGroupCheck = (value, helpers) => {
   return value.toUpperCase()
 }
 
-const accessModuleNameCheck = (value, helpers) => {
+const accessactionNameCheck = (value, helpers) => {
   if (!valid_module_name.includes(value.toUpperCase())) {
     return helpers.message(`{#label} must be any of ${valid_module_name}`)
   }
@@ -279,7 +280,7 @@ module.exports = {
   checkYoutubeLink,
   changeDateFormat,
   accessModuleGroupCheck,
-  accessModuleNameCheck,
+  accessactionNameCheck,
   accessMethodCheck,
   DateTimeFormatValid,
   dateTimeAfterCurrentTime,

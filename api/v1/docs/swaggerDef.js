@@ -1,8 +1,8 @@
-const { version } = require('../../../package.json');
-const config = require('../../../config/config');
+const { version } = require('../../../package.json')
+const config = require('../../../config/config')
 
 const swaggerDef = {
-  openapi: "3.0.0",
+  openapi: '3.0.0',
   info: {
     title: config.project,
     version,
@@ -18,14 +18,14 @@ const swaggerDef = {
       type: 'string',
       name: 'x-access-token',
       scheme: 'bearer',
-      in: 'headers',
-    },
+      in: 'headers'
+    }
   },
   servers: [
     {
       url: `${config.localhost}:${config.port}/v1`
     }
   ]
-};
+}
 
-module.exports = swaggerDef;
+module.exports = swaggerDef

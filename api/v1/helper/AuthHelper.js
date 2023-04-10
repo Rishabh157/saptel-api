@@ -1,6 +1,8 @@
 const adminService = require('../services/AdminService')
 const userService = require('../services/UserService')
 const logger = require('../../../config/logger')
+const { errorRes } = require('../../utils/resError')
+const httpStatus = require('http-status')
 
 const checkTokenExist = (req, res) => {
   if (
@@ -16,13 +18,13 @@ const checkTokenExist = (req, res) => {
         data: null,
         status: false
       },
-      statusCode: 401,
+      statusCode: httpStatus.UNAUTHORIZED,
       status: false
     }
   } else {
     return {
       data: req.headers['x-access-token'].trim(),
-      statusCode: 200,
+      statusCode: httpStatus.OK,
       status: true
     }
   }
@@ -61,30 +63,15 @@ const checkAdminValid = async userData => {
       }
     }
   } catch (err) {
+    let errData = errorRes(err)
     logger.info(errData.resData)
-    let msg = []
-    let i = 1
-    let error_msg = ''
-    let statusCode =
-      err.statusCode !== undefined && err.statusCode !== null
-        ? err.statusCode
-        : 500
-    if (!err.message) {
-      for (let key in err.errors) {
-        if (err.errors[key].message) {
-          error_msg += i + '.' + err.errors[key].message
-          i++
-        }
-      }
-    } else {
-      error_msg = err.message
-    }
+    let { message, status, data, code, issue } = errData.resData
     return {
-      message: error_msg,
+      message,
+      status,
+      data,
       code: 'USER_NOT_FOUND.',
-      issue: 'AUTHENTICATION_FAILED',
-      data: null,
-      status: false
+      issue: 'AUTHENTICATION_FAILED'
     }
   }
 }
@@ -122,30 +109,15 @@ const checkUserValid = async userData => {
       }
     }
   } catch (err) {
+    let errData = errorRes(err)
     logger.info(errData.resData)
-    let msg = []
-    let i = 1
-    let error_msg = ''
-    let statusCode =
-      err.statusCode !== undefined && err.statusCode !== null
-        ? err.statusCode
-        : 500
-    if (!err.message) {
-      for (let key in err.errors) {
-        if (err.errors[key].message) {
-          error_msg += i + '.' + err.errors[key].message
-          i++
-        }
-      }
-    } else {
-      error_msg = err.message
-    }
+    let { message, status, data, code, issue } = errData.resData
     return {
-      message: error_msg,
+      message,
+      status,
+      data,
       code: 'USER_NOT_FOUND.',
-      issue: 'AUTHENTICATION_FAILED',
-      data: null,
-      status: false
+      issue: 'AUTHENTICATION_FAILED'
     }
   }
 }

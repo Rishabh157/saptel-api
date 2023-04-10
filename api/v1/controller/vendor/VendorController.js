@@ -1,12 +1,11 @@
 const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
-const ApiError = require("../../../utils/apiError");
-const accessmoduleService = require("../../services/AccessModuleService");
-const { searchKeys } = require("../../model/AccessModuleSchema");
+const ApiError = require("../../../utils/ApiError");
+const vendorService = require("../../services/VendorService");
+const { searchKeys } = require("../../model/VendorSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const accessModuleHelper = require("./AccessModuleHelper");
 
 const {
   getSearchQuery,
@@ -16,84 +15,35 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
   getOrderByAndItsValue,
-} = require("../../helper/filterPaginationHelper");
+} = require("../../helper/FilterPaginationHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
     let {
-      route,
-      method,
-      actionName,
-      actionDisplayName,
-      actionDisplayRank,
-      ModelName,
-      ModelDisplayName,
-      ModelDisplayRank,
-      fields,
+      companyName,
+      vendorCode,
+      companyType,
+      ownerShipType,
+      websiteAddress,
+      registrationAddress,
+      billingAddress,
+      contactInformation,
+      document,
+      bankInformation,
     } = req.body;
-
     /**
-     * check valid data
+     * check duplicate exist
      */
-
-    let allCollections = await accessModuleHelper.collectionNameArray(
-      ModelName
-    );
-
-    let allFieldsCheck = accessModuleHelper.isAllFieldsExists(
-      allCollections,
-      fields
-    );
-    if (!allFieldsCheck.status) {
-      throw new ApiError(httpStatus.OK, allFieldsCheck.message);
-    }
-
-    let dataExist = await accessmoduleService.isExists(
-      ["action", "ModelName"],
-      false,
-      true
-    );
+    let dataExist = await vendorService.isExists([
+      { companyName },
+      { vendorCode },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    let routemethodExist = await accessmoduleService.isExists(
-      ["route", "method"],
-      false,
-      true
-    );
-    if (routemethodExist.exists && routemethodExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, routemethodExist.existsSummary);
-    }
-    let actionNameModelNameExist = await accessmoduleService.isExists(
-      ["actionDisplayRank", "ModelName"],
-      false,
-      true
-    );
-    if (
-      actionNameModelNameExist.exists &&
-      actionNameModelNameExist.existsSummary
-    ) {
-      throw new ApiError(httpStatus.OK, actionNameModelNameExist.existsSummary);
-    }
-    let featurefound = await accessmoduleService.getOneByMultiField({
-      ModelName: ModelName,
-    });
-    if (featurefound && featurefound.ModelDisplayRank !== ModelDisplayRank) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Feature rank must be same in it's all module"
-      );
-    }
-    if (featurefound && featurefound.ModelDisplayName !== ModelDisplayName) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Feature display name must be same in it's all module"
-      );
-    }
-
     //------------------create data-------------------
-    let dataCreated = await accessmoduleService.createNewData({ ...req.body });
+    let dataCreated = await vendorService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -119,19 +69,30 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { actionName, action, route, method, fields } = req.body;
+    let {
+      companyName,
+      vendorCode,
+      companyType,
+      ownerShipType,
+      websiteAddress,
+      registrationAddress,
+      billingAddress,
+      contactInformation,
+      document,
+      bankInformation,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
 
     //------------------Find data-------------------
-    let datafound = await accessmoduleService.getOneByMultiField({
+    let datafound = await vendorService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Accessmodule not found.`);
+      throw new ApiError(httpStatus.OK, `Vendor not found.`);
     }
 
-    let dataUpdated = await accessmoduleService.getOneAndUpdate(
+    let dataUpdated = await vendorService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -225,7 +186,12 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["actionName", "action", "route", "method"];
+    let numberFileds = [
+      "companyName",
+      "vendorCode",
+      "companyType",
+      "ownerShipType",
+    ];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -264,9 +230,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await accessmoduleService.aggregateQuery(
-      finalAggregateQuery
-    );
+    let dataFound = await vendorService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -285,9 +249,9 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await accessmoduleService.aggregateQuery(finalAggregateQuery);
+    let result = await vendorService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
-      return res.status(httpStatus.OK).send({
+      return res.status(200).send({
         data: result,
         totalPage: totalpages,
         status: true,
@@ -317,7 +281,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await accessmoduleService.findAllWithQuery(matchQuery);
+    let dataExist = await vendorService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -343,10 +307,10 @@ exports.get = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await accessmoduleService.getOneByMultiField({ _id }))) {
+    if (!(await vendorService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await accessmoduleService.getOneAndDelete({ _id });
+    let deleted = await vendorService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -370,13 +334,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await accessmoduleService.getOneByMultiField({ _id });
+    let dataExist = await vendorService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await accessmoduleService.getOneAndUpdate(
+    let statusChanged = await vendorService.getOneAndUpdate(
       { _id },
       { isActive }
     );

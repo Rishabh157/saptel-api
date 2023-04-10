@@ -34,6 +34,8 @@ const fileManagerSchema = new mongoose.Schema(
   }
 )
 
+const searchKeys = ['fileType', 'fileUrl', 'category', 'isActive']
 module.exports = mongoose.model('FileManager', fileManagerSchema)
+module.exports.searchKeys = [...searchKeys]
 
 // model schema ends here

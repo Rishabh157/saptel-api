@@ -34,23 +34,9 @@ exports.checkUniqueFieldsAdd = async (req, res, fields) => {
     }
     return { message, status }
   } catch (err) {
-    let msg = []
-    let i = 1
-    let error_msg = 'Something went wrong.'
-    let statusCode =
-      err.statusCode !== undefined && err.statusCode !== null
-        ? err.statusCode
-        : 500
-    if (!err.message) {
-      for (let key in err.errors) {
-        if (err.errors[key].message) {
-          error_msg += i + '.' + err.errors[key].message
-          i++
-        }
-      }
-    } else {
-      error_msg = err.message
-    }
-    return { message: error_msg, status: false, statusCode: statusCode }
+    let errData = errorRes(err)
+    logger.info(errData.resData)
+    let { message, status, data, code, issue } = errData.resData
+    return { message, status, data, code, issue, statusCode: code }
   }
 }

@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
+const { accountEnum } = require('../helper/enumUtils')
 const CompanySchema = new mongoose.Schema(
   {
     companyName: { type: String, required: true, trim: true, lowercase: true },
@@ -14,67 +15,67 @@ const CompanySchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
+            lowercase: true
           },
           branchName: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
+            lowercase: true
           },
           accountHolderName: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
+            lowercase: true
           },
           accountNumber: { type: Number, required: true },
           ifscNumber: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
+            lowercase: true
           },
           accountType: {
             type: String,
-            enum: ["SAVING", "CURRENT"],
+            enum: [accountEnum.saving, accountEnum.current],
             trim: true,
             uppercase: true,
-            default: "SAVING",
-          },
-        },
+            default: accountEnum.saving
+          }
+        }
       ],
-      required: true,
+      required: true
     },
     isDeleted: {
       type: Boolean,
-      default: false,
+      default: false
     },
     isActive: {
       type: Boolean,
-      default: true,
-    },
+      default: true
+    }
   },
   {
-    timestamps: true,
+    timestamps: true
   }
-);
+)
 
 const searchKeys = [
-  "companyName",
-  "websiteUrl",
-  "companyLogo",
-  "gstNo",
-  "address",
-  "phoneNo",
-  "bankName",
-  "branchName",
-  "accountHolderName",
-  "accountNumber",
-  "ifscNumber",
-  "accountType",
-];
-module.exports = mongoose.model("Company", CompanySchema);
-module.exports.searchKeys = [...searchKeys];
+  'companyName',
+  'websiteUrl',
+  'companyLogo',
+  'gstNo',
+  'address',
+  'phoneNo',
+  'bankName',
+  'branchName',
+  'accountHolderName',
+  'accountNumber',
+  'ifscNumber',
+  'accountType'
+]
+module.exports = mongoose.model('Company', CompanySchema)
+module.exports.searchKeys = [...searchKeys]
 
 // model schema ends here

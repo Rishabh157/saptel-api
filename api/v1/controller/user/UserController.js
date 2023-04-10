@@ -1,14 +1,14 @@
 const config = require('../../../../config/config')
 const logger = require('../../../../config/logger')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/ApiError')
+const ApiError = require('../../../utils/apiError')
 const userService = require('../../services/UserService')
 const { searchKeys } = require('../../model/UserSchema')
 const errorRes = require('../../../utils/resError')
 const { getQuery } = require('../../helper/utils')
 const bcryptjs = require('bcryptjs')
 const otpHelper = require('../otp/OtpHelper')
-const { sendMsg91Function } = require('../../helper/SmsHelper')
+const { sendMsg91Function } = require('../../helper/smsHelper')
 const { tokenCreate, otpTokenCreate } = require('../../helper/tokenCreate')
 const { isAfter } = require('date-fns')
 const mongoose = require('mongoose')
@@ -20,7 +20,8 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
   getOrderByAndItsValue
-} = require('../../helper/FilterPaginationHelper')
+} = require('../../helper/filterPaginationHelper')
+const { userEnum } = require('../../helper/enumUtils')
 
 //add start
 exports.add = async (req, res) => {
@@ -102,7 +103,7 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let { firstName, lastName, mobile, email } = req.body
-    if (req.userData.userType !== 'USER') {
+    if (req.userData.userType !== userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         `You do not have authority to access this.`
@@ -179,7 +180,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       matchQuery.$and.push({ _id: mongoose.Types.ObjectId(req.userData.Id) })
     }
 
@@ -281,7 +282,7 @@ exports.allFilterPagination = async (req, res) => {
 
     let result = await userService.aggregateQuery(finalAggregateQuery)
     if (result.length) {
-      return res.status(200).send({
+      return res.status(httpStatus.OK).send({
         data: result,
         totalPage: totalpages,
         status: true,
@@ -309,11 +310,11 @@ exports.get = async (req, res) => {
     //if no default query then pass {}
 
     let matchQuery = { isDeleted: false }
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       matchQuery['_id'] = req.userData.Id
     }
     if (
-      req.userData.userType !== 'USER' &&
+      req.userData.userType !== userEnum.user &&
       req.query &&
       Object.keys(req.query).length
     ) {
@@ -347,7 +348,7 @@ exports.get = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         `You do not have authority to access this.`
@@ -381,7 +382,7 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         `You do not have authority to access this.`
@@ -460,7 +461,7 @@ exports.login = async (req, res) => {
       )
     }
 
-    return res.status(200).send({
+    return res.status(httpStatus.OK).send({
       message: `Otp sent mobile number ${mobile} successfully. Please verify.`,
       data: {
         token: token,
@@ -509,7 +510,7 @@ exports.verifyOtp = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Something went wrong`)
     }
 
-    return res.status(200).send({
+    return res.status(httpStatus.OK).send({
       message: 'Login Successfull.',
       status: true,
       data: {

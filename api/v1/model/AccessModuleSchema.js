@@ -3,26 +3,50 @@
 const mongoose = require("mongoose");
 const AccessmoduleSchema = new mongoose.Schema(
   {
-    moduleName: { type: String, required: true, trim: true },
-    action: { type: String, required: true, trim: true, uppercase: true },
-    route: { type: String, required: true, trim: true, lowercase: true },
-    method: { type: String, required: true, trim: true, uppercase: true },
-    moduleDisplayName: {
+    route: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
     },
-    moduleRank: { type: Number, required: true, default: 1 },
-    featureDisplayName: {
+    method: {
+      type: String,
+      required: true,
+      trim: true,
+      uppercase: true,
+    },
+    actionName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    actionDisplayName: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
     },
-    featureRank: { type: Number, required: true, default: 1 },
-    featureName: { type: String, required: true, trim: true, lowercase: true },
-
+    actionDisplayRank: {
+      type: Number,
+      required: true,
+      default: 1,
+    },
+    ModelName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    ModelDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    ModelDisplayRank: {
+      type: Number,
+      required: true,
+      default: 1,
+    },
     fields: {
       type: [
         {
@@ -32,19 +56,15 @@ const AccessmoduleSchema = new mongoose.Schema(
             trim: true,
             lowercase: true,
           },
-        },
-        {
           fieldName: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true,
           },
         },
       ],
       default: [],
     },
-
     isDeleted: {
       type: Boolean,
       default: false,
@@ -59,7 +79,14 @@ const AccessmoduleSchema = new mongoose.Schema(
   }
 );
 const allFields = Object.keys(AccessmoduleSchema.obj);
-const searchKeys = ["moduleName", "action", "route", "method", "fields"];
+const searchKeys = [
+  "actionName",
+  "actionDisplayName",
+  "actionDisplayRank",
+  "ModelName",
+  "ModelDisplayName",
+  "ModelDisplayRank",
+];
 module.exports = mongoose.model("Accessmodule", AccessmoduleSchema);
 module.exports.searchKeys = [...searchKeys];
 module.exports.allFields = [...allFields];

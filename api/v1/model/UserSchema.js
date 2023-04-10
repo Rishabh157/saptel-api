@@ -1,6 +1,7 @@
 // model schema starts here
 
 const mongoose = require('mongoose')
+const { userEnum } = require('../helper/enumUtils')
 const UserSchema = new mongoose.Schema(
   {
     firstName: {
@@ -30,7 +31,7 @@ const UserSchema = new mongoose.Schema(
     userType: {
       type: String,
       required: true,
-      default: 'USER'
+      default: userEnum.user
     },
 
     isDeleted: {

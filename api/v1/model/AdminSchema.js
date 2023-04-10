@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { userEnum } = require('../helper/enumUtils')
 
 const AdminSchema = new mongoose.Schema(
   {
@@ -38,7 +39,7 @@ const AdminSchema = new mongoose.Schema(
     },
     userType: {
       type: String,
-      default: 'SUPER_ADMIN',
+      default: userEnum.admin,
       uppercase: true,
       trim: true
     },

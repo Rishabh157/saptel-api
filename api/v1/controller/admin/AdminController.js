@@ -3,12 +3,13 @@ const logger = require('../../../../config/logger')
 const adminService = require('../../services/AdminService')
 const bcryptjs = require('bcryptjs')
 const otpHelper = require('../otp/OtpHelper')
-const { sendMsg91Function } = require('../../helper/SmsHelper')
+const { sendMsg91Function } = require('../../helper/smsHelper')
 const { tokenCreate, otpTokenCreate } = require('../../helper/tokenCreate')
 const { isAfter } = require('date-fns')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/ApiError')
+const ApiError = require('../../../utils/apiError')
 const errorRes = require('../../../utils/resError')
+const { userEnum } = require('../../helper/enumUtils')
 
 /*********************************************************************/
 
@@ -25,7 +26,7 @@ exports.add = async (req, res) => {
     /**
      * if only super admin can create new admin users.
      */
-    // if (req.userData.userType !== 'SUPER_ADMIN') {
+    // if (req.userData.userType !== userEnum.superAdmin) {
     //   throw new ApiError(
     //     httpStatus.OK,
     //     `You do not have authority to add users'`
@@ -133,7 +134,7 @@ exports.login = async (req, res) => {
       )
     }
 
-    return res.status(200).send({
+    return res.status(httpStatus.OK).send({
       message: `Otp sent mobile number ${mobile} successfully. Please verify.`,
       data: {
         token: token,
@@ -186,7 +187,7 @@ exports.verifyOtp = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Something went wrong`)
     }
 
-    return res.status(200).send({
+    return res.status(httpStatus.OK).send({
       message: 'Login Successfull.',
       status: true,
       data: {
@@ -219,13 +220,13 @@ exports.update = async (req, res) => {
   try {
     let { firstName, lastName, mobile, email } = req.body
     let { Id: loggedInUserId, userType } = req.userData
-    if (userType === 'USER') {
+    if (userType === userEnum.user) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'AUTHORIZATION_FAILED')
     }
     let idToBeSearch =
-      userType === 'ADMIN'
+      userType === userEnum.admin
         ? loggedInUserId
-        : req.params && req.params.id && userType === 'SUPER_ADMIN'
+        : req.params && req.params.id && userType === userEnum.superAdmin
         ? req.params.id
         : loggedInUserId
 
@@ -310,7 +311,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    if (req.userData.userType === 'USER') {
+    if (req.userData.userType === userEnum.user) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'AUTHORIZATION_FAILED')
     }
 
@@ -412,7 +413,7 @@ exports.allFilterPagination = async (req, res) => {
 
     let result = await adminService.aggregateQuery(finalAggregateQuery)
     if (result.length) {
-      return res.status(200).send({
+      return res.status(httpStatus.OK).send({
         data: result,
         totalPage: totalpages,
         status: true,
@@ -445,13 +446,13 @@ exports.allFilterPagination = async (req, res) => {
 exports.view = async (req, res) => {
   try {
     let { Id: loggedInUserId, userType } = req.userData
-    if (userType === 'USER') {
+    if (userType === userEnum.user) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'AUTHORIZATION_FAILED')
     }
     let userId =
-      userType === 'ADMIN'
+      userType === userEnum.admin
         ? loggedInUserId
-        : req.params && req.params.id && userType === 'SUPER_ADMIN'
+        : req.params && req.params.id && userType === userEnum.superAdmin
         ? req.params.id
         : loggedInUserId
 
@@ -499,16 +500,16 @@ exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
     let { Id: loggedInUserId, userType } = req.userData
-    if (userType === 'USER') {
+    if (userType === userEnum.user) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'AUTHORIZATION_FAILED')
     }
 
     let matchQuery = { isDeleted: false }
-    if (req.userData.userType === 'ADMIN') {
+    if (req.userData.userType === userEnum.admin) {
       matchQuery['_id'] = loggedInUserId
     }
     if (
-      req.userData.userType !== 'ADMIN' &&
+      req.userData.userType !== userEnum.admin &&
       req.query &&
       Object.keys(req.query).length
     ) {
@@ -548,7 +549,10 @@ exports.get = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id
-    if (req.userData.userType === 'USER' || req.userData.userType === 'ADMIN') {
+    if (
+      req.userData.userType === userEnum.user ||
+      req.userData.userType === userEnum.admin
+    ) {
       throw new ApiError(httpStatus.UNAUTHORIZED, `AUTHORIZATION_FAILED`)
     }
     if (!(await adminService.getOneByMultiField({ _id }))) {
@@ -586,7 +590,10 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id
-    if (req.userData.userType === 'USER' || req.userData.userType === 'ADMIN') {
+    if (
+      req.userData.userType === userEnum.user ||
+      req.userData.userType === userEnum.admin
+    ) {
       throw new ApiError(httpStatus.UNAUTHORIZED, `AUTHORIZATION_FAILED`)
     }
     let dataExist = await adminService.getOneByMultiField({ _id })

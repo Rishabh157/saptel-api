@@ -20,6 +20,7 @@ const productSubCategoryRoute = require("./ProductSubCategoryRoute");
 const productGroupRoute = require("./ProductGroupRoute");
 const productCategoryRoute = require("./ProductCategoryRoute");
 const taxesRoute = require("./TaxesRoute");
+const vendorRoute = require("./VendorRoute");
 const itemRoute = require("./ItemRoute");
 const attributesGroupRoute = require("./AttributesGroupRoute");
 const attributesRoute = require("./AttributesRoute");
@@ -133,6 +134,10 @@ const defaultRoutes = [
   {
     path: "/scheme",
     route: schemeRoute,
+  },
+  {
+    path: "/vendor",
+    route: vendorRoute,
   },
   {
     path: "/attribute",

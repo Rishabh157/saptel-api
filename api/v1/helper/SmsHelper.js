@@ -36,7 +36,7 @@ exports.sendSms = async function (url) {
   }
   var result = await new Promise(function (resolve, reject) {
     request(url, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
+      if (!error && response.statusCode === httpStatus.OK) {
         dataToSend = {
           sendStatus: true,
           response: response,
