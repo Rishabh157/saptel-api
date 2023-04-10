@@ -1,17 +1,8 @@
 const moment = require('moment')
 const logger = require('../../../config/logger')
-const { userEnum } = require('../helper/enumUtils')
-const valid_module_group = [userEnum.admin]
-const valid_module_name = [
-  'ADD',
-  'UPDATE',
-  'DELETE',
-  'CHANGE_STATUS',
-  'ALL_NORMAL_LIST',
-  'ALL_PAGINATION_FILTER_LIST',
-  'VIEW'
-]
+const { actionMethodEnum } = require('../helper/enumUtils')
 const valid_method_name = ['GET', 'POST', 'PUT', 'DELETE']
+const valid_action_name = Object.keys(actionMethodEnum)
 
 const objectId = (value, helpers) => {
   if (!value.match(/^[0-9a-fA-F]{24}$/)) {
@@ -20,25 +11,18 @@ const objectId = (value, helpers) => {
   return value
 }
 
-const accessModuleGroupCheck = (value, helpers) => {
-  if (!valid_module_group.includes(value.toUpperCase())) {
-    return helpers.message(`{#label} must be any of ${valid_module_group}`)
-  }
-  return value.toUpperCase()
-}
-
 const accessactionNameCheck = (value, helpers) => {
-  if (!valid_module_name.includes(value.toUpperCase())) {
-    return helpers.message(`{#label} must be any of ${valid_module_name}`)
+  if (!valid_action_name.includes(value.toUpperCase())) {
+    return helpers.message(`{#label} must be any of ${valid_action_name}`)
   }
-  return value.toUpperCase()
+  return value.toLowerCase()
 }
 
 const accessMethodCheck = (value, helpers) => {
-  if (!valid_method_name.includes(value.toUpperCase())) {
+  if (!valid_method_name.includes(value.toLowerCase())) {
     return helpers.message(`{#label} must be any of ${valid_method_name}`)
   }
-  return value.toUpperCase()
+  return value.toLowerCase()
 }
 
 const indianMobile = (value, helpers) => {
@@ -279,7 +263,6 @@ module.exports = {
   isAfterCurrentTime,
   checkYoutubeLink,
   changeDateFormat,
-  accessModuleGroupCheck,
   accessactionNameCheck,
   accessMethodCheck,
   DateTimeFormatValid,

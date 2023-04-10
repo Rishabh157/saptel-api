@@ -160,7 +160,7 @@ const createMany = async insertDataArray => {
 /**
  * find Count and delete
  * @param {object} matchObj
- * @returns {Promise<Machine>}
+ * @returns {Promise<FileManager>}
  */
 const findCount = async matchObj => {
   return FileManager.find({ ...matchObj, isDeleted: false }).count()
@@ -171,7 +171,7 @@ const findCount = async matchObj => {
  * @param {Array} filterArray
  * @param {Array} exceptIds
  * @param {Boolean} combined
- * @returns {Promise<User>}
+ * @returns {Promise<FileManager>}
  */
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
@@ -180,8 +180,12 @@ const isExists = async (filterArray, exceptIds = false, combined = false) => {
     if (exceptIds) {
       combinedObj['_id'] = { $nin: exceptIds }
     }
+
     if (await getOneByMultiField({ ...combinedObj })) {
-      return { exists: true, existsSummary: 'Data already exist.' }
+      return {
+        exists: true,
+        existsSummary: `${Object.keys(combinedObj)} already exist.`
+      }
     }
     return { exists: false, existsSummary: '' }
   }
@@ -198,7 +202,6 @@ const isExists = async (filterArray, exceptIds = false, combined = false) => {
     })
   )
 
-  // let exists = mappedArray.some(elem => elem.exists)
   return mappedArray.reduce(
     (acc, ele) => {
       if (ele.exists) {

@@ -2,74 +2,71 @@ const router = require('express').Router()
 const companyController = require('../../controller/company/CompanyController')
 const validate = require('../../middleware/validate')
 const companyValidation = require('../../validation/CompanyValidation')
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
-const {
-  authCheckMiddleware,
-  otpVerifyToken
-  } = require('../../middleware/authenticationCheck')
+const { accessModuleCheck } = require('../../middleware/accessModuleCheck')
+const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
 
-  //-----------------------------------------------------
-  /**
+//-----------------------------------------------------
+/**
  * get one document (if query) / all documents
  */
- router.get(
+router.get(
   '/',
   accessModuleCheck,
   authCheckMiddleware,
   validate(companyValidation.get),
   companyController.get
-  )
-  /**
+)
+/**
  * get all company pagination filter
  */
- 
- router.post(
+
+router.post(
   '/',
   accessModuleCheck,
   authCheckMiddleware,
   validate(companyValidation.getAllFilter),
   companyController.allFilterPagination
-  )
-  
-  /**
+)
+
+/**
  * create new document
  */
- router.post(
+router.post(
   '/add',
   accessModuleCheck,
   authCheckMiddleware,
   validate(companyValidation.create),
   companyController.add
-  )
-  /**
+)
+/**
  * update document
  */
- router.put(
+router.put(
   '/:id',
   accessModuleCheck,
   authCheckMiddleware,
   validate(companyValidation.update),
   companyController.update
-  )
-  /**
+)
+/**
  * update status
  */
- router.put(
+router.put(
   '/status-change/:id',
   accessModuleCheck,
   authCheckMiddleware,
   validate(companyValidation.changeStatus),
   companyController.statusChange
-  )
-  /**
+)
+/**
  * delete document
  */
- router.delete(
+router.delete(
   '/:id',
   accessModuleCheck,
   authCheckMiddleware,
   validate(companyValidation.deleteDocument),
   companyController.deleteDocument
-  )
-  
-  module.exports = router
+)
+
+module.exports = router

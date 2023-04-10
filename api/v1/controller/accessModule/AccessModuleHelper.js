@@ -1,48 +1,83 @@
-const mongoose = require("mongoose");
-exports.isAllFieldsExists = (allFields, fields) => {
-  const filteredArray = allFields.data.filter(
-    (item) =>
-      item !== "isDeleted" &&
-      item !== "isActive" &&
-      item !== "createdAt" &&
-      item !== "updatedAt" &&
-      item !== "_id" &&
-      item !== "__v"
-  );
+const mongoose = require('mongoose')
+const { actionMethodEnum } = require('../../helper/enumUtils')
+
+const isAllFieldsExists = (allFields, fields) => {
+  const filteredArray = allFields.filter(
+    item =>
+      item !== 'isDeleted' &&
+      item !== 'isActive' &&
+      item !== 'createdAt' &&
+      item !== 'updatedAt' &&
+      item !== '_id' &&
+      item !== '__v'
+  )
 
   return filteredArray.reduce(
     (acc, field) => {
-      let fieldExists = fields.find((e) => {
-        return e.fieldName === field;
-      });
+      let fieldExists = fields.find(e => {
+        return e.fieldName === field
+      })
       if (!fieldExists) {
-        acc.status = false;
-        acc.message += `${field} is missing in fields array. `;
+        acc.status = false
+        acc.message += `${field} is missing in fields array. `
       }
-      return acc;
+      return acc
     },
-    { status: true, message: "" }
-  );
-};
-exports.collectionNameArray = async (actionName) => {
-  // Retrieve a list of all the collection names
+    { status: true, message: '' }
+  )
+}
 
-  let collections = await mongoose.modelNames();
+const isModelNameValid = async modelName => {
+  return await mongoose.modelNames().find(ele => {
+    return ele.toLowerCase() === modelName.toLowerCase()
+  })
+}
+const allFields = collectionName => {
+  return Object.keys(mongoose.model(collectionName).schema.paths)
+}
+const checkBodyData = async (modelName, fields) => {
+  try {
+    let modelFound = await isModelNameValid(modelName)
+    if (!modelFound) {
+      return {
+        message: `Invalid model name ${modelName}. It must be same as Schema's model name.`,
+        status: false,
+        data: []
+      }
+    }
+    let fieldsFound = await allFields(modelFound)
+    if (!fieldsFound || !fieldsFound.length) {
+      return {
+        message: `No fields found in schema.`,
+        status: false,
+        data: []
+      }
+    }
+    let checkFieldsInBody = await isAllFieldsExists(fieldsFound, fields)
+    if (!checkFieldsInBody.status) {
+      return {
+        message: checkFieldsInBody.message,
+        status: false,
+        data: []
+      }
+    }
 
-  if (!collections.includes(actionName)) {
-    return {
-      status: false,
-      message: "Module does not exist in data base collection.",
-      data: [],
-    };
+    return { message: 'All Ok', status: true, data: fields }
+  } catch (err) {
+    return { message: 'Error Occured.', status: false, data: [] }
   }
+}
 
-  // Retrieving the field names from the model schema
+const isActionMethodValid = async (actionName, method) => {
+  return actionMethodEnum[actionName.toLowerCase()]?.toLowerCase() ===
+    method.toLowerCase()
+    ? true
+    : false
+}
 
-  let allFields = Object.keys(mongoose.model(actionName).schema.paths);
-  return {
-    status: true,
-    message: "success",
-    data: allFields,
-  };
-};
+module.exports = {
+  isModelNameValid,
+  isAllFieldsExists,
+  checkBodyData,
+  isActionMethodValid
+}

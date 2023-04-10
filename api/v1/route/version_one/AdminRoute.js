@@ -6,12 +6,14 @@ const {
   authCheckMiddleware,
   otpVerifyToken
 } = require('../../middleware/authenticationCheck')
+const { accessModuleCheck } = require('../../middleware/accessModuleCheck')
 
 /**
  * get one document (if query) / all documents
  */
 router.get(
   '/',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(adminValidation.get),
   adminController.get
@@ -23,6 +25,7 @@ router.get(
 
 router.post(
   '/',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(adminValidation.getAllFilter),
   adminController.allFilterPagination
@@ -33,7 +36,7 @@ router.post(
  */
 router.post(
   '/add',
-  // authCheckMiddleware,
+  accessModuleCheck,
   validate(adminValidation.createValid),
   adminController.add
 )
@@ -43,6 +46,7 @@ router.post(
  */
 router.post(
   '/login',
+  accessModuleCheck,
   validate(adminValidation.loginValid),
   adminController.login
 )
@@ -53,6 +57,7 @@ router.post(
 router.post(
   '/verify-otp',
   otpVerifyToken,
+  accessModuleCheck,
   validate(adminValidation.verifyOtpValid),
   adminController.verifyOtp
 )
@@ -62,6 +67,7 @@ router.post(
  */
 router.put(
   '/status-change/:id',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(adminValidation.changeStatus),
   adminController.statusChange
@@ -72,6 +78,7 @@ router.put(
  */
 router.delete(
   '/:id',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(adminValidation.deleteDocument),
   adminController.deleteDocument

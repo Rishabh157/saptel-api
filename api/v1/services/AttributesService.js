@@ -1,4 +1,4 @@
-const Attributes = require("../model/AttributesSchema");
+const Attributes = require('../model/AttributesSchema')
 const { combineObjects } = require('../helper/utils')
 
 //-------------------------------------------
@@ -9,8 +9,8 @@ const { combineObjects } = require('../helper/utils')
  * @returns {Promise<Attributes>}
  */
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return Attributes.findOne({ [fieldName]: fieldValue, isDeleted: false });
-};
+  return Attributes.findOne({ [fieldName]: fieldValue, isDeleted: false })
+}
 //-------------------------------------------
 /**
  * Get One Attributes by multiple Fields field
@@ -22,8 +22,8 @@ const getOneByMultiField = async (matchObj, projectObj) => {
   return Attributes.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
-  );
-};
+  )
+}
 
 //-------------------------------------------
 /**
@@ -31,18 +31,18 @@ const getOneByMultiField = async (matchObj, projectObj) => {
  * @param {object} bodyData
  * @returns {Promise<Attributes>}
  */
-const createNewData = async (bodyData) => {
-  return Attributes.create({ ...bodyData });
-};
+const createNewData = async bodyData => {
+  return Attributes.create({ ...bodyData })
+}
 //-------------------------------------------
 /**
  * get by id Attributes
  * @param {ObjectId} id
  * @returns {Promise<Attributes>}
  */
-const getById = async (id) => {
-  return Attributes.findById(id);
-};
+const getById = async id => {
+  return Attributes.findById(id)
+}
 //-------------------------------------------
 /**
  * Update Attributes by id
@@ -55,8 +55,8 @@ const getByIdAndUpdate = async (id, updateBody) => {
     { _id: id },
     { ...updateBody },
     { new: true }
-  );
-};
+  )
+}
 //-------------------------------------------
 /**
  * find One and update
@@ -69,8 +69,8 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
-  );
-};
+  )
+}
 //-------------------------------------------
 /**
  * find One and update
@@ -83,30 +83,30 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
-  );
-};
+  )
+}
 //-------------------------------------------
 /**
  * Delete by id
  * @param {ObjectId} id
  * @returns {Promise<Attributes>}
  */
-const getByIdAndDelete = async (id) => {
-  return Attributes.findByIdAndDelete(id);
-};
+const getByIdAndDelete = async id => {
+  return Attributes.findByIdAndDelete(id)
+}
 //-------------------------------------------
 /**
  * find one and delete
  * @param {object} matchObj
  * @returns {Promise<Attributes>}
  */
-const getOneAndDelete = async (matchObj) => {
+const getOneAndDelete = async matchObj => {
   return Attributes.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
-  );
-};
+  )
+}
 //-------------------------------------------
 /**
  * find one and delete
@@ -115,91 +115,91 @@ const getOneAndDelete = async (matchObj) => {
  * @returns {Promise<Attributes>}
  */
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return Attributes.find({ ...matchObj, isDeleted: false }, { ...projectObj });
-};
+  return Attributes.find({ ...matchObj, isDeleted: false }, { ...projectObj })
+}
 //-------------------------------------------
 /**
  * find one and delete
  * @returns {Promise<Attributes>}
  */
 const findAll = async () => {
-  return Attributes.find();
-};
+  return Attributes.find()
+}
 //-------------------------------------------
 /**
  * find one and delete
  * @param {Array} aggregateQueryArray
  * @returns {Promise<Attributes>}
  */
-const aggregateQuery = async (aggregateQueryArray) => {
-  return Attributes.aggregate(aggregateQueryArray);
-};
+const aggregateQuery = async aggregateQueryArray => {
+  return Attributes.aggregate(aggregateQueryArray)
+}
 //-------------------------------------------
 /**
  * find one and delete
  * @param {Array} insertDataArray
  * @returns {Promise<Attributes>}
  */
-const createMany = async (insertDataArray) => {
-  return Attributes.insertMany(insertDataArray);
-};
+const createMany = async insertDataArray => {
+  return Attributes.insertMany(insertDataArray)
+}
 //-------------------------------------------
 /**
  * find Count and delete
  * @param {object} matchObj
- * @returns {Promise
-                          <Machine>
-                            }
+ * @returns {Promise <Attributes> }
  */
-const findCount = async (matchObj) => {
-  return Attributes.find({ ...matchObj, isDeleted: false }).count();
-};
+const findCount = async matchObj => {
+  return Attributes.find({ ...matchObj, isDeleted: false }).count()
+}
 //-------------------------------------------
 /**
  *
  * @param {Array} filterArray
  * @param {Array} exceptIds
  * @param {Boolean} combined
- * @returns {Promise
-                            <User>
-                              }
+ * @returns {Promise <Attributes> }
  */
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
-    let combinedObj = await combineObjects(filterArray);
+    let combinedObj = await combineObjects(filterArray)
 
     if (exceptIds) {
-      combinedObj["_id"] = { $nin: exceptIds };
+      combinedObj['_id'] = { $nin: exceptIds }
     }
+
     if (await getOneByMultiField({ ...combinedObj })) {
-      return { exists: true, existsSummary: "Data already exist." };
+      return {
+        exists: true,
+        existsSummary: `${Object.keys(combinedObj)} already exist.`
+      }
     }
-    return { exists: false, existsSummary: "" };
+    return { exists: false, existsSummary: '' }
   }
 
   let mappedArray = await Promise.all(
-    filterArray.map(async (element) => {
+    filterArray.map(async element => {
       if (exceptIds) {
-        element["_id"] = { $nin: exceptIds };
+        element['_id'] = { $nin: exceptIds }
       }
       if (await getOneByMultiField({ ...element })) {
-        return { exists: true, fieldName: Object.keys(element)[0] };
+        return { exists: true, fieldName: Object.keys(element)[0] }
       }
-      return { exists: false, fieldName: Object.keys(element)[0] };
+      return { exists: false, fieldName: Object.keys(element)[0] }
     })
-  );
+  )
 
   return mappedArray.reduce(
     (acc, ele) => {
       if (ele.exists) {
-        acc.exists = true;
-        acc.existsSummary += `${ele.fieldName.toLowerCase()} already exist. `;
+        acc.exists = true
+        acc.existsSummary += `${ele.fieldName.toLowerCase()} already exist. `
       }
-      return acc;
+      return acc
     },
-    { exists: false, existsSummary: "" }
-  );
-};
+    { exists: false, existsSummary: '' }
+  )
+}
 //-------------------------------------------
 module.exports = {
   getOneBySingleField,
@@ -216,5 +216,5 @@ module.exports = {
   onlyUpdateOne,
   createMany,
   findCount,
-  isExists,
-};
+  isExists
+}

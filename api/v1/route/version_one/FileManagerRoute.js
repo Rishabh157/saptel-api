@@ -4,6 +4,8 @@ const fileManagerValidation = require('../../validation/FileManagerValidation')
 const fileManagerController = require('../../controller/fileManager/FileManagerController')
 const multerFile = require('../../middleware/multerFileUpload')
 const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
+const { accessModuleCheck } = require('../../middleware/accessModuleCheck')
+
 //-----------------------------------------------------
 
 /**
@@ -11,6 +13,7 @@ const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
  */
 router.get(
   '/',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(fileManagerValidation.get),
   fileManagerController.get
@@ -22,6 +25,7 @@ router.get(
 
 router.post(
   '/',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(fileManagerValidation.getAllFilter),
   fileManagerController.allFilterPagination
@@ -32,6 +36,7 @@ router.post(
  */
 router.post(
   '/add',
+  accessModuleCheck,
   authCheckMiddleware,
   multerFile.fileUpload.array('fileUrl', 1),
   fileManagerValidation.fileExistCheck,
@@ -44,6 +49,7 @@ router.post(
  */
 router.put(
   '/:id',
+  accessModuleCheck,
   authCheckMiddleware,
   multerFile.fileUpload.array('fileUrl', 1),
   fileManagerValidation.fileExistCheck,
@@ -56,6 +62,7 @@ router.put(
  */
 router.put(
   '/status-change/:id',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(fileManagerValidation.changeStatus),
   fileManagerController.statusChange
@@ -67,6 +74,7 @@ router.put(
 router.delete(
   '/:id',
   authCheckMiddleware,
+  accessModuleCheck,
   validate(fileManagerValidation.deleteDocument),
   fileManagerController.deleteDocument
 )

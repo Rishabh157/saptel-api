@@ -165,7 +165,53 @@ const createMany = async insertDataArray => {
   return OTP.insertMany(insertDataArray)
 }
 //-------------------------------------------
+/**
+ *
+ * @param {Array} filterArray
+ * @param {Array} exceptIds
+ * @param {Boolean} combined
+ * @returns {Promise<Otp>}
+ */
+const isExists = async (filterArray, exceptIds = false, combined = false) => {
+  if (combined) {
+    let combinedObj = await combineObjects(filterArray)
 
+    if (exceptIds) {
+      combinedObj['_id'] = { $nin: exceptIds }
+    }
+
+    if (await getOneByMultiField({ ...combinedObj })) {
+      return {
+        exists: true,
+        existsSummary: `${Object.keys(combinedObj)} already exist.`
+      }
+    }
+    return { exists: false, existsSummary: '' }
+  }
+
+  let mappedArray = await Promise.all(
+    filterArray.map(async element => {
+      if (exceptIds) {
+        element['_id'] = { $nin: exceptIds }
+      }
+      if (await getOneByMultiField({ ...element })) {
+        return { exists: true, fieldName: Object.keys(element)[0] }
+      }
+      return { exists: false, fieldName: Object.keys(element)[0] }
+    })
+  )
+
+  return mappedArray.reduce(
+    (acc, ele) => {
+      if (ele.exists) {
+        acc.exists = true
+        acc.existsSummary += `${ele.fieldName.toLowerCase()} already exist. `
+      }
+      return acc
+    },
+    { exists: false, existsSummary: '' }
+  )
+}
 //-------------------------------------------
 module.exports = {
   getOneBySingleField,

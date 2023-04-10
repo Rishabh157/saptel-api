@@ -8,157 +8,152 @@ const { combineObjects } = require('../helper/utils')
  * @param {string} fieldValue
  * @returns {Promise<Area>}
  */
- const getOneBySingleField = async (fieldName, fieldValue) => {
+const getOneBySingleField = async (fieldName, fieldValue) => {
   return Area.findOne({ [fieldName]: fieldValue, isDeleted: false })
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * Get One Area by multiple Fields field
  * @param {object} matchObj
  * @param {object} projectObj
  * @returns {Promise<Area>}
  */
- const getOneByMultiField = async (matchObj, projectObj) => {
+const getOneByMultiField = async (matchObj, projectObj) => {
   return Area.findOne({ ...matchObj, isDeleted: false }, { ...projectObj })
-  }
-  
-  //-------------------------------------------
-  /**
+}
+
+//-------------------------------------------
+/**
  * Create Area
  * @param {object} bodyData
  * @returns {Promise<Area>}
  */
- const createNewData = async bodyData => {
+const createNewData = async bodyData => {
   return Area.create({ ...bodyData })
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * get by id Area
  * @param {ObjectId} id
  * @returns {Promise<Area>}
  */
- const getById = async id => {
+const getById = async id => {
   return Area.findById(id)
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * Update Area by id
  * @param {ObjectId} id
  * @param {Object} updateBody
  * @returns {Promise<Area>}
  */
- const getByIdAndUpdate = async (id, updateBody) => {
+const getByIdAndUpdate = async (id, updateBody) => {
   return Area.findByIdAndUpdate({ _id: id }, { ...updateBody }, { new: true })
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find One and update
  * @param {object} matchObj
  * @param {Object} updateBody
  * @returns {Promise<Area>}
  */
- const getOneAndUpdate = async (matchObj, updateBody) => {
+const getOneAndUpdate = async (matchObj, updateBody) => {
   return Area.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
   )
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find One and update
  * @param {object} matchObj
  * @param {Object} updateBody
  * @returns {Promise<Area>}
  */
- const onlyUpdateOne = async (matchObj, updateBody) => {
+const onlyUpdateOne = async (matchObj, updateBody) => {
   return Area.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
   )
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * Delete by id
  * @param {ObjectId} id
- * @returns {Promise<Area>}
+ * @returns {Promise <Area>}
  */
- const getByIdAndDelete = async id => {
+const getByIdAndDelete = async id => {
   return Area.findByIdAndDelete(id)
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find one and delete
  * @param {object} matchObj
- * @returns {Promise<Area>}
+ * @returns {Promise <Area>}
  */
- const getOneAndDelete = async matchObj => {
+const getOneAndDelete = async matchObj => {
   return Area.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
   )
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find one and delete
  * @param {object} matchObj
  * @param {object} projectObj
- * @returns {Promise<Area>}
+ * @returns {Promise <Area> }
  */
- const findAllWithQuery = async (matchObj, projectObj) => {
+const findAllWithQuery = async (matchObj, projectObj) => {
   return Area.find({ ...matchObj, isDeleted: false }, { ...projectObj })
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find one and delete
- * @returns {Promise<Area>}
+ * @returns {Promise <Area>}
  */
- const findAll = async () => {
+const findAll = async () => {
   return Area.find()
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find one and delete
  * @param {Array} aggregateQueryArray
- * @returns {Promise<Area>}
+ * @returns {Promise <Area>}
  */
- const aggregateQuery = async aggregateQueryArray => {
+const aggregateQuery = async aggregateQueryArray => {
   return Area.aggregate(aggregateQueryArray)
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find one and delete
  * @param {Array} insertDataArray
- * @returns {Promise<Area>
-                        }
+ * @returns {Promise <Area> }
  */
- const createMany = async insertDataArray => {
+const createMany = async insertDataArray => {
   return Area.insertMany(insertDataArray)
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  * find Count and delete
  * @param {object} matchObj
- * @returns {Promise
-                          <Machine>
-                            }
+ * @returns {Promise <Area>}
  */
- const findCount = async matchObj => {
+const findCount = async matchObj => {
   return Area.find({ ...matchObj, isDeleted: false }).count()
-  }
-  //-------------------------------------------
-  /**
+}
+//-------------------------------------------
+/**
  *
  * @param {Array} filterArray
  * @param {Array} exceptIds
  * @param {Boolean} combined
- * @returns {Promise
-                            <User>
-                              }
+ * @returns {Promise <Area>}
  */
- const isExists = async (filterArray, exceptIds = false, combined = false) => {
+const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
     let combinedObj = await combineObjects(filterArray)
 
@@ -182,7 +177,7 @@ const { combineObjects } = require('../helper/utils')
       return { exists: false, fieldName: Object.keys(element)[0] }
     })
   )
- 
+
   return mappedArray.reduce(
     (acc, ele) => {
       if (ele.exists) {
@@ -193,9 +188,9 @@ const { combineObjects } = require('../helper/utils')
     },
     { exists: false, existsSummary: '' }
   )
-  }
-  //-------------------------------------------
-  module.exports = {
+}
+//-------------------------------------------
+module.exports = {
   getOneBySingleField,
   getOneByMultiField,
   createNewData,
@@ -211,4 +206,4 @@ const { combineObjects } = require('../helper/utils')
   createMany,
   findCount,
   isExists
-  }
+}

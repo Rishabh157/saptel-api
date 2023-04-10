@@ -6,6 +6,8 @@ const {
   authCheckMiddleware,
   otpVerifyToken
 } = require('../../middleware/authenticationCheck')
+const { accessModuleCheck } = require('../../middleware/accessModuleCheck')
+
 //-----------------------------------------------------
 
 /**
@@ -13,6 +15,7 @@ const {
  */
 router.get(
   '/',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.get),
   userController.get
@@ -24,6 +27,7 @@ router.get(
 
 router.post(
   '/',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.getAllFilter),
   userController.allFilterPagination
@@ -32,18 +36,29 @@ router.post(
 /**
  * create new document
  */
-router.post('/signup', validate(userValidation.create), userController.add)
+router.post(
+  '/signup',
+  accessModuleCheck,
+  validate(userValidation.create),
+  userController.add
+)
 
 /**
  * login user via otp
  */
-router.post('/login', validate(userValidation.loginValid), userController.login)
+router.post(
+  '/login',
+  accessModuleCheck,
+  validate(userValidation.loginValid),
+  userController.login
+)
 
 /**
  * verify otp send on mobile
  */
 router.post(
   '/verify-otp',
+  accessModuleCheck,
   otpVerifyToken,
   validate(userValidation.verifyOtpValid),
   userController.verifyOtp
@@ -53,6 +68,7 @@ router.post(
  */
 router.put(
   '/update-profile',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.update),
   userController.update
@@ -63,6 +79,7 @@ router.put(
  */
 router.put(
   '/status-change/:id',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.changeStatus),
   userController.statusChange
@@ -73,6 +90,7 @@ router.put(
  */
 router.delete(
   '/:id',
+  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.deleteDocument),
   userController.deleteDocument
