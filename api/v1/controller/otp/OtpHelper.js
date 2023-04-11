@@ -1,6 +1,6 @@
 const otpService = require('../../services/OtpService')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/apiError')
+const ApiError = require('../../../utils/apiErrorUtils')
 const moment = require('moment')
 
 exports.getOtp = async (userId, userType) => {

@@ -1,7 +1,7 @@
 const config = require('../../../../config/config')
 const logger = require('../../../../config/logger')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/apiError')
+const ApiError = require('../../../utils/apiErrorUtils')
 const attributesService = require('../../services/AttributesService')
 const { searchKeys } = require('../../model/AttributesSchema')
 const errorRes = require('../../../utils/resError')
@@ -15,7 +15,7 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
   getOrderByAndItsValue
-} = require('../../helper/filterPaginationHelper')
+} = require('../../helper/paginationFilterHelper')
 
 //add start
 exports.add = async (req, res) => {

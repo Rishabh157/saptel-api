@@ -1,9 +1,9 @@
 const jwt = require('jsonwebtoken')
 const config = require('../../../config/config')
 const logger = require('../../../config/logger')
-const authHelper = require('../helper/authHelper')
+const authHelper = require('../helper/authenticationHelper')
 const httpStatus = require('http-status')
-const ApiError = require('../../utils/apiError')
+const ApiError = require('../../utils/apiErrorUtils')
 const { userEnum } = require('../helper/enumUtils')
 const { errorRes } = require('../../utils/resError')
 
