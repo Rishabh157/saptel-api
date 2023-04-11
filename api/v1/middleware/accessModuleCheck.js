@@ -1,7 +1,7 @@
 const config = require('../../../config/config')
 const logger = require('../../../config/logger')
 const httpStatus = require('http-status')
-const ApiError = require('../../utils/apiError')
+const ApiError = require('../../utils/apiErrorUtils')
 const { errorRes } = require('../../utils/resError')
 const accessmoduleService = require('../../v1/services/AccessModuleService')
 

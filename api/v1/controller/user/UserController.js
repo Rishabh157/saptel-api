@@ -1,14 +1,14 @@
 const config = require('../../../../config/config')
 const logger = require('../../../../config/logger')
 const httpStatus = require('http-status')
-const ApiError = require('../../../utils/apiError')
+const ApiError = require('../../../utils/apiErrorUtils')
 const userService = require('../../services/UserService')
 const { searchKeys } = require('../../model/UserSchema')
 const errorRes = require('../../../utils/resError')
 const { getQuery } = require('../../helper/utils')
 const bcryptjs = require('bcryptjs')
 const otpHelper = require('../otp/OtpHelper')
-const { sendMsg91Function } = require('../../helper/smsHelper')
+const { sendMsg91Function } = require('../../helper/msgHelper')
 const { tokenCreate, otpTokenCreate } = require('../../helper/tokenCreate')
 const { isAfter } = require('date-fns')
 const mongoose = require('mongoose')
@@ -20,7 +20,7 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
   getOrderByAndItsValue
-} = require('../../helper/filterPaginationHelper')
+} = require('../../helper/paginationFilterHelper')
 const { userEnum } = require('../../helper/enumUtils')
 
 //add start
