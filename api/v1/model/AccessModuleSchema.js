@@ -1,5 +1,3 @@
-// model schema starts here
-
 const mongoose = require('mongoose')
 const AccessmoduleSchema = new mongoose.Schema(
   {
