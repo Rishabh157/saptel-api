@@ -16,6 +16,8 @@ const barCodeRoute = require("./BarCodeRoute");
 const asrRequestRoute = require("./AsrRequestRoute");
 const schemeRoute = require("./SchemeRoute");
 const dealerRoute = require("./DealerRoute");
+const purchaseOrderRoute = require("./PurchaseOrderRoute");
+const salesOrderRoute = require("./SalesOrderRoute");
 const inventoriesRoute = require("./InventoriesRouter");
 const wareHouseRoute = require("./WareHouseRoute");
 const dealersCategoryRoute = require("./DealersCategoryRoute");
@@ -150,6 +152,15 @@ const defaultRoutes = [
     path: "/inventories",
     route: inventoriesRoute,
   },
+  {
+    path: "/sales-order",
+    route: salesOrderRoute,
+  },
+  {
+    path: "/purchase-order",
+    route: purchaseOrderRoute,
+  },
+
   {
     path: "/vendor",
     route: vendorRoute,
