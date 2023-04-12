@@ -1,4 +1,19 @@
+const { apiAppEnum } = require('../helper/enumUtils')
 const mongoose = require('mongoose')
+const validateAccessType = value => {
+  const allowedValues = [
+    apiAppEnum.app,
+    apiAppEnum.dashboard,
+    apiAppEnum.web,
+    apiAppEnum.all
+  ]
+  if (!Array.isArray(value) || !value.length) {
+    return false
+  }
+  console.log(value, allowedValues)
+  return value.every(v => allowedValues.includes(v))
+}
+
 const AccessmoduleSchema = new mongoose.Schema(
   {
     route: {
@@ -69,6 +84,27 @@ const AccessmoduleSchema = new mongoose.Schema(
         }
       ],
       required: true
+    },
+    acccessType: {
+      type: [String],
+      validate: [
+        {
+          validator: validateAccessType,
+          message: 'Invalid accessType value.'
+        }
+      ],
+      default: [apiAppEnum.dashboard]
+    },
+    featureName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true
+    },
+    featureRank: {
+      type: Number,
+      required: true,
+      default: 1
     },
     isDeleted: {
       type: Boolean,
