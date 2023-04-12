@@ -2,6 +2,7 @@ const Joi = require('joi').extend(require('@joi/date'))
 Joi.joiDate = require('@joi/date')(Joi)
 Joi.joiObjectId = require('joi-objectid')(Joi)
 const commonValidation = require('./CommonValidation')
+const { apiAppEnum } = require('../helper/enumUtils')
 
 /**
  * create new document
@@ -16,6 +17,21 @@ const create = {
     modelName: Joi.string().required().lowercase(),
     modelDisplayName: Joi.string().required().lowercase(),
     modelDisplayRank: Joi.number().required(),
+    featureName: Joi.string().required().lowercase(),
+    featureRank: Joi.number().required(),
+    acccessType: Joi.array()
+      .items(
+        Joi.string()
+          .optional()
+          .valid(
+            `${apiAppEnum.all}`,
+            `${apiAppEnum.app}`,
+            `${apiAppEnum.dashboard}`,
+            `${apiAppEnum.web}`
+          )
+          .lowercase()
+      )
+      .empty(Joi.array().length(0)),
     fields: Joi.array().items(
       Joi.object().keys({
         fieldDisplayName: Joi.string().lowercase().allow(''),
@@ -45,6 +61,21 @@ const update = {
     modelName: Joi.string().required().lowercase(),
     modelDisplayName: Joi.string().required().lowercase(),
     modelDisplayRank: Joi.number().required(),
+    featureName: Joi.string().required().lowercase(),
+    featureRank: Joi.number().required(),
+    acccessType: Joi.array()
+      .items(
+        Joi.string()
+          .optional()
+          .valid(
+            `${apiAppEnum.all}`,
+            `${apiAppEnum.app}`,
+            `${apiAppEnum.dashboard}`,
+            `${apiAppEnum.web}`
+          )
+          .lowercase()
+      )
+      .empty(Joi.array().length(0)),
     fields: Joi.array().items(
       Joi.object().keys({
         fieldDisplayName: Joi.string().lowercase().allow(''),

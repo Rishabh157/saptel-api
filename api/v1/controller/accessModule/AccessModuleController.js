@@ -30,6 +30,8 @@ exports.add = async (req, res) => {
       modelName,
       modelDisplayName,
       modelDisplayRank,
+      featureName,
+      featureRank,
       fields
     } = req.body
 
@@ -92,19 +94,28 @@ exports.add = async (req, res) => {
     ) {
       throw new ApiError(httpStatus.OK, actionNamemodelNameExist.existsSummary)
     }
-    let featurefound = await accessmoduleService.getOneByMultiField({
+    let modelfound = await accessmoduleService.getOneByMultiField({
       modelName: modelName
     })
-    if (featurefound && featurefound.modelDisplayRank !== modelDisplayRank) {
+    if (modelfound && modelfound.modelDisplayRank !== modelDisplayRank) {
       throw new ApiError(
         httpStatus.OK,
-        "Feature rank must be same in it's all module"
+        "model rank must be same in it's all module"
       )
     }
-    if (featurefound && featurefound.modelDisplayName !== modelDisplayName) {
+    if (modelfound && modelfound.modelDisplayName !== modelDisplayName) {
       throw new ApiError(
         httpStatus.OK,
-        "Feature display name must be same in it's all module"
+        "model display name must be same in it's all module"
+      )
+    }
+    let featurefound = await accessmoduleService.getOneByMultiField({
+      featureName: featureName
+    })
+    if (featurefound && featurefound.featureRank !== featureRank) {
+      throw new ApiError(
+        httpStatus.OK,
+        "feature rank must be same in it's all module"
       )
     }
 
@@ -147,6 +158,8 @@ exports.update = async (req, res) => {
       modelName,
       modelDisplayName,
       modelDisplayRank,
+      featureName,
+      featureRank,
       fields
     } = req.body
 
@@ -209,22 +222,30 @@ exports.update = async (req, res) => {
     ) {
       throw new ApiError(httpStatus.OK, actionNamemodelNameExist.existsSummary)
     }
-    let featurefound = await accessmoduleService.getOneByMultiField({
+    let modelfound = await accessmoduleService.getOneByMultiField({
       modelName: modelName
     })
-    if (featurefound && featurefound.modelDisplayRank !== modelDisplayRank) {
+    if (modelfound && modelfound.modelDisplayRank !== modelDisplayRank) {
       throw new ApiError(
         httpStatus.OK,
-        "Feature rank must be same in it's all module"
+        "model rank must be same in it's all module"
       )
     }
-    if (featurefound && featurefound.modelDisplayName !== modelDisplayName) {
+    if (modelfound && modelfound.modelDisplayName !== modelDisplayName) {
       throw new ApiError(
         httpStatus.OK,
-        "Feature display name must be same in it's all module"
+        "model display name must be same in it's all module"
       )
     }
-
+    let featurefound = await accessmoduleService.getOneByMultiField({
+      featureName: featureName
+    })
+    if (featurefound && featurefound.featureRank !== featureRank) {
+      throw new ApiError(
+        httpStatus.OK,
+        "feature rank must be same in it's all module"
+      )
+    }
     //------------------Find data-------------------
     let datafound = await accessmoduleService.getOneByMultiField({
       _id: idToBeSearch
@@ -405,6 +426,7 @@ exports.allFilterPagination = async (req, res) => {
     let errData = errorRes(err)
     logger.info(errData.resData)
     let { message, status, data, code, issue } = errData.resData
+
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue })
