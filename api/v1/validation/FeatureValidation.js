@@ -2,41 +2,19 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("./CommonValidation");
-const { apiAppEnum } = require("../helper/enumUtils");
 
 /**
  * create new document
  */
 const create = {
   body: Joi.object().keys({
-    route: Joi.string().required().lowercase(),
-    method: Joi.string().required().lowercase(),
-    actionName: Joi.string().required().lowercase(),
-    actionDisplayName: Joi.string().required().lowercase(),
-    actionDisplayRank: Joi.number().required(),
-    modelName: Joi.string().required().lowercase(),
-    modelDisplayName: Joi.string().required().lowercase(),
-    modelDisplayRank: Joi.number().required(),
-    acccessType: Joi.array()
-      .items(
-        Joi.string()
-          .optional()
-          .valid(
-            `${apiAppEnum.all}`,
-            `${apiAppEnum.app}`,
-            `${apiAppEnum.dashboard}`,
-            `${apiAppEnum.web}`
-          )
-          .lowercase()
-      )
-      .empty(Joi.array().length(0)),
-    fields: Joi.array().items(
-      Joi.object().keys({
-        fieldDisplayName: Joi.string().lowercase().allow(""),
-        fieldName: Joi.string().allow(""),
-        fieldRank: Joi.number().required(),
-      })
-    ),
+    featureName: Joi.string().lowercase().required(),
+    moduleName: Joi.string().lowercase().required(),
+    featureRank: Joi.number().required(),
+    moduleRank: Joi.number().required(),
+    accessModule: Joi.array().items({
+      accessModuleId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
   }),
 };
 
@@ -48,37 +26,13 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    route: Joi.string().required().lowercase(),
-    method: Joi.string().required().lowercase(),
-    actionName: Joi.string()
-      .custom(commonValidation.accessactionNameCheck)
-      .required()
-      .lowercase(),
-    actionDisplayName: Joi.string().required().lowercase(),
-    actionDisplayRank: Joi.number().required(),
-    modelName: Joi.string().required().lowercase(),
-    modelDisplayName: Joi.string().required().lowercase(),
-    modelDisplayRank: Joi.number().required(),
-    acccessType: Joi.array()
-      .items(
-        Joi.string()
-          .optional()
-          .valid(
-            `${apiAppEnum.all}`,
-            `${apiAppEnum.app}`,
-            `${apiAppEnum.dashboard}`,
-            `${apiAppEnum.web}`
-          )
-          .lowercase()
-      )
-      .empty(Joi.array().length(0)),
-    fields: Joi.array().items(
-      Joi.object().keys({
-        fieldDisplayName: Joi.string().lowercase().allow(""),
-        fieldName: Joi.string().allow(""),
-        fieldRank: Joi.number().required(),
-      })
-    ),
+    featureName: Joi.string().lowercase().required(),
+    moduleName: Joi.string().lowercase().required(),
+    featureRank: Joi.number().required(),
+    moduleRank: Joi.number().required(),
+    accessModule: Joi.array().items({
+      accessModuleId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
   }),
 };
 
@@ -133,8 +87,18 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
+      featureName: Joi.string().optional(),
+      moduleName: Joi.string().optional(),
     })
     .optional(),
+};
+/**
+ * get by id
+ */
+const getDocument = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
 };
 
 /**
@@ -161,4 +125,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getDocument,
 };

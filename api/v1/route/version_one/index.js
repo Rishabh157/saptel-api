@@ -18,6 +18,7 @@ const schemeRoute = require("./SchemeRoute");
 const dealerRoute = require("./DealerRoute");
 const purchaseOrderRoute = require("./PurchaseOrderRoute");
 const salesOrderRoute = require("./SalesOrderRoute");
+const featureRoute = require("./FeatureRoute");
 const inventoriesRoute = require("./InventoriesRouter");
 const wareHouseRoute = require("./WareHouseRoute");
 const dealersCategoryRoute = require("./DealersCategoryRoute");
@@ -159,6 +160,10 @@ const defaultRoutes = [
   {
     path: "/purchase-order",
     route: purchaseOrderRoute,
+  },
+  {
+    path: "/feature",
+    route: featureRoute,
   },
 
   {
