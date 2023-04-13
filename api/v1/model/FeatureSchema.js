@@ -9,7 +9,6 @@ const FeatureSchema = new mongoose.Schema(
       type: [],
       required: true,
     },
-
     isDeleted: {
       type: Boolean,
       default: false,

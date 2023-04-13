@@ -188,7 +188,7 @@ const VendorSchema = new mongoose.Schema(
       ],
       required: true,
     },
-
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

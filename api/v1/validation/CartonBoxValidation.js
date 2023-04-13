@@ -16,6 +16,7 @@ const create = {
       depth: Joi.number().required(),
     }),
     boxWeight: Joi.number().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -35,6 +36,7 @@ const update = {
       depth: Joi.number().required(),
     }),
     boxWeight: Joi.number().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

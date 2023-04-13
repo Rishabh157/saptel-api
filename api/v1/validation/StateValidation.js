@@ -10,6 +10,7 @@ const create = {
   body: Joi.object().keys({
     stateName: Joi.string().lowercase().required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -23,6 +24,7 @@ const update = {
   body: Joi.object().keys({
     stateName: Joi.string().lowercase().required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

@@ -48,6 +48,7 @@ const create = {
       documentName: Joi.string().required(),
       documentFile: Joi.string().uri().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -99,6 +100,7 @@ const update = {
       documentName: Joi.string().required(),
       documentFile: Joi.string().uri().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

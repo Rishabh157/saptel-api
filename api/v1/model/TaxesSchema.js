@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const TaxesSchema = new mongoose.Schema(
   {
     taxName: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

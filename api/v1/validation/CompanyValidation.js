@@ -24,6 +24,7 @@ const create = {
         accountType: Joi.string().required(),
       })
     ),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -51,6 +52,7 @@ const update = {
         accountType: Joi.string().required(),
       })
     ),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

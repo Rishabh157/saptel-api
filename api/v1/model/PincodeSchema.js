@@ -6,6 +6,7 @@ const PincodeSchema = new mongoose.Schema(
     districtId: { type: String, required: true, trim: true, lowercase: true },
     stateId: { type: String, required: true, trim: true, lowercase: true },
     countryId: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

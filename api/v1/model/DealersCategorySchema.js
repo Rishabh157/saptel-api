@@ -10,6 +10,7 @@ const DealersCategorySchema = new mongoose.Schema(
     investAmount: { type: Number, required: true },
     numberOfOrders: { type: Number, required: true },
     deliveryPercentage: { type: Number, required: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -43,6 +43,7 @@ const create = {
       language: Joi.string().required(),
       script: Joi.string().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -89,6 +90,7 @@ const update = {
       language: Joi.string().required(),
       script: Joi.string().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

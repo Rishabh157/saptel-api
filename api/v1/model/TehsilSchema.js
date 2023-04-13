@@ -5,6 +5,7 @@ const TehsilSchema = new mongoose.Schema(
     districtId: { type: String, required: true, trim: true },
     stateId: { type: String, required: true, trim: true },
     countryId: { type: String, required: true, trim: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -19,11 +20,6 @@ const TehsilSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = [
-  "tehsilName",
-  "districtId",
-  "stateId",
-  "countryId",
-];
+const searchKeys = ["tehsilName", "districtId", "stateId", "countryId"];
 module.exports = mongoose.model("Tehsil", TehsilSchema);
-module.exports.searchKeys = [...searchKeys]
+module.exports.searchKeys = [...searchKeys];

@@ -7,7 +7,10 @@ const commonValidation = require("./CommonValidation");
  * create new document
  */
 const create = {
-  body: Joi.object().keys({ taxName: Joi.string().lowercase().required() }),
+  body: Joi.object().keys({
+    taxName: Joi.string().lowercase().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
 };
 
 /**
@@ -17,7 +20,10 @@ const update = {
   params: Joi.object().keys({
     id: Joi.required().custom(commonValidation.objectId),
   }),
-  body: Joi.object().keys({ taxName: Joi.string().lowercase().required() }),
+  body: Joi.object().keys({
+    taxName: Joi.string().lowercase().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
 };
 
 /**

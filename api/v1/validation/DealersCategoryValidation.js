@@ -12,6 +12,7 @@ const create = {
     investAmount: Joi.number().required(),
     numberOfOrders: Joi.number().required(),
     deliveryPercentage: Joi.number().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -27,6 +28,7 @@ const update = {
     investAmount: Joi.number().required(),
     numberOfOrders: Joi.number().required(),
     deliveryPercentage: Joi.number().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

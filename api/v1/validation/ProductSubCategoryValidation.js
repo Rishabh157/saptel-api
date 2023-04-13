@@ -13,6 +13,7 @@ const create = {
     parentCategory: Joi.string().custom(commonValidation.objectId).required(),
     applicableTaxes: Joi.string().custom(commonValidation.objectId).required(),
     hsnCode: Joi.string().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -29,6 +30,7 @@ const update = {
     parentCategory: Joi.string().custom(commonValidation.objectId).required(),
     applicableTaxes: Joi.string().custom(commonValidation.objectId).required(),
     hsnCode: Joi.string().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
