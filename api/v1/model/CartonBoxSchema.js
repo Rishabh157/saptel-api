@@ -36,6 +36,7 @@ const CartonBoxSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

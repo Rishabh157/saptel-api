@@ -12,6 +12,7 @@ const create = {
       productName: Joi.string().lowercase().required(),
       quantity: Joi.number().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -27,6 +28,7 @@ const update = {
       productName: Joi.string().lowercase().required(),
       quantity: Joi.number().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

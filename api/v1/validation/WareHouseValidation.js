@@ -36,6 +36,7 @@ const create = {
       mobileNumber: Joi.number().required(),
       landLine: Joi.number().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -75,6 +76,7 @@ const update = {
       mobileNumber: Joi.number().required(),
       landLine: Joi.number().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

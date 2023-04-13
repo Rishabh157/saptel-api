@@ -3,6 +3,7 @@ const StateSchema = new mongoose.Schema(
   {
     stateName: { type: String, required: true, trim: true, lowercase: true },
     countryId: { type: String, required: true, trim: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -19,4 +20,4 @@ const StateSchema = new mongoose.Schema(
 
 const searchKeys = ["stateName", "countryId"];
 module.exports = mongoose.model("State", StateSchema);
-module.exports.searchKeys = [...searchKeys]
+module.exports.searchKeys = [...searchKeys];

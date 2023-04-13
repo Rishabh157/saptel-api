@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const ProductGroupSchema = new mongoose.Schema(
   {
     groupName: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

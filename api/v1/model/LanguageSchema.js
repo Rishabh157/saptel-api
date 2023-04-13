@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const LanguageSchema = new mongoose.Schema(
   {
     languageName: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

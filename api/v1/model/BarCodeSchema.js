@@ -3,6 +3,7 @@ const BarCodeSchema = new mongoose.Schema(
   {
     productGroup: { type: String, required: true, trim: true },
     quantity: { type: Number, required: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

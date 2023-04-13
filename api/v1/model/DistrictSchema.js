@@ -4,6 +4,7 @@ const DistrictSchema = new mongoose.Schema(
     districtName: { type: String, required: true, trim: true, lowercase: true },
     stateId: { type: String, required: true, trim: true },
     countryId: { type: String, required: true, trim: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -20,4 +21,4 @@ const DistrictSchema = new mongoose.Schema(
 
 const searchKeys = ["districtName", "stateId", "countryId"];
 module.exports = mongoose.model("District", DistrictSchema);
-module.exports.searchKeys = [...searchKeys]
+module.exports.searchKeys = [...searchKeys];

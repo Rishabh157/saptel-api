@@ -3,6 +3,7 @@ const ProductCategorySchema = new mongoose.Schema(
   {
     categoryCode: { type: String, required: true, trim: true, lowercase: true },
     categoryName: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

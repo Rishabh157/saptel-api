@@ -34,6 +34,7 @@ const create = {
       question: Joi.string().required(),
       answer: Joi.string().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -71,6 +72,7 @@ const update = {
       question: Joi.string().required(),
       answer: Joi.string().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

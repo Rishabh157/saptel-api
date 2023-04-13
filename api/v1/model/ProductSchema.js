@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 const ProductSchema = new mongoose.Schema(
   {
     productCode: { type: String, required: true, trim: true, lowercase: true },
@@ -7,13 +7,13 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true
+      lowercase: true,
     },
     productSubCategory: {
       type: String,
       required: true,
       trim: true,
-      lowercase: true
+      lowercase: true,
     },
     productGroup: { type: String, required: true, trim: true, lowercase: true },
     productWeight: { type: Number, required: true, trim: true },
@@ -21,21 +21,21 @@ const ProductSchema = new mongoose.Schema(
       type: {
         height: {
           type: Number,
-          required: true
+          required: true,
         },
 
         weight: {
           type: Number,
-          required: true
+          required: true,
         },
 
         depth: {
           type: Number,
-          required: true
-        }
+          required: true,
+        },
       },
 
-      required: true
+      required: true,
     },
     productImage: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true, lowercase: true },
@@ -46,16 +46,16 @@ const ProductSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true
+            lowercase: true,
           },
 
           itemQuantity: {
             type: Number,
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       ],
-      required: true
+      required: true,
     },
     tax: {
       type: [
@@ -64,16 +64,16 @@ const ProductSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true
+            lowercase: true,
           },
 
           taxPercent: {
             type: Number,
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       ],
-      required: true
+      required: true,
     },
     faq: {
       type: [
@@ -82,18 +82,18 @@ const ProductSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true
+            lowercase: true,
           },
 
           answer: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true
-          }
-        }
+            lowercase: true,
+          },
+        },
       ],
-      required: true
+      required: true,
     },
     video: {
       type: [
@@ -102,17 +102,17 @@ const ProductSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true
+            lowercase: true,
           },
 
           videoLink: {
             type: String,
             required: true,
-            trim: true
-          }
-        }
+            trim: true,
+          },
+        },
       ],
-      required: true
+      required: true,
     },
     callScript: {
       type: [
@@ -121,49 +121,49 @@ const ProductSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            lowercase: true
+            lowercase: true,
           },
 
           script: {
             type: String,
             required: true,
             trim: true,
-            lowercase: true
-          }
-        }
+            lowercase: true,
+          },
+        },
       ],
-      required: true
+      required: true,
     },
-
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isActive: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
-)
+);
 
 const searchKeys = [
-  'productCode',
-  'productName',
-  'productCategory',
-  'productSubCategory',
-  'productGroup',
-  'productWeight',
-  'dimension',
-  'productImage',
-  'description',
-  'item',
-  'tax',
-  'faq',
-  'video',
-  'callScript'
-]
-module.exports = mongoose.model('Product', ProductSchema)
-module.exports.searchKeys = [...searchKeys]
+  "productCode",
+  "productName",
+  "productCategory",
+  "productSubCategory",
+  "productGroup",
+  "productWeight",
+  "dimension",
+  "productImage",
+  "description",
+  "item",
+  "tax",
+  "faq",
+  "video",
+  "callScript",
+];
+module.exports = mongoose.model("Product", ProductSchema);
+module.exports.searchKeys = [...searchKeys];

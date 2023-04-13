@@ -7,6 +7,7 @@ const AttributesSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -23,4 +24,4 @@ const AttributesSchema = new mongoose.Schema(
 
 const searchKeys = ["attributeName"];
 module.exports = mongoose.model("Attributes", AttributesSchema);
-module.exports.searchKeys = [...searchKeys]
+module.exports.searchKeys = [...searchKeys];

@@ -3,6 +3,7 @@ const InventoriesSchema = new mongoose.Schema(
   {
     packaging: { type: String, required: true, trim: true },
     barCode: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

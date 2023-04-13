@@ -1,7 +1,7 @@
-const Joi = require('joi')
-Joi.joiDate = require('@joi/date')(Joi)
-Joi.joiObjectId = require('joi-objectid')(Joi)
-const commonValidation = require('./CommonValidation')
+const Joi = require("joi");
+Joi.joiDate = require("@joi/date")(Joi);
+Joi.joiObjectId = require("joi-objectid")(Joi);
+const commonValidation = require("./CommonValidation");
 //-------------------------------------------------------------------------------------
 
 /**
@@ -16,27 +16,29 @@ const createValid = {
     userName: Joi.string().lowercase().required(),
     password: Joi.string().required(),
     confirmPassword: Joi.string()
-      .valid(Joi.ref('password'))
-      .label('Password and confirm password does not match. :')
-      .required()
-  })
-}
+      .valid(Joi.ref("password"))
+      .label("Password and confirm password does not match. :")
+      .required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
 
 /**
  * update
  */
 const updateValid = {
   params: Joi.object().keys({
-    id: Joi.custom(commonValidation.objectId).required()
+    id: Joi.custom(commonValidation.objectId).required(),
   }),
   body: Joi.object().keys({
     firstName: Joi.string().lowercase().required(),
     lastName: Joi.string().lowercase().required(),
     email: Joi.string().lowercase().required(),
     mobile: Joi.string().custom(commonValidation.indianMobile).required(), //
-    userName: Joi.string().lowercase().required()
-  })
-}
+    userName: Joi.string().lowercase().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
 
 /**
  * filter pagination
@@ -44,43 +46,43 @@ const updateValid = {
 const getAllValid = {
   body: Joi.object().keys({
     params: Joi.array().items(Joi.string().required()),
-    searchValue: Joi.string().allow(''),
+    searchValue: Joi.string().allow(""),
     dateFilter: Joi.object()
       .keys({
-        startDate: Joi.string().custom(commonValidation.dateFormat).allow(''),
-        endDate: Joi.string().custom(commonValidation.dateFormat).allow(''),
-        dateFilterKey: Joi.string().allow('').optional()
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow("").optional(),
       })
       .default({}),
     rangeFilterBy: Joi.object()
       .keys({
-        rangeFilterKey: Joi.string().allow(''),
-        rangeInitial: Joi.string().allow(''),
-        rangeEnd: Joi.string().allow('')
+        rangeFilterKey: Joi.string().allow(""),
+        rangeInitial: Joi.string().allow(""),
+        rangeEnd: Joi.string().allow(""),
       })
       .default({})
       .optional(),
-    orderBy: Joi.string().allow(''),
-    orderByValue: Joi.number().valid(1, -1).allow(''),
+    orderBy: Joi.string().allow(""),
+    orderByValue: Joi.number().valid(1, -1).allow(""),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     filterBy: Joi.array().items(
       Joi.object().keys({
-        fieldName: Joi.string().allow(''),
+        fieldName: Joi.string().allow(""),
         value: Joi.alternatives().try(
-          Joi.string().allow(''),
-          Joi.number().allow(''),
-          Joi.boolean().allow(''),
+          Joi.string().allow(""),
+          Joi.number().allow(""),
+          Joi.boolean().allow(""),
           Joi.array().items(Joi.string()).default([]),
           Joi.array().items(Joi.number()).default([]),
           Joi.array().items(Joi.boolean()).default([]),
           Joi.array().default([])
-        )
+        ),
       })
     ),
-    isPaginationRequired: Joi.boolean().default(true).optional()
-  })
-}
+    isPaginationRequired: Joi.boolean().default(true).optional(),
+  }),
+};
 
 /**
  * get either all data or single document
@@ -90,28 +92,28 @@ const get = {
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
       mobile: Joi.string().custom(commonValidation.indianMobile).optional(),
-      email: Joi.string().optional()
+      email: Joi.string().optional(),
     })
-    .optional()
-}
+    .optional(),
+};
 
 /**
  * delete a document
  */
 const deleteDocument = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId).required()
-  })
-}
+    id: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
 
 /**
  * change status of document
  */
 const changeStatus = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId).required()
-  })
-}
+    id: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
 
 /**
  * login
@@ -119,10 +121,10 @@ const changeStatus = {
 const loginValid = {
   body: Joi.object()
     .keys({
-      mobile: Joi.string().custom(commonValidation.indianMobile).required()
+      mobile: Joi.string().custom(commonValidation.indianMobile).required(),
     })
-    .required()
-}
+    .required(),
+};
 
 /**
  * verify otp
@@ -130,10 +132,10 @@ const loginValid = {
 const verifyOtpValid = {
   body: Joi.object()
     .keys({
-      otp: Joi.string().required()
+      otp: Joi.string().required(),
     })
-    .required()
-}
+    .required(),
+};
 
 module.exports = {
   createValid,
@@ -143,5 +145,5 @@ module.exports = {
   loginValid,
   get,
   deleteDocument,
-  changeStatus
-}
+  changeStatus,
+};

@@ -14,6 +14,7 @@ const create = {
     itemCategory: Joi.string().required(),
     itemSubCategory: Joi.string().required(),
     itemImage: Joi.string().uri().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -31,6 +32,7 @@ const update = {
     itemCategory: Joi.string().required(),
     itemSubCategory: Joi.string().required(),
     itemImage: Joi.string().uri().required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

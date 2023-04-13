@@ -16,6 +16,7 @@ const create = {
       rate: Joi.number().required(),
       quantity: Joi.number().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -35,6 +36,7 @@ const update = {
       rate: Joi.number().required(),
       quantity: Joi.number().required(),
     }),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

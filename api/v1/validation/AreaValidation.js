@@ -14,6 +14,7 @@ const create = {
     districtId: Joi.string().custom(commonValidation.objectId).required(),
     stateId: Joi.string().custom(commonValidation.objectId).required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -31,6 +32,7 @@ const update = {
     districtId: Joi.string().custom(commonValidation.objectId).required(),
     stateId: Joi.string().custom(commonValidation.objectId).required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

@@ -5,8 +5,9 @@ const AttributesGroupSchema = new mongoose.Schema(
     attributes: {
       type: [String],
       required: true,
-      minlength: 1
+      minlength: 1,
     },
+    companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -23,4 +24,4 @@ const AttributesGroupSchema = new mongoose.Schema(
 
 const searchKeys = ["groupeName", "attributes"];
 module.exports = mongoose.model("AttributesGroup", AttributesGroupSchema);
-module.exports.searchKeys = [...searchKeys]
+module.exports.searchKeys = [...searchKeys];
