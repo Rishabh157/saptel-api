@@ -121,7 +121,8 @@ const changeStatus = {
 const loginValid = {
   body: Joi.object()
     .keys({
-      mobile: Joi.string().custom(commonValidation.indianMobile).required(),
+      email: Joi.string().required(),
+      password: Joi.string().required(),
     })
     .required(),
 };
