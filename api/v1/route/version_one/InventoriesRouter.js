@@ -19,6 +19,17 @@ router.get(
   validate(inventoriesValidation.get),
   inventoriesController.get
 );
+
+/**
+ * get one document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(inventoriesValidation.getDocument),
+  inventoriesController.getById
+);
 /**
  * get all inventories pagination filter
  */

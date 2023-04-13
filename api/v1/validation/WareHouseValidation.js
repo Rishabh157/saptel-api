@@ -136,7 +136,14 @@ const get = {
     })
     .optional(),
 };
-
+/**
+ * get a document
+ */
+const getDocument = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 /**
  * delete a document
  */
@@ -161,4 +168,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getDocument,
 };

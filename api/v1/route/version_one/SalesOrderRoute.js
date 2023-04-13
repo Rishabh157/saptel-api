@@ -19,6 +19,17 @@ router.get(
   validate(salesOrderValidation.get),
   salesOrderController.get
 );
+
+/**
+ * get one document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(salesOrderValidation.getDocument),
+  salesOrderController.getById
+);
 /**
  * get all salesOrder pagination filter
  */
