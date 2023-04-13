@@ -1,72 +1,83 @@
-const router = require('express').Router()
-const itemController = require('../../controller/item/ItemController')
-const validate = require('../../middleware/validate')
-const itemValidation = require('../../validation/ItemValidation')
-const { accessModuleCheck } = require('../../middleware/accessModuleCheck')
-const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
+const router = require("express").Router();
+const itemController = require("../../controller/item/ItemController");
+const validate = require("../../middleware/validate");
+const itemValidation = require("../../validation/ItemValidation");
+const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
  * get one document (if query) / all documents
  */
 router.get(
-  '/',
+  "/",
   accessModuleCheck,
   authCheckMiddleware,
   validate(itemValidation.get),
   itemController.get
-)
+);
+
+/**
+ * get one document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(itemValidation.getDocument),
+  itemController.getById
+);
 /**
  * get all item pagination filter
  */
 
 router.post(
-  '/',
+  "/",
   accessModuleCheck,
   authCheckMiddleware,
   validate(itemValidation.getAllFilter),
   itemController.allFilterPagination
-)
+);
 
 /**
  * create new document
  */
 router.post(
-  '/add',
+  "/add",
   accessModuleCheck,
   authCheckMiddleware,
   validate(itemValidation.create),
   itemController.add
-)
+);
 /**
  * update document
  */
 router.put(
-  '/:id',
+  "/:id",
   accessModuleCheck,
   authCheckMiddleware,
   validate(itemValidation.update),
   itemController.update
-)
+);
 /**
  * update status
  */
 router.put(
-  '/status-change/:id',
+  "/status-change/:id",
   accessModuleCheck,
   authCheckMiddleware,
   validate(itemValidation.changeStatus),
   itemController.statusChange
-)
+);
 /**
  * delete document
  */
 router.delete(
-  '/:id',
+  "/:id",
   accessModuleCheck,
   authCheckMiddleware,
   validate(itemValidation.deleteDocument),
   itemController.deleteDocument
-)
+);
 
-module.exports = router
+module.exports = router;

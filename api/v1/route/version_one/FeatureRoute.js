@@ -14,7 +14,7 @@ const {
  */
 router.get(
   "/",
-  //   accessModuleCheck,
+  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.get),
   featureController.get
@@ -26,7 +26,7 @@ router.get(
 
 router.get(
   "/:id",
-  //   accessModuleCheck,
+  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.getDocument),
   featureController.getById
