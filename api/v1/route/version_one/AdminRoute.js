@@ -46,7 +46,7 @@ router.post(
  */
 router.post(
   "/login",
-  // accessModuleCheck,
+  accessModuleCheck,
   validate(adminValidation.loginValid),
   adminController.login
 );

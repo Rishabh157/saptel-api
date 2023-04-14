@@ -94,10 +94,10 @@ exports.add = async (req, res) => {
  */
 exports.login = async (req, res) => {
   try {
-    let email = req.body.email;
+    let userName = req.body.userName;
     let password = req.body.password;
 
-    let dataFound = await adminService.getOneByMultiField({ email });
+    let dataFound = await adminService.getOneByMultiField({ userName });
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Admin not found.`);
     }
@@ -105,7 +105,14 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-    let { _id: userId, userType, firstName, mobile, lastName } = dataFound;
+    let {
+      _id: userId,
+      userType,
+      firstName,
+      mobile,
+      lastName,
+      email,
+    } = dataFound;
 
     let token = await tokenCreate(dataFound);
     if (!token) {
@@ -122,6 +129,7 @@ exports.login = async (req, res) => {
         fullName: `${firstName} ${lastName}`,
         email: email,
         mobile: mobile,
+        userName: userName,
       },
       status: true,
       code: null,
