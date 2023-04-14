@@ -12,7 +12,7 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 router.get(
   "/",
   accessModuleCheck,
-  // authCheckMiddleware,
+  authCheckMiddleware,
   validate(countryValidation.get),
   countryController.get
 );
@@ -34,7 +34,7 @@ router.get(
 router.post(
   "/",
   accessModuleCheck,
-  // authCheckMiddleware,
+  authCheckMiddleware,
   validate(countryValidation.getAllFilter),
   countryController.allFilterPagination
 );

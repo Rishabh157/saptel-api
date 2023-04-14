@@ -18,6 +18,16 @@ router.get(
 );
 
 /**
+ * get all state's of a country
+ */
+router.get(
+  "/get-country-state/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(stateValidation.get),
+  stateController.getStateByCountry
+);
+/**
  * get one document
  */
 router.get(

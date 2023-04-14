@@ -16,7 +16,16 @@ router.get(
   validate(districtValidation.get),
   districtController.get
 );
-
+/**
+ * get all district of a state
+ */
+router.get(
+  "/get-state-district/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(districtValidation.get),
+  districtController.getStateDistrict
+);
 /**
  * get one document
  */
@@ -44,7 +53,7 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
+  // accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.create),
   districtController.add

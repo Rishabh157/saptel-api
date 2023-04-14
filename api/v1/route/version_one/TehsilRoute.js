@@ -16,7 +16,16 @@ router.get(
   validate(tehsilValidation.get),
   tehsilController.get
 );
-
+/**
+ * get all tehsil of a district
+ */
+router.get(
+  "/get-district-tehsil/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(tehsilValidation.get),
+  tehsilController.getTehsilByDistrict
+);
 /**
  * get one document
  */

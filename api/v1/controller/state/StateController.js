@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const stateService = require("../../services/StateService");
 const { searchKeys } = require("../../model/StateSchema");
-const errorRes = require("../../../utils/resError");
+const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
 const {
@@ -288,6 +288,38 @@ exports.getById = async (req, res) => {
       isDeleted: false,
     });
 
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//get all state by country api
+exports.getStateByCountry = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+    console.log(idToBeSearch);
+    let dataExist = await stateService.findAllWithQuery({
+      countryId: idToBeSearch,
+      isDeleted: false,
+    });
+    console.log(dataExist);
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {

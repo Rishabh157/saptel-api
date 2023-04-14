@@ -16,7 +16,27 @@ router.get(
   validate(pincodeValidation.get),
   pincodeController.get
 );
+/**
+ * get all pincodes of a country
+ */
+router.get(
+  "/get-country-pincode/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(pincodeValidation.get),
+  pincodeController.getPincodeByCountry
+);
 
+/**
+ * get all pincodes of a district
+ */
+router.get(
+  "/get-district-pincode/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(pincodeValidation.get),
+  pincodeController.getPincodeByDistrict
+);
 /**
  * get one document
  */
@@ -33,7 +53,7 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
+  // accessModuleCheck,
   authCheckMiddleware,
   validate(pincodeValidation.getAllFilter),
   pincodeController.allFilterPagination
@@ -44,7 +64,7 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
+  // accessModuleCheck,
   authCheckMiddleware,
   validate(pincodeValidation.create),
   pincodeController.add
