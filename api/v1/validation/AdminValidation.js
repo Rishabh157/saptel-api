@@ -121,7 +121,7 @@ const changeStatus = {
 const loginValid = {
   body: Joi.object()
     .keys({
-      email: Joi.string().required(),
+      userName: Joi.string().required(),
       password: Joi.string().required(),
     })
     .required(),
