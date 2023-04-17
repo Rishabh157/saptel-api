@@ -1,14 +1,14 @@
-const jwt = require('jsonwebtoken')
-const config = require('../../../config/config')
-const logger = require('../../../config/logger')
-const { tokenEnum } = require('../helper/enumUtils')
+const jwt = require("jsonwebtoken");
+const config = require("../../../config/config");
+const logger = require("../../../config/logger");
+const { tokenEnum } = require("../helper/enumUtils");
 
 /**
  *
  * @param {Object} tokenData
  * @returns
  */
-exports.tokenCreate = async tokenData => {
+exports.tokenCreate = async (tokenData) => {
   var token = await jwt.sign(
     {
       Id: tokenData._id,
@@ -18,22 +18,40 @@ exports.tokenCreate = async tokenData => {
       email: tokenData.email,
       mobile: tokenData.mobile,
       userType: tokenData.userType,
-      tokenType: tokenEnum.login
+      tokenType: tokenEnum.login,
     },
     config.jwt_secret,
     {
-      expiresIn: config.jwt_expires
+      expiresIn: config.jwt_expires,
     }
-  )
-  return token
-}
-
+  );
+  return token;
+};
+exports.refreshTokenCreate = async (tokenData) => {
+  var token = await jwt.sign(
+    {
+      Id: tokenData._id,
+      userName: tokenData.userName,
+      firstName: tokenData.firstName,
+      lastName: tokenData.lastName,
+      email: tokenData.email,
+      mobile: tokenData.mobile,
+      userType: tokenData.userType,
+      tokenType: tokenEnum.login,
+    },
+    config.jwt_secret_refresh,
+    {
+      expiresIn: "1y",
+    }
+  );
+  return token;
+};
 /**
  *
  * @param {object} tokenData
  * @returns
  */
-exports.otpTokenCreate = async tokenData => {
+exports.otpTokenCreate = async (tokenData) => {
   var token = await jwt.sign(
     {
       Id: tokenData._id,
@@ -43,12 +61,12 @@ exports.otpTokenCreate = async tokenData => {
       email: tokenData.email,
       mobile: tokenData.mobile,
       userType: tokenData.userType,
-      tokenType: tokenEnum.otpverify
+      tokenType: tokenEnum.otpverify,
     },
     config.jwt_secret_otp,
     {
-      expiresIn: config.jwt_expires_otp
+      expiresIn: config.jwt_expires_otp,
     }
-  )
-  return token
-}
+  );
+  return token;
+};

@@ -128,6 +128,29 @@ const loginValid = {
 };
 
 /**
+ * changePassword
+ */
+const changePasswordValid = {
+  body: Joi.object()
+    .keys({
+      currentPassword: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      userId: Joi.string().custom(commonValidation.objectId).required(),
+    })
+    .required(),
+};
+/**
+ * refresh token
+ */
+const refreshTokenValid = {
+  body: Joi.object()
+    .keys({
+      refreshToken: Joi.string().required(),
+    })
+    .required(),
+};
+
+/**
  * verify otp
  */
 const verifyOtpValid = {
@@ -147,4 +170,6 @@ module.exports = {
   get,
   deleteDocument,
   changeStatus,
+  refreshTokenValid,
+  changePasswordValid,
 };

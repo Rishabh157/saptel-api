@@ -36,7 +36,7 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
+  // accessModuleCheck,
   validate(adminValidation.createValid),
   adminController.add
 );
@@ -46,9 +46,40 @@ router.post(
  */
 router.post(
   "/login",
-  accessModuleCheck,
+  // accessModuleCheck,
   validate(adminValidation.loginValid),
   adminController.login
+);
+
+/**
+ * logout
+ */
+router.post(
+  "/logout",
+  // accessModuleCheck,
+  authCheckMiddleware,
+  adminController.logout
+);
+
+/**
+ * change password
+ */
+router.put(
+  "/change-password",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(adminValidation.changePasswordValid),
+  adminController.changePassword
+);
+
+/**
+ * refresh token
+ */
+router.post(
+  "/refresh",
+  // accessModuleCheck,
+  validate(adminValidation.refreshTokenValid),
+  adminController.refreshToken
 );
 
 /**
