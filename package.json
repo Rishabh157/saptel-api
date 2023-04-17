@@ -4,7 +4,7 @@
   "description": "sapthrishi telmart apis",
   "main": "server.js",
   "scripts": {
-    "start": "concurrently 'redis-server --daemonize yes' 'redis-commander' 'nodemon --exec server.js'",
+    "start": "concurrently 'redis-server --daemonize yes' 'redis-commander' 'nodemon'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "codiotic technologies pvt ltd",
