@@ -13,47 +13,48 @@ exports.authCheckMiddleware = async (req, res, next) => {
     /**
      * check token exist in req body
      */
-    let isTokenExist = authHelper.checkTokenExist(req, res);
-    if (!isTokenExist || !isTokenExist.status) {
-      return res.status(isTokenExist.statusCode).send({
-        ...isTokenExist.data,
-      });
-    }
-    let token = isTokenExist.data;
-    const decoded = await jwt.verify(token, config.jwt_secret);
-    req.userData = decoded;
-    if (!req.userData || !req.userData.Id || req.userData.Id === "") {
-      throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
-    }
-    if (req.userData.tokenType !== "LOGIN") {
-      throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
-    }
-    const allRedisValue = await redisClient.keys(`${decoded}*`);
-    const redisValue = await redisClient.get(
-      decoded.Id + isTokenExist.deviceId
-    );
-    if (!redisValue) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
-    }
-    const redisAccessToken = redisValue.split("***");
-    if (isTokenExist.data !== redisAccessToken[0]) {
-      throw new ApiError(httpStatus.ok, userDetails.message);
-    }
-
-    if (
-      req.userData.userType === userEnum.superAdmin ||
-      req.userData.userType === userEnum.admin
-    ) {
-      let userDetails = await authHelper.checkAdminValid(req.userData);
-      if (!userDetails.status) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
+    let isTokenExist = authHelper.checkTokenExist(req, res, req.route.path);
+    if (req.route.path !== "/logout") {
+      if (!isTokenExist || !isTokenExist.status) {
+        return res.status(isTokenExist.statusCode).send({
+          ...isTokenExist.data,
+        });
       }
-    }
+      let token = isTokenExist.data;
+      const decoded = await jwt.verify(token, config.jwt_secret);
+      req.userData = decoded;
+      if (!req.userData || !req.userData.Id || req.userData.Id === "") {
+        throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
+      }
+      if (req.userData.tokenType !== "LOGIN") {
+        throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
+      }
+      const redisValue = await redisClient.get(
+        decoded.Id + isTokenExist.deviceId
+      );
+      if (!redisValue) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
+      }
+      const redisAccessToken = redisValue.split("***");
+      if (isTokenExist.data !== redisAccessToken[0]) {
+        throw new ApiError(httpStatus.ok, userDetails.message);
+      }
 
-    if (req.userData.userType === userEnum.user) {
-      let userDetails = await authHelper.checkUserValid(req.userData);
-      if (!userDetails.status) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
+      if (
+        req.userData.userType === userEnum.superAdmin ||
+        req.userData.userType === userEnum.admin
+      ) {
+        let userDetails = await authHelper.checkAdminValid(req.userData);
+        if (!userDetails.status) {
+          throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
+        }
+      }
+
+      if (req.userData.userType === userEnum.user) {
+        let userDetails = await authHelper.checkUserValid(req.userData);
+        if (!userDetails.status) {
+          throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
+        }
       }
     }
     next();

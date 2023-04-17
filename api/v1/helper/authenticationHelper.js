@@ -4,7 +4,7 @@ const logger = require("../../../config/logger");
 const { errorRes } = require("../../utils/resError");
 const httpStatus = require("http-status");
 
-const checkTokenExist = (req, res) => {
+const checkTokenExist = (req, res, path) => {
   if (
     !req.headers ||
     !req.headers["x-access-token"] ||
@@ -24,7 +24,7 @@ const checkTokenExist = (req, res) => {
   } else if (
     !req.headers ||
     !req.headers["device-id"] ||
-    req.headers["device-id"] === ""
+    (req.headers["device-id"] === "" && path !== "/logout")
   ) {
     return {
       data: {
@@ -40,7 +40,7 @@ const checkTokenExist = (req, res) => {
   } else {
     return {
       data: req.headers["x-access-token"].trim(),
-      deviceId: req.headers["device-id"].trim(),
+      deviceId: req.headers["device-id"].trim() || "",
       statusCode: httpStatus.OK,
       status: true,
     };
