@@ -104,64 +104,77 @@ exports.logout = async (req, res) => {
 };
 
 exports.changePassword = async (req, res) => {
-  const deviceId = req.headers["device-id"];
-  const token = req.headers["x-access-token"];
-  const { currentPassword, newPassword, userId } = req.body;
-  const decoded = await jwt.verify(token, config.jwt_secret);
-  if (decoded.Id !== userId) {
-    throw new ApiError(httpStatus.OK, `Invalid Token`);
-  }
-  const user = await adminService.getOneByMultiField({
-    _id: userId,
-    isDeleted: false,
-  }); // assuming you're using Passport.js or similar for authentication
-  let { _id, userType, firstName, mobile, lastName, email, userName } = user;
-  // Check if the current password matches the user's password
-  const isMatch = await bcrypt.compare(currentPassword, user.password);
-  if (!isMatch) {
-    throw new ApiError(httpStatus.OK, `Current password not matched`);
-  }
+  try {
+    const deviceId = req.headers["device-id"];
+    const token = req.headers["x-access-token"];
+    const { currentPassword, newPassword, userId } = req.body;
+    const decoded = await jwt.verify(token, config.jwt_secret);
+    if (decoded.Id !== userId) {
+      throw new ApiError(httpStatus.OK, `Invalid Token`);
+    }
+    const user = await adminService.getOneByMultiField({
+      _id: userId,
+      isDeleted: false,
+    }); // assuming you're using Passport.js or similar for authentication
+    let { _id, userType, firstName, mobile, lastName, email, userName } = user;
+    // Check if the current password matches the user's password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new ApiError(httpStatus.OK, `Current password not matched`);
+    }
 
-  // Hash the new password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(newPassword, salt);
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-  // Update the user's password in the database
-  user.password = hashedPassword;
-  await user.save();
-  await logOut(req, true);
-  let newToken = await tokenCreate(user);
-  if (!newToken) {
-    throw new ApiError(
-      httpStatus.OK,
-      "Something went wrong. Please try again later."
+    // Update the user's password in the database
+    user.password = hashedPassword;
+    await user.save();
+    await logOut(req, true);
+    let newToken = await tokenCreate(user);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await refreshTokenCreate(user);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    await redisClient.set(
+      userId + deviceId,
+      newToken + "***" + newRefreshToken
     );
+    const allRedisValue = await redisClient.keys(`${userId}*`);
+    return res.status(httpStatus.OK).send({
+      message: `Password change successful!`,
+      data: {
+        token: newToken,
+        refreshToken: newRefreshToken,
+        fullName: `${firstName} ${lastName}`,
+        email: email,
+        mobile: mobile,
+        userName: userName,
+      },
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
   }
-  let newRefreshToken = await refreshTokenCreate(user);
-
-  if (!newRefreshToken) {
-    throw new ApiError(
-      httpStatus.OK,
-      "Something went wrong. Please try again later."
-    );
-  }
-  await redisClient.set(userId + deviceId, newToken + "***" + newRefreshToken);
-  const allRedisValue = await redisClient.keys(`${userId}*`);
-  return res.status(httpStatus.OK).send({
-    message: `Password change successful!`,
-    data: {
-      token: newToken,
-      refreshToken: newRefreshToken,
-      fullName: `${firstName} ${lastName}`,
-      email: email,
-      mobile: mobile,
-      userName: userName,
-    },
-    status: true,
-    code: null,
-    issue: null,
-  });
 };
+
 /**
  * login
  * @param {*} req
