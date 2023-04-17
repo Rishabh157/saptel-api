@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const productCategoryService = require("../../services/ProductCategoryService");
 const { searchKeys } = require("../../model/ProductCategorySchema");
-const errorRes = require("../../../utils/resError");
+const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
 const {

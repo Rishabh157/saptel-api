@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const inventoriesService = require("../../services/InventoriesService");
 const { searchKeys } = require("../../model/InventoriesSchema");
-const errorRes = require("../../../utils/resError");
+const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
 const {

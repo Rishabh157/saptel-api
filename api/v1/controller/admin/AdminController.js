@@ -4,14 +4,20 @@ const adminService = require("../../services/AdminService");
 const bcryptjs = require("bcryptjs");
 const otpHelper = require("../otp/OtpHelper");
 const { sendMsg91Function } = require("../../helper/msgHelper");
-const { tokenCreate, otpTokenCreate } = require("../../helper/tokenCreate");
+const {
+  tokenCreate,
+  otpTokenCreate,
+  refreshTokenCreate,
+} = require("../../helper/tokenCreate");
 const { isAfter } = require("date-fns");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const { errorRes } = require("../../../utils/resError");
 const { userEnum } = require("../../helper/enumUtils");
 const bcrypt = require("bcrypt");
-
+const redisClient = require("../../../../database/redis");
+const jwt = require("jsonwebtoken");
+const { logOut } = require("../../helper/utils");
 /*********************************************************************/
 
 /**
@@ -86,6 +92,76 @@ exports.add = async (req, res) => {
 };
 /*********************************************************************/
 
+exports.logout = async (req, res) => {
+  logOut(req);
+  return res.status(httpStatus.OK).send({
+    message: `Logout successfull!`,
+    data: [],
+    status: true,
+    code: null,
+    issue: null,
+  });
+};
+
+exports.changePassword = async (req, res) => {
+  const deviceId = req.headers["device-id"];
+  const token = req.headers["x-access-token"];
+  const { currentPassword, newPassword, userId } = req.body;
+  const decoded = await jwt.verify(token, config.jwt_secret);
+  if (decoded.Id !== userId) {
+    throw new ApiError(httpStatus.OK, `Invalid Token`);
+  }
+  const user = await adminService.getOneByMultiField({
+    _id: userId,
+    isDeleted: false,
+  }); // assuming you're using Passport.js or similar for authentication
+  let { _id, userType, firstName, mobile, lastName, email, userName } = user;
+  // Check if the current password matches the user's password
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    throw new ApiError(httpStatus.OK, `Current password not matched`);
+  }
+
+  // Hash the new password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  // Update the user's password in the database
+  user.password = hashedPassword;
+  await user.save();
+  await logOut(req, true);
+  let newToken = await tokenCreate(user);
+  if (!newToken) {
+    throw new ApiError(
+      httpStatus.OK,
+      "Something went wrong. Please try again later."
+    );
+  }
+  let newRefreshToken = await refreshTokenCreate(user);
+
+  if (!newRefreshToken) {
+    throw new ApiError(
+      httpStatus.OK,
+      "Something went wrong. Please try again later."
+    );
+  }
+  await redisClient.set(userId + deviceId, newToken + "***" + newRefreshToken);
+  const allRedisValue = await redisClient.keys(`${userId}*`);
+  return res.status(httpStatus.OK).send({
+    message: `Password change successful!`,
+    data: {
+      token: newToken,
+      refreshToken: newRefreshToken,
+      fullName: `${firstName} ${lastName}`,
+      email: email,
+      mobile: mobile,
+      userName: userName,
+    },
+    status: true,
+    code: null,
+    issue: null,
+  });
+};
 /**
  * login
  * @param {*} req
@@ -96,6 +172,7 @@ exports.login = async (req, res) => {
   try {
     let userName = req.body.userName;
     let password = req.body.password;
+    let deviceId = req.headers["device-id"];
 
     let dataFound = await adminService.getOneByMultiField({ userName });
     if (!dataFound) {
@@ -121,11 +198,22 @@ exports.login = async (req, res) => {
         "Something went wrong. Please try again later."
       );
     }
+    let refreshToken = await refreshTokenCreate(dataFound);
+    if (!refreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    await redisClient.set(userId + deviceId, token + "***" + refreshToken);
 
     return res.status(httpStatus.OK).send({
       message: `Login successful!`,
       data: {
         token: token,
+        refreshToken: refreshToken,
+        userId: userId,
         fullName: `${firstName} ${lastName}`,
         email: email,
         mobile: mobile,
@@ -145,7 +233,70 @@ exports.login = async (req, res) => {
   }
 };
 /*********************************************************************/
+exports.refreshToken = async (req, res) => {
+  try {
+    let refreshTokenValue = req.body.refreshToken;
+    let deviceId = req.headers["device-id"];
 
+    const decoded = await jwt.verify(
+      refreshTokenValue,
+      config.jwt_secret_refresh
+    );
+    if (!decoded) {
+      throw new ApiError(httpStatus.OK, `Invalid refreshToken`);
+    }
+
+    let userData = await adminService.getOneByMultiField({
+      _id: decoded.Id,
+      isDeleted: false,
+    });
+    if (!userData) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Invalid token User not found."
+      );
+    }
+
+    let newToken = await tokenCreate(userData);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await refreshTokenCreate(userData);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    await redisClient.set(
+      decoded.Id + deviceId,
+      newToken + "***" + newRefreshToken
+    );
+
+    return res.status(httpStatus.OK).send({
+      message: `successfull!`,
+      data: {
+        token: newToken,
+        refreshToken: newRefreshToken,
+      },
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 /**
  * verify otp function
  * @param {*} req

@@ -4,6 +4,7 @@
   "description": "sapthrishi telmart apis",
   "main": "server.js",
   "scripts": {
+    "start": "concurrently 'redis-server --daemonize yes' 'redis-commander' 'nodemon --exec ts-node server.js'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "codiotic technologies pvt ltd",
@@ -15,6 +16,7 @@
     "bcrypt": "^5.1.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
+    "concurrently": "^8.0.1",
     "cors": "^2.8.5",
     "date-fns": "^2.29.3",
     "dotenv": "^16.0.3",
@@ -36,6 +38,7 @@
     "node-path": "^0.0.3",
     "nodemailer": "^6.9.1",
     "nodemon": "^2.0.22",
+    "redis": "^4.6.5",
     "request": "^2.88.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.2",
