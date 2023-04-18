@@ -3,8 +3,9 @@ const userService = require("../services/UserService");
 const logger = require("../../../config/logger");
 const { errorRes } = require("../../utils/resError");
 const httpStatus = require("http-status");
+const redisClient = require("../../../database/redis");
 
-const checkTokenExist = (req, res, path) => {
+const checkTokenExist = (req, res) => {
   if (
     !req.headers ||
     !req.headers["x-access-token"] ||
@@ -21,10 +22,50 @@ const checkTokenExist = (req, res, path) => {
       statusCode: httpStatus.UNAUTHORIZED,
       status: false,
     };
-  } else if (
-    !req.headers ||
-    !req.headers["device-id"] ||
-    (req.headers["device-id"] === "" && path !== "/logout")
+  } else {
+    return {
+      data: req.headers["x-access-token"].trim(),
+      statusCode: httpStatus.OK,
+      status: true,
+    };
+  }
+};
+
+const redisCheck = async (decoded, deviceId, token) => {
+  try {
+    const redisValue = await redisClient.get(decoded.Id + deviceId);
+    if (!redisValue) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
+    }
+    const redisAccessToken = redisValue.split("***");
+    if (token !== redisAccessToken[0]) {
+      throw new ApiError(httpStatus.ok, "Invalid Token");
+    }
+    return {
+      message: "Ok",
+      data: redisAccessToken,
+      status: true,
+    };
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message } = errData.resData;
+    return {
+      message: message,
+      code: "AUTHENTICATION_FAILED",
+      issue: message.toUpperCase().replace(/ /gi, "_"),
+      data: null,
+      status: false,
+    };
+  }
+};
+
+const checkDeviceId = (req, res) => {
+  if (
+    req.route.path !== "/logout" &&
+    (!req.headers ||
+      !req.headers["device-id"] ||
+      req.headers["device-id"] === "")
   ) {
     return {
       data: {
@@ -39,8 +80,7 @@ const checkTokenExist = (req, res, path) => {
     };
   } else {
     return {
-      data: req.headers["x-access-token"].trim(),
-      deviceId: req.headers["device-id"].trim() || "",
+      deviceId: req.headers["device-id"] ? req.headers["device-id"].trim() : "",
       statusCode: httpStatus.OK,
       status: true,
     };
@@ -143,4 +183,6 @@ module.exports = {
   checkTokenExist,
   checkAdminValid,
   checkUserValid,
+  redisCheck,
+  checkDeviceId,
 };
