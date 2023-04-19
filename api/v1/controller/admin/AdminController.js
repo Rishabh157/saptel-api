@@ -202,6 +202,7 @@ exports.login = async (req, res) => {
       mobile,
       lastName,
       email,
+      companyId,
     } = dataFound;
 
     let token = await tokenCreate(dataFound);
@@ -231,6 +232,7 @@ exports.login = async (req, res) => {
         email: email,
         mobile: mobile,
         userName: userName,
+        companyId: companyId,
       },
       status: true,
       code: null,
