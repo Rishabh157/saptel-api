@@ -1,9 +1,23 @@
 const mongoose = require("mongoose");
 const AttributesGroupSchema = new mongoose.Schema(
   {
-    groupeName: { type: String, required: true, trim: true, lowercase: true },
+    groupName: { type: String, required: true, trim: true, lowercase: true },
     attributes: {
-      type: [String],
+      type: [
+        {
+          label: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+          value: {
+            type: String,
+            required: true,
+            trim: true,
+          },
+        },
+      ],
       required: true,
       minlength: 1,
     },

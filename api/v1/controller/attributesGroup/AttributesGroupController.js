@@ -20,12 +20,12 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { groupeName, attributes } = req.body;
+    let { groupName, attributes } = req.body;
     /**
      * check duplicate exist
      */
     let dataExist = await attributesGroupService.isExists([
-      { groupeName },
+      { groupName },
       //   { attributes },
     ]);
     if (dataExist.exists && dataExist.existsSummary) {
@@ -60,7 +60,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { groupeName, attributes } = req.body;
+    let { groupName, attributes } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -166,7 +166,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["groupeName"];
+    let numberFileds = ["groupName"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
