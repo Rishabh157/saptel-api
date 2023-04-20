@@ -89,7 +89,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      groupeName: Joi.string(),
+      groupName: Joi.string(),
       attributes: Joi.array(),
     })
     .optional(),
