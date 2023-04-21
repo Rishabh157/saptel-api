@@ -24,7 +24,7 @@ const ProductSchema = new mongoose.Schema(
           required: true,
         },
 
-        weight: {
+        width: {
           type: Number,
           required: true,
         },

@@ -18,7 +18,7 @@ const create = {
     productWeight: Joi.number().required(),
     dimension: Joi.object().keys({
       height: Joi.number().required(),
-      weight: Joi.number().required(),
+      width: Joi.number().required(),
       depth: Joi.number().required(),
     }),
     productImage: Joi.string().uri().required(),
@@ -65,7 +65,7 @@ const update = {
     productWeight: Joi.number().required(),
     dimension: Joi.object().keys({
       height: Joi.number().required(),
-      weight: Joi.number().required(),
+      width: Joi.number().required(),
       depth: Joi.number().required(),
     }),
     productImage: Joi.string().uri().required(),

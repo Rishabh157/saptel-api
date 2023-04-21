@@ -18,7 +18,7 @@ const CartonBoxSchema = new mongoose.Schema(
           required: true,
         },
 
-        weight: {
+        width: {
           type: Number,
           required: true,
         },
