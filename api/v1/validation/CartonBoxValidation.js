@@ -30,7 +30,7 @@ const update = {
   body: Joi.object().keys({
     boxName: Joi.string().lowercase().required(),
     innerItemCount: Joi.number().required(),
-    dimension: Joi.array().items({
+    dimension: Joi.object().keys({
       height: Joi.number().required(),
       width: Joi.number().required(),
       depth: Joi.number().required(),
