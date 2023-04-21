@@ -321,6 +321,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await attributesGroupService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+
     let deleted = await attributesGroupService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

@@ -6,6 +6,7 @@ const attributesService = require("../../services/AttributesService");
 const { searchKeys } = require("../../model/AttributesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const AttributesGroup = require("../../model/AttributesGroupSchema");
 
 const {
   getSearchQuery,
@@ -16,6 +17,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -304,6 +306,7 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
@@ -311,6 +314,27 @@ exports.deleteDocument = async (req, res) => {
     if (!(await attributesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    const groupsToUpdate = await AttributesGroup.find({
+      isDeleted: false,
+      isActive: true,
+      attributes: {
+        $elemMatch: {
+          value: new mongoose.Types.ObjectId(_id),
+        },
+      },
+    });
+    const updateOperations = groupsToUpdate.map((group) => ({
+      updateOne: {
+        filter: { _id: group._id },
+        update: {
+          $pull: { attributes: { value: new mongoose.Types.ObjectId(_id) } },
+        },
+      },
+    }));
+
+    // Execute the update operations in bulk
+    await AttributesGroup.bulkWrite(updateOperations);
+
     let deleted = await attributesService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

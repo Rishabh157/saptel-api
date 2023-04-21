@@ -90,7 +90,7 @@ const defaultRoutes = [
     route: areaRoute,
   },
   {
-    path: "/product-code",
+    path: "/product-category",
     route: productCategoryRoute,
   },
   {
