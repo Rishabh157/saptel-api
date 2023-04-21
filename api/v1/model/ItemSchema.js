@@ -4,12 +4,6 @@ const ItemSchema = new mongoose.Schema(
     itemCode: { type: String, required: true, trim: true },
     itemName: { type: String, required: true, trim: true, lowercase: true },
     itemWeight: { type: Number, required: true },
-    itemCategory: { type: String, required: true, trim: true },
-    itemSubCategory: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     itemImage: { type: String, required: true, trim: true, lowercase: true },
     companyId: { type: String, required: true, trim: true },
     isDeleted: {
@@ -31,7 +25,6 @@ const searchKeys = [
   "itemName",
   "itemWeight",
   "itemCategory",
-  "itemSubCategory",
   "itemImage",
 ];
 module.exports = mongoose.model("Item", ItemSchema);
