@@ -60,7 +60,10 @@ exports.update = async (req, res) => {
     let { attributeName } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await attributesService.isExists([{ attributeName }]);
+    let dataExist = await attributesService.isExists(
+      [{ attributeName }],
+      idToBeSearch
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }

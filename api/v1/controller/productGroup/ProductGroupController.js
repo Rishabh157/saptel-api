@@ -58,7 +58,13 @@ exports.update = async (req, res) => {
     let { groupName } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await productGroupService.isExists(
+      [{ groupName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await productGroupService.getOneByMultiField({
       _id: idToBeSearch,

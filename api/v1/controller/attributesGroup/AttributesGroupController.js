@@ -63,10 +63,13 @@ exports.update = async (req, res) => {
     let { groupName, attributes } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await attributesGroupService.isExists([
-      { groupName },
-      //   { attributes },
-    ]);
+    let dataExist = await attributesGroupService.isExists(
+      [
+        { groupName },
+        //   { attributes },
+      ],
+      idToBeSearch
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
