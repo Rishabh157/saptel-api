@@ -58,7 +58,10 @@ exports.update = async (req, res) => {
     let { taxName } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await taxesService.isExists([{ taxName }], idToBeSearch);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await taxesService.getOneByMultiField({
       _id: idToBeSearch,
