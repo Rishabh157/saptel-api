@@ -20,14 +20,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      itemCode,
-      itemName,
-      itemWeight,
-      itemCategory,
-      itemSubCategory,
-      itemImage,
-    } = req.body;
+    let { itemCode, itemName, itemWeight, itemImage } = req.body;
     /**
      * check duplicate exist
      */
@@ -62,17 +55,13 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let {
-      itemCode,
-      itemName,
-      itemWeight,
-      itemCategory,
-      itemSubCategory,
-      itemImage,
-    } = req.body;
+    let { itemCode, itemName, itemWeight, itemImage } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await itemService.isExists([{ itemCode }, { itemName }]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await itemService.getOneByMultiField({ _id: idToBeSearch });
     if (!datafound) {
@@ -173,13 +162,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "itemCode",
-      "itemName",
-      "itemCategory",
-      "itemSubCategory",
-      "itemImage",
-    ];
+    let numberFileds = ["itemCode", "itemName", "itemImage"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {

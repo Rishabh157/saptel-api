@@ -63,7 +63,13 @@ exports.update = async (req, res) => {
     let { groupName, attributes } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await attributesGroupService.isExists([
+      { groupName },
+      //   { attributes },
+    ]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await attributesGroupService.getOneByMultiField({
       _id: idToBeSearch,
