@@ -58,7 +58,13 @@ exports.update = async (req, res) => {
     let { boxName, innerItemCount, dimension, boxWeight } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await cartonBoxService.isExists(
+      [{ boxName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await cartonBoxService.getOneByMultiField({
       _id: idToBeSearch,
