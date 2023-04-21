@@ -63,7 +63,13 @@ exports.update = async (req, res) => {
     let { categoryCode, categoryName } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await productCategoryService.isExists(
+      [{ categoryCode }, { categoryName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await productCategoryService.getOneByMultiField({
       _id: idToBeSearch,

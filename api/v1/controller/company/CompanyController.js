@@ -32,7 +32,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await companyService.isExists([]);
+    let dataExist = await companyService.isExists([{ companyName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -74,7 +74,13 @@ exports.update = async (req, res) => {
     } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await companyService.isExists(
+      [{ companyName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await companyService.getOneByMultiField({
       _id: idToBeSearch,
