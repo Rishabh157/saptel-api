@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const AsrRequestSchema = new mongoose.Schema(
   {
-    arsDetails: {
+    asrDetails: {
       type: [
         {
           productName: {
@@ -10,6 +10,7 @@ const AsrRequestSchema = new mongoose.Schema(
             lowercase: true,
             required: true,
           },
+          productId: { type: String, required: true, trim: true },
           quantity: {
             type: Number,
             required: true,
@@ -33,6 +34,6 @@ const AsrRequestSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["productName", "quantity"];
+const searchKeys = ["asrDetails.productName", "asrDetails.quantity"];
 module.exports = mongoose.model("AsrRequest", AsrRequestSchema);
 module.exports.searchKeys = [...searchKeys];
