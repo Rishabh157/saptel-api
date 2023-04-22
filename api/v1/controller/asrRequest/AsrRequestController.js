@@ -20,7 +20,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { arsDetails } = req.body;
+    let { asrDetails } = req.body;
     /**
      * check duplicate exist
      */
@@ -55,7 +55,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { arsDetails } = req.body;
+    let { asrDetails } = req.body;
     let datafound = await asrRequestService.getOneByMultiField({
       _id: idToBeSearch,
     });
