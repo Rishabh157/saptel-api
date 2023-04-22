@@ -6,6 +6,7 @@ const productGroupService = require("../../services/ProductGroupService");
 const { searchKeys } = require("../../model/ProductGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const AsrRequest = require("../../model/AsrRequestSchema");
 
 const {
   getSearchQuery,
@@ -16,6 +17,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -320,6 +322,22 @@ exports.deleteDocument = async (req, res) => {
     if (!(await productGroupService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    const canDeleted = await AsrRequest.find({
+      isDeleted: false,
+      isActive: true,
+      asrDetails: {
+        $elemMatch: {
+          productId: new mongoose.Types.ObjectId(_id),
+        },
+      },
+    });
+    if (canDeleted.length) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Product Group can't be deleted because it is currently used in other services"
+      );
+    }
+
     let deleted = await productGroupService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
