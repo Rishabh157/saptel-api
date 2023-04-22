@@ -56,6 +56,7 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let { asrDetails } = req.body;
+    let idToBeSearch = req.params.id;
     let datafound = await asrRequestService.getOneByMultiField({
       _id: idToBeSearch,
     });
