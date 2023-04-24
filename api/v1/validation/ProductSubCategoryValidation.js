@@ -10,14 +10,8 @@ const create = {
   body: Joi.object().keys({
     subCategoryCode: Joi.string().required(),
     subCategoryName: Joi.string().lowercase().required(),
-    parentCategory: Joi.object().keys({
-      label: Joi.string().required(),
-      value: Joi.string().custom(commonValidation.objectId).required(),
-    }),
-    applicableTaxes: Joi.object().keys({
-      label: Joi.string().required(),
-      value: Joi.string().custom(commonValidation.objectId).required(),
-    }),
+    parentCategory: Joi.string().custom(commonValidation.objectId).required(),
+    applicableTaxes: Joi.string().custom(commonValidation.objectId).required(),
     hsnCode: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -33,14 +27,8 @@ const update = {
   body: Joi.object().keys({
     subCategoryCode: Joi.string().required(),
     subCategoryName: Joi.string().lowercase().required(),
-    parentCategory: Joi.object().keys({
-      label: Joi.string().required(),
-      value: Joi.string().custom(commonValidation.objectId).required(),
-    }),
-    applicableTaxes: Joi.object().keys({
-      label: Joi.string().required(),
-      value: Joi.string().custom(commonValidation.objectId).required(),
-    }),
+    parentCategory: Joi.string().custom(commonValidation.objectId).required(),
+    applicableTaxes: Joi.string().custom(commonValidation.objectId).required(),
     hsnCode: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

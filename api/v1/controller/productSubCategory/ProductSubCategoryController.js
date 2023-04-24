@@ -6,6 +6,7 @@ const productSubCategoryService = require("../../services/ProductSubCategoryServ
 const { searchKeys } = require("../../model/ProductSubCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const productCategoryService = require("../../services/ProductCategoryService");
 
 const {
   getSearchQuery,
@@ -16,6 +17,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -218,7 +220,37 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "parentCategory",
+          foreignField: "_id",
+          as: "product_category",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "taxes",
+          localField: "applicableTaxes",
+          foreignField: "_id",
+          as: "app_taxes",
+          pipeline: [{ $project: { taxName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          parentCategoryLabel: {
+            $arrayElemAt: ["$product_category.categoryName", 0],
+          },
+          applicableTaxesLabel: {
+            $arrayElemAt: ["$app_taxes.taxName", 0],
+          },
+        },
+      },
+      { $unset: ["product_category", "app_taxes"] },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -249,6 +281,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
+    finalAggregateQuery.push(...additionalQuery);
 
     let result = await productSubCategoryService.aggregateQuery(
       finalAggregateQuery
@@ -283,9 +316,40 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
-    let dataExist = await productSubCategoryService.findAllWithQuery(
-      matchQuery
+    let aggregateQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "parentCategory",
+          foreignField: "_id",
+          as: "product_category",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "taxes",
+          localField: "applicableTaxes",
+          foreignField: "_id",
+          as: "app_taxes",
+          pipeline: [{ $project: { taxName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          parentCategoryLabel: {
+            $arrayElemAt: ["$product_category.categoryName", 0],
+          },
+          applicableTaxesLabel: {
+            $arrayElemAt: ["$app_taxes.taxName", 0],
+          },
+        },
+      },
+      { $unset: ["product_category", "app_taxes"] },
+    ];
+    let dataExist = await productSubCategoryService.aggregateQuery(
+      aggregateQuery
     );
 
     if (!dataExist || !dataExist.length) {
@@ -314,18 +378,54 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await productSubCategoryService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+    let aggregateQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "parentCategory",
+          foreignField: "_id",
+          as: "product_category",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "taxes",
+          localField: "applicableTaxes",
+          foreignField: "_id",
+          as: "app_taxes",
+          pipeline: [{ $project: { taxName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          parentCategoryLabel: {
+            $arrayElemAt: ["$product_category.categoryName", 0],
+          },
+          applicableTaxesLabel: {
+            $arrayElemAt: ["$app_taxes.taxName", 0],
+          },
+        },
+      },
+      { $unset: ["product_category", "app_taxes"] },
+    ];
+    let dataExist = await productSubCategoryService.aggregateQuery(
+      aggregateQuery
+    );
 
-    if (!dataExist) {
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
