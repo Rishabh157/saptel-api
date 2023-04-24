@@ -13,14 +13,36 @@ const ProductSubCategorySchema = new mongoose.Schema(
       lowercase: true,
     },
     parentCategory: {
-      type: String,
+      type: {
+        label: {
+          type: String,
+          required: true,
+          trim: true,
+          lowercase: true,
+        },
+        value: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
       required: true,
-      trim: true,
     },
     applicableTaxes: {
-      type: String,
+      type: {
+        label: {
+          type: String,
+          required: true,
+          trim: true,
+          lowercase: true,
+        },
+        value: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
       required: true,
-      trim: true,
     },
     hsnCode: { type: String, required: true, trim: true },
     companyId: { type: String, required: true, trim: true },
@@ -41,8 +63,8 @@ const ProductSubCategorySchema = new mongoose.Schema(
 const searchKeys = [
   "subCategoryCode",
   "subCategoryName",
-  "parentCategory",
-  "applicableTaxes",
+  "parentCategory.label",
+  "applicableTaxes.label",
   "hsnCode",
 ];
 module.exports = mongoose.model("ProductSubCategory", ProductSubCategorySchema);
