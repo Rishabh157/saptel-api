@@ -14,7 +14,7 @@ router.get(
   accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.get),
-  productSubCategoryController.getByParentCategory
+  productSubCategoryController.get
 );
 
 /**
@@ -24,7 +24,7 @@ router.get(
   "/get-by-parent-category/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(productSubCategoryValidation.get),
+  validate(productSubCategoryValidation.getDocument),
   productSubCategoryController.getByParentCategory
 );
 /**
