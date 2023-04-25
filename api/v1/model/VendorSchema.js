@@ -29,7 +29,7 @@ const VendorSchema = new mongoose.Schema(
     registrationAddress: {
       type: {
         phone: {
-          type: Number,
+          type: String,
           required: true,
         },
 
@@ -65,7 +65,7 @@ const VendorSchema = new mongoose.Schema(
     billingAddress: {
       type: {
         phone: {
-          type: Number,
+          type: String,
           required: true,
         },
 
@@ -127,11 +127,11 @@ const VendorSchema = new mongoose.Schema(
             lowercase: true,
           },
           mobileNumber: {
-            type: Number,
+            type: String,
             required: true,
           },
           landLine: {
-            type: Number,
+            type: String,
             required: true,
           },
         },
