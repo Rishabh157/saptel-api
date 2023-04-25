@@ -187,6 +187,12 @@ const VendorSchema = new mongoose.Schema(
             trim: true,
             lowercase: true,
           },
+          accountNumber: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
           accountType: {
             type: String,
             enum: [accountEnum.saving, accountEnum.current],
