@@ -16,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -219,7 +220,122 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "countries",
+          localField: "registrationAddress.country",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "registrationAddress.state",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "registrationAddress.district",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "registrationAddress.pincode",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      // billing section start
+      {
+        $lookup: {
+          from: "countries",
+          localField: "billingAddress.country",
+          foreignField: "_id",
+          as: "b_country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "billingAddress.state",
+          foreignField: "_id",
+          as: "b_state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "billingAddress.district",
+          foreignField: "_id",
+          as: "b_district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "billingAddress.pincode",
+          foreignField: "_id",
+          as: "b_pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          registrationCountryName: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          registrationStateName: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          registrationDistrictName: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          registrationPincodeName: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          //billing start
+          billingAddressCountryName: {
+            $arrayElemAt: ["$b_country_name.countryName", 0],
+          },
+          billingAddressStateName: {
+            $arrayElemAt: ["$b_state_name.stateName", 0],
+          },
+          billingAddressDistrictName: {
+            $arrayElemAt: ["$b_district_name.districtName", 0],
+          },
+          billingAddressPincodeName: {
+            $arrayElemAt: ["$b_pincode_name.pincode", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "b_country_name",
+          "b_state_name",
+          "b_district_name",
+          "b_pincode_name",
+        ],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -280,8 +396,124 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
-    let dataExist = await vendorService.findAllWithQuery(matchQuery);
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "registrationAddress.country",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "registrationAddress.state",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "registrationAddress.district",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "registrationAddress.pincode",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      // billing section start
+      {
+        $lookup: {
+          from: "countries",
+          localField: "billingAddress.country",
+          foreignField: "_id",
+          as: "b_country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "billingAddress.state",
+          foreignField: "_id",
+          as: "b_state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "billingAddress.district",
+          foreignField: "_id",
+          as: "b_district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "billingAddress.pincode",
+          foreignField: "_id",
+          as: "b_pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          registrationCountryName: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          registrationStateName: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          registrationDistrictName: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          registrationPincodeName: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          //billing start
+          billingAddressCountryName: {
+            $arrayElemAt: ["$b_country_name.countryName", 0],
+          },
+          billingAddressStateName: {
+            $arrayElemAt: ["$b_state_name.stateName", 0],
+          },
+          billingAddressDistrictName: {
+            $arrayElemAt: ["$b_district_name.districtName", 0],
+          },
+          billingAddressPincodeName: {
+            $arrayElemAt: ["$b_pincode_name.pincode", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "b_country_name",
+          "b_state_name",
+          "b_district_name",
+          "b_pincode_name",
+        ],
+      },
+    ];
+    let dataExist = await vendorService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -308,12 +540,133 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await vendorService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "registrationAddress.country",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "registrationAddress.state",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "registrationAddress.district",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "registrationAddress.pincode",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      // billing section start
+      {
+        $lookup: {
+          from: "countries",
+          localField: "billingAddress.country",
+          foreignField: "_id",
+          as: "b_country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "billingAddress.state",
+          foreignField: "_id",
+          as: "b_state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "billingAddress.district",
+          foreignField: "_id",
+          as: "b_district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "billingAddress.pincode",
+          foreignField: "_id",
+          as: "b_pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          registrationCountryName: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          registrationStateName: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          registrationDistrictName: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          registrationPincodeName: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          //billing start
+          billingAddressCountryName: {
+            $arrayElemAt: ["$b_country_name.countryName", 0],
+          },
+          billingAddressStateName: {
+            $arrayElemAt: ["$b_state_name.stateName", 0],
+          },
+          billingAddressDistrictName: {
+            $arrayElemAt: ["$b_district_name.districtName", 0],
+          },
+          billingAddressPincodeName: {
+            $arrayElemAt: ["$b_pincode_name.pincode", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "b_country_name",
+          "b_state_name",
+          "b_district_name",
+          "b_pincode_name",
+        ],
+      },
+    ];
+    let dataExist = await vendorService.aggregateQuery({
+      additionalQuery,
+    });
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

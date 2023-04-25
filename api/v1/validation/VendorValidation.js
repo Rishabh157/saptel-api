@@ -10,7 +10,7 @@ const create = {
   body: Joi.object().keys({
     companyName: Joi.string().lowercase().required(),
     vendorCode: Joi.string().required(),
-    companyType: Joi.string().custom(commonValidation.objectId).required(),
+    companyType: Joi.string().required(),
     ownerShipType: Joi.string().lowercase().required(),
     websiteAddress: Joi.string().uri().required(),
     registrationAddress: Joi.object().keys({
@@ -64,7 +64,7 @@ const update = {
   body: Joi.object().keys({
     companyName: Joi.string().lowercase().required(),
     vendorCode: Joi.string().required(),
-    companyType: Joi.string().custom(commonValidation.objectId).required(),
+    companyType: Joi.string().required(),
     ownerShipType: Joi.string().lowercase().required(),
     websiteAddress: Joi.string().uri().required(),
     registrationAddress: Joi.object().keys({
