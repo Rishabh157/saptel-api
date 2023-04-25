@@ -1,10 +1,24 @@
 const mongoose = require("mongoose");
-const { accountEnum } = require("../helper/enumUtils");
+const { accountEnum, companyEnum } = require("../helper/enumUtils");
+const { ObjectId } = require("mongodb");
 const VendorSchema = new mongoose.Schema(
   {
     companyName: { type: String, required: true, trim: true, lowercase: true },
     vendorCode: { type: String, required: true, trim: true },
-    companyType: { type: String, required: true, trim: true },
+    companyType: {
+      type: String,
+      required: true,
+      enum: [
+        companyEnum.llp,
+        companyEnum.opc,
+        companyEnum.plc,
+        companyEnum.pltc,
+        companyEnum.psc,
+        companyEnum.sec,
+        companyEnum.sp,
+      ],
+      trim: true,
+    },
     ownerShipType: {
       type: String,
       required: true,
@@ -26,22 +40,22 @@ const VendorSchema = new mongoose.Schema(
           lowercase: true,
         },
         country: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         state: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         district: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         pincode: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
@@ -62,22 +76,22 @@ const VendorSchema = new mongoose.Schema(
           lowercase: true,
         },
         country: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         state: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         district: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         pincode: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
