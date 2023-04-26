@@ -12,8 +12,8 @@ const create = {
     wareHouseName: Joi.string().lowercase().required(),
     country: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
-    regd: Joi.object().keys({
-      phone: Joi.number().required(),
+    registrationAddress: Joi.object().keys({
+      phone: Joi.string().required(),
       address: Joi.string().required(),
       country: Joi.string().custom(commonValidation.objectId).required(),
       state: Joi.string().custom(commonValidation.objectId).required(),
@@ -21,7 +21,7 @@ const create = {
       pincode: Joi.string().custom(commonValidation.objectId).required(),
     }),
     billingAddress: Joi.object().keys({
-      phone: Joi.number().required(),
+      phone: Joi.string().required(),
       address: Joi.string().required(),
       country: Joi.string().custom(commonValidation.objectId).required(),
       state: Joi.string().custom(commonValidation.objectId).required(),
@@ -33,8 +33,8 @@ const create = {
       department: Joi.string().required(),
       designation: Joi.string().required(),
       email: Joi.string().required(),
-      mobileNumber: Joi.number().required(),
-      landLine: Joi.number().required(),
+      mobileNumber: Joi.string().required(),
+      landLine: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -52,8 +52,8 @@ const update = {
     wareHouseName: Joi.string().lowercase().required(),
     country: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
-    regd: Joi.object().keys({
-      phone: Joi.number().required(),
+    registrationAddress: Joi.object().keys({
+      phone: Joi.string().required(),
       address: Joi.string().required(),
       country: Joi.string().custom(commonValidation.objectId).required(),
       state: Joi.string().custom(commonValidation.objectId).required(),
@@ -61,7 +61,7 @@ const update = {
       pincode: Joi.string().custom(commonValidation.objectId).required(),
     }),
     billingAddress: Joi.object().keys({
-      phone: Joi.number().required(),
+      phone: Joi.string().required(),
       address: Joi.string().required(),
       country: Joi.string().custom(commonValidation.objectId).required(),
       state: Joi.string().custom(commonValidation.objectId).required(),
@@ -73,8 +73,8 @@ const update = {
       department: Joi.string().required(),
       designation: Joi.string().required(),
       email: Joi.string().required(),
-      mobileNumber: Joi.number().required(),
-      landLine: Joi.number().required(),
+      mobileNumber: Joi.string().required(),
+      landLine: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

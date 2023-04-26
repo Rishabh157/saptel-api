@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const DealerSchema = new mongoose.Schema(
   {
@@ -6,7 +7,7 @@ const DealerSchema = new mongoose.Schema(
     firstName: { type: String, required: true, trim: true, lowercase: true },
     lastName: { type: String, required: true, trim: true, lowercase: true },
     dealerCategory: {
-      type: String,
+      type: ObjectId,
       required: true,
       trim: true,
     },
@@ -14,7 +15,7 @@ const DealerSchema = new mongoose.Schema(
     registrationAddress: {
       type: {
         phone: {
-          type: Number,
+          type: String,
           required: true,
         },
 
@@ -25,22 +26,22 @@ const DealerSchema = new mongoose.Schema(
           lowercase: true,
         },
         country: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         state: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         district: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         pincode: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
@@ -50,7 +51,7 @@ const DealerSchema = new mongoose.Schema(
     billingAddress: {
       type: {
         phone: {
-          type: Number,
+          type: String,
           required: true,
         },
 
@@ -61,22 +62,22 @@ const DealerSchema = new mongoose.Schema(
           lowercase: true,
         },
         country: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         state: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         district: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         pincode: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
@@ -112,11 +113,11 @@ const DealerSchema = new mongoose.Schema(
             lowercase: true,
           },
           mobileNumber: {
-            type: Number,
+            type: String,
             required: true,
           },
           landLine: {
-            type: Number,
+            type: String,
             required: true,
           },
         },
@@ -138,7 +139,7 @@ const DealerSchema = new mongoose.Schema(
           trim: true,
         },
         adharCardNumber: {
-          type: Number,
+          type: String,
           required: true,
         },
         adharCard: {
