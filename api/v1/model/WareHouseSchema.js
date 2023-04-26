@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const WareHouseSchema = new mongoose.Schema(
   {
@@ -13,12 +14,12 @@ const WareHouseSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    country: { type: String, required: true, trim: true },
+    country: { type: ObjectId, required: true, trim: true },
     email: { type: String, required: true, trim: true, lowercase: true },
-    regd: {
+    registrationAddress: {
       type: {
         phone: {
-          type: Number,
+          type: String,
           required: true,
         },
 
@@ -29,22 +30,22 @@ const WareHouseSchema = new mongoose.Schema(
           lowercase: true,
         },
         country: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         state: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         district: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         pincode: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
@@ -54,7 +55,7 @@ const WareHouseSchema = new mongoose.Schema(
     billingAddress: {
       type: {
         phone: {
-          type: Number,
+          type: String,
           required: true,
         },
 
@@ -65,22 +66,22 @@ const WareHouseSchema = new mongoose.Schema(
           lowercase: true,
         },
         country: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         state: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         district: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
         pincode: {
-          type: String,
+          type: ObjectId,
           required: true,
           trim: true,
         },
@@ -116,11 +117,11 @@ const WareHouseSchema = new mongoose.Schema(
             lowercase: true,
           },
           mobileNumber: {
-            type: Number,
+            type: String,
             required: true,
           },
           landLine: {
-            type: Number,
+            type: String,
             required: true,
           },
         },
@@ -147,7 +148,7 @@ const searchKeys = [
   "wareHouseName",
   "country",
   "email",
-  "regd",
+  "registrationAddress",
   "billingAddress",
   "contactInformation",
 ];
