@@ -6,6 +6,7 @@ const productCategoryService = require("../../services/ProductCategoryService");
 const { searchKeys } = require("../../model/ProductCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const productSubCategoryService = require("../../services/ProductSubCategoryService");
 
 const {
   getSearchQuery,
@@ -326,6 +327,15 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await productCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isProductCategoryExists = await productSubCategoryService.findCount({
+      parentCategory: _id,
+    });
+    if (isProductCategoryExists) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Product category can't be deleted as it is used in other module"
+      );
     }
     let deleted = await productCategoryService.getOneAndDelete({ _id });
     if (!deleted) {

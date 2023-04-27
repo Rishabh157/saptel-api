@@ -6,7 +6,7 @@ const taxesService = require("../../services/TaxesService");
 const { searchKeys } = require("../../model/TaxesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-
+const productSubCategoryService = require("../../services/ProductSubCategoryService");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -16,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -314,6 +315,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await taxesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    const isTaxExists = await productSubCategoryService.findCount({
+      applicableTaxes: _id,
+    });
+    if (isTaxExists) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Tax can't be deleted as it is used in other module"
+      );
+    }
+
     let deleted = await taxesService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
