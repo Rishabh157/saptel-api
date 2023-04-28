@@ -1,21 +1,20 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const ProductSchema = new mongoose.Schema(
   {
     productCode: { type: String, required: true, trim: true, lowercase: true },
     productName: { type: String, required: true, trim: true, lowercase: true },
     productCategory: {
-      type: String,
+      type: ObjectId,
       required: true,
       trim: true,
-      lowercase: true,
     },
     productSubCategory: {
-      type: String,
+      type: ObjectId,
       required: true,
       trim: true,
-      lowercase: true,
     },
-    productGroup: { type: String, required: true, trim: true, lowercase: true },
+    productGroup: { type: ObjectId, required: true, trim: true },
     productWeight: { type: Number, required: true, trim: true },
     dimension: {
       type: {
@@ -43,10 +42,9 @@ const ProductSchema = new mongoose.Schema(
       type: [
         {
           itemName: {
-            type: String,
+            type: ObjectId,
             required: true,
             trim: true,
-            lowercase: true,
           },
 
           itemQuantity: {
@@ -61,10 +59,9 @@ const ProductSchema = new mongoose.Schema(
       type: [
         {
           taxName: {
-            type: String,
+            type: ObjectId,
             required: true,
             trim: true,
-            lowercase: true,
           },
 
           taxPercent: {
@@ -134,7 +131,7 @@ const ProductSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

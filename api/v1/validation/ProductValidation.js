@@ -24,11 +24,11 @@ const create = {
     productImage: Joi.string().uri().required(),
     description: Joi.string().lowercase().required(),
     item: Joi.array().items({
-      itemName: Joi.string().required(),
+      itemName: Joi.string().custom(commonValidation.objectId).required(),
       itemQuantity: Joi.number().required(),
     }),
     tax: Joi.array().items({
-      taxName: Joi.string().required(),
+      taxName: Joi.string().custom(commonValidation.objectId).required(),
       taxPercent: Joi.number().required(),
     }),
     faq: Joi.array().items({
@@ -71,11 +71,11 @@ const update = {
     productImage: Joi.string().uri().required(),
     description: Joi.string().lowercase().required(),
     item: Joi.array().items({
-      itemName: Joi.string().required(),
+      itemName: Joi.string().custom(commonValidation.objectId).required(),
       itemQuantity: Joi.number().required(),
     }),
     tax: Joi.array().items({
-      taxName: Joi.string().required(),
+      taxName: Joi.string().custom(commonValidation.objectId).required(),
       taxPercent: Joi.number().required(),
     }),
     faq: Joi.array().items({

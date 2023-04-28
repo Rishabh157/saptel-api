@@ -16,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -228,7 +229,165 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "productCategory",
+          foreignField: "_id",
+          as: "productCategory_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "productSubCategory",
+          foreignField: "_id",
+          as: "productSubCategory_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "productGroup_name",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          item: {
+            $map: {
+              input: "$item",
+              as: "itemone",
+              in: {
+                itemName: "",
+                itemId: "$$itemone.itemName",
+                itemQuantity: "$$itemone.itemQuantity",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "item.itemId",
+          foreignField: "_id",
+          as: "items",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          tax: {
+            $map: {
+              input: "$tax",
+              as: "taxone",
+              in: {
+                taxName: "",
+                taxId: "$$taxone.taxName",
+                taxPercent: "$$taxone.taxPercent",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "taxes",
+          localField: "tax.taxId",
+          foreignField: "_id",
+          as: "taxes",
+          pipeline: [{ $project: { taxName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$productCategory_name.categoryName", 0],
+          },
+          productSubCategoryLabel: {
+            $arrayElemAt: ["$productSubCategory_name.subCategoryName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$productGroup_name.groupName", 0],
+          },
+
+          tax: {
+            $map: {
+              input: "$tax",
+              as: "taxone",
+              in: {
+                $mergeObjects: [
+                  "$$taxone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$taxes",
+                          as: "taxtwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$taxtwo._id" },
+                              { $toString: "$$taxone.taxId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          item: {
+            $map: {
+              input: "$item",
+              as: "itemone",
+              in: {
+                $mergeObjects: [
+                  "$$itemone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$items",
+                          as: "itemtwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$itemtwo._id" },
+                              { $toString: "$$itemone.itemId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $unset: [
+          "taxes",
+          "items",
+          "productGroup_name",
+          "productSubCategory_name",
+          "productCategory_name",
+        ],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -289,8 +448,167 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "productCategory",
+          foreignField: "_id",
+          as: "productCategory_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "productSubCategory",
+          foreignField: "_id",
+          as: "productSubCategory_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "productGroup_name",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          item: {
+            $map: {
+              input: "$item",
+              as: "itemone",
+              in: {
+                itemName: "",
+                itemId: "$$itemone.itemName",
+                itemQuantity: "$$itemone.itemQuantity",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "item.itemId",
+          foreignField: "_id",
+          as: "items",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          tax: {
+            $map: {
+              input: "$tax",
+              as: "taxone",
+              in: {
+                taxName: "",
+                taxId: "$$taxone.taxName",
+                taxPercent: "$$taxone.taxPercent",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "taxes",
+          localField: "tax.taxId",
+          foreignField: "_id",
+          as: "taxes",
+          pipeline: [{ $project: { taxName: 1 } }],
+        },
+      },
 
-    let dataExist = await productService.findAllWithQuery(matchQuery);
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$productCategory_name.categoryName", 0],
+          },
+          productSubCategoryLabel: {
+            $arrayElemAt: ["$productSubCategory_name.subCategoryName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$productGroup_name.groupName", 0],
+          },
+
+          tax: {
+            $map: {
+              input: "$tax",
+              as: "taxone",
+              in: {
+                $mergeObjects: [
+                  "$$taxone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$taxes",
+                          as: "taxtwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$taxtwo._id" },
+                              { $toString: "$$taxone.taxId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          item: {
+            $map: {
+              input: "$item",
+              as: "itemone",
+              in: {
+                $mergeObjects: [
+                  "$$itemone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$items",
+                          as: "itemtwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$itemtwo._id" },
+                              { $toString: "$$itemone.itemId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $unset: [
+          "taxes",
+          "items",
+          "productGroup_name",
+          "productSubCategory_name",
+          "productCategory_name",
+        ],
+      },
+    ];
+    let dataExist = await productService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -318,18 +636,180 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await productService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "productCategory",
+          foreignField: "_id",
+          as: "productCategory_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "productSubCategory",
+          foreignField: "_id",
+          as: "productSubCategory_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "productGroup_name",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          item: {
+            $map: {
+              input: "$item",
+              as: "itemone",
+              in: {
+                itemName: "",
+                itemId: "$$itemone.itemName",
+                itemQuantity: "$$itemone.itemQuantity",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "item.itemId",
+          foreignField: "_id",
+          as: "items",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          tax: {
+            $map: {
+              input: "$tax",
+              as: "taxone",
+              in: {
+                taxName: "",
+                taxId: "$$taxone.taxName",
+                taxPercent: "$$taxone.taxPercent",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "taxes",
+          localField: "tax.taxId",
+          foreignField: "_id",
+          as: "taxes",
+          pipeline: [{ $project: { taxName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$productCategory_name.categoryName", 0],
+          },
+          productSubCategoryLabel: {
+            $arrayElemAt: ["$productSubCategory_name.subCategoryName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$productGroup_name.groupName", 0],
+          },
+
+          tax: {
+            $map: {
+              input: "$tax",
+              as: "taxone",
+              in: {
+                $mergeObjects: [
+                  "$$taxone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$taxes",
+                          as: "taxtwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$taxtwo._id" },
+                              { $toString: "$$taxone.taxId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          item: {
+            $map: {
+              input: "$item",
+              as: "itemone",
+              in: {
+                $mergeObjects: [
+                  "$$itemone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$items",
+                          as: "itemtwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$itemtwo._id" },
+                              { $toString: "$$itemone.itemId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $unset: [
+          "taxes",
+          "items",
+          "productGroup_name",
+          "productSubCategory_name",
+          "productCategory_name",
+        ],
+      },
+    ];
+    let dataExist = await productService.aggregateQuery(additionalQuery);
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
