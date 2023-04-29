@@ -40,7 +40,7 @@ const create = {
       videoLink: Joi.string().uri().required(),
     }),
     callScript: Joi.array().items({
-      language: Joi.string().required(),
+      language: Joi.string().custom(commonValidation.objectId).required(),
       script: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
@@ -87,7 +87,7 @@ const update = {
       videoLink: Joi.string().uri().required(),
     }),
     callScript: Joi.array().items({
-      language: Joi.string().required(),
+      language: Joi.string().custom(commonValidation.objectId).required(),
       script: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),

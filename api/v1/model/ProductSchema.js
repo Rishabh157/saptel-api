@@ -115,10 +115,9 @@ const ProductSchema = new mongoose.Schema(
       type: [
         {
           language: {
-            type: String,
+            type: ObjectId,
             required: true,
             trim: true,
-            lowercase: true,
           },
 
           script: {

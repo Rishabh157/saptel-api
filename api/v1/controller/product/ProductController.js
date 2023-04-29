@@ -307,6 +307,30 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [{ $project: { taxName: 1 } }],
         },
       },
+      {
+        $addFields: {
+          callScript: {
+            $map: {
+              input: "$callScript",
+              as: "languageone",
+              in: {
+                languageName: "",
+                languageId: "$$languageone.language",
+                script: "$$languageone.script",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "languages",
+          localField: "callScript.languageId",
+          foreignField: "_id",
+          as: "languages",
+          pipeline: [{ $project: { languageName: 1 } }],
+        },
+      },
 
       {
         $addFields: {
@@ -376,10 +400,39 @@ exports.allFilterPagination = async (req, res) => {
               },
             },
           },
+          callScript: {
+            $map: {
+              input: "$callScript",
+              as: "languageone",
+              in: {
+                $mergeObjects: [
+                  "$$languageone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$languages",
+                          as: "languagetwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$languagetwo._id" },
+                              { $toString: "$$languageone.languageId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
       },
       {
         $unset: [
+          "languages",
           "taxes",
           "items",
           "productGroup_name",
@@ -527,6 +580,30 @@ exports.get = async (req, res) => {
           pipeline: [{ $project: { taxName: 1 } }],
         },
       },
+      {
+        $addFields: {
+          callScript: {
+            $map: {
+              input: "$callScript",
+              as: "languageone",
+              in: {
+                languageName: "",
+                languageId: "$$languageone.language",
+                script: "$$languageone.script",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "languages",
+          localField: "callScript.languageId",
+          foreignField: "_id",
+          as: "languages",
+          pipeline: [{ $project: { languageName: 1 } }],
+        },
+      },
 
       {
         $addFields: {
@@ -596,10 +673,39 @@ exports.get = async (req, res) => {
               },
             },
           },
+          callScript: {
+            $map: {
+              input: "$callScript",
+              as: "languageone",
+              in: {
+                $mergeObjects: [
+                  "$$languageone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$languages",
+                          as: "languagetwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$languagetwo._id" },
+                              { $toString: "$$languageone.languageId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
       },
       {
         $unset: [
+          "languages",
           "taxes",
           "items",
           "productGroup_name",
@@ -721,6 +827,30 @@ exports.getById = async (req, res) => {
           pipeline: [{ $project: { taxName: 1 } }],
         },
       },
+      {
+        $addFields: {
+          callScript: {
+            $map: {
+              input: "$callScript",
+              as: "languageone",
+              in: {
+                languageName: "",
+                languageId: "$$languageone.language",
+                script: "$$languageone.script",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "languages",
+          localField: "callScript.languageId",
+          foreignField: "_id",
+          as: "languages",
+          pipeline: [{ $project: { languageName: 1 } }],
+        },
+      },
 
       {
         $addFields: {
@@ -790,10 +920,39 @@ exports.getById = async (req, res) => {
               },
             },
           },
+          callScript: {
+            $map: {
+              input: "$callScript",
+              as: "languageone",
+              in: {
+                $mergeObjects: [
+                  "$$languageone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$languages",
+                          as: "languagetwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$languagetwo._id" },
+                              { $toString: "$$languageone.languageId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
         },
       },
       {
         $unset: [
+          "languages",
           "taxes",
           "items",
           "productGroup_name",
