@@ -1,9 +1,12 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const BarCodeSchema = new mongoose.Schema(
   {
-    productGroup: { type: String, required: true, trim: true },
+    productGroup: { type: ObjectId, required: true, trim: true },
     quantity: { type: Number, required: true },
+    barcodeNumber: { type: String, required: true, trim: true },
     companyId: { type: String, required: true, trim: true },
+
     isDeleted: {
       type: Boolean,
       default: false,

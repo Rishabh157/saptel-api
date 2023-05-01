@@ -20,11 +20,11 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroup, quantity } = req.body;
+    let { productGroup, quantity, barcodeNumber } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await barCodeService.isExists([]);
+    let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -189,7 +189,29 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group"] },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -250,8 +272,32 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
 
-    let dataExist = await barCodeService.findAllWithQuery(matchQuery);
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group"] },
+    ];
+
+    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -279,18 +325,42 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await barCodeService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+    let additionalQuery = [
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
 
-    if (!dataExist) {
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group"] },
+    ];
+    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
