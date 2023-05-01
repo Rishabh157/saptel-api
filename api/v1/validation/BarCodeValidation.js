@@ -10,6 +10,7 @@ const create = {
   body: Joi.object().keys({
     productGroup: Joi.string().custom(commonValidation.objectId).required(),
     quantity: Joi.number().required(),
+    barcodeNumber: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -24,6 +25,7 @@ const update = {
   body: Joi.object().keys({
     productGroup: Joi.string().custom(commonValidation.objectId).required(),
     quantity: Joi.number().required(),
+    barcodeNumber: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

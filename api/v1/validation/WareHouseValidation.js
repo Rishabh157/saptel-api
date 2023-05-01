@@ -37,6 +37,8 @@ const create = {
       landLine: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    vendorId: Joi.string().custom(commonValidation.objectId),
+    dealerId: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
@@ -77,6 +79,8 @@ const update = {
       landLine: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    vendorId: Joi.string().custom(commonValidation.objectId),
+    dealerId: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
