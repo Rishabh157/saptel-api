@@ -93,7 +93,7 @@ exports.update = async (req, res) => {
     let dataExist = await schemeService.isExists(
       [{ schemeCode }, { schemeName }],
       idToBeSearch,
-      true
+      false
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
