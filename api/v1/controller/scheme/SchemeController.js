@@ -92,7 +92,7 @@ exports.update = async (req, res) => {
     let idToBeSearch = req.params.id;
     let dataExist = await schemeService.isExists(
       [{ schemeCode }, { schemeName }],
-      false,
+
       idToBeSearch
     );
     if (dataExist.exists && dataExist.existsSummary) {
