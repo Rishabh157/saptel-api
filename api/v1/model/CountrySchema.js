@@ -1,8 +1,9 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const CountrySchema = new mongoose.Schema(
   {
     countryName: { type: String, required: true, trim: true, lowercase: true },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
