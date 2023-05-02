@@ -89,8 +89,15 @@ exports.update = async (req, res) => {
       productInformation,
       faq,
     } = req.body;
-
     let idToBeSearch = req.params.id;
+    let dataExist = await schemeService.isExists(
+      [{ schemeCode }, { schemeName }],
+      false,
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
 
     //------------------Find data-------------------
     let datafound = await schemeService.getOneByMultiField({
