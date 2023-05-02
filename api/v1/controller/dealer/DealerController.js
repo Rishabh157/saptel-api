@@ -83,7 +83,14 @@ exports.update = async (req, res) => {
     } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await dealerService.isExists(
+      [{ dealerCode }],
+      idToBeSearch,
+      false
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await dealerService.getOneByMultiField({
       _id: idToBeSearch,

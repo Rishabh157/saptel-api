@@ -237,7 +237,40 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "category",
+          foreignField: "_id",
+          as: "parent_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "subCategory",
+          foreignField: "_id",
+          as: "sub_category_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$parent_name.categoryName", 0],
+          },
+          ProductSubCategoryLabel: {
+            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["parent_name", "sub_category_name"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -298,8 +331,42 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "category",
+          foreignField: "_id",
+          as: "parent_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "subCategory",
+          foreignField: "_id",
+          as: "sub_category_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
 
-    let dataExist = await schemeService.findAllWithQuery(matchQuery);
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$parent_name.categoryName", 0],
+          },
+          ProductSubCategoryLabel: {
+            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["parent_name", "sub_category_name"],
+      },
+    ];
+    let dataExist = await schemeService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -327,18 +394,53 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await schemeService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "category",
+          foreignField: "_id",
+          as: "parent_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "subCategory",
+          foreignField: "_id",
+          as: "sub_category_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$parent_name.categoryName", 0],
+          },
+          ProductSubCategoryLabel: {
+            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["parent_name", "sub_category_name"],
+      },
+    ];
+    let dataExist = await schemeService.aggregateQuery(additionalQuery);
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });

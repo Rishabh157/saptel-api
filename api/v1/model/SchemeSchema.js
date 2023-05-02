@@ -1,10 +1,16 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const SchemeSchema = new mongoose.Schema(
   {
     schemeCode: { type: String, required: true, trim: true },
     schemeName: { type: String, required: true, trim: true, lowercase: true },
-    category: { type: String, required: true, trim: true, lowercase: true },
-    subCategory: { type: String, required: true, trim: true, lowercase: true },
+    category: { type: ObjectId, required: true, trim: true, lowercase: true },
+    subCategory: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     schemePrice: { type: Number, required: true },
     dimension: {
       type: {
