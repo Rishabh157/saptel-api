@@ -328,10 +328,12 @@ exports.deleteDocument = async (req, res) => {
     if (!(await productCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isProductCategoryExists = await productSubCategoryService.findCount({
-      parentCategory: _id,
-    });
-    if (isProductCategoryExists) {
+    const isProductCategoryExistsInSubCate =
+      await productSubCategoryService.findCount({
+        parentCategory: _id,
+      });
+
+    if (isProductCategoryExistsInSubCate) {
       throw new ApiError(
         httpStatus.OK,
         "Product category can't be deleted as it is used in other module"

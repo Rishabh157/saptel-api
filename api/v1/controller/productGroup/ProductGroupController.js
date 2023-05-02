@@ -7,6 +7,7 @@ const { searchKeys } = require("../../model/ProductGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const AsrRequest = require("../../model/AsrRequestSchema");
+const productService = require("../../services/ProductService");
 
 const {
   getSearchQuery,
@@ -322,6 +323,10 @@ exports.deleteDocument = async (req, res) => {
     if (!(await productGroupService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    const isProductCategoryExistsInProduct = await productService.findCount({
+      productSubCategory: _id,
+    });
+
     const canDeleted = await AsrRequest.find({
       isDeleted: false,
       isActive: true,
@@ -331,7 +336,7 @@ exports.deleteDocument = async (req, res) => {
         },
       },
     });
-    if (canDeleted.length) {
+    if (canDeleted.length || isProductCategoryExistsInProduct) {
       throw new ApiError(
         httpStatus.OK,
         "Product Group can't be deleted because it is currently used in other services"
