@@ -161,8 +161,8 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "area",
+    let numberFileds = ["area"];
+    let objectIdFileds = [
       "pincodeId",
       "tehsilId",
       "districtId",
@@ -170,7 +170,12 @@ exports.allFilterPagination = async (req, res) => {
       "countryId",
     ];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFileds
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
