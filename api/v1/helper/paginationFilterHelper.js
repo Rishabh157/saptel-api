@@ -1,5 +1,6 @@
 const httpStatus = require("http-status");
 const moment = require("moment");
+const { ObjectId } = require("mongodb");
 
 const checkInvalidParams = (searchIn, searchKeys) => {
   if (!searchIn) {
@@ -102,49 +103,107 @@ const getRangeQuery = (rangeFilterBy) => {
   return queryArray.length ? queryArray : null;
 };
 
-const getFilterQuery = (filterBy, booleanFields, numberFileds) => {
+const getFilterQuery = (
+  filterBy,
+  booleanFields,
+  numberFileds,
+  objectIdFields
+) => {
   let queryArray = [];
-
+  objectIdFields =
+    objectIdFields && Array.isArray(objectIdFields) ? objectIdFields : [];
   let invalidData = ["null", null, undefined, "undefined", ""];
 
   if (filterBy !== undefined) {
     if (!Array.isArray(filterBy)) {
-      throw new ApiError(httpStatus.OK, `filterBy must be an array.`);
+      return {
+        message: `filterBy must be an array.`,
+        status: true,
+        data: null,
+      };
     }
+
     if (filterBy.length > 0) {
       for (let each in filterBy) {
         if (!invalidData.includes(filterBy[each].fieldName)) {
-          if (Array.isArray(filterBy[each].value)) {
-            if (filterBy[each].value.length) {
-              queryArray.push({
-                [filterBy[each].fieldName]: { $in: filterBy[each].value },
+          let fieldName = filterBy[each].fieldName;
+          let filterValue = filterBy[each].value;
+          if (
+            Array.isArray(filterValue) &&
+            filterValue.length &&
+            !booleanFields.includes(fieldName) &&
+            !numberFileds.includes(fieldName) &&
+            !objectIdFields.includes(fieldName)
+          ) {
+            let orQuery = [];
+            filterValue.forEach((val) => {
+              orQuery.push({
+                [fieldName]: {
+                  $regex: `.*${val}.*`,
+                  $options: "i",
+                },
               });
-            }
-          } else if (filterBy[each].value !== "") {
+            });
+
+            queryArray.push({ $or: orQuery });
+          } else if (filterValue !== "") {
             if (
-              typeof filterBy[each].value === "string" &&
-              !booleanFields.includes(filterBy[each].fieldName)
+              typeof filterValue === "string" &&
+              !booleanFields.includes(fieldName) &&
+              !numberFileds.includes(fieldName) &&
+              !objectIdFields.includes(fieldName)
             ) {
               queryArray.push({
-                [filterBy[each].fieldName]: filterBy[each].value,
+                [fieldName]: {
+                  $regex: `.*${filterValue}.*`,
+                  $options: "i",
+                },
               });
             } else if (
-              numberFileds.includes(filterBy[each].fieldName) &&
-              !isNaN(parseInt(filterBy[each].value))
+              numberFileds.includes(fieldName) &&
+              !isNaN(parseInt(filterValue))
             ) {
-              queryArray.push({
-                [filterBy[each].fieldName]: parseInt(filterBy[each].value),
-              });
+              let filterValue = filterBy[each].value;
+              if (Array.isArray(filterValue) && filterValue.length) {
+                let orQuery = [];
+                filterValue.forEach((val) => {
+                  orQuery.push({
+                    [fieldName]: parseInt(val),
+                  });
+                });
+
+                queryArray.push({ $or: orQuery });
+              } else {
+                queryArray.push({
+                  [fieldName]: parseInt(filterValue),
+                });
+              }
             } else if (
-              typeof filterBy[each].value === "boolean" ||
-              booleanFields.includes(filterBy[each].fieldName)
+              objectIdFields.includes(fieldName) &&
+              typeof filterValue === "string"
+            ) {
+              let filterValue = filterBy[each].value;
+              if (Array.isArray(filterValue) && filterValue.length) {
+                let orQuery = [];
+                filterValue.forEach((val) => {
+                  orQuery.push({
+                    [fieldName]: new ObjectId(val),
+                  });
+                });
+
+                queryArray.push({ $or: orQuery });
+              } else {
+                queryArray.push({
+                  [fieldName]: new ObjectId(filterValue),
+                });
+              }
+            } else if (
+              typeof filterValue === "boolean" ||
+              booleanFields.includes(fieldName)
             ) {
               queryArray.push({
-                [filterBy[each].fieldName]:
-                  filterBy[each].value === true ||
-                  filterBy[each].value === "true"
-                    ? true
-                    : false,
+                [fieldName]:
+                  filterValue === true || filterValue === "true" ? true : false,
               });
             }
           }
