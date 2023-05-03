@@ -14,6 +14,7 @@ const languageRoute = require("./LanguageRoute");
 const cartonBoxRoute = require("./CartonBoxRoute");
 const barCodeRoute = require("./BarCodeRoute");
 const asrRequestRoute = require("./AsrRequestRoute");
+const grnRoute = require("./GRNRoute");
 const schemeRoute = require("./SchemeRoute");
 const dealerRoute = require("./DealerRoute");
 const purchaseOrderRoute = require("./PurchaseOrderRoute");
@@ -112,6 +113,10 @@ const defaultRoutes = [
   {
     path: "/asr",
     route: asrRequestRoute,
+  },
+  {
+    path: "/grn",
+    route: grnRoute,
   },
   {
     path: "/carton-box",
