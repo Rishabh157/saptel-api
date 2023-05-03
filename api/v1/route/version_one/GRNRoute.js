@@ -19,6 +19,17 @@ router.get(
   validate(goodReceivedNoteValidation.get),
   goodReceivedNoteController.get
 );
+
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(goodReceivedNoteValidation.getDocument),
+  goodReceivedNoteController.getById
+);
 /**
  * get all goodReceivedNote pagination filter
  */
