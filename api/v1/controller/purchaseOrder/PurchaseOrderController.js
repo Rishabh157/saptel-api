@@ -58,7 +58,13 @@ exports.update = async (req, res) => {
     let { poCode, vendorId, wareHouseId, purchaseOrder } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await purchaseOrderService.isExists(
+      [{ poCode }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await purchaseOrderService.getOneByMultiField({
       _id: idToBeSearch,
@@ -189,7 +195,40 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendors_name",
+          pipeline: [{ $project: { companyName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          vendorLabel: {
+            $arrayElemAt: ["$vendors_name.companyName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["vendors_name", "warehouses_name"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -252,8 +291,42 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendors_name",
+          pipeline: [{ $project: { companyName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
 
-    let dataExist = await purchaseOrderService.findAllWithQuery(matchQuery);
+      {
+        $addFields: {
+          vendorLabel: {
+            $arrayElemAt: ["$vendors_name.companyName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["vendors_name", "warehouses_name"],
+      },
+    ];
+    let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -281,18 +354,55 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await purchaseOrderService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        $match: {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendors_name",
+          pipeline: [{ $project: { companyName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          vendorLabel: {
+            $arrayElemAt: ["$vendors_name.companyName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["vendors_name", "warehouses_name"],
+      },
+    ];
+    let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });

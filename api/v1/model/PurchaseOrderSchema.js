@@ -1,9 +1,10 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const PurchaseOrderSchema = new mongoose.Schema(
   {
     poCode: { type: String, required: true, trim: true },
-    vendorId: { type: String, required: true, trim: true },
-    wareHouseId: { type: String, required: true, trim: true },
+    vendorId: { type: ObjectId, required: true, trim: true },
+    wareHouseId: { type: ObjectId, required: true, trim: true },
     purchaseOrder: {
       type: [
         {
@@ -29,7 +30,7 @@ const PurchaseOrderSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

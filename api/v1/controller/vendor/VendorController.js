@@ -6,6 +6,7 @@ const vendorService = require("../../services/VendorService");
 const { searchKeys } = require("../../model/VendorSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const purchaseOrderService = require("../../services/PurchaseOrderService");
 
 const {
   getSearchQuery,
@@ -690,6 +691,16 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await vendorService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isVendorExistsInPo = await purchaseOrderService.findCount({
+      vendorId: _id,
+    });
+
+    if (isVendorExistsInPo) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Vendor can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await vendorService.getOneAndDelete({ _id });
     if (!deleted) {
