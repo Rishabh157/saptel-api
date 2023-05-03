@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const BarCodeSchema = new mongoose.Schema(
   {
     productGroup: { type: ObjectId, required: true, trim: true },
-    quantity: { type: Number, required: true },
     barcodeNumber: { type: String, required: true, trim: true },
     companyId: { type: String, required: true, trim: true },
 
@@ -21,6 +20,6 @@ const BarCodeSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["productGroup", "quantity"];
+const searchKeys = ["productGroup"];
 module.exports = mongoose.model("BarCode", BarCodeSchema);
 module.exports.searchKeys = [...searchKeys];
