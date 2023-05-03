@@ -58,7 +58,10 @@ exports.update = async (req, res) => {
     let { languageName } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await languageService.isExists([{ languageName }]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await languageService.getOneByMultiField({
       _id: idToBeSearch,
