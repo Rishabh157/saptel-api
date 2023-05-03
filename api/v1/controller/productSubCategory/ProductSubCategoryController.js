@@ -482,7 +482,7 @@ exports.deleteDocument = async (req, res) => {
       productSubCategory: _id,
     });
     const isProductSubCategoryExistsInScheme = await schemeService.findCount({
-      productSubCategory: _id,
+      subCategory: _id,
     });
 
     if (
