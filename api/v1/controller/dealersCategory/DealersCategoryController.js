@@ -25,7 +25,9 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await dealersCategoryService.isExists([]);
+    let dataExist = await dealersCategoryService.isExists([
+      { dealersCategory },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -62,7 +64,13 @@ exports.update = async (req, res) => {
       req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await dealersCategoryService.isExists(
+      [{ dealersCategory }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await dealersCategoryService.getOneByMultiField({
       _id: idToBeSearch,
