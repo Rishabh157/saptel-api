@@ -6,6 +6,7 @@ const itemService = require("../../services/ItemService");
 const { searchKeys } = require("../../model/ItemSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const purchaseOrderService = require("../../services/PurchaseOrderService");
 
 const {
   getSearchQuery,
@@ -315,6 +316,16 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await itemService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isItemExistsInPo = await purchaseOrderService.findCount({
+      "purchaseOrder.itemId": _id,
+    });
+
+    if (isItemExistsInPo) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Item can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await itemService.getOneAndDelete({ _id });
     if (!deleted) {

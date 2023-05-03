@@ -8,8 +8,8 @@ const PurchaseOrderSchema = new mongoose.Schema(
     purchaseOrder: {
       type: [
         {
-          itemName: {
-            type: String,
+          itemId: {
+            type: ObjectId,
             required: true,
             trim: true,
           },

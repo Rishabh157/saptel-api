@@ -214,7 +214,33 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [{ $project: { wareHouseName: 1 } }],
         },
       },
-
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          purchaseOrder: {
+            $map: {
+              input: "$purchaseOrder",
+              as: "purchaseOrderone",
+              in: {
+                itemName: "",
+                itemId: "$$purchaseOrderone.itemId",
+                rate: "$$purchaseOrderone.rate",
+                quantity: "$$purchaseOrderone.quantity",
+                estReceivingDate: "$$purchaseOrderone.estReceivingDate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "purchaseOrder.itemId",
+          foreignField: "_id",
+          as: "purchaseOrders",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
       {
         $addFields: {
           vendorLabel: {
@@ -222,6 +248,34 @@ exports.allFilterPagination = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          purchaseOrder: {
+            $map: {
+              input: "$purchaseOrder",
+              as: "purchaseOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$purchaseOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$purchaseOrders",
+                          as: "purchaseOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$purchaseOrdertwo._id" },
+                              { $toString: "$$purchaseOrderone.itemId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
           },
         },
       },
@@ -311,7 +365,33 @@ exports.get = async (req, res) => {
           pipeline: [{ $project: { wareHouseName: 1 } }],
         },
       },
-
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          purchaseOrder: {
+            $map: {
+              input: "$purchaseOrder",
+              as: "purchaseOrderone",
+              in: {
+                itemName: "",
+                itemId: "$$purchaseOrderone.itemId",
+                rate: "$$purchaseOrderone.rate",
+                quantity: "$$purchaseOrderone.quantity",
+                estReceivingDate: "$$purchaseOrderone.estReceivingDate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "purchaseOrder.itemId",
+          foreignField: "_id",
+          as: "purchaseOrders",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
       {
         $addFields: {
           vendorLabel: {
@@ -319,6 +399,34 @@ exports.get = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          purchaseOrder: {
+            $map: {
+              input: "$purchaseOrder",
+              as: "purchaseOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$purchaseOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$purchaseOrders",
+                          as: "purchaseOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$purchaseOrdertwo._id" },
+                              { $toString: "$$purchaseOrderone.itemId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
           },
         },
       },
@@ -380,7 +488,33 @@ exports.getById = async (req, res) => {
           pipeline: [{ $project: { wareHouseName: 1 } }],
         },
       },
-
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          purchaseOrder: {
+            $map: {
+              input: "$purchaseOrder",
+              as: "purchaseOrderone",
+              in: {
+                itemName: "",
+                itemId: "$$purchaseOrderone.itemId",
+                rate: "$$purchaseOrderone.rate",
+                quantity: "$$purchaseOrderone.quantity",
+                estReceivingDate: "$$purchaseOrderone.estReceivingDate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "purchaseOrder.itemId",
+          foreignField: "_id",
+          as: "purchaseOrders",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
       {
         $addFields: {
           vendorLabel: {
@@ -388,6 +522,34 @@ exports.getById = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          purchaseOrder: {
+            $map: {
+              input: "$purchaseOrder",
+              as: "purchaseOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$purchaseOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$purchaseOrders",
+                          as: "purchaseOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$purchaseOrdertwo._id" },
+                              { $toString: "$$purchaseOrderone.itemId" },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
           },
         },
       },
