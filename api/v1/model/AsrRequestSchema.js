@@ -19,6 +19,7 @@ const AsrRequestSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    completed: { type: Boolean, default: false },
     companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
@@ -34,6 +35,10 @@ const AsrRequestSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["asrDetails.productName", "asrDetails.quantity"];
+const searchKeys = [
+  "asrDetails.productName",
+  "asrDetails.quantity",
+  "completed",
+];
 module.exports = mongoose.model("AsrRequest", AsrRequestSchema);
 module.exports.searchKeys = [...searchKeys];

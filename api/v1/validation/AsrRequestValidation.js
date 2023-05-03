@@ -13,6 +13,7 @@ const create = {
       productId: Joi.string().custom(commonValidation.objectId).required(),
       quantity: Joi.number().required(),
     }),
+    completed: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -30,6 +31,7 @@ const update = {
       productId: Joi.string().custom(commonValidation.objectId).required(),
       quantity: Joi.number().required(),
     }),
+    completed: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

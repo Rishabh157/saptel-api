@@ -20,7 +20,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { asrDetails } = req.body;
+    let { asrDetails, completed } = req.body;
     /**
      * check duplicate exist
      */
@@ -55,7 +55,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { asrDetails } = req.body;
+    let { asrDetails, completed } = req.body;
     let idToBeSearch = req.params.id;
     let datafound = await asrRequestService.getOneByMultiField({
       _id: idToBeSearch,
@@ -341,6 +341,39 @@ exports.statusChange = async (req, res) => {
     let statusChanged = await asrRequestService.getOneAndUpdate(
       { _id },
       { isActive }
+    );
+    if (!statusChanged) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: statusChanged,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.changeCompleteStatus = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let dataExist = await asrRequestService.getOneByMultiField({ _id });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let completed = dataExist.completed ? false : true;
+
+    let statusChanged = await asrRequestService.getOneAndUpdate(
+      { _id },
+      { completed }
     );
     if (!statusChanged) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

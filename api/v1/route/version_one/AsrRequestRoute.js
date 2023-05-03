@@ -69,6 +69,18 @@ router.put(
   validate(asrRequestValidation.changeStatus),
   asrRequestController.statusChange
 );
+
+/**
+ * update completed status
+ */
+router.put(
+  "/completed/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(asrRequestValidation.changeStatus),
+  asrRequestController.changeCompleteStatus
+);
+
 /**
  * delete document
  */
