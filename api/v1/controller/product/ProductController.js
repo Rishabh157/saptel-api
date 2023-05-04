@@ -266,7 +266,7 @@ exports.allFilterPagination = async (req, res) => {
               as: "itemone",
               in: {
                 itemName: "",
-                itemId: "$$itemone.itemName",
+                itemId: "$$itemone.itemId",
                 itemQuantity: "$$itemone.itemQuantity",
               },
             },
@@ -291,7 +291,7 @@ exports.allFilterPagination = async (req, res) => {
               as: "taxone",
               in: {
                 taxName: "",
-                taxId: "$$taxone.taxName",
+                taxId: "$$taxone.taxId",
                 taxPercent: "$$taxone.taxPercent",
               },
             },
@@ -539,7 +539,7 @@ exports.get = async (req, res) => {
               as: "itemone",
               in: {
                 itemName: "",
-                itemId: "$$itemone.itemName",
+                itemId: "$$itemone.itemId",
                 itemQuantity: "$$itemone.itemQuantity",
               },
             },
@@ -564,7 +564,7 @@ exports.get = async (req, res) => {
               as: "taxone",
               in: {
                 taxName: "",
-                taxId: "$$taxone.taxName",
+                taxId: "$$taxone.taxId",
                 taxPercent: "$$taxone.taxPercent",
               },
             },
@@ -786,7 +786,7 @@ exports.getById = async (req, res) => {
               as: "itemone",
               in: {
                 itemName: "",
-                itemId: "$$itemone.itemName",
+                itemId: "$$itemone.itemId",
                 itemQuantity: "$$itemone.itemQuantity",
               },
             },
@@ -811,7 +811,7 @@ exports.getById = async (req, res) => {
               as: "taxone",
               in: {
                 taxName: "",
-                taxId: "$$taxone.taxName",
+                taxId: "$$taxone.taxId",
                 taxPercent: "$$taxone.taxPercent",
               },
             },
