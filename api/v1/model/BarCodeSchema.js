@@ -20,6 +20,6 @@ const BarCodeSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["productGroup"];
+const searchKeys = ["productGroup", "barcodeNumber"];
 module.exports = mongoose.model("BarCode", BarCodeSchema);
 module.exports.searchKeys = [...searchKeys];
