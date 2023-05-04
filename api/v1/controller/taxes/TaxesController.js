@@ -7,6 +7,8 @@ const { searchKeys } = require("../../model/TaxesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const productSubCategoryService = require("../../services/ProductSubCategoryService");
+const productService = require("../../services/ProductService");
+
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -318,7 +320,11 @@ exports.deleteDocument = async (req, res) => {
     const isTaxExists = await productSubCategoryService.findCount({
       applicableTaxes: _id,
     });
-    if (isTaxExists) {
+    const isTaxExistsInProduct = await productService.findCount({
+      "tax.taxId": _id,
+    });
+
+    if (isTaxExists || isTaxExistsInProduct) {
       throw new ApiError(
         httpStatus.OK,
         "Tax can't be deleted as it is used in other module"

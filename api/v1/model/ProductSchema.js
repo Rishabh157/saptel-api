@@ -41,7 +41,7 @@ const ProductSchema = new mongoose.Schema(
     item: {
       type: [
         {
-          itemName: {
+          itemId: {
             type: ObjectId,
             required: true,
             trim: true,
@@ -58,7 +58,7 @@ const ProductSchema = new mongoose.Schema(
     tax: {
       type: [
         {
-          taxName: {
+          taxId: {
             type: ObjectId,
             required: true,
             trim: true,

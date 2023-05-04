@@ -7,6 +7,7 @@ const { searchKeys } = require("../../model/ItemSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const purchaseOrderService = require("../../services/PurchaseOrderService");
+const productService = require("../../services/ProductService");
 
 const {
   getSearchQuery,
@@ -320,8 +321,11 @@ exports.deleteDocument = async (req, res) => {
     const isItemExistsInPo = await purchaseOrderService.findCount({
       "purchaseOrder.itemId": _id,
     });
+    const isItemExistsInProduct = await productService.findCount({
+      "item.itemId": _id,
+    });
 
-    if (isItemExistsInPo) {
+    if (isItemExistsInPo || isItemExistsInProduct) {
       throw new ApiError(
         httpStatus.OK,
         "Item can't be deleted because it is currently used in other services"
