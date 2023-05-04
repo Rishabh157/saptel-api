@@ -11,6 +11,7 @@ const create = {
     productGroup: Joi.string().custom(commonValidation.objectId).required(),
     barcodeNumber: Joi.string().required(),
     barcodeGroupNumber: Joi.string().required(),
+    isUsed: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -26,6 +27,7 @@ const update = {
     productGroup: Joi.string().custom(commonValidation.objectId).required(),
     barcodeNumber: Joi.string().required(),
     barcodeGroupNumber: Joi.string().required(),
+    isUsed: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
