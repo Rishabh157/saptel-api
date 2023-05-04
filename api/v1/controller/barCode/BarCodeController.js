@@ -20,11 +20,13 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroup, barcodeNumber } = req.body;
+    let { productGroup, barcodeNumber, barcodeGroupNumber } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
+    let dataExist = await barCodeService.isExists([
+      { barcodeNumber, barcodeGroupNumber },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }

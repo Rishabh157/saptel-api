@@ -6,6 +6,7 @@ const languageService = require("../../services/LanguageService");
 const { searchKeys } = require("../../model/LanguageSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const productService = require("../../services/ProductService");
 
 const {
   getSearchQuery,
@@ -317,6 +318,16 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await languageService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isLanguageExistsInProduct = await productService.findCount({
+      "callScript.language": _id,
+    });
+
+    if (isLanguageExistsInProduct) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Language can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await languageService.getOneAndDelete({ _id });
     if (!deleted) {

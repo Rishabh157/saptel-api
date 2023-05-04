@@ -328,6 +328,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await dealersCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    const isDealerCatExistsInDealer = await productService.findCount({
+      "callScript.language": _id,
+    });
+
+    if (isLanguageExistsInProduct) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Dealer category can't be deleted because it is currently used in other services"
+      );
+    }
     let deleted = await dealersCategoryService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

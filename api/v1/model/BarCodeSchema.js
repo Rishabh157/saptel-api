@@ -4,6 +4,7 @@ const BarCodeSchema = new mongoose.Schema(
   {
     productGroup: { type: ObjectId, required: true, trim: true },
     barcodeNumber: { type: String, required: true, trim: true },
+    barcodeGroupNumber: { type: String, required: true, trim: true },
     companyId: { type: String, required: true, trim: true },
 
     isDeleted: {
@@ -20,6 +21,11 @@ const BarCodeSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["productGroup", "barcodeNumber", "productGroupLabel"];
+const searchKeys = [
+  "productGroup",
+  "barcodeNumber",
+  "productGroupLabel",
+  "barcodeGroupNumber",
+];
 module.exports = mongoose.model("BarCode", BarCodeSchema);
 module.exports.searchKeys = [...searchKeys];
