@@ -281,7 +281,7 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
-        $unset: ["vendors_name", "warehouses_name"],
+        $unset: ["vendors_name", "warehouses_name", "purchaseOrders"],
       },
     ];
 
@@ -432,7 +432,7 @@ exports.get = async (req, res) => {
         },
       },
       {
-        $unset: ["vendors_name", "warehouses_name"],
+        $unset: ["vendors_name", "warehouses_name", "purchaseOrders"],
       },
     ];
     let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
@@ -555,7 +555,7 @@ exports.getById = async (req, res) => {
         },
       },
       {
-        $unset: ["vendors_name", "warehouses_name"],
+        $unset: ["vendors_name", "warehouses_name", "purchaseOrders"],
       },
     ];
     let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
