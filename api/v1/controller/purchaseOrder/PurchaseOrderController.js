@@ -16,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -466,7 +467,7 @@ exports.getById = async (req, res) => {
     let additionalQuery = [
       {
         $match: {
-          _id: idToBeSearch,
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
           isDeleted: false,
         },
       },
