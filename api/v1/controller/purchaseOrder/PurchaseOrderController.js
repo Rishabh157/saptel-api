@@ -44,7 +44,6 @@ exports.add = async (req, res) => {
       };
     });
 
-    console.log(output);
     //------------------create data-------------------
 
     let dataCreated = await purchaseOrderService.createMany(output);
@@ -236,17 +235,11 @@ exports.allFilterPagination = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           purchaseOrder: {
-            $map: {
-              input: "$purchaseOrder",
-              as: "purchaseOrderone",
-              in: {
-                itemName: "",
-                itemId: "$$purchaseOrderone.itemId",
-                rate: "$$purchaseOrderone.rate",
-                quantity: "$$purchaseOrderone.quantity",
-                estReceivingDate: "$$purchaseOrderone.estReceivingDate",
-              },
-            },
+            itemName: "",
+            itemId: "$purchaseOrder.itemId",
+            rate: "$purchaseOrder.rate",
+            quantity: "$purchaseOrder.quantity",
+            estReceivingDate: "$purchaseOrder.estReceivingDate",
           },
         },
       },
@@ -267,33 +260,8 @@ exports.allFilterPagination = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          purchaseOrder: {
-            $map: {
-              input: "$purchaseOrder",
-              as: "purchaseOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$purchaseOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$purchaseOrders",
-                          as: "purchaseOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$purchaseOrdertwo._id" },
-                              { $toString: "$$purchaseOrderone.itemId" },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "purchaseOrder.itemName": {
+            $arrayElemAt: ["$purchaseOrders.itemName", 0],
           },
         },
       },
@@ -387,17 +355,11 @@ exports.get = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           purchaseOrder: {
-            $map: {
-              input: "$purchaseOrder",
-              as: "purchaseOrderone",
-              in: {
-                itemName: "",
-                itemId: "$$purchaseOrderone.itemId",
-                rate: "$$purchaseOrderone.rate",
-                quantity: "$$purchaseOrderone.quantity",
-                estReceivingDate: "$$purchaseOrderone.estReceivingDate",
-              },
-            },
+            itemName: "",
+            itemId: "$purchaseOrder.itemId",
+            rate: "$purchaseOrder.rate",
+            quantity: "$purchaseOrder.quantity",
+            estReceivingDate: "$purchaseOrder.estReceivingDate",
           },
         },
       },
@@ -418,33 +380,8 @@ exports.get = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          purchaseOrder: {
-            $map: {
-              input: "$purchaseOrder",
-              as: "purchaseOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$purchaseOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$purchaseOrders",
-                          as: "purchaseOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$purchaseOrdertwo._id" },
-                              { $toString: "$$purchaseOrderone.itemId" },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "purchaseOrder.itemName": {
+            $arrayElemAt: ["$purchaseOrders.itemName", 0],
           },
         },
       },
@@ -510,17 +447,11 @@ exports.getById = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           purchaseOrder: {
-            $map: {
-              input: "$purchaseOrder",
-              as: "purchaseOrderone",
-              in: {
-                itemName: "",
-                itemId: "$$purchaseOrderone.itemId",
-                rate: "$$purchaseOrderone.rate",
-                quantity: "$$purchaseOrderone.quantity",
-                estReceivingDate: "$$purchaseOrderone.estReceivingDate",
-              },
-            },
+            itemName: "",
+            itemId: "$purchaseOrder.itemId",
+            rate: "$purchaseOrder.rate",
+            quantity: "$purchaseOrder.quantity",
+            estReceivingDate: "$purchaseOrder.estReceivingDate",
           },
         },
       },
@@ -541,33 +472,8 @@ exports.getById = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          purchaseOrder: {
-            $map: {
-              input: "$purchaseOrder",
-              as: "purchaseOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$purchaseOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$purchaseOrders",
-                          as: "purchaseOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$purchaseOrdertwo._id" },
-                              { $toString: "$$purchaseOrderone.itemId" },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "purchaseOrder.itemName": {
+            $arrayElemAt: ["$purchaseOrders.itemName", 0],
           },
         },
       },
