@@ -6,28 +6,27 @@ const PurchaseOrderSchema = new mongoose.Schema(
     vendorId: { type: ObjectId, required: true, trim: true },
     wareHouseId: { type: ObjectId, required: true, trim: true },
     purchaseOrder: {
-      type: [
-        {
-          itemId: {
-            type: ObjectId,
-            required: true,
-            trim: true,
-          },
-          rate: {
-            type: Number,
-            required: true,
-          },
-          quantity: {
-            type: Number,
-            required: true,
-          },
-          estReceivingDate: {
-            type: String,
-            required: true,
-            trim: true,
-          },
+      type: {
+        itemId: {
+          type: ObjectId,
+          required: true,
+          trim: true,
         },
-      ],
+        rate: {
+          type: Number,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        estReceivingDate: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+
       required: true,
     },
     companyId: { type: ObjectId, required: true, trim: true },

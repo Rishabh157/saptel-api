@@ -29,8 +29,25 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    const output = req.body.purchaseOrder.map((order) => {
+      return {
+        poCode: req.body.poCode,
+        vendorId: req.body.vendorId,
+        wareHouseId: req.body.wareHouseId,
+        purchaseOrder: {
+          itemId: order.itemId,
+          rate: order.rate,
+          quantity: order.quantity,
+          estReceivingDate: order.estReceivingDate,
+        },
+        companyId: req.body.companyId,
+      };
+    });
+
+    console.log(output);
     //------------------create data-------------------
-    let dataCreated = await purchaseOrderService.createNewData({ ...req.body });
+
+    let dataCreated = await purchaseOrderService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
