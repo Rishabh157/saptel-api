@@ -8,6 +8,7 @@ const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const AsrRequest = require("../../model/AsrRequestSchema");
 const productService = require("../../services/ProductService");
+const schemeService = require("../../services/SchemeService");
 
 const {
   getSearchQuery,
@@ -326,7 +327,9 @@ exports.deleteDocument = async (req, res) => {
     const isProductCategoryExistsInProduct = await productService.findCount({
       productSubCategory: _id,
     });
-
+    const isProductCategoryExistsInScheme = await schemeService.findCount({
+      subCategory: _id,
+    });
     const canDeleted = await AsrRequest.find({
       isDeleted: false,
       isActive: true,
@@ -336,7 +339,11 @@ exports.deleteDocument = async (req, res) => {
         },
       },
     });
-    if (canDeleted.length || isProductCategoryExistsInProduct) {
+    if (
+      canDeleted.length ||
+      isProductCategoryExistsInProduct ||
+      isProductCategoryExistsInScheme
+    ) {
       throw new ApiError(
         httpStatus.OK,
         "Product Group can't be deleted because it is currently used in other services"

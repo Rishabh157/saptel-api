@@ -7,6 +7,8 @@ const { searchKeys } = require("../../model/ProductCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const productSubCategoryService = require("../../services/ProductSubCategoryService");
+const schemeService = require("../../services/SchemeService");
+const productService = require("../../services/ProductService");
 
 const {
   getSearchQuery,
@@ -332,8 +334,18 @@ exports.deleteDocument = async (req, res) => {
       await productSubCategoryService.findCount({
         parentCategory: _id,
       });
+    const isProductCategoryExistsInScheme = await schemeService.findCount({
+      subCategory: _id,
+    });
+    const isProductCategoryExistsInProduct = await productService.findCount({
+      productSubCategory: _id,
+    });
 
-    if (isProductCategoryExistsInSubCate) {
+    if (
+      isProductCategoryExistsInSubCate ||
+      isProductCategoryExistsInScheme ||
+      isProductCategoryExistsInProduct
+    ) {
       throw new ApiError(
         httpStatus.OK,
         "Product category can't be deleted as it is used in other module"

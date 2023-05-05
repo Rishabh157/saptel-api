@@ -6,6 +6,7 @@ const dealersCategoryService = require("../../services/DealersCategoryService");
 const { searchKeys } = require("../../model/DealersCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const dealerService = require("../../services/DealerService");
 
 const {
   getSearchQuery,
@@ -328,11 +329,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await dealersCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isDealerCatExistsInDealer = await productService.findCount({
-      "callScript.language": _id,
+    const isDealerCatExistsInDealer = await dealerService.findCount({
+      dealersCategory: _id,
     });
 
-    if (isLanguageExistsInProduct) {
+    if (isDealerCatExistsInDealer) {
       throw new ApiError(
         httpStatus.OK,
         "Dealer category can't be deleted because it is currently used in other services"
