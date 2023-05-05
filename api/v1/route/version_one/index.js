@@ -31,6 +31,8 @@ const vendorRoute = require("./VendorRoute");
 const itemRoute = require("./ItemRoute");
 const attributesGroupRoute = require("./AttributesGroupRoute");
 const attributesRoute = require("./AttributesRoute");
+const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
+
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
 const userRoute = require("./UserRoute");
@@ -166,6 +168,11 @@ const defaultRoutes = [
     path: "/purchase-order",
     route: purchaseOrderRoute,
   },
+  {
+    path: "/cartonbox-barcode",
+    route: cartonBoxBarcodeRoute,
+  },
+
   {
     path: "/feature",
     route: featureRoute,

@@ -39,6 +39,13 @@ router.post(
   barCodeController.allFilterPagination
 );
 
+router.post(
+  "/barcode-group",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(barCodeValidation.getAllFilter),
+  barCodeController.allFilterGroupPagination
+);
 /**
  * create new document
  */
