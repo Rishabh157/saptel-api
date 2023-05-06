@@ -42,6 +42,7 @@ const searchKeys = [
   "barcodeGroupNumber",
   "isUsed",
   "companyId",
+  "cartonboxLabel",
 ];
 module.exports = mongoose.model("CartonBoxBarcode", CartonBoxBarcodeSchema);
 module.exports.searchKeys = [...searchKeys];

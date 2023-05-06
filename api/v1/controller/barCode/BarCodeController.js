@@ -402,7 +402,6 @@ exports.allFilterGroupPagination = async (req, res) => {
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
-    console.log(dataFound, "***************");
 
     let { limit, page, totalData, skip, totalpages } =
       await getLimitAndTotalCount(
