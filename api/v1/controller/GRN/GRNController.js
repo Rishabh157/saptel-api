@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const goodReceivedNoteService = require("../../services/GRNService");
 const { searchKeys } = require("../../model/GRNSchema");
-const errorRes = require("../../../utils/resError");
+const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const purchaseOrderService = require("../../services/PurchaseOrderService");
 
@@ -29,7 +29,10 @@ exports.add = async (req, res) => {
      */
 
     await purchaseOrderService.getOneAndUpdate(
-      { poCode: poCode, "purchaseOrder.itemId": itemId },
+      {
+        poCode: poCode,
+        "purchaseOrder.itemId": new mongoose.Types.ObjectId(itemId),
+      },
       { $set: { isEditable: false } }
     );
 
