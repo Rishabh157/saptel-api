@@ -387,26 +387,6 @@ exports.allFilterGroupPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-
-    //-----------------------------------
-    let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
-    if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found`);
-    }
-
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
-    }
     finalAggregateQuery.push({
       $group: {
         _id: "$barcodeGroupNumber",
@@ -417,6 +397,26 @@ exports.allFilterGroupPagination = async (req, res) => {
         productGroupLabel: { $first: "$productGroupLabel" },
       },
     });
+    //-----------------------------------
+    let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+    console.log(dataFound, "***************");
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
     // return res.send(finalAggregateQuery);
     let result = await barCodeService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
