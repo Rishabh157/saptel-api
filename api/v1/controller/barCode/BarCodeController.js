@@ -16,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -495,7 +496,66 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+//get api
+exports.getAllByGroup = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let groupId = req.params.id;
+    let matchQuery = {
+      isDeleted: false,
+      barcodeGroupNumber: groupId,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
 
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroup",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group"] },
+    ];
+
+    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //single view api
 exports.getById = async (req, res) => {
   try {
@@ -503,7 +563,7 @@ exports.getById = async (req, res) => {
     let idToBeSearch = req.params.id;
     let additionalQuery = [
       {
-        _id: idToBeSearch,
+        _id: new mongoose.Types.ObjectId(idToBeSearch),
         isDeleted: false,
       },
       {

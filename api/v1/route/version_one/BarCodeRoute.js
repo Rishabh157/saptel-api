@@ -18,6 +18,16 @@ router.get(
 );
 
 /**
+ * get by groupid
+ */
+router.get(
+  "/all-by-group/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(barCodeValidation.getGroupId),
+  barCodeController.getAllByGroup
+);
+/**
  * get one document
  */
 router.get(

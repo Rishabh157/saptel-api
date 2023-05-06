@@ -96,6 +96,12 @@ const getDocument = {
   }),
 };
 
+const getGroupId = {
+  params: Joi.object().keys({
+    id: Joi.string(),
+  }),
+};
+
 /**
  * delete a document
  */
@@ -121,4 +127,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getGroupId,
 };
