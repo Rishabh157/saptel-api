@@ -6,6 +6,7 @@ const goodReceivedNoteService = require("../../services/GRNService");
 const { searchKeys } = require("../../model/GRNSchema");
 const errorRes = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const purchaseOrderService = require("../../services/PurchaseOrderService");
 
 const {
   getSearchQuery,
@@ -21,16 +22,17 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      poCode,
-      itemName,
-      receivedQuantity,
-      goodQuantity,
-      defectiveQuantity,
-    } = req.body;
+    let { poCode, itemId, receivedQuantity, goodQuantity, defectiveQuantity } =
+      req.body;
     /**
      * check duplicate exist
      */
+
+    await purchaseOrderService.getOneAndUpdate(
+      { poCode: poCode, "purchaseOrder.itemId": itemId },
+      { $set: { isEditable: false } }
+    );
+
     let dataExist = await goodReceivedNoteService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
@@ -64,13 +66,8 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let {
-      poCode,
-      itemName,
-      receivedQuantity,
-      goodQuantity,
-      defectiveQuantity,
-    } = req.body;
+    let { poCode, itemId, receivedQuantity, goodQuantity, defectiveQuantity } =
+      req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -176,7 +173,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["poCode", "itemName"];
+    let numberFileds = ["poCode", "itemId"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
