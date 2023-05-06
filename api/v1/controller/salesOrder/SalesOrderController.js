@@ -16,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -189,8 +190,104 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealer",
+          foreignField: "_id",
+          as: "dealer_name",
+          pipeline: [
+            {
+              $project: {
+                dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+              },
+            },
+            // { $project: { lastName: "$lastName" } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                groupName: "",
+                productGroupId: "$$productSalesOrderone.productGroup",
+                Quantity: "$$productSalesOrderone.quantity",
+                rate: "$$productSalesOrderone.rate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productSalesOrders",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$productSalesOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$productSalesOrders",
+                          as: "productSalesOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$productSalesOrdertwo._id" },
+                              {
+                                $toString:
+                                  "$$productSalesOrderone.productGroupId",
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
 
+      {
+        $unset: ["dealer_name", "warehouses_name", "productSalesOrders"],
+      },
+    ];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
@@ -250,8 +347,107 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealer",
+          foreignField: "_id",
+          as: "dealer_name",
+          pipeline: [
+            {
+              $project: {
+                dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+              },
+            },
+            // { $project: { lastName: "$lastName" } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                groupName: "",
+                productGroupId: "$$productSalesOrderone.productGroup",
+                Quantity: "$$productSalesOrderone.quantity",
+                rate: "$$productSalesOrderone.rate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productSalesOrders",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$productSalesOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$productSalesOrders",
+                          as: "productSalesOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$productSalesOrdertwo._id" },
+                              {
+                                $toString:
+                                  "$$productSalesOrderone.productGroupId",
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
 
-    let dataExist = await salesOrderService.findAllWithQuery(matchQuery);
+      {
+        $unset: ["dealer_name", "warehouses_name", "productSalesOrders"],
+      },
+    ];
+
+    let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -279,18 +475,120 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await salesOrderService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealer",
+          foreignField: "_id",
+          as: "dealer_name",
+          pipeline: [
+            {
+              $project: {
+                dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+              },
+            },
+            // { $project: { lastName: "$lastName" } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                groupName: "",
+                productGroupId: "$$productSalesOrderone.productGroup",
+                Quantity: "$$productSalesOrderone.quantity",
+                rate: "$$productSalesOrderone.rate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productSalesOrders",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$productSalesOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$productSalesOrders",
+                          as: "productSalesOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$productSalesOrdertwo._id" },
+                              {
+                                $toString:
+                                  "$$productSalesOrderone.productGroupId",
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+
+      {
+        $unset: ["dealer_name", "warehouses_name", "productSalesOrders"],
+      },
+    ];
+    let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });

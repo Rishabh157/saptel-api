@@ -1,14 +1,15 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const SalesOrderSchema = new mongoose.Schema(
   {
     soNumber: { type: Number, required: true },
-    dealer: { type: String, required: true, trim: true },
-    wareHouse: { type: String, required: true, trim: true },
+    dealer: { type: ObjectId, required: true, trim: true },
+    wareHouse: { type: ObjectId, required: true, trim: true },
     productSalesOrder: {
       type: [
         {
           productGroup: {
-            type: String,
+            type: ObjectId,
             required: true,
             trim: true,
             lowercase: true,
