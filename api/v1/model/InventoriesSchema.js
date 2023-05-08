@@ -1,9 +1,11 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const InventoriesSchema = new mongoose.Schema(
   {
-    packaging: { type: String, required: true, trim: true },
-    barCode: { type: String, required: true, trim: true, lowercase: true },
-    companyId: { type: String, required: true, trim: true },
+    productGroupName: { type: String, required: true, trim: true },
+    groupBarcodeNumber: { type: String, required: true },
+    barcodeNumber: { type: String, required: true },
+    companyId: { type: ObjectId, required: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -18,6 +20,6 @@ const InventoriesSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["packaging", "barCode"];
+const searchKeys = ["productGroupName", "groupBarcode"];
 module.exports = mongoose.model("Inventories", InventoriesSchema);
 module.exports.searchKeys = [...searchKeys];

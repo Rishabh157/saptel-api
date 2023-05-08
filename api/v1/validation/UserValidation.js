@@ -8,13 +8,14 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    firstName: Joi.string().lowercase(),
+    firstName: Joi.string().lowercase().required(),
     lastName: Joi.string().lowercase().required(),
     mobile: Joi.string()
       .lowercase()
       .custom(commonValidation.indianMobile)
       .required(),
     email: Joi.string().lowercase().required(),
+    userType: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -31,6 +32,7 @@ const update = {
       .custom(commonValidation.indianMobile)
       .required(),
     email: Joi.string().lowercase().required(),
+    userType: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

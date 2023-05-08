@@ -6,6 +6,7 @@ const inventoriesService = require("../../services/InventoriesService");
 const { searchKeys } = require("../../model/InventoriesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const barCodeService = require("../../services/BarCodeService");
 
 const {
   getSearchQuery,
@@ -20,16 +21,40 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { packaging, barCode } = req.body;
+    let { productGroupName, groupBarcodeNumber, barcodeNumber, companyId } =
+      req.body;
+
     /**
      * check duplicate exist
      */
-    let dataExist = await inventoriesService.isExists([]);
+    let dataExist = await inventoriesService.isExists(
+      [{ groupBarcodeNumber }, { barcodeNumber }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    const output = req.body.barcodeNumber.map((barcode) => {
+      return {
+        productGroupName: productGroupName,
+        groupBarcodeNumber: groupBarcodeNumber,
+        barcodeNumber: barcode,
+        companyId: companyId,
+      };
+    });
+    req.body.barcodeNumber.map(async (barcode) => {
+      await barCodeService.getOneAndUpdate(
+        {
+          barcodeNumber: barcode,
+        },
+        { $set: { isUsed: true } }
+      );
+    });
     //------------------create data-------------------
-    let dataCreated = await inventoriesService.createNewData({ ...req.body });
+
+    //------------------create data-------------------
+    let dataCreated = await inventoriesService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -55,7 +80,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { packaging, barCode } = req.body;
+    let { productGroupName, groupBarcodeNumber, barcodeNumber } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -161,7 +186,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["packaging", "barCode"];
+    let numberFileds = [];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -198,7 +223,16 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-
+    finalAggregateQuery.push({
+      $group: {
+        _id: "$groupBarcodeNumber",
+        // data: { $push: "$$ROOT" },
+        groupBarcodeNumber: { $first: "$groupBarcodeNumber" },
+        productGroupName: { $first: "$productGroupName" },
+        companyId: { $first: "$companyId" },
+        count: { $sum: 1 },
+      },
+    });
     //-----------------------------------
     let dataFound = await inventoriesService.aggregateQuery(
       finalAggregateQuery
