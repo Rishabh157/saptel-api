@@ -13,7 +13,7 @@ const inventoryStatus = Object.freeze({
 });
 const inventoryCondition = Object.freeze({
   good: "GOOD",
-  bad: "BAD",
+  defective: "DEFECTIVE",
 });
 
 const companyEnum = Object.freeze({

@@ -18,7 +18,7 @@ const InventoriesSchema = new mongoose.Schema(
     },
     condition: {
       type: String,
-      enum: [inventoryCondition.good, inventoryCondition.bad],
+      enum: [inventoryCondition.good, inventoryCondition.defective],
       trim: true,
       default: inventoryCondition.good,
     },

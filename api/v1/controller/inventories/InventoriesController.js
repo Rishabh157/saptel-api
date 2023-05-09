@@ -41,19 +41,21 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    const output = req.body.barcodeNumber.map((barcode) => {
+    const output = req.body.productDetail.map((barcode) => {
       return {
         productGroupName: productGroupName,
         groupBarcodeNumber: groupBarcodeNumber,
-        barcodeNumber: barcode,
+        barcodeNumber: barcode?.barcodeNumber,
+        status: barcode?.status,
+        condition: barcode?.condition,
         companyId: companyId,
         wareHouse: wareHouse,
       };
     });
-    req.body.barcodeNumber.map(async (barcode) => {
+    req.body.productDetail.map(async (barcode) => {
       await barCodeService.getOneAndUpdate(
         {
-          barcodeNumber: barcode,
+          barcodeNumber: barcode?.barcodeNumber,
         },
         { $set: { isUsed: true } }
       );
