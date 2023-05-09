@@ -11,6 +11,11 @@ const create = {
     productGroupName: Joi.string().lowercase().required(),
     groupBarcodeNumber: Joi.string().required(),
     barcodeNumber: Joi.array().items(Joi.string()).required(),
+    wareHouse: Joi.string().custom(commonValidation.objectId).required(),
+    expiryDate: Joi.string(),
+    quantity: Joi.number(),
+    status: Joi.string(),
+    condition: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -26,6 +31,11 @@ const update = {
     productGroupName: Joi.string().lowercase().required(),
     groupBarcodeNumber: Joi.string().required(),
     barcodeNumber: Joi.array().items(Joi.string()).required(),
+    wareHouse: Joi.string().custom(commonValidation.objectId).required(),
+    expiryDate: Joi.string(),
+    quantity: Joi.number(),
+    status: Joi.string(),
+    condition: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

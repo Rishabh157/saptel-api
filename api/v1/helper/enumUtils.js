@@ -7,6 +7,15 @@ const allFileEnum = Object.freeze({
 const tokenEnum = Object.freeze({ login: "LOGIN", otpverify: "OTP_VERIFY" });
 
 const accountEnum = Object.freeze({ saving: "SAVING", current: "CURRENT" });
+const inventoryStatus = Object.freeze({
+  available: "AVAILABLE",
+  outOfStock: "OUTOFSTOCK",
+});
+const inventoryCondition = Object.freeze({
+  good: "GOOD",
+  bad: "BAD",
+});
+
 const companyEnum = Object.freeze({
   pltc: "Private Limited Company",
   plc: "Public Limited Company",
@@ -51,4 +60,6 @@ module.exports = {
   actionMethodEnum,
   apiAppEnum,
   companyEnum,
+  inventoryStatus,
+  inventoryCondition,
 };

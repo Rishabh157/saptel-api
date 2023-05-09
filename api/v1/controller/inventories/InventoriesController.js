@@ -17,12 +17,18 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroupName, groupBarcodeNumber, barcodeNumber, companyId } =
-      req.body;
+    let {
+      productGroupName,
+      groupBarcodeNumber,
+      barcodeNumber,
+      companyId,
+      wareHouse,
+    } = req.body;
 
     /**
      * check duplicate exist
@@ -41,6 +47,7 @@ exports.add = async (req, res) => {
         groupBarcodeNumber: groupBarcodeNumber,
         barcodeNumber: barcode,
         companyId: companyId,
+        wareHouse: wareHouse,
       };
     });
     req.body.barcodeNumber.map(async (barcode) => {
@@ -214,7 +221,33 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "wareHouse_name",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          wareHouseLabel: {
+            $arrayElemAt: ["$wareHouse_name.wareHouseName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["wareHouse_name"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -229,8 +262,10 @@ exports.allFilterPagination = async (req, res) => {
         // data: { $push: "$$ROOT" },
         groupBarcodeNumber: { $first: "$groupBarcodeNumber" },
         productGroupName: { $first: "$productGroupName" },
-        companyId: { $first: "$companyId" },
+        wareHouse: { $first: "$wareHouseLabel" },
+
         count: { $sum: 1 },
+        companyId: { $first: "$companyId" },
       },
     });
     //-----------------------------------
@@ -286,8 +321,35 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
-    let dataExist = await inventoriesService.findAllWithQuery(matchQuery);
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "wareHouse_name",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          wareHouseLabel: {
+            $arrayElemAt: ["$wareHouse_name.wareHouseName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["wareHouse_name"],
+      },
+    ];
+    let dataExist = await inventoriesService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -315,18 +377,48 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await inventoriesService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "wareHouse_name",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          wareHouseLabel: {
+            $arrayElemAt: ["$wareHouse_name.wareHouseName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["wareHouse_name"],
+      },
+    ];
+    let dataExist = await inventoriesService.aggregateQuery(additionalQuery);
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
