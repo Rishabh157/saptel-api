@@ -74,38 +74,58 @@ exports.update = async (req, res) => {
   try {
     let { poCode, vendorId, wareHouseId, purchaseOrder } = req.body;
 
-    let idToBeSearch = req.params.id;
-    let dataExist = await purchaseOrderService.isExists(
-      [{ poCode }],
-      idToBeSearch
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+    // let idToBeSearch = req.params.id;
+    // let dataExist = await purchaseOrderService.isExists(
+    //   [{ poCode }],
+    //   idToBeSearch
+    // );
+    // if (dataExist.exists && dataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    // }
+
     //------------------Find data-------------------
-    let datafound = await purchaseOrderService.getOneByMultiField({
-      _id: idToBeSearch,
-    });
-    if (!datafound) {
-      throw new ApiError(httpStatus.OK, `PurchaseOrder not found.`);
-    }
-
-    let dataUpdated = await purchaseOrderService.getOneAndUpdate(
-      {
-        _id: idToBeSearch,
-        isDeleted: false,
-      },
-      {
-        $set: {
-          ...req.body,
+    // let datafound = await purchaseOrderService.getOneByMultiField({
+    //   _id: idToBeSearch,
+    // });
+    // if (!datafound) {
+    //   throw new ApiError(httpStatus.OK, `PurchaseOrder not found.`);
+    // }
+    const output = purchaseOrder.map((order) => {
+      return {
+        poCode: req.body.poCode,
+        vendorId: req.body.vendorId,
+        wareHouseId: req.body.wareHouseId,
+        purchaseOrder: {
+          id: order.id,
+          itemId: order.itemId,
+          rate: order.rate,
+          quantity: order.quantity,
+          estReceivingDate: order.estReceivingDate,
         },
-      }
-    );
+        companyId: req.body.companyId,
+      };
+    });
+    const updatedData = [];
+    for (let each in output) {
+      const dataUpdated = await purchaseOrderService.getOneAndUpdate(
+        {
+          _id: output[each].purchaseOrder.id,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            ...output[each],
+          },
+        }
+      );
+      updatedData.push(dataUpdated);
+    }
+    //------------------create data-------------------
 
-    if (dataUpdated) {
+    if (updatedData.length) {
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
-        data: dataUpdated,
+        data: updatedData,
         status: true,
         code: null,
         issue: null,
@@ -328,6 +348,96 @@ exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
     let matchQuery = { isDeleted: false };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendors_name",
+          pipeline: [{ $project: { companyName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          purchaseOrder: {
+            itemName: "",
+            itemId: "$purchaseOrder.itemId",
+            rate: "$purchaseOrder.rate",
+            quantity: "$purchaseOrder.quantity",
+            estReceivingDate: "$purchaseOrder.estReceivingDate",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "purchaseOrder.itemId",
+          foreignField: "_id",
+          as: "purchaseOrders",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          vendorLabel: {
+            $arrayElemAt: ["$vendors_name.companyName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          "purchaseOrder.itemName": {
+            $arrayElemAt: ["$purchaseOrders.itemName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["vendors_name", "warehouses_name", "purchaseOrders"],
+      },
+    ];
+    let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//get api
+exports.getByPoCode = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let poCodeToBeSearch = req.params.pocode;
+    let matchQuery = { isDeleted: false, poCode: poCodeToBeSearch };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

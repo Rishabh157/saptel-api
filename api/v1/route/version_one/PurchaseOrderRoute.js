@@ -19,6 +19,14 @@ router.get(
   validate(purchaseOrderValidation.get),
   purchaseOrderController.get
 );
+// get by pocode
+router.get(
+  "/get-by-po/:pocode",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(purchaseOrderValidation.get),
+  purchaseOrderController.getByPoCode
+);
 
 /**
  * get one document

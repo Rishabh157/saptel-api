@@ -86,6 +86,14 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
     { new: true }
   );
 };
+
+const updateMany = async (matchObj, updateBody) => {
+  return PurchaseOrder.updateMany(
+    { ...matchObj, isDeleted: false },
+    { ...updateBody },
+    { new: true }
+  );
+};
 //-------------------------------------------
 /**
  * Delete by id
@@ -221,4 +229,5 @@ module.exports = {
   createMany,
   findCount,
   isExists,
+  updateMany,
 };
