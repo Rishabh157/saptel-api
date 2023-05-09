@@ -12,6 +12,7 @@ const create = {
     barcodeNumber: Joi.string().lowercase().required(),
     barcodeGroupNumber: Joi.string().lowercase().required(),
     isUsed: Joi.boolean(),
+    cartonBoxItems: Joi.array().items(Joi.string()),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -28,6 +29,7 @@ const update = {
     barcodeNumber: Joi.string().lowercase().required(),
     barcodeGroupNumber: Joi.string().lowercase().required(),
     isUsed: Joi.boolean(),
+    cartonBoxItems: Joi.array().items(Joi.string()),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

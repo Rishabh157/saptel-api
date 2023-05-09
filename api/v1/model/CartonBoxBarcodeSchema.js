@@ -21,6 +21,7 @@ const CartonBoxBarcodeSchema = new mongoose.Schema(
       lowercase: true,
     },
     isUsed: { type: Boolean, default: false },
+    cartonBoxItems: { type: [String], required: true },
     companyId: { type: ObjectId, required: true, trim: true, lowercase: true },
     isDeleted: {
       type: Boolean,

@@ -8,7 +8,7 @@ const SalesOrderSchema = new mongoose.Schema(
     productSalesOrder: {
       type: [
         {
-          productGroup: {
+          productGroupId: {
             type: ObjectId,
             required: true,
             trim: true,

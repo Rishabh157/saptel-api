@@ -226,7 +226,7 @@ exports.allFilterPagination = async (req, res) => {
               in: {
                 groupName: "",
                 productGroupId: "$$productSalesOrderone.productGroup",
-                Quantity: "$$productSalesOrderone.quantity",
+                quantity: "$$productSalesOrderone.quantity",
                 rate: "$$productSalesOrderone.rate",
               },
             },
@@ -384,7 +384,7 @@ exports.get = async (req, res) => {
               in: {
                 groupName: "",
                 productGroupId: "$$productSalesOrderone.productGroup",
-                Quantity: "$$productSalesOrderone.quantity",
+                quantity: "$$productSalesOrderone.quantity",
                 rate: "$$productSalesOrderone.rate",
               },
             },
@@ -518,7 +518,7 @@ exports.getById = async (req, res) => {
               in: {
                 groupName: "",
                 productGroupId: "$$productSalesOrderone.productGroup",
-                Quantity: "$$productSalesOrderone.quantity",
+                quantity: "$$productSalesOrderone.quantity",
                 rate: "$$productSalesOrderone.rate",
               },
             },

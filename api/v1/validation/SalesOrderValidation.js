@@ -12,7 +12,7 @@ const create = {
     dealer: Joi.string().custom(commonValidation.objectId).required(),
     wareHouse: Joi.string().custom(commonValidation.objectId).required(),
     productSalesOrder: Joi.array().items({
-      productGroup: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       rate: Joi.number().required(),
       quantity: Joi.number().required(),
     }),
@@ -32,7 +32,7 @@ const update = {
     dealer: Joi.string().custom(commonValidation.objectId).required(),
     wareHouse: Joi.string().custom(commonValidation.objectId).required(),
     productSalesOrder: Joi.array().items({
-      productGroup: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       rate: Joi.number().required(),
       quantity: Joi.number().required(),
     }),
