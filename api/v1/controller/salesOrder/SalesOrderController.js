@@ -471,6 +471,138 @@ exports.get = async (req, res) => {
 };
 
 //single view api
+exports.getByDealerId = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+
+    let additionalQuery = [
+      {
+        $match: {
+          dealer: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealer",
+          foreignField: "_id",
+          as: "dealer_name",
+          pipeline: [
+            {
+              $project: {
+                dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+              },
+            },
+            // { $project: { lastName: "$lastName" } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouse",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                groupName: "",
+                productGroupId: "$$productSalesOrderone.productGroupId",
+                quantity: "$$productSalesOrderone.quantity",
+                rate: "$$productSalesOrderone.rate",
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productSalesOrders",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          productSalesOrder: {
+            $map: {
+              input: "$productSalesOrder",
+              as: "productSalesOrderone",
+              in: {
+                $mergeObjects: [
+                  "$$productSalesOrderone",
+                  {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$productSalesOrders",
+                          as: "productSalesOrdertwo",
+                          cond: {
+                            $eq: [
+                              { $toString: "$$productSalesOrdertwo._id" },
+                              {
+                                $toString:
+                                  "$$productSalesOrderone.productGroupId",
+                              },
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+
+      {
+        $unset: ["dealer_name", "warehouses_name", "productSalesOrders"],
+      },
+    ];
+    let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+//single view api
 exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}

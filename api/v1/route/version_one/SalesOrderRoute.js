@@ -31,6 +31,16 @@ router.get(
   salesOrderController.getById
 );
 /**
+ * get by dealer id
+ */
+router.get(
+  "/get-by-dealer/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(salesOrderValidation.getDocument),
+  salesOrderController.getByDealerId
+);
+/**
  * get all salesOrder pagination filter
  */
 
