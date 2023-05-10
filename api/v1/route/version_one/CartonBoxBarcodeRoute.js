@@ -19,6 +19,17 @@ router.get(
   validate(cartonBoxBarcodeValidation.get),
   cartonBoxBarcodeController.get
 );
+
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/get-by-box/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(cartonBoxBarcodeValidation.get),
+  cartonBoxBarcodeController.getByBoxId
+);
 /**
  * get all cartonBoxBarcode pagination filter
  */

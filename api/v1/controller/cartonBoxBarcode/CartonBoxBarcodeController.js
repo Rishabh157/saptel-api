@@ -245,6 +245,19 @@ exports.allFilterPagination = async (req, res) => {
       $match: matchQuery,
     });
 
+    finalAggregateQuery.push({
+      $group: {
+        _id: "$barcodeNumber",
+        barcodeNumber: { $first: "$barcodeNumber" },
+        cartonBoxId: { $first: "$cartonBoxId" },
+        barcodeGroupNumber: { $first: "$barcodeGroupNumber" },
+        cartonboxLabel: { $first: "$cartonboxLabel" },
+        isUsed: { $first: "$isUsed" },
+        createdAt: { $first: "$createdAt" },
+        companyId: { $first: "$companyId" },
+      },
+    });
+
     //-----------------------------------
     let dataFound = await cartonBoxBarcodeService.aggregateQuery(
       finalAggregateQuery
@@ -338,6 +351,65 @@ exports.get = async (req, res) => {
       //     count: 1,
       //   },
       // },
+    ];
+
+    let dataExist = await cartonBoxBarcodeService.aggregateQuery(
+      additionalQuery
+    );
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//get api
+exports.getByBoxId = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let boxId = req.params.id;
+    let matchQuery = { isDeleted: false, barcodeNumber: boxId };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "cartonboxes",
+          localField: "cartonBoxId",
+          foreignField: "_id",
+          as: "carton_box",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { boxName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          cartonboxLabel: {
+            $arrayElemAt: ["$carton_box.boxName", 0],
+          },
+        },
+      },
+      { $unset: ["carton_box"] },
     ];
 
     let dataExist = await cartonBoxBarcodeService.aggregateQuery(
