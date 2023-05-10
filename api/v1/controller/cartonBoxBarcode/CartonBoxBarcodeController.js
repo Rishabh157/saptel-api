@@ -253,6 +253,7 @@ exports.allFilterPagination = async (req, res) => {
         barcodeGroupNumber: { $first: "$barcodeGroupNumber" },
         cartonboxLabel: { $first: "$cartonboxLabel" },
         isUsed: { $first: "$isUsed" },
+        count: { $sum: 1 },
         createdAt: { $first: "$createdAt" },
         companyId: { $first: "$companyId" },
       },
