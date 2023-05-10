@@ -588,7 +588,7 @@ exports.getByDealerId = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: dataExist,
         code: null,
         issue: null,
       });
