@@ -6,6 +6,8 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/CompanySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const userService = require("../../services/UserService");
+const adminService = require("../../services/AdminService");
 
 const {
   getSearchQuery,
@@ -345,6 +347,19 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await companyService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isCompanyAssigned = await userService.findCount({
+      companyId: _id,
+    });
+    const isCompanyAssignedToAdmin = await adminService.findCount({
+      companyId: _id,
+    });
+
+    if (isCompanyAssigned || isCompanyAssignedToAdmin) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Company can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await companyService.getOneAndDelete({ _id });
     if (!deleted) {
