@@ -29,7 +29,7 @@ exports.add = async (req, res) => {
       productGroup,
       productWeight,
       dimension,
-      productImage,
+      // productImage,
       description,
       item,
       tax,

@@ -21,7 +21,7 @@ const create = {
       width: Joi.number().required(),
       depth: Joi.number().required(),
     }),
-    productImage: Joi.string().uri().required(),
+    // productImage: Joi.string().uri().required(),
     description: Joi.string().lowercase().required(),
     item: Joi.array().items({
       itemId: Joi.string().custom(commonValidation.objectId).required(),
@@ -68,7 +68,7 @@ const update = {
       width: Joi.number().required(),
       depth: Joi.number().required(),
     }),
-    productImage: Joi.string().uri().required(),
+    // productImage: Joi.string().uri().required(),
     description: Joi.string().lowercase().required(),
     item: Joi.array().items({
       itemId: Joi.string().custom(commonValidation.objectId).required(),

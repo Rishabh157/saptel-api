@@ -36,7 +36,7 @@ const ProductSchema = new mongoose.Schema(
 
       required: true,
     },
-    productImage: { type: String, required: true, trim: true },
+    // productImage: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true, lowercase: true },
     item: {
       type: [
@@ -153,7 +153,7 @@ const searchKeys = [
   "productGroup",
   "productWeight",
   "dimension",
-  "productImage",
+  // "productImage",
   "description",
   "item",
   "tax",

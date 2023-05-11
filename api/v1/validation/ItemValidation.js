@@ -11,7 +11,7 @@ const create = {
     itemCode: Joi.string().required(),
     itemName: Joi.string().lowercase().required(),
     itemWeight: Joi.number().required(),
-    itemImage: Joi.string().uri().required(),
+    // itemImage: Joi.string().uri().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -27,7 +27,7 @@ const update = {
     itemCode: Joi.string().required(),
     itemName: Joi.string().lowercase().required(),
     itemWeight: Joi.number().required(),
-    itemImage: Joi.string().uri().required(),
+    // itemImage: Joi.string().uri().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
