@@ -195,6 +195,7 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
+    console.log(dataFound);
     let {
       _id: userId,
       userType,
@@ -232,6 +233,7 @@ exports.login = async (req, res) => {
         email: email,
         mobile: mobile,
         userName: userName,
+        userType: userType,
         companyId: companyId,
       },
       status: true,
@@ -445,6 +447,71 @@ exports.update = async (req, res) => {
 };
 /*********************************************************************/
 
+exports.updateCompany = async (req, res) => {
+  try {
+    let { companyId } = req.body;
+    let { Id: loggedInUserId, userType } = req.userData;
+    if (userType === userEnum.user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "AUTHORIZATION_FAILED");
+    }
+    let idToBeSearch = req.params.id;
+    // userType === userEnum.admin
+    //   ? loggedInUserId
+    //   : req.params && req.params.id && userType === userEnum.superAdmin
+    //   ? req.params.id
+    //   : loggedInUserId;
+
+    if (!idToBeSearch) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Invalid request, Unable to find user's unique id in the request."
+      );
+    }
+
+    /**
+     * check duplicate exist
+     */
+
+    //------------------Find data-------------------
+    let datafound = await adminService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `User not found.`);
+    }
+
+    let dataUpdated = await adminService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          companyId: companyId,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      return res.status(httpStatus.CREATED).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: null,
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 /**
  * all filter pagination api
  * @param {*} req

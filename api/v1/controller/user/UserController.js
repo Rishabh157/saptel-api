@@ -454,6 +454,7 @@ exports.login = async (req, res) => {
         fullName: `${firstName} ${lastName}`,
         email: email,
         mobile: mobile,
+        userType: userType,
       },
       status: true,
       code: null,

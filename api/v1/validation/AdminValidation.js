@@ -40,6 +40,15 @@ const updateValid = {
   }),
 };
 
+const updateCompanyValid = {
+  params: Joi.object().keys({
+    id: Joi.custom(commonValidation.objectId).required(),
+  }),
+  body: Joi.object().keys({
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 /**
  * filter pagination
  */
@@ -172,4 +181,5 @@ module.exports = {
   changeStatus,
   refreshTokenValid,
   changePasswordValid,
+  updateCompanyValid,
 };

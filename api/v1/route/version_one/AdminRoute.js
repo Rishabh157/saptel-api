@@ -119,8 +119,8 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(adminValidation.updateValid),
-  adminController.update
+  validate(adminValidation.updateCompanyValid),
+  adminController.updateCompany
 );
 
 module.exports = router;
