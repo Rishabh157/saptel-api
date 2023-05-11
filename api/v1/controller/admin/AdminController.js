@@ -373,17 +373,17 @@ exports.verifyOtp = async (req, res) => {
  */
 exports.update = async (req, res) => {
   try {
-    let { firstName, lastName, mobile, email } = req.body;
+    let { firstName, lastName, mobile, email, companyId, userName } = req.body;
     let { Id: loggedInUserId, userType } = req.userData;
     if (userType === userEnum.user) {
       throw new ApiError(httpStatus.UNAUTHORIZED, "AUTHORIZATION_FAILED");
     }
-    let idToBeSearch =
-      userType === userEnum.admin
-        ? loggedInUserId
-        : req.params && req.params.id && userType === userEnum.superAdmin
-        ? req.params.id
-        : loggedInUserId;
+    let idToBeSearch = req.params.id;
+    // userType === userEnum.admin
+    //   ? loggedInUserId
+    //   : req.params && req.params.id && userType === userEnum.superAdmin
+    //   ? req.params.id
+    //   : loggedInUserId;
 
     if (!idToBeSearch) {
       throw new ApiError(
@@ -397,7 +397,7 @@ exports.update = async (req, res) => {
      */
     let dataExist = await adminService.isExists(
       [{ userName }, { email }, { mobile }],
-      [idToBeSearch]
+      idToBeSearch
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);

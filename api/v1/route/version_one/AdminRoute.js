@@ -114,5 +114,13 @@ router.delete(
   validate(adminValidation.deleteDocument),
   adminController.deleteDocument
 );
+//update
+router.put(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(adminValidation.updateValid),
+  adminController.update
+);
 
 module.exports = router;
