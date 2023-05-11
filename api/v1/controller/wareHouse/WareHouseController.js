@@ -134,7 +134,7 @@ exports.allFilterPagination = async (req, res) => {
       : true;
     let finalAggregateQuery = [];
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [{ isDeleted: false, vendorId: null, dealerId: null }],
     };
     /**
      * to send only active data on web
