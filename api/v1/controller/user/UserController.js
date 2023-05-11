@@ -9,7 +9,11 @@ const { getQuery } = require("../../helper/utils");
 const bcryptjs = require("bcryptjs");
 const otpHelper = require("../otp/OtpHelper");
 const { sendMsg91Function } = require("../../helper/msgHelper");
-const { tokenCreate, otpTokenCreate } = require("../../helper/tokenCreate");
+const {
+  tokenCreate,
+  otpTokenCreate,
+  refreshTokenCreate,
+} = require("../../helper/tokenCreate");
 const { isAfter } = require("date-fns");
 const bcrypt = require("bcrypt");
 
@@ -28,7 +32,7 @@ const { userEnum } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { firstName, lastName, mobile, email } = req.body;
+    let { firstName, lastName, mobile, email, companyId } = req.body;
 
     /**
      * check duplicate exist
@@ -37,52 +41,29 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    // let randomPassword = generateRandomPassword();
+    let hashedPassword = await bcryptjs.hash(mobile, 12);
+    if (!hashedPassword) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Something went wrong with the password.`
+      );
+    }
+    // req.body["password"] = hashedPassword;
+    let dataToUpload = { ...req.body, password: hashedPassword };
+    console.log(dataToUpload);
     //------------------create data-------------------
-    let dataCreated = await userService.createNewData({ ...req.body });
+    let dataCreated = await userService.createNewData({ ...dataToUpload });
 
     if (dataCreated) {
-      let { _id: userId, userType } = dataCreated;
-      let msg91Data = {
-        flow_id: config.msg_login_otp,
-        sender: config.msg_sender_id,
-        mobiles: "91" + mobile,
-        OTP: "",
-      };
-
-      /**
-       * function to find not used otp or create a new one
-       */
-
-      let otpReceived = await otpHelper.getOtp(userId.toString(), userType);
-      if (!otpReceived || !otpReceived.status) {
-        throw new ApiError(httpStatus.OK, otpReceived?.message);
-      }
-      let otpData = otpReceived.data;
-      msg91Data.OTP = otpData.otp;
-
-      //   let msgSent = await sendMsg91Function(msg91Data)
-      //   if (!msgSent || !msgSent.sendStatus) {
-      //     throw new ApiError(
-      //       httpStatus.OK,
-      //       "Couldn't send otp on entered mobile number. Please try again."
-      //     )
-      //   }
-
-      let token = await otpTokenCreate(dataCreated);
-      if (!token) {
-        throw new ApiError(
-          httpStatus.OK,
-          "Something went wrong while sending otp. Please try again later."
-        );
-      }
-
       return res.status(httpStatus.CREATED).send({
-        message: `Otp sent mobile number ${mobile} successfully. Please verify.`,
+        message: `User added successfull`,
         data: {
-          token: token,
           fullName: `${firstName} ${lastName}`,
           email: email,
           mobile: mobile,
+          companyId: companyId,
+          userType: userEnum.user,
         },
         status: true,
         code: null,
@@ -437,10 +418,24 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-    let { _id: userId, userType, mobile, firstName, lastName } = dataFound;
+    let {
+      _id: userId,
+      userType,
+      mobile,
+      firstName,
+      lastName,
+      companyId,
+    } = dataFound;
 
     let token = await tokenCreate(dataFound);
     if (!token) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let refreshToken = await refreshTokenCreate(dataFound);
+    if (!refreshToken) {
       throw new ApiError(
         httpStatus.OK,
         "Something went wrong. Please try again later."
@@ -451,10 +446,13 @@ exports.login = async (req, res) => {
       message: `Login successful!`,
       data: {
         token: token,
+        refreshToken: refreshToken,
+        userId: userId,
         fullName: `${firstName} ${lastName}`,
         email: email,
         mobile: mobile,
         userType: userType,
+        companyId: companyId,
       },
       status: true,
       code: null,
