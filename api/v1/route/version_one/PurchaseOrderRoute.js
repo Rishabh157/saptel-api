@@ -27,6 +27,14 @@ router.get(
   validate(purchaseOrderValidation.get),
   purchaseOrderController.getByPoCode
 );
+// get by vendor id
+router.get(
+  "/get-by-vendor/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(purchaseOrderValidation.getDocument),
+  purchaseOrderController.getByVendorId
+);
 
 /**
  * get one document

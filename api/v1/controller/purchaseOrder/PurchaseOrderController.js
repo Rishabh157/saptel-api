@@ -521,6 +521,96 @@ exports.getByPoCode = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+exports.getByVendorId = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let vendorToBeSearch = req.params.id;
+
+    let additionalQuery = [
+      {
+        $match: {
+          vendorId: new mongoose.Types.ObjectId(vendorToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "vendors",
+          localField: "vendorId",
+          foreignField: "_id",
+          as: "vendors_name",
+          pipeline: [{ $project: { companyName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          purchaseOrder: {
+            itemName: "",
+            itemId: "$purchaseOrder.itemId",
+            rate: "$purchaseOrder.rate",
+            quantity: "$purchaseOrder.quantity",
+            estReceivingDate: "$purchaseOrder.estReceivingDate",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "purchaseOrder.itemId",
+          foreignField: "_id",
+          as: "purchaseOrders",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          vendorLabel: {
+            $arrayElemAt: ["$vendors_name.companyName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          "purchaseOrder.itemName": {
+            $arrayElemAt: ["$purchaseOrders.itemName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["vendors_name", "warehouses_name", "purchaseOrders"],
+      },
+    ];
+    let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 
 //single view api
 exports.getById = async (req, res) => {
