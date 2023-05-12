@@ -350,9 +350,11 @@ exports.deleteDocument = async (req, res) => {
     }
     const isCompanyAssigned = await userService.findCount({
       companyId: _id,
+      isDeleted: false,
     });
     const isCompanyAssignedToAdmin = await adminService.findCount({
       companyId: _id,
+      isDeleted: false,
     });
 
     if (isCompanyAssigned || isCompanyAssignedToAdmin) {

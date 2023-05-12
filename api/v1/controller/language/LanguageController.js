@@ -321,6 +321,7 @@ exports.deleteDocument = async (req, res) => {
     }
     const isLanguageExistsInProduct = await productService.findCount({
       "callScript.language": _id,
+      isDeleted: false,
     });
 
     if (isLanguageExistsInProduct) {

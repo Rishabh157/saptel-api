@@ -333,12 +333,15 @@ exports.deleteDocument = async (req, res) => {
     const isProductCategoryExistsInSubCate =
       await productSubCategoryService.findCount({
         parentCategory: _id,
+        isDeleted: false,
       });
     const isProductCategoryExistsInScheme = await schemeService.findCount({
       subCategory: _id,
+      isDeleted: false,
     });
     const isProductCategoryExistsInProduct = await productService.findCount({
       productSubCategory: _id,
+      isDeleted: false,
     });
 
     if (

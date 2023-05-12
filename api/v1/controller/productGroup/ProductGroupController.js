@@ -326,9 +326,11 @@ exports.deleteDocument = async (req, res) => {
     }
     const isProductCategoryExistsInProduct = await productService.findCount({
       productSubCategory: _id,
+      isDeleted: false,
     });
     const isProductCategoryExistsInScheme = await schemeService.findCount({
       subCategory: _id,
+      isDeleted: false,
     });
     const canDeleted = await AsrRequest.find({
       isDeleted: false,

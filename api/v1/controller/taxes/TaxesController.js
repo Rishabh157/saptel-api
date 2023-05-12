@@ -319,9 +319,11 @@ exports.deleteDocument = async (req, res) => {
     }
     const isTaxExists = await productSubCategoryService.findCount({
       applicableTaxes: _id,
+      isDeleted: false,
     });
     const isTaxExistsInProduct = await productService.findCount({
       "tax.taxId": _id,
+      isDeleted: false,
     });
 
     if (isTaxExists || isTaxExistsInProduct) {

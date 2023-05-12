@@ -694,6 +694,7 @@ exports.deleteDocument = async (req, res) => {
     }
     const isVendorExistsInPo = await purchaseOrderService.findCount({
       vendorId: _id,
+      isDeleted: false,
     });
 
     if (isVendorExistsInPo) {

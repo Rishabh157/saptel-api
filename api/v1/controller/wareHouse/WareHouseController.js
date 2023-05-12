@@ -727,6 +727,7 @@ exports.deleteDocument = async (req, res) => {
     }
     const isWareHouseExistsInPo = await purchaseOrderService.findCount({
       wareHouseId: _id,
+      isDeleted: false,
     });
 
     if (isWareHouseExistsInPo) {

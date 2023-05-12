@@ -320,9 +320,11 @@ exports.deleteDocument = async (req, res) => {
     }
     const isItemExistsInPo = await purchaseOrderService.findCount({
       "purchaseOrder.itemId": _id,
+      isDeleted: false,
     });
     const isItemExistsInProduct = await productService.findCount({
       "item.itemId": _id,
+      isDeleted: false,
     });
 
     if (isItemExistsInPo || isItemExistsInProduct) {

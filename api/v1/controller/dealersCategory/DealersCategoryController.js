@@ -331,6 +331,7 @@ exports.deleteDocument = async (req, res) => {
     }
     const isDealerCatExistsInDealer = await dealerService.findCount({
       dealersCategory: _id,
+      isDeleted: false,
     });
 
     if (isDealerCatExistsInDealer) {
