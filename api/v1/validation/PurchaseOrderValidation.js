@@ -18,6 +18,7 @@ const create = {
       estReceivingDate: Joi.string().required(),
     }),
     isEditable: Joi.boolean(),
+
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -41,10 +42,27 @@ const update = {
       estReceivingDate: Joi.string().required(),
     }),
     isEditable: Joi.boolean(),
+
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
+/**
+ * update po approval level
+ */
+const updateApproval = {
+  params: Joi.object().keys({
+    id: Joi.required().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    approval: Joi.object().keys({
+      approvalLevel: Joi.number().required(),
+      approvalByName: Joi.string().required(),
+      approvalById: Joi.string().required(),
+      time: Joi.string().required(),
+    }),
+  }),
+};
 /**
  * filter and pagination api
  */
@@ -134,4 +152,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  updateApproval,
 };

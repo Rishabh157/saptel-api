@@ -21,6 +21,22 @@ const create = {
 };
 
 /**
+ * update po approval level
+ */
+const updateApproval = {
+  params: Joi.object().keys({
+    id: Joi.required().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    approval: Joi.object().keys({
+      approvalLevel: Joi.number().required(),
+      approvalByName: Joi.string().required(),
+      approvalById: Joi.string().required(),
+      time: Joi.string().required(),
+    }),
+  }),
+};
+/**
  * update existing document
  */
 const update = {
@@ -128,4 +144,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  updateApproval,
 };

@@ -52,6 +52,14 @@ router.post(
   salesOrderController.allFilterPagination
 );
 
+// update approval status
+router.put(
+  "/approval-level/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(salesOrderValidation.updateApproval),
+  salesOrderController.updateLevel
+);
 /**
  * create new document
  */

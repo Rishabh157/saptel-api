@@ -78,6 +78,15 @@ router.put(
   validate(purchaseOrderValidation.update),
   purchaseOrderController.update
 );
+
+// update approval status
+router.put(
+  "/approval-level/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(purchaseOrderValidation.updateApproval),
+  purchaseOrderController.updateLevel
+);
 /**
  * update status
  */

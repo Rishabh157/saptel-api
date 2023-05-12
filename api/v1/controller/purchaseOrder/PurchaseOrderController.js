@@ -143,6 +143,69 @@ exports.update = async (req, res) => {
   }
 };
 
+//update start
+exports.updateLevel = async (req, res) => {
+  try {
+    let { approval } = req.body;
+
+    let idToBeSearch = req.params.id;
+    // let dataExist = await purchaseOrderService.isExists(
+    //   [{ poCode }],
+    //   idToBeSearch
+    // );
+    // if (dataExist.exists && dataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    // }
+
+    //------------------Find data-------------------
+    let datafound = await purchaseOrderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `PurchaseOrder not found.`);
+    }
+    const dataToPush = {
+      approvalLevel: approval.approvalLevel,
+      approvalByName: approval.approvalByName,
+      approvalById: approval.approvalById,
+      time: approval.time,
+    };
+
+    const dataUpdated = await purchaseOrderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $push: {
+          approval: dataToPush,
+        },
+      }
+    );
+
+    //------------------create data-------------------
+
+    if (dataUpdated) {
+      return res.status(httpStatus.CREATED).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: null,
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {

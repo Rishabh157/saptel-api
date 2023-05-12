@@ -33,6 +33,35 @@ const PurchaseOrderSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    approval: {
+      type: [
+        {
+          approvalLevel: {
+            type: Number,
+            required: true,
+          },
+
+          approvalByName: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+          approvalById: {
+            type: ObjectId,
+            required: true,
+          },
+          time: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+        },
+      ],
+      default: [],
+    },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,

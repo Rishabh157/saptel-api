@@ -26,6 +26,34 @@ const SalesOrderSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    approval: {
+      type: [
+        {
+          approvalLevel: {
+            type: Number,
+            required: true,
+          },
+
+          approvalByName: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+          approvalById: {
+            type: ObjectId,
+            required: true,
+          },
+          time: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+        },
+      ],
+      default: [],
+    },
     companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
