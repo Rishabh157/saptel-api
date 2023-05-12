@@ -164,6 +164,9 @@ exports.updateLevel = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `PurchaseOrder not found.`);
     }
+    if (datafound.approval.length >= 2) {
+      throw new ApiError(httpStatus.OK, `Can't add another`);
+    }
     const dataToPush = {
       approvalLevel: approval.approvalLevel,
       approvalByName: approval.approvalByName,
