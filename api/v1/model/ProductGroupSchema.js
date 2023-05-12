@@ -7,7 +7,7 @@ const ProductGroupSchema = new mongoose.Schema(
       type: [
         {
           taxName: {
-            type: ObjectId,
+            type: String,
             required: true,
             trim: true,
           },

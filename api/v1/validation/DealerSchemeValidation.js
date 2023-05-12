@@ -8,11 +8,10 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    groupName: Joi.string().lowercase().required(),
-    tax: Joi.array().items({
-      taxName: Joi.string().required(),
-      taxPercent: Joi.number().required(),
-    }),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    schemeId: Joi.array().items(
+      Joi.custom(commonValidation.objectId).required()
+    ),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -25,11 +24,8 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    groupName: Joi.string().lowercase().required(),
-    tax: Joi.array().items({
-      taxName: Joi.string().required(),
-      taxPercent: Joi.number().required(),
-    }),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -85,18 +81,11 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      groupName: Joi.string().optional(),
+      dealerId: Joi.string().optional(),
     })
     .optional(),
 };
-/**
- * get a document
- */
-const getDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
+
 /**
  * delete a document
  */
@@ -121,5 +110,4 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getDocument,
 };
