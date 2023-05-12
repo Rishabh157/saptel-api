@@ -32,7 +32,7 @@ exports.add = async (req, res) => {
       // productImage,
       description,
       item,
-      tax,
+      // tax,
       faq,
       video,
       callScript,
@@ -84,7 +84,7 @@ exports.update = async (req, res) => {
       dimension,
       description,
       item,
-      tax,
+      // tax,
       faq,
       video,
       callScript,
@@ -282,31 +282,31 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [{ $project: { itemName: 1 } }],
         },
       },
-      {
-        // "tax.taxId": "$tax.taxName",
-        $addFields: {
-          tax: {
-            $map: {
-              input: "$tax",
-              as: "taxone",
-              in: {
-                taxName: "",
-                taxId: "$$taxone.taxId",
-                taxPercent: "$$taxone.taxPercent",
-              },
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "taxes",
-          localField: "tax.taxId",
-          foreignField: "_id",
-          as: "taxes",
-          pipeline: [{ $project: { taxName: 1 } }],
-        },
-      },
+      // {
+      //   // "tax.taxId": "$tax.taxName",
+      //   $addFields: {
+      //     tax: {
+      //       $map: {
+      //         input: "$tax",
+      //         as: "taxone",
+      //         in: {
+      //           taxName: "",
+      //           taxId: "$$taxone.taxId",
+      //           taxPercent: "$$taxone.taxPercent",
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "taxes",
+      //     localField: "tax.taxId",
+      //     foreignField: "_id",
+      //     as: "taxes",
+      //     pipeline: [{ $project: { taxName: 1 } }],
+      //   },
+      // },
       {
         $addFields: {
           callScript: {
@@ -344,34 +344,34 @@ exports.allFilterPagination = async (req, res) => {
             $arrayElemAt: ["$productGroup_name.groupName", 0],
           },
 
-          tax: {
-            $map: {
-              input: "$tax",
-              as: "taxone",
-              in: {
-                $mergeObjects: [
-                  "$$taxone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$taxes",
-                          as: "taxtwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$taxtwo._id" },
-                              { $toString: "$$taxone.taxId" },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
-          },
+          // tax: {
+          //   $map: {
+          //     input: "$tax",
+          //     as: "taxone",
+          //     in: {
+          //       $mergeObjects: [
+          //         "$$taxone",
+          //         {
+          //           $arrayElemAt: [
+          //             {
+          //               $filter: {
+          //                 input: "$taxes",
+          //                 as: "taxtwo",
+          //                 cond: {
+          //                   $eq: [
+          //                     { $toString: "$$taxtwo._id" },
+          //                     { $toString: "$$taxone.taxId" },
+          //                   ],
+          //                 },
+          //               },
+          //             },
+          //             0,
+          //           ],
+          //         },
+          //       ],
+          //     },
+          //   },
+          // },
           item: {
             $map: {
               input: "$item",
@@ -433,7 +433,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $unset: [
           "languages",
-          "taxes",
+          // "taxes",
           "items",
           "productGroup_name",
           "productSubCategory_name",
@@ -555,31 +555,31 @@ exports.get = async (req, res) => {
           pipeline: [{ $project: { itemName: 1 } }],
         },
       },
-      {
-        // "tax.taxId": "$tax.taxName",
-        $addFields: {
-          tax: {
-            $map: {
-              input: "$tax",
-              as: "taxone",
-              in: {
-                taxName: "",
-                taxId: "$$taxone.taxId",
-                taxPercent: "$$taxone.taxPercent",
-              },
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "taxes",
-          localField: "tax.taxId",
-          foreignField: "_id",
-          as: "taxes",
-          pipeline: [{ $project: { taxName: 1 } }],
-        },
-      },
+      // {
+      //   // "tax.taxId": "$tax.taxName",
+      //   $addFields: {
+      //     tax: {
+      //       $map: {
+      //         input: "$tax",
+      //         as: "taxone",
+      //         in: {
+      //           taxName: "",
+      //           taxId: "$$taxone.taxId",
+      //           taxPercent: "$$taxone.taxPercent",
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "taxes",
+      //     localField: "tax.taxId",
+      //     foreignField: "_id",
+      //     as: "taxes",
+      //     pipeline: [{ $project: { taxName: 1 } }],
+      //   },
+      // },
       {
         $addFields: {
           callScript: {
@@ -617,34 +617,34 @@ exports.get = async (req, res) => {
             $arrayElemAt: ["$productGroup_name.groupName", 0],
           },
 
-          tax: {
-            $map: {
-              input: "$tax",
-              as: "taxone",
-              in: {
-                $mergeObjects: [
-                  "$$taxone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$taxes",
-                          as: "taxtwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$taxtwo._id" },
-                              { $toString: "$$taxone.taxId" },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
-          },
+          // tax: {
+          //   $map: {
+          //     input: "$tax",
+          //     as: "taxone",
+          //     in: {
+          //       $mergeObjects: [
+          //         "$$taxone",
+          //         {
+          //           $arrayElemAt: [
+          //             {
+          //               $filter: {
+          //                 input: "$taxes",
+          //                 as: "taxtwo",
+          //                 cond: {
+          //                   $eq: [
+          //                     { $toString: "$$taxtwo._id" },
+          //                     { $toString: "$$taxone.taxId" },
+          //                   ],
+          //                 },
+          //               },
+          //             },
+          //             0,
+          //           ],
+          //         },
+          //       ],
+          //     },
+          //   },
+          // },
           item: {
             $map: {
               input: "$item",
@@ -706,7 +706,7 @@ exports.get = async (req, res) => {
       {
         $unset: [
           "languages",
-          "taxes",
+          // "taxes",
           "items",
           "productGroup_name",
           "productSubCategory_name",
@@ -802,31 +802,31 @@ exports.getById = async (req, res) => {
           pipeline: [{ $project: { itemName: 1 } }],
         },
       },
-      {
-        // "tax.taxId": "$tax.taxName",
-        $addFields: {
-          tax: {
-            $map: {
-              input: "$tax",
-              as: "taxone",
-              in: {
-                taxName: "",
-                taxId: "$$taxone.taxId",
-                taxPercent: "$$taxone.taxPercent",
-              },
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "taxes",
-          localField: "tax.taxId",
-          foreignField: "_id",
-          as: "taxes",
-          pipeline: [{ $project: { taxName: 1 } }],
-        },
-      },
+      // {
+      //   // "tax.taxId": "$tax.taxName",
+      //   $addFields: {
+      //     tax: {
+      //       $map: {
+      //         input: "$tax",
+      //         as: "taxone",
+      //         in: {
+      //           taxName: "",
+      //           taxId: "$$taxone.taxId",
+      //           taxPercent: "$$taxone.taxPercent",
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "taxes",
+      //     localField: "tax.taxId",
+      //     foreignField: "_id",
+      //     as: "taxes",
+      //     pipeline: [{ $project: { taxName: 1 } }],
+      //   },
+      // },
       {
         $addFields: {
           callScript: {
@@ -864,34 +864,34 @@ exports.getById = async (req, res) => {
             $arrayElemAt: ["$productGroup_name.groupName", 0],
           },
 
-          tax: {
-            $map: {
-              input: "$tax",
-              as: "taxone",
-              in: {
-                $mergeObjects: [
-                  "$$taxone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$taxes",
-                          as: "taxtwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$taxtwo._id" },
-                              { $toString: "$$taxone.taxId" },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
-          },
+          // tax: {
+          //   $map: {
+          //     input: "$tax",
+          //     as: "taxone",
+          //     in: {
+          //       $mergeObjects: [
+          //         "$$taxone",
+          //         {
+          //           $arrayElemAt: [
+          //             {
+          //               $filter: {
+          //                 input: "$taxes",
+          //                 as: "taxtwo",
+          //                 cond: {
+          //                   $eq: [
+          //                     { $toString: "$$taxtwo._id" },
+          //                     { $toString: "$$taxone.taxId" },
+          //                   ],
+          //                 },
+          //               },
+          //             },
+          //             0,
+          //           ],
+          //         },
+          //       ],
+          //     },
+          //   },
+          // },
           item: {
             $map: {
               input: "$item",
@@ -953,7 +953,7 @@ exports.getById = async (req, res) => {
       {
         $unset: [
           "languages",
-          "taxes",
+          // "taxes",
           "items",
           "productGroup_name",
           "productSubCategory_name",

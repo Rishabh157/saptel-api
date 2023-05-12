@@ -27,10 +27,7 @@ const create = {
       itemId: Joi.string().custom(commonValidation.objectId).required(),
       itemQuantity: Joi.number().required(),
     }),
-    tax: Joi.array().items({
-      taxId: Joi.string().custom(commonValidation.objectId).required(),
-      taxPercent: Joi.number().required(),
-    }),
+
     faq: Joi.array().items({
       question: Joi.string().required(),
       answer: Joi.string().required(),
@@ -74,10 +71,7 @@ const update = {
       itemId: Joi.string().custom(commonValidation.objectId).required(),
       itemQuantity: Joi.number().required(),
     }),
-    tax: Joi.array().items({
-      taxId: Joi.string().custom(commonValidation.objectId).required(),
-      taxPercent: Joi.number().required(),
-    }),
+
     faq: Joi.array().items({
       question: Joi.string().required(),
       answer: Joi.string().required(),

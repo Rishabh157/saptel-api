@@ -55,23 +55,7 @@ const ProductSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    tax: {
-      type: [
-        {
-          taxId: {
-            type: ObjectId,
-            required: true,
-            trim: true,
-          },
 
-          taxPercent: {
-            type: Number,
-            required: true,
-          },
-        },
-      ],
-      required: true,
-    },
     faq: {
       type: [
         {
@@ -156,7 +140,7 @@ const searchKeys = [
   // "productImage",
   "description",
   "item",
-  "tax",
+
   "faq",
   "video",
   "callScript",
