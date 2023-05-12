@@ -24,13 +24,8 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      subCategoryCode,
-      subCategoryName,
-      parentCategory,
-      applicableTaxes,
-      hsnCode,
-    } = req.body;
+    let { subCategoryCode, subCategoryName, parentCategory, hsnCode } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -70,13 +65,8 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let {
-      subCategoryCode,
-      subCategoryName,
-      parentCategory,
-      applicableTaxes,
-      hsnCode,
-    } = req.body;
+    let { subCategoryCode, subCategoryName, parentCategory, hsnCode } =
+      req.body;
 
     let idToBeSearch = req.params.id;
     let dataExist = await productSubCategoryService.isExists(
@@ -192,7 +182,6 @@ exports.allFilterPagination = async (req, res) => {
       "subCategoryCode",
       "subCategoryName",
       "parentCategory",
-      "applicableTaxes",
       "hsnCode",
     ];
 
@@ -232,22 +221,11 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [{ $project: { categoryName: 1 } }],
         },
       },
-      {
-        $lookup: {
-          from: "taxes",
-          localField: "applicableTaxes",
-          foreignField: "_id",
-          as: "app_taxes",
-          pipeline: [{ $project: { taxName: 1 } }],
-        },
-      },
+
       {
         $addFields: {
           parentCategoryLabel: {
             $arrayElemAt: ["$product_category.categoryName", 0],
-          },
-          applicableTaxesLabel: {
-            $arrayElemAt: ["$app_taxes.taxName", 0],
           },
         },
       },
@@ -329,22 +307,11 @@ exports.get = async (req, res) => {
           pipeline: [{ $project: { categoryName: 1 } }],
         },
       },
-      {
-        $lookup: {
-          from: "taxes",
-          localField: "applicableTaxes",
-          foreignField: "_id",
-          as: "app_taxes",
-          pipeline: [{ $project: { taxName: 1 } }],
-        },
-      },
+
       {
         $addFields: {
           parentCategoryLabel: {
             $arrayElemAt: ["$product_category.categoryName", 0],
-          },
-          applicableTaxesLabel: {
-            $arrayElemAt: ["$app_taxes.taxName", 0],
           },
         },
       },
@@ -396,22 +363,11 @@ exports.getById = async (req, res) => {
           pipeline: [{ $project: { categoryName: 1 } }],
         },
       },
-      {
-        $lookup: {
-          from: "taxes",
-          localField: "applicableTaxes",
-          foreignField: "_id",
-          as: "app_taxes",
-          pipeline: [{ $project: { taxName: 1 } }],
-        },
-      },
+
       {
         $addFields: {
           parentCategoryLabel: {
             $arrayElemAt: ["$product_category.categoryName", 0],
-          },
-          applicableTaxesLabel: {
-            $arrayElemAt: ["$app_taxes.taxName", 0],
           },
         },
       },
