@@ -93,7 +93,7 @@ exports.add = async (req, res) => {
 /*********************************************************************/
 
 exports.logout = async (req, res) => {
-  logOut(req);
+  logOut(req, req.body.logoutAll);
   return res.status(httpStatus.OK).send({
     message: `Logout successfull!`,
     data: [],
