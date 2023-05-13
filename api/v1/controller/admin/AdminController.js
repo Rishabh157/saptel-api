@@ -262,7 +262,16 @@ exports.refreshToken = async (req, res) => {
     if (!decoded) {
       throw new ApiError(httpStatus.OK, `Invalid refreshToken`);
     }
-
+    const tokenKey = `${decoded.Id}*`;
+    // const allKeys = await redisClient.keys();
+    // console.log(allKeys, "redisClient.keys");
+    const allRedisValue = await redisClient.keys(tokenKey);
+    if (!allRedisValue) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Invalid token User not found."
+      );
+    }
     let userData = await adminService.getOneByMultiField({
       _id: decoded.Id,
       isDeleted: false,
