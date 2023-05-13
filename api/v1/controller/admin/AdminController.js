@@ -266,7 +266,7 @@ exports.refreshToken = async (req, res) => {
     // const allKeys = await redisClient.keys();
     // console.log(allKeys, "redisClient.keys");
     const allRedisValue = await redisClient.keys(tokenKey);
-    if (!allRedisValue) {
+    if (!allRedisValue.length) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
         "Invalid token User not found."
