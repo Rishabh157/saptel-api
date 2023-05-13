@@ -30,7 +30,21 @@ router.get(
 /**
  * get all dealer pagination filter
  */
-
+/**
+ * login dealer
+ */
+router.post(
+  "/login",
+  // accessModuleCheck,
+  validate(dealerValidation.loginValid),
+  dealerController.login
+);
+router.post(
+  "/refresh",
+  // accessModuleCheck,
+  validate(dealerValidation.refreshTokenValid),
+  dealerController.refreshToken
+);
 router.post(
   "/",
   accessModuleCheck,

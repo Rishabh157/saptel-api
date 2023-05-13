@@ -11,6 +11,8 @@ let {
   JWT_SECRET,
   JWT_SECRET_REFRESH,
   JWT_EXPIRATION_MINUTES,
+  JWT_DEALER_SECRET,
+  JWT_DEALER_SECRET_REFRESH,
   LOCALHOST,
   BASEURL_LOCAL,
   JWT_SECRET_OTP,
@@ -24,6 +26,8 @@ let envObj = {
   MONGODB_URL,
   JWT_SECRET,
   JWT_SECRET_REFRESH,
+  JWT_DEALER_SECRET,
+  JWT_DEALER_SECRET_REFRESH,
   JWT_EXPIRATION_MINUTES,
   LOCALHOST,
   BASEURL_LOCAL,
@@ -40,6 +44,10 @@ const envVarsSchema = Joi.object().keys({
   BASEURL_LOCAL: Joi.string().required().label("Base url is url"),
   JWT_SECRET: Joi.string().required().label("JWT secret key"),
   JWT_SECRET_REFRESH: Joi.string().required().label("JWT secret refresh key"),
+  JWT_DEALER_SECRET: Joi.string().required().label("JWT dealer secret key"),
+  JWT_DEALER_SECRET_REFRESH: Joi.string()
+    .required()
+    .label("JWT dealer secret refresh key"),
   JWT_EXPIRATION_MINUTES: Joi.string()
     .default("10 hours")
     .description("minutes after which token expires"),
@@ -73,7 +81,10 @@ module.exports = {
   localhost: envVars.LOCALHOST,
   jwt_secret: envVars.JWT_SECRET,
   jwt_secret_refresh: envVars.JWT_SECRET_REFRESH,
+  jwt_dealer_secret: envVars.JWT_DEALER_SECRET,
+  jwt_dealer_secret_refresh: envVars.JWT_DEALER_SECRET_REFRESH,
   jwt_expires: envVars.JWT_EXPIRATION_MINUTES,
+
   jwt_secret_otp: envVars.JWT_SECRET_OTP,
   jwt_expires_otp: envVars.JWT_EXPIRATION_MINUTES_OTP,
   localhost: envVars.LOCALHOST,

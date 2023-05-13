@@ -46,6 +46,41 @@ exports.refreshTokenCreate = async (tokenData) => {
   );
   return token;
 };
+exports.dealerTokenCreate = async (tokenData) => {
+  var token = await jwt.sign(
+    {
+      Id: tokenData._id,
+      dealerCode: tokenData.dealerCode,
+      firstName: tokenData.firstName,
+      lastName: tokenData.lastName,
+      email: tokenData.email,
+
+      tokenType: tokenEnum.login,
+    },
+    config.jwt_dealer_secret,
+    {
+      expiresIn: config.jwt_expires,
+    }
+  );
+  return token;
+};
+exports.dealerRefreshTokenCreate = async (tokenData) => {
+  var token = await jwt.sign(
+    {
+      Id: tokenData._id,
+      dealerCode: tokenData.dealerCode,
+      firstName: tokenData.firstName,
+      lastName: tokenData.lastName,
+      email: tokenData.email,
+      tokenType: tokenEnum.login,
+    },
+    config.jwt_dealer_secret_refresh,
+    {
+      expiresIn: "1y",
+    }
+  );
+  return token;
+};
 /**
  *
  * @param {object} tokenData

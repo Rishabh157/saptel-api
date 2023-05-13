@@ -6,24 +6,23 @@ const SalesOrderSchema = new mongoose.Schema(
     dealer: { type: ObjectId, required: true, trim: true },
     wareHouse: { type: ObjectId, required: true, trim: true },
     productSalesOrder: {
-      type: [
-        {
-          productGroupId: {
-            type: ObjectId,
-            required: true,
-            trim: true,
-            lowercase: true,
-          },
-          rate: {
-            type: Number,
-            required: true,
-          },
-          quantity: {
-            type: Number,
-            required: true,
-          },
+      type: {
+        productGroupId: {
+          type: ObjectId,
+          required: true,
+          trim: true,
+          lowercase: true,
         },
-      ],
+        rate: {
+          type: Number,
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+      },
+
       required: true,
     },
     approval: {

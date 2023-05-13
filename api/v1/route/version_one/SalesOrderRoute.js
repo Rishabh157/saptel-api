@@ -6,6 +6,7 @@ const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
+  authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -52,6 +53,14 @@ router.post(
   salesOrderController.allFilterPagination
 );
 
+// dealer app inventory
+router.post(
+  "/list",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
+  validate(salesOrderValidation.getAllFilter),
+  salesOrderController.allFilterPagination
+);
 // update approval status
 router.put(
   "/approval-level/:id",

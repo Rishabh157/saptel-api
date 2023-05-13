@@ -6,6 +6,7 @@ const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
+  authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -42,6 +43,15 @@ router.post(
   inventoriesController.allFilterPagination
 );
 
+//dealer ap pagination
+router.post(
+  "/dealer",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
+  validate(inventoriesValidation.getAllFilter),
+  inventoriesController.allFilterPagination
+);
+
 /**
  * create new document
  */
@@ -49,6 +59,16 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
+  validate(inventoriesValidation.create),
+  inventoriesController.add
+);
+/**
+ * create new document for dealer app
+ */
+router.post(
+  "/dealer/add",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
   validate(inventoriesValidation.create),
   inventoriesController.add
 );

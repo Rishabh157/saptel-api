@@ -21,7 +21,8 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { soNumber, dealer, wareHouse, productSalesOrder } = req.body;
+    let { soNumber, dealer, wareHouse, productSalesOrder, companyId } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -29,8 +30,21 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    const output = productSalesOrder.map((po) => {
+      return {
+        soNumber: soNumber,
+        dealer: dealer,
+        wareHouse: wareHouse,
+        productSalesOrder: {
+          productGroupId: po.productGroupId,
+          rate: po.rate,
+          quantity: po.quantity,
+        },
+        companyId: companyId,
+      };
+    });
     //------------------create data-------------------
-    let dataCreated = await salesOrderService.createNewData({ ...req.body });
+    let dataCreated = await salesOrderService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -286,16 +300,10 @@ exports.allFilterPagination = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                groupName: "",
-                productGroupId: "$$productSalesOrderone.productGroupId",
-                quantity: "$$productSalesOrderone.quantity",
-                rate: "$$productSalesOrderone.rate",
-              },
-            },
+            groupName: "",
+            productGroupId: "$productSalesOrder.productGroupId",
+            quantity: "$productSalesOrder.quantity",
+            rate: "$productSalesOrder.rate",
           },
         },
       },
@@ -316,36 +324,8 @@ exports.allFilterPagination = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$productSalesOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$productSalesOrders",
-                          as: "productSalesOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$productSalesOrdertwo._id" },
-                              {
-                                $toString:
-                                  "$$productSalesOrderone.productGroupId",
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "productSalesOrder.groupName": {
+            $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
       },
@@ -444,16 +424,10 @@ exports.get = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                groupName: "",
-                productGroupId: "$$productSalesOrderone.productGroupId",
-                quantity: "$$productSalesOrderone.quantity",
-                rate: "$$productSalesOrderone.rate",
-              },
-            },
+            groupName: "",
+            productGroupId: "$productSalesOrder.productGroupId",
+            quantity: "$productSalesOrder.quantity",
+            rate: "$productSalesOrder.rate",
           },
         },
       },
@@ -474,36 +448,8 @@ exports.get = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$productSalesOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$productSalesOrders",
-                          as: "productSalesOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$productSalesOrdertwo._id" },
-                              {
-                                $toString:
-                                  "$$productSalesOrderone.productGroupId",
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "productSalesOrder.groupName": {
+            $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
       },
@@ -578,16 +524,10 @@ exports.getByDealerId = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                groupName: "",
-                productGroupId: "$$productSalesOrderone.productGroupId",
-                quantity: "$$productSalesOrderone.quantity",
-                rate: "$$productSalesOrderone.rate",
-              },
-            },
+            groupName: "",
+            productGroupId: "$productSalesOrder.productGroupId",
+            quantity: "$productSalesOrder.quantity",
+            rate: "$productSalesOrder.rate",
           },
         },
       },
@@ -608,36 +548,8 @@ exports.getByDealerId = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$productSalesOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$productSalesOrders",
-                          as: "productSalesOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$productSalesOrdertwo._id" },
-                              {
-                                $toString:
-                                  "$$productSalesOrderone.productGroupId",
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "productSalesOrder.groupName": {
+            $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
       },
@@ -710,16 +622,10 @@ exports.getById = async (req, res) => {
         // "tax.taxId": "$tax.taxName",
         $addFields: {
           productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                groupName: "",
-                productGroupId: "$$productSalesOrderone.productGroupId",
-                quantity: "$$productSalesOrderone.quantity",
-                rate: "$$productSalesOrderone.rate",
-              },
-            },
+            groupName: "",
+            productGroupId: "$productSalesOrder.productGroupId",
+            quantity: "$productSalesOrder.quantity",
+            rate: "$productSalesOrder.rate",
           },
         },
       },
@@ -740,36 +646,8 @@ exports.getById = async (req, res) => {
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productSalesOrder: {
-            $map: {
-              input: "$productSalesOrder",
-              as: "productSalesOrderone",
-              in: {
-                $mergeObjects: [
-                  "$$productSalesOrderone",
-                  {
-                    $arrayElemAt: [
-                      {
-                        $filter: {
-                          input: "$productSalesOrders",
-                          as: "productSalesOrdertwo",
-                          cond: {
-                            $eq: [
-                              { $toString: "$$productSalesOrdertwo._id" },
-                              {
-                                $toString:
-                                  "$$productSalesOrderone.productGroupId",
-                              },
-                            ],
-                          },
-                        },
-                      },
-                      0,
-                    ],
-                  },
-                ],
-              },
-            },
+          "productSalesOrder.groupName": {
+            $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
       },

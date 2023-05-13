@@ -170,6 +170,10 @@ const defaultRoutes = [
     route: purchaseOrderRoute,
   },
   {
+    path: "/dealer/purchase-order",
+    route: salesOrderRoute,
+  },
+  {
     path: "/cartonbox-barcode",
     route: cartonBoxBarcodeRoute,
   },

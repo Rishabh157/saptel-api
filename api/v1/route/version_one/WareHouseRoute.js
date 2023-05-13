@@ -3,7 +3,10 @@ const wareHouseController = require("../../controller/wareHouse/WareHouseControl
 const validate = require("../../middleware/validate");
 const wareHouseValidation = require("../../validation/WareHouseValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -28,6 +31,16 @@ router.get(
   wareHouseController.getById
 );
 /**
+ * get one document for dealer app
+ */
+router.get(
+  "/dealer/:id",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
+  validate(wareHouseValidation.getDocument),
+  wareHouseController.getById
+);
+/**
  * get all wareHouse pagination filter
  */
 
@@ -35,6 +48,14 @@ router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
+  validate(wareHouseValidation.getAllFilter),
+  wareHouseController.allFilterPagination
+);
+// dealer project warehouse
+router.post(
+  "/dealer",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
   validate(wareHouseValidation.getAllFilter),
   wareHouseController.allFilterPagination
 );
@@ -50,12 +71,32 @@ router.post(
   wareHouseController.add
 );
 /**
+ * create new document in dealer app
+ */
+router.post(
+  "/dealer/add",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
+  validate(wareHouseValidation.create),
+  wareHouseController.add
+);
+/**
  * update document
  */
 router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
+  validate(wareHouseValidation.update),
+  wareHouseController.update
+);
+/**
+ * update document for dealer app
+ */
+router.put(
+  "/dealer/:id",
+  accessModuleCheck,
+  authCheckDealerMiddleware,
   validate(wareHouseValidation.update),
   wareHouseController.update
 );

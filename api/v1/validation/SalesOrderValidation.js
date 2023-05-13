@@ -47,7 +47,7 @@ const update = {
     soNumber: Joi.number().required(),
     dealer: Joi.string().custom(commonValidation.objectId).required(),
     wareHouse: Joi.string().custom(commonValidation.objectId).required(),
-    productSalesOrder: Joi.array().items({
+    productSalesOrder: Joi.object().keys({
       productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       rate: Joi.number().required(),
       quantity: Joi.number().required(),

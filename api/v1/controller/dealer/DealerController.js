@@ -6,7 +6,14 @@ const dealerService = require("../../services/DealerService");
 const { searchKeys } = require("../../model/DealerSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const bcryptjs = require("bcryptjs");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
+const {
+  dealerTokenCreate,
+  dealerRefreshTokenCreate,
+} = require("../../helper/tokenCreate");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -33,6 +40,7 @@ exports.add = async (req, res) => {
       contactInformation,
       document,
       otherDocument,
+      password,
     } = req.body;
     /**
      * check duplicate exist
@@ -41,6 +49,15 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    let hashedPassword = await bcryptjs.hash(password, 12);
+    if (!hashedPassword) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Something went wrong with the password.`
+      );
+    }
+    req.body.password = hashedPassword;
+
     //------------------create data-------------------
     let dataCreated = await dealerService.createNewData({ ...req.body });
 
@@ -132,6 +149,129 @@ exports.update = async (req, res) => {
   }
 };
 
+//dealer login
+exports.login = async (req, res) => {
+  try {
+    let reqEmail = req.body.email;
+    let password = req.body.password;
+
+    let dataFound = await dealerService.getOneByMultiField({ email: reqEmail });
+    if (!dataFound) {
+      throw new ApiError(httpStatus.OK, `Dealer not found.`);
+    }
+    let matched = await bcrypt.compare(password, dataFound.password);
+    if (!matched) {
+      throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
+    }
+    let {
+      _id: dealerId,
+      // userType,
+      firmName,
+      firstName,
+      lastName,
+      dealerCode,
+      email,
+      companyId,
+    } = dataFound;
+
+    let token = await dealerTokenCreate(dataFound);
+    if (!token) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let refreshToken = await dealerRefreshTokenCreate(dataFound);
+    if (!refreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: `Dealer Login successful!`,
+      data: {
+        token: token,
+        refreshToken: refreshToken,
+        userId: dealerId,
+        firmName: firmName,
+        dealerCode: dealerCode,
+        fullName: `${firstName} ${lastName}`,
+        email: email,
+        companyId: companyId,
+      },
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+exports.refreshToken = async (req, res) => {
+  try {
+    let refreshTokenValue = req.body.refreshToken;
+
+    const decoded = await jwt.verify(
+      refreshTokenValue,
+      config.jwt_dealer_secret_refresh
+    );
+    if (!decoded) {
+      throw new ApiError(httpStatus.OK, `Invalid refreshToken`);
+    }
+
+    let userData = await dealerService.getOneByMultiField({
+      _id: decoded.Id,
+      isDeleted: false,
+    });
+    if (!userData) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Invalid token Dealer not found."
+      );
+    }
+
+    let newToken = await dealerTokenCreate(userData);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await dealerRefreshTokenCreate(userData);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: `successfull!`,
+      data: {
+        token: newToken,
+        refreshToken: newRefreshToken,
+      },
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {

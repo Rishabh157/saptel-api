@@ -4,11 +4,7 @@ const adminService = require("../../services/AdminService");
 const bcryptjs = require("bcryptjs");
 const otpHelper = require("../otp/OtpHelper");
 const { sendMsg91Function } = require("../../helper/msgHelper");
-const {
-  tokenCreate,
-  otpTokenCreate,
-  refreshTokenCreate,
-} = require("../../helper/tokenCreate");
+const { tokenCreate, refreshTokenCreate } = require("../../helper/tokenCreate");
 const { isAfter } = require("date-fns");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");

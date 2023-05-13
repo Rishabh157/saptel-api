@@ -14,6 +14,7 @@ const create = {
     lastName: Joi.string().lowercase().required(),
     dealerCategory: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
+    password: Joi.string().required(),
     registrationAddress: Joi.object().keys({
       phone: Joi.string().required(),
       address: Joi.string().required(),
@@ -148,6 +149,14 @@ const getAllFilter = {
   }),
 };
 
+const refreshTokenValid = {
+  body: Joi.object()
+    .keys({
+      refreshToken: Joi.string().required(),
+    })
+    .required(),
+};
+
 /**
  * get either all data or single document
  */
@@ -167,7 +176,14 @@ const getDocument = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
-
+const loginValid = {
+  body: Joi.object()
+    .keys({
+      email: Joi.string().required(),
+      password: Joi.string().required(),
+    })
+    .required(),
+};
 /**
  * delete a document
  */
@@ -193,4 +209,6 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  loginValid,
+  refreshTokenValid,
 };
