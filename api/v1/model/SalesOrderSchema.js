@@ -68,6 +68,13 @@ const SalesOrderSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["soNumber", "dealer", "wareHouse", "productSalesOrder"];
+const searchKeys = [
+  "soNumber",
+  "dealer",
+  "wareHouse",
+  "productSalesOrder",
+  "dealerLabel",
+  "warehouseLabel",
+];
 module.exports = mongoose.model("SalesOrder", SalesOrderSchema);
 module.exports.searchKeys = [...searchKeys];
