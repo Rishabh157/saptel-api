@@ -33,6 +33,7 @@ const attributesGroupRoute = require("./AttributesGroupRoute");
 const attributesRoute = require("./AttributesRoute");
 const dealerSchemeRoute = require("./DealerSchemeRoute");
 const dealerPincodeRoute = require("./DealerPincodeRoute");
+const deliveryBoyRoute = require("./DeliveryBoyRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
@@ -198,6 +199,10 @@ const defaultRoutes = [
   {
     path: "/dealer-pincode",
     route: dealerPincodeRoute,
+  },
+  {
+    path: "/delivery-boy",
+    route: deliveryBoyRoute,
   },
 ];
 
