@@ -32,7 +32,7 @@ const { userEnum } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { firstName, lastName, mobile, email, companyId } = req.body;
+    let { firstName, lastName, mobile, email, companyId, password } = req.body;
 
     /**
      * check duplicate exist
@@ -42,18 +42,18 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     // let randomPassword = generateRandomPassword();
-    let hashedPassword = await bcryptjs.hash(mobile, 12);
+    let hashedPassword = await bcryptjs.hash(password, 12);
     if (!hashedPassword) {
       throw new ApiError(
         httpStatus.OK,
         `Something went wrong with the password.`
       );
     }
-    // req.body["password"] = hashedPassword;
-    let dataToUpload = { ...req.body, password: hashedPassword };
-    console.log(dataToUpload);
+    req.body.password = hashedPassword;
+    // let dataToUpload = { ...req.body, password: hashedPassword };
+    // console.log(dataToUpload);
     //------------------create data-------------------
-    let dataCreated = await userService.createNewData({ ...dataToUpload });
+    let dataCreated = await userService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

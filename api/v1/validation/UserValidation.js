@@ -16,6 +16,7 @@ const create = {
       .required(),
     email: Joi.string().lowercase().required(),
     userType: Joi.string(),
+    password: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
