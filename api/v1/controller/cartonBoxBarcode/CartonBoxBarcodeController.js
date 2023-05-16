@@ -29,6 +29,19 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    let lastObject = await cartonBoxBarcodeService.aggregateQuery([
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
+    if (lastObject.length) {
+      const barcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
+      const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
+      req.body.barcodeNumber = paddedBarcodeNumber;
+      console.log(paddedBarcodeNumber);
+    } else {
+      req.body.barcodeNumber = "000001";
+    }
     //------------------create data-------------------
     let dataCreated = await cartonBoxBarcodeService.createNewData({
       ...req.body,

@@ -9,7 +9,6 @@ const commonValidation = require("./CommonValidation");
 const create = {
   body: Joi.object().keys({
     cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
-    barcodeNumber: Joi.string().required(),
     barcodeGroupNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
     itemBarcodeNumber: Joi.string().required(),
@@ -26,7 +25,6 @@ const update = {
   }),
   body: Joi.object().keys({
     cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
-    barcodeNumber: Joi.string().required(),
     barcodeGroupNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
     itemBarcodeNumber: Joi.string().required(),

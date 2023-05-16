@@ -25,11 +25,22 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await barCodeService.isExists([
-      { barcodeNumber, barcodeGroupNumber },
-    ]);
+    let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    let lastObject = await barCodeService.aggregateQuery([
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
+
+    if (lastObject) {
+      const barcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
+      const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
+      req.body.barcodeNumber = paddedBarcodeNumber;
+      console.log(paddedBarcodeNumber);
+    } else {
+      req.body.barcodeNumber = "000001";
     }
     //------------------create data-------------------
     let dataCreated = await barCodeService.createNewData({ ...req.body });
