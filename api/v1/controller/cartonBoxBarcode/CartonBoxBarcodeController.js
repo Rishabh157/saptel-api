@@ -20,8 +20,14 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { cartonBoxId, barcodeNumber, barcodeGroupNumber, isUsed, companyId } =
-      req.body;
+    let {
+      cartonBoxId,
+      barcodeNumber,
+      barcodeGroupNumber,
+      itemBarcodeNumber,
+      isUsed,
+      companyId,
+    } = req.body;
     /**
      * check duplicate exist
      */
@@ -42,10 +48,18 @@ exports.add = async (req, res) => {
     } else {
       req.body.barcodeNumber = "000001";
     }
-    //------------------create data-------------------
-    let dataCreated = await cartonBoxBarcodeService.createNewData({
-      ...req.body,
+
+    const output = itemBarcodeNumber.map((barcode) => {
+      return {
+        cartonBoxId: cartonBoxId,
+        barcodeNumber: req.body.barcodeNumber,
+        barcodeGroupNumber: barcodeGroupNumber,
+        companyId: companyId,
+        itemBarcodeNumber: barcode,
+      };
     });
+    //------------------create data-------------------
+    let dataCreated = await cartonBoxBarcodeService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

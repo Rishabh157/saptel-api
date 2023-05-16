@@ -11,7 +11,7 @@ const create = {
     cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
     barcodeGroupNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
-    itemBarcodeNumber: Joi.string().required(),
+    itemBarcodeNumber: Joi.array().items(Joi.string().required()),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
