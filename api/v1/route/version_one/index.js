@@ -34,6 +34,7 @@ const attributesRoute = require("./AttributesRoute");
 const dealerSchemeRoute = require("./DealerSchemeRoute");
 const dealerPincodeRoute = require("./DealerPincodeRoute");
 const deliveryBoyRoute = require("./DeliveryBoyRoute");
+const didRoute = require("./DidManagementRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
@@ -203,6 +204,10 @@ const defaultRoutes = [
   {
     path: "/delivery-boy",
     route: deliveryBoyRoute,
+  },
+  {
+    path: "/did-management",
+    route: didRoute,
   },
 ];
 
