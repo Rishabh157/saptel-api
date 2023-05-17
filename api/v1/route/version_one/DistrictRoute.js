@@ -35,6 +35,16 @@ router.get(
   validate(districtValidation.get),
   districtController.getStateDistrict
 );
+
+/**
+ * get all district of a state without token
+ */
+router.get(
+  "/get-state-district/inbound/:id",
+
+  validate(districtValidation.get),
+  districtController.getStateDistrict
+);
 /**
  * get one document
  */

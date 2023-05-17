@@ -31,6 +31,16 @@ router.get(
   validate(tehsilValidation.get),
   tehsilController.getTehsilByDistrict
 );
+
+/**
+ * get all tehsil of a district without token
+ */
+router.get(
+  "/get-district-tehsil/inbound:id",
+
+  validate(tehsilValidation.get),
+  tehsilController.getTehsilByDistrict
+);
 /**
  * get one document
  */

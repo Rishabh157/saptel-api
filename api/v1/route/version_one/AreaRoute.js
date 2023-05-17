@@ -32,6 +32,15 @@ router.get(
   validate(areaValidation.getDocument),
   areaController.getById
 );
+
+/**
+ * get all area by pincode without token
+ */
+router.get(
+  "/get-area-by-pincode/inbound/:id",
+  validate(areaValidation.getAreaByPincode),
+  areaController.getAreaByPincode
+);
 /**
  * get all area pagination filter
  */

@@ -31,6 +31,15 @@ router.get(
   validate(stateValidation.get),
   stateController.getStateByCountry
 );
+
+/**
+ * get all state's of a country without token
+ */
+router.get(
+  "/get-country-state/inbound/:id",
+  validate(stateValidation.get),
+  stateController.getStateByCountry
+);
 /**
  * get one document
  */

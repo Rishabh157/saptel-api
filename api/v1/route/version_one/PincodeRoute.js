@@ -33,6 +33,15 @@ router.get(
 );
 
 /**
+ * get all pincodes of a country without token
+ */
+router.get(
+  "/get-country-pincode/inbound/:id",
+  validate(pincodeValidation.get),
+  pincodeController.getPincodeByCountry
+);
+
+/**
  * get all pincodes of a district
  */
 router.get(
