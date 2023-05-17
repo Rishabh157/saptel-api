@@ -6,6 +6,7 @@ const schemeService = require("../../services/SchemeService");
 const { searchKeys } = require("../../model/SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const channelManagementService = require("../../services/ChannelManagementService");
 
 const {
   getSearchQuery,
@@ -463,6 +464,16 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await schemeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isSchemeExistsInChannel = await channelManagementService.findCount({
+      scheme: _id,
+      isDeleted: false,
+    });
+    if (isSchemeExistsInChannel) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Scheme can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await schemeService.getOneAndDelete({ _id });
     if (!deleted) {

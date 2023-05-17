@@ -18,6 +18,10 @@ router.get(
 );
 
 /**
+ * get all documents without token
+ */
+router.get("/inbound", validate(countryValidation.get), countryController.get);
+/**
  * get one document
  */
 router.get(

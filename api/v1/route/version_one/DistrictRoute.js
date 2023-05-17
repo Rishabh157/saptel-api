@@ -16,6 +16,15 @@ router.get(
   validate(districtValidation.get),
   districtController.get
 );
+
+/**
+ * get all documents without token
+ */
+router.get(
+  "/inbound",
+  validate(districtValidation.get),
+  districtController.get
+);
 /**
  * get all district of a state
  */

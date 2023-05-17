@@ -16,7 +16,10 @@ router.get(
   validate(schemeValidation.get),
   schemeController.get
 );
-
+/**
+ * get all documents without token for inbound calls
+ */
+router.get("/inbound", validate(schemeValidation.get), schemeController.get);
 /**
  * get one document
  */
@@ -24,6 +27,15 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
+  validate(schemeValidation.getDocument),
+  schemeController.getById
+);
+
+/**
+ * get one document without token
+ */
+router.get(
+  "/inbound/:id",
   validate(schemeValidation.getDocument),
   schemeController.getById
 );

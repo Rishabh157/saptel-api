@@ -18,6 +18,11 @@ router.get(
 );
 
 /**
+ * get all documents without token
+ */
+router.get("/inbound", validate(areaValidation.get), areaController.get);
+
+/**
  * get one document
  */
 router.get(

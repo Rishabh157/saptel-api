@@ -16,6 +16,11 @@ router.get(
   validate(pincodeValidation.get),
   pincodeController.get
 );
+
+/**
+ * get all documents without token
+ */
+router.get("/inbound", validate(pincodeValidation.get), pincodeController.get);
 /**
  * get all pincodes of a country
  */

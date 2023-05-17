@@ -6,6 +6,7 @@ const channelGroupService = require("../../services/ChannelGroupService");
 const { searchKeys } = require("../../model/ChannelGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const channelManagementService = require("../../services/ChannelManagementService");
 
 const {
   getSearchQuery,
@@ -281,6 +282,17 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await channelGroupService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isChannelGroupExistsInChannel =
+      await channelManagementService.findCount({
+        channelGroupId: _id,
+        isDeleted: false,
+      });
+    if (isChannelGroupExistsInChannel) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Channel Group can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await channelGroupService.getOneAndDelete({ _id });
     if (!deleted) {
