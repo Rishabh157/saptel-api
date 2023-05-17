@@ -36,6 +36,8 @@ const dealerPincodeRoute = require("./DealerPincodeRoute");
 const deliveryBoyRoute = require("./DeliveryBoyRoute");
 const didRoute = require("./DidManagementRoute");
 const tabRoute = require("./TabManagementRoute");
+const channelGroupRoute = require("./ChannelGroupRoute");
+const channelManagementRoute = require("./ChannelManagementRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
@@ -213,6 +215,14 @@ const defaultRoutes = [
   {
     path: "/tab-management",
     route: tabRoute,
+  },
+  {
+    path: "/channel-group",
+    route: channelGroupRoute,
+  },
+  {
+    path: "/channel-management",
+    route: channelManagementRoute,
   },
 ];
 
