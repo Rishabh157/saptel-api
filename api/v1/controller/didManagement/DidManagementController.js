@@ -43,9 +43,7 @@ exports.add = async (req, res) => {
     if (!isSchemeIdExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme");
     }
-    if (!isChannelIdExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel");
-    }
+
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid company");
     }
