@@ -40,6 +40,7 @@ const channelGroupRoute = require("./ChannelGroupRoute");
 const channelManagementRoute = require("./ChannelManagementRoute");
 const dispositionOneRoute = require("./DispositionOneRoute");
 const channelCategoryRoute = require("./ChannelCategoryRoute");
+const channelMasterRoute = require("./ChannelMasterRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
@@ -233,6 +234,10 @@ const defaultRoutes = [
   {
     path: "/channel-category",
     route: channelCategoryRoute,
+  },
+  {
+    path: "/channel-master",
+    route: channelMasterRoute,
   },
 ];
 
