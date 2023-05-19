@@ -13,6 +13,7 @@ const countryService = require("../../services/CountryService");
 const channelCategoryService = require("../../services/ChannelCategoryService");
 const languageService = require("../../services/LanguageService");
 const companyService = require("../../services/CompanyService");
+const slotMasterService = require("../../services/SlotMasterService");
 
 const {
   getSearchQuery,
@@ -846,6 +847,17 @@ exports.deleteDocument = async (req, res) => {
     let _id = req.params.id;
     if (!(await channelMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const isChannelExistsInSlot = await slotMasterService.findCount({
+      channelName: _id,
+      isDeleted: false,
+    });
+
+    if (isChannelExistsInSlot) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Channel can't be deleted because it is currently used in other services"
+      );
     }
     let deleted = await channelMasterService.getOneAndDelete({ _id });
     if (!deleted) {

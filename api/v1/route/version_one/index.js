@@ -41,6 +41,8 @@ const channelManagementRoute = require("./ChannelManagementRoute");
 const dispositionOneRoute = require("./DispositionOneRoute");
 const channelCategoryRoute = require("./ChannelCategoryRoute");
 const channelMasterRoute = require("./ChannelMasterRoute");
+const tapeMasterRoute = require("./TapeMasterRoute");
+const slotMasterRoute = require("./SlotMasterRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
@@ -238,6 +240,14 @@ const defaultRoutes = [
   {
     path: "/channel-master",
     route: channelMasterRoute,
+  },
+  {
+    path: "/tape-master",
+    route: tapeMasterRoute,
+  },
+  {
+    path: "/slot-master",
+    route: slotMasterRoute,
   },
 ];
 

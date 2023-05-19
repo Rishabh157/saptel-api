@@ -26,7 +26,7 @@ const ChannelMasterSchema = new mongoose.Schema(
     },
     mobile: { type: String, required: false, trim: true, default: "" },
     country: { type: ObjectId, required: true, trim: true },
-    language: { type: ObjectId, required: false },
+    language: { type: ObjectId, required: false, default: null },
     channelCategory: {
       type: ObjectId,
       required: true,
@@ -68,6 +68,12 @@ const searchKeys = [
   "website",
   "state",
   "paymentType",
+  "areaLabel",
+  "channelGroupLabel",
+  "countryLabel",
+  "channelCategoryLabel",
+  "stateLabel",
+  "languageLabel",
 ];
 module.exports = mongoose.model("ChannelMaster", ChannelMasterSchema);
 module.exports.searchKeys = [...searchKeys];
