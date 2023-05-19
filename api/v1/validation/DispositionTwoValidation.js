@@ -91,6 +91,13 @@ const changeStatus = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+//===============delete a document===============
+const deleteDocument = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 module.exports = {
   create,
   update,
@@ -98,4 +105,5 @@ module.exports = {
   changeStatus,
   getByDispositionOneId,
   getAllFilter,
+  deleteDocument,
 };

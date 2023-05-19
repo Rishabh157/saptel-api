@@ -9,11 +9,13 @@ const getOneByMultiField = async (matchObj, projectObj) => {
     { ...projectObj }
   );
 };
+// --------------------------------------
 
 //====================create new DispositionTwo================
 const createNewData = async (bodyData) => {
   return DispositionTwo.create({ ...bodyData });
 };
+// --------------------------------------
 
 //====================create new DispositionTwo================
 const getOneAndUpdate = async (matchObj, updateBody) => {
@@ -23,6 +25,17 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
     { new: true }
   );
 };
+// --------------------------------------
+
+//====================getOneAndDelete================
+const getOneAndDelete = async (matchObj) => {
+  return DispositionTwo.findOneAndUpdate(
+    { ...matchObj },
+    { isDeleted: true },
+    { new: true }
+  );
+};
+//-------------------------------------------
 
 //====================findAllWithQuery================
 const findAllWithQuery = async (matchObj, projectObj) => {
@@ -31,6 +44,7 @@ const findAllWithQuery = async (matchObj, projectObj) => {
     { ...projectObj }
   );
 };
+// --------------------------------------
 
 //==================== etById================
 const getById = async (id) => {
@@ -42,7 +56,20 @@ const getById = async (id) => {
 };
 //-------------------------------------------
 
+//====================aggregateQuery================
+const aggregateQuery = async (aggregateQueryArray) => {
+  return DispositionTwo.aggregate(aggregateQueryArray);
+};
+// --------------------------------------
+
+//====================findCount================
+const findCount = async (matchObj) => {
+  return DispositionTwo.find({ ...matchObj, isDeleted: false }).count();
+};
+//-------------------------------------------
+
 //====================isExists================
+
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
     let combinedObj = await combineObjects(filterArray);
@@ -91,4 +118,7 @@ module.exports = {
   getOneAndUpdate,
   findAllWithQuery,
   getById,
+  aggregateQuery,
+  getOneAndDelete,
+  findCount,
 };
