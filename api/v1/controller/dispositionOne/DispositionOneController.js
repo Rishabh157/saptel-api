@@ -286,13 +286,13 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-
     let dataExist = await dispositionOneService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
+    console.log(dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
