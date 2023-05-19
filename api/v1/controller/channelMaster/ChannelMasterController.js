@@ -12,6 +12,7 @@ const stateService = require("../../services/StateService");
 const countryService = require("../../services/CountryService");
 const channelCategoryService = require("../../services/ChannelCategoryService");
 const languageService = require("../../services/LanguageService");
+const companyService = require("../../services/CompanyService");
 
 const {
   getSearchQuery,
@@ -43,6 +44,7 @@ exports.add = async (req, res) => {
       website,
       state,
       paymentType,
+      companyId,
     } = req.body;
     /**
      * check duplicate exist
@@ -71,6 +73,10 @@ exports.add = async (req, res) => {
       _id: channelCategory,
       isDeleted: false,
     });
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
           _id: language,
@@ -79,6 +85,9 @@ exports.add = async (req, res) => {
       : null;
     if (!isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid area");
+    }
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
     }
     if (!isChannelGroupExists) {
       throw new ApiError(httpStatus.OK, "Invalid channel group");
@@ -138,6 +147,7 @@ exports.update = async (req, res) => {
       website,
       state,
       paymentType,
+      companyId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -175,6 +185,13 @@ exports.update = async (req, res) => {
           isDeleted: false,
         })
       : null;
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
     if (!isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid area");
     }

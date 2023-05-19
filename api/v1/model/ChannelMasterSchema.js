@@ -36,6 +36,8 @@ const ChannelMasterSchema = new mongoose.Schema(
     website: { type: String, required: false, trim: true, default: "" },
     state: { type: ObjectId, required: true, trim: true },
     paymentType: { type: String, required: false, trim: true, default: "" },
+    companyId: { type: ObjectId, required: true, trim: true },
+
     isDeleted: {
       type: Boolean,
       default: false,
