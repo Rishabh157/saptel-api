@@ -46,6 +46,7 @@ const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
 const userRoute = require("./UserRoute");
 const config = require("../../../../config/config");
+const dispositionTwo = require("./DispositionTwoRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -230,6 +231,10 @@ const defaultRoutes = [
   {
     path: "/disposition-one",
     route: dispositionOneRoute,
+  },
+  {
+    path: "/disposition-two",
+    route: dispositionTwo,
   },
   {
     path: "/channel-category",
