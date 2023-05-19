@@ -2,12 +2,10 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const languageService = require("../../services/LanguageService");
-const { searchKeys } = require("../../model/LanguageSchema");
+const channelCategoryService = require("../../services/ChannelCategoryService");
+const { searchKeys } = require("../../model/ChannelCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const productService = require("../../services/ProductService");
-const tapeMasterService = require("../../services/TapeMasterService");
 
 const {
   getSearchQuery,
@@ -22,16 +20,20 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { languageName } = req.body;
+    let { channelCategory, companyId } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await languageService.isExists([{ languageName }]);
+    let dataExist = await channelCategoryService.isExists([
+      { channelCategory },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await languageService.createNewData({ ...req.body });
+    let dataCreated = await channelCategoryService.createNewData({
+      ...req.body,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -57,25 +59,19 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { languageName } = req.body;
+    let { channelCategory, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await languageService.isExists(
-      [{ languageName }],
-      idToBeSearch
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     //------------------Find data-------------------
-    let datafound = await languageService.getOneByMultiField({
+    let datafound = await channelCategoryService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Language not found.`);
+      throw new ApiError(httpStatus.OK, `ChannelCategory not found.`);
     }
 
-    let dataUpdated = await languageService.getOneAndUpdate(
+    let dataUpdated = await channelCategoryService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -169,7 +165,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["languageName"];
+    let numberFileds = ["channelCategory", "companyId"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -208,7 +204,9 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await languageService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await channelCategoryService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -227,9 +225,11 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await languageService.aggregateQuery(finalAggregateQuery);
+    let result = await channelCategoryService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (result.length) {
-      return res.status(httpStatus.OK).send({
+      return res.status(200).send({
         data: result,
         totalPage: totalpages,
         status: true,
@@ -259,7 +259,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await languageService.findAllWithQuery(matchQuery);
+    let dataExist = await channelCategoryService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -281,61 +281,14 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-
-//single view api
-exports.getById = async (req, res) => {
-  try {
-    //if no default query then pass {}
-    let idToBeSearch = req.params.id;
-    let dataExist = await languageService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
-
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist,
-        code: null,
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await languageService.getOneByMultiField({ _id }))) {
+    if (!(await channelCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isLanguageExistsInProduct = await productService.findCount({
-      "callScript.language": _id,
-      isDeleted: false,
-    });
-    const isLanguageExistsInTape = await tapeMasterService.findCount({
-      language: _id,
-      isDeleted: false,
-    });
-
-    if (isLanguageExistsInProduct || isLanguageExistsInTape) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Language can't be deleted because it is currently used in other services"
-      );
-    }
-    let deleted = await languageService.getOneAndDelete({ _id });
+    let deleted = await channelCategoryService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -359,13 +312,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await languageService.getOneByMultiField({ _id });
+    let dataExist = await channelCategoryService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await languageService.getOneAndUpdate(
+    let statusChanged = await channelCategoryService.getOneAndUpdate(
       { _id },
       { isActive }
     );

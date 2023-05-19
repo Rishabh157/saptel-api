@@ -8,7 +8,16 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    dispositionName: Joi.string().lowercase().required(),
+    slotName: Joi.string().lowercase().required(),
+    channelGroup: Joi.string().custom(commonValidation.objectId).required(),
+    startDateTime: Joi.string().lowercase().required(),
+    type: Joi.string().required(),
+    days: Joi.array().items(Joi.string().required()),
+    tapeName: Joi.string().custom(commonValidation.objectId).required(),
+    channelName: Joi.string().custom(commonValidation.objectId).required(),
+    endDateTime: Joi.string().lowercase().required(),
+    channelTrp: Joi.string().lowercase().required(),
+    remarks: Joi.string().lowercase().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -21,7 +30,16 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    dispositionName: Joi.string().lowercase().required(),
+    slotName: Joi.string().lowercase().required(),
+    channelGroup: Joi.string().custom(commonValidation.objectId).required(),
+    startDateTime: Joi.string().lowercase().required(),
+    type: Joi.string().required(),
+    days: Joi.array().items(Joi.string().required()),
+    tapeName: Joi.string().custom(commonValidation.objectId).required(),
+    channelName: Joi.string().custom(commonValidation.objectId).required(),
+    endDateTime: Joi.string().lowercase().required(),
+    channelTrp: Joi.string().lowercase().required(),
+    remarks: Joi.string().lowercase().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -77,7 +95,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      dispositionName: Joi.string().optional(),
+      slotName: Joi.string().optional(),
     })
     .optional(),
 };
@@ -86,15 +104,6 @@ const get = {
  * delete a document
  */
 const deleteDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-/**
- * get a document by Id
- */
-const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
@@ -115,5 +124,4 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getById,
 };

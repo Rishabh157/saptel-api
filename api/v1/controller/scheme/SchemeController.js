@@ -6,7 +6,7 @@ const schemeService = require("../../services/SchemeService");
 const { searchKeys } = require("../../model/SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const channelManagementService = require("../../services/ChannelManagementService");
+const tapeMasterService = require("../../services/TapeMasterService");
 
 const {
   getSearchQuery,
@@ -465,11 +465,12 @@ exports.deleteDocument = async (req, res) => {
     if (!(await schemeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isSchemeExistsInChannel = await channelManagementService.findCount({
+    const isSchemeExistsInTape = await tapeMasterService.findCount({
       scheme: _id,
       isDeleted: false,
     });
-    if (isSchemeExistsInChannel) {
+
+    if (isSchemeExistsInTape) {
       throw new ApiError(
         httpStatus.OK,
         "Scheme can't be deleted because it is currently used in other services"

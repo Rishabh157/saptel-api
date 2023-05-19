@@ -2,12 +2,14 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const languageService = require("../../services/LanguageService");
-const { searchKeys } = require("../../model/LanguageSchema");
+const slotMasterService = require("../../services/SlotMasterService");
+const { searchKeys } = require("../../model/SlotMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const productService = require("../../services/ProductService");
+const channelGroupService = require("../../services/ChannelGroupService");
 const tapeMasterService = require("../../services/TapeMasterService");
+const channelMasterService = require("../../services/ChannelMasterService");
+const companyService = require("../../services/CompanyService");
 
 const {
   getSearchQuery,
@@ -18,20 +20,62 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { languageName } = req.body;
+    let {
+      slotName,
+      channelGroup,
+      startDateTime,
+      type,
+      days,
+      tapeName,
+      channelName,
+      endDateTime,
+      channelTrp,
+      remarks,
+      companyId,
+    } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await languageService.isExists([{ languageName }]);
+    let dataExist = await slotMasterService.isExists([{ slotName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    const isChannelGroupExists = await channelGroupService.findCount({
+      _id: channelGroup,
+      isDeleted: false,
+    });
+    const isTapeExists = await tapeMasterService.findCount({
+      _id: tapeName,
+      isDeleted: false,
+    });
+    const isChannelExists = await channelMasterService.findCount({
+      _id: channelName,
+      isDeleted: false,
+    });
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    if (!isChannelGroupExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel group");
+    }
+    if (!isTapeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid tape");
+    }
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel");
+    }
+
     //------------------create data-------------------
-    let dataCreated = await languageService.createNewData({ ...req.body });
+    let dataCreated = await slotMasterService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -57,25 +101,58 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { languageName } = req.body;
+    let {
+      slotName,
+      channelGroup,
+      startDateTime,
+      type,
+      days,
+      tapeName,
+      channelName,
+      endDateTime,
+      channelTrp,
+      remarks,
+      companyId,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await languageService.isExists(
-      [{ languageName }],
-      idToBeSearch
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     //------------------Find data-------------------
-    let datafound = await languageService.getOneByMultiField({
+    let datafound = await slotMasterService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Language not found.`);
+      throw new ApiError(httpStatus.OK, `SlotMaster not found.`);
     }
-
-    let dataUpdated = await languageService.getOneAndUpdate(
+    const isChannelGroupExists = await channelGroupService.findCount({
+      _id: channelGroup,
+      isDeleted: false,
+    });
+    const isTapeExists = await tapeMasterService.findCount({
+      _id: tapeName,
+      isDeleted: false,
+    });
+    const isChannelExists = await channelMasterService.findCount({
+      _id: channelName,
+      isDeleted: false,
+    });
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    if (!isChannelGroupExists) {
+      throw new ApiError(httpStatus.OK, "Invalid language");
+    }
+    if (!isTapeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid tape");
+    }
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel");
+    }
+    let dataUpdated = await slotMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -169,7 +246,18 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["languageName"];
+    let numberFileds = [
+      "slotName",
+      "channelGroup",
+      "startDateTime",
+      "type",
+      "days",
+      "tapeName",
+      "channelName",
+      "endDateTime",
+      "channelTrp",
+      "remarks",
+    ];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -197,7 +285,69 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "channelgroups",
+          localField: "channelGroup",
+          foreignField: "_id",
+          as: "channelGroup_data",
+          pipeline: [
+            {
+              $project: {
+                groupName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tapemasters",
+          localField: "tapeName",
+          foreignField: "_id",
+          as: "tape_data",
+          pipeline: [
+            {
+              $project: {
+                tapeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelName",
+          foreignField: "_id",
+          as: "channel_data",
+          pipeline: [
+            {
+              $project: {
+                channelName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          groupNameLabel: {
+            $arrayElemAt: ["$channelGroup_data.groupName", 0],
+          },
+          tapeLabel: {
+            $arrayElemAt: ["$tape_data.tapeName", 0],
+          },
+          channelLabel: {
+            $arrayElemAt: ["$channel_data.channelName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["channel_data", "tape_data", "channelGroup_data"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -208,7 +358,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await languageService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await slotMasterService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -227,9 +377,9 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await languageService.aggregateQuery(finalAggregateQuery);
+    let result = await slotMasterService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
-      return res.status(httpStatus.OK).send({
+      return res.status(200).send({
         data: result,
         totalPage: totalpages,
         status: true,
@@ -258,8 +408,72 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "channelgroups",
+          localField: "channelGroup",
+          foreignField: "_id",
+          as: "channelGroup_data",
+          pipeline: [
+            {
+              $project: {
+                groupName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tapemasters",
+          localField: "tapeName",
+          foreignField: "_id",
+          as: "tape_data",
+          pipeline: [
+            {
+              $project: {
+                tapeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelName",
+          foreignField: "_id",
+          as: "channel_data",
+          pipeline: [
+            {
+              $project: {
+                channelName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          groupNameLabel: {
+            $arrayElemAt: ["$channelGroup_data.groupName", 0],
+          },
+          tapeLabel: {
+            $arrayElemAt: ["$tape_data.tapeName", 0],
+          },
+          channelLabel: {
+            $arrayElemAt: ["$channel_data.channelName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["channel_data", "tape_data", "channelGroup_data"],
+      },
+    ];
 
-    let dataExist = await languageService.findAllWithQuery(matchQuery);
+    let dataExist = await slotMasterService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -282,23 +496,89 @@ exports.get = async (req, res) => {
   }
 };
 
-//single view api
+//get api
 exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await languageService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
+    let additionalQuery = [
+      {
+        _id: new mongoose.Types.ObjectId(idToBeSearch),
+        isDeleted: false,
+      },
+      {
+        $lookup: {
+          from: "channelgroups",
+          localField: "channelGroup",
+          foreignField: "_id",
+          as: "channelGroup_data",
+          pipeline: [
+            {
+              $project: {
+                groupName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tapemasters",
+          localField: "tapeName",
+          foreignField: "_id",
+          as: "tape_data",
+          pipeline: [
+            {
+              $project: {
+                tapeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelName",
+          foreignField: "_id",
+          as: "channel_data",
+          pipeline: [
+            {
+              $project: {
+                channelName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          groupNameLabel: {
+            $arrayElemAt: ["$channelGroup_data.groupName", 0],
+          },
+          tapeLabel: {
+            $arrayElemAt: ["$tape_data.tapeName", 0],
+          },
+          channelLabel: {
+            $arrayElemAt: ["$channel_data.channelName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["channel_data", "tape_data", "channelGroup_data"],
+      },
+    ];
+
+    let dataExist = await slotMasterService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -312,30 +592,14 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await languageService.getOneByMultiField({ _id }))) {
+    if (!(await slotMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isLanguageExistsInProduct = await productService.findCount({
-      "callScript.language": _id,
-      isDeleted: false,
-    });
-    const isLanguageExistsInTape = await tapeMasterService.findCount({
-      language: _id,
-      isDeleted: false,
-    });
-
-    if (isLanguageExistsInProduct || isLanguageExistsInTape) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Language can't be deleted because it is currently used in other services"
-      );
-    }
-    let deleted = await languageService.getOneAndDelete({ _id });
+    let deleted = await slotMasterService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -359,13 +623,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await languageService.getOneByMultiField({ _id });
+    let dataExist = await slotMasterService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await languageService.getOneAndUpdate(
+    let statusChanged = await slotMasterService.getOneAndUpdate(
       { _id },
       { isActive }
     );

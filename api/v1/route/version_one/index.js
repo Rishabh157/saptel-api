@@ -39,12 +39,17 @@ const tabRoute = require("./TabManagementRoute");
 const channelGroupRoute = require("./ChannelGroupRoute");
 const channelManagementRoute = require("./ChannelManagementRoute");
 const dispositionOneRoute = require("./DispositionOneRoute");
+const channelCategoryRoute = require("./ChannelCategoryRoute");
+const channelMasterRoute = require("./ChannelMasterRoute");
+const tapeMasterRoute = require("./TapeMasterRoute");
+const slotMasterRoute = require("./SlotMasterRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
 const artistRoute = require("./ArtistRoute");
 const userRoute = require("./UserRoute");
 const config = require("../../../../config/config");
+const dispositionTwo = require("./DispositionTwoRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -233,6 +238,26 @@ const defaultRoutes = [
   {
     path: "/artist",
     route: artistRoute,
+  },
+  {
+    path: "/disposition-two",
+    route: dispositionTwo,
+  },
+  {
+    path: "/channel-category",
+    route: channelCategoryRoute,
+  },
+  {
+    path: "/channel-master",
+    route: channelMasterRoute,
+  },
+  {
+    path: "/tape-master",
+    route: tapeMasterRoute,
+  },
+  {
+    path: "/slot-master",
+    route: slotMasterRoute,
   },
 ];
 

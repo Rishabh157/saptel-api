@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const dispositionOneController = require("../../controller/dispositionOne/DispositionOneController");
+const slotMasterController = require("../../controller/slotMaster/SlotMasterController");
 const validate = require("../../middleware/validate");
-const dispositionOneValidation = require("../../validation/DispositionOneValidation");
+const slotMasterValidation = require("../../validation/SlotMasterValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
@@ -16,19 +16,19 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.get),
-  dispositionOneController.get
+  validate(slotMasterValidation.get),
+  slotMasterController.get
 );
 /**
- * get all dispositionOne pagination filter
+ * get all slotMaster pagination filter
  */
 
 router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.getAllFilter),
-  dispositionOneController.allFilterPagination
+  validate(slotMasterValidation.getAllFilter),
+  slotMasterController.allFilterPagination
 );
 
 /**
@@ -38,8 +38,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.create),
-  dispositionOneController.add
+  validate(slotMasterValidation.create),
+  slotMasterController.add
 );
 /**
  * update document
@@ -48,19 +48,8 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.update),
-  dispositionOneController.update
-);
-
-/**
- * get by id
- */
-router.get(
-  "/:id",
-  accessModuleCheck,
-  authCheckMiddleware,
-  validate(dispositionOneValidation.getById),
-  dispositionOneController.getById
+  validate(slotMasterValidation.update),
+  slotMasterController.update
 );
 /**
  * update status
@@ -69,8 +58,8 @@ router.put(
   "/status-change/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.changeStatus),
-  dispositionOneController.statusChange
+  validate(slotMasterValidation.changeStatus),
+  slotMasterController.statusChange
 );
 /**
  * delete document
@@ -79,8 +68,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.deleteDocument),
-  dispositionOneController.deleteDocument
+  validate(slotMasterValidation.deleteDocument),
+  slotMasterController.deleteDocument
 );
 
 module.exports = router;

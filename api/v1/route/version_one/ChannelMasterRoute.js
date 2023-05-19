@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const dispositionOneController = require("../../controller/dispositionOne/DispositionOneController");
+const channelMasterController = require("../../controller/channelMaster/ChannelMasterController");
 const validate = require("../../middleware/validate");
-const dispositionOneValidation = require("../../validation/DispositionOneValidation");
+const channelMasterValidation = require("../../validation/ChannelMasterValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
@@ -16,19 +16,19 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.get),
-  dispositionOneController.get
+  validate(channelMasterValidation.get),
+  channelMasterController.get
 );
 /**
- * get all dispositionOne pagination filter
+ * get all channelMaster pagination filter
  */
 
 router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.getAllFilter),
-  dispositionOneController.allFilterPagination
+  validate(channelMasterValidation.getAllFilter),
+  channelMasterController.allFilterPagination
 );
 
 /**
@@ -38,8 +38,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.create),
-  dispositionOneController.add
+  validate(channelMasterValidation.create),
+  channelMasterController.add
 );
 /**
  * update document
@@ -48,19 +48,19 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.update),
-  dispositionOneController.update
+  validate(channelMasterValidation.update),
+  channelMasterController.update
 );
 
 /**
- * get by id
+ * get by id document
  */
 router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.getById),
-  dispositionOneController.getById
+  validate(channelMasterValidation.getById),
+  channelMasterController.getById
 );
 /**
  * update status
@@ -69,8 +69,8 @@ router.put(
   "/status-change/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.changeStatus),
-  dispositionOneController.statusChange
+  validate(channelMasterValidation.changeStatus),
+  channelMasterController.statusChange
 );
 /**
  * delete document
@@ -79,8 +79,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionOneValidation.deleteDocument),
-  dispositionOneController.deleteDocument
+  validate(channelMasterValidation.deleteDocument),
+  channelMasterController.deleteDocument
 );
 
 module.exports = router;

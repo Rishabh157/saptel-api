@@ -9,6 +9,8 @@ const commonValidation = require("./CommonValidation");
 const create = {
   body: Joi.object().keys({
     didNumber: Joi.string().lowercase().required(),
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+    channelId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -22,6 +24,8 @@ const update = {
   }),
   body: Joi.object().keys({
     didNumber: Joi.string().lowercase().required(),
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+    channelId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -92,6 +96,15 @@ const deleteDocument = {
 };
 
 /**
+ * get a single document
+ */
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
  * change status of document
  */
 const changeStatus = {
@@ -106,4 +119,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getById,
 };

@@ -16,6 +16,27 @@ const inventoryCondition = Object.freeze({
   defective: "DEFECTIVE",
 });
 
+const tapeType = Object.freeze({
+  schemeCode: "SCHEME_CODE",
+  promotional: "PROMOTIONAL",
+  intruption: "INTRUPTION",
+});
+
+const slotType = Object.freeze({
+  fixed: "FIXED",
+  flexible: "FLEXIBLE",
+});
+
+const slotDaysType = Object.freeze({
+  monday: "MONDAY",
+  tuesday: "TUESDAY",
+  wednesday: "WEDNESDAY",
+  thursday: "THURSDAY",
+  friday: "FRIDAY",
+  saturday: "SATURDAY",
+  sunday: "SUNDAY",
+});
+
 const companyEnum = Object.freeze({
   pltc: "Private Limited Company",
   plc: "Public Limited Company",
@@ -62,4 +83,7 @@ module.exports = {
   companyEnum,
   inventoryStatus,
   inventoryCondition,
+  tapeType,
+  slotType,
+  slotDaysType,
 };
