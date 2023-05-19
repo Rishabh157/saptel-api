@@ -51,6 +51,17 @@ router.put(
   validate(didManagementValidation.update),
   didManagementController.update
 );
+
+/**
+ * get by id document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(didManagementValidation.getById),
+  didManagementController.getById
+);
 /**
  * update status
  */

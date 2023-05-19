@@ -51,6 +51,17 @@ router.put(
   validate(channelMasterValidation.update),
   channelMasterController.update
 );
+
+/**
+ * get by id document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(channelMasterValidation.getById),
+  channelMasterController.getById
+);
 /**
  * update status
  */
