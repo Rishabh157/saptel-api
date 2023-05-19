@@ -6,10 +6,9 @@ const didManagementService = require("../../services/DidManagementService");
 const { searchKeys } = require("../../model/DidManagementSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const channelManagementService = require("../../services/ChannelManagementService");
 const schemeService = require("../../services/SchemeService");
 const companyService = require("../../services/CompanyService");
-const channelManagementService = require("../../services/ChannelManagementService");
+const channelMasterService = require("../../services/ChannelMasterService");
 
 const {
   getSearchQuery,
@@ -37,7 +36,7 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
 
-    const isChannelExists = await channelManagementService.findCount({
+    const isChannelExists = await channelMasterService.findCount({
       _id: channelId,
       isDeleted: false,
     });
@@ -98,7 +97,7 @@ exports.update = async (req, res) => {
       _id: schemeId,
       isDeleted: false,
     });
-    const isChannelExists = await channelManagementService.findCount({
+    const isChannelExists = await channelMasterService.findCount({
       _id: channelId,
       isDeleted: false,
     });
@@ -510,16 +509,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await didManagementService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isDidExistsInChannel = await channelManagementService.findCount({
-      didNumber: _id,
-      isDeleted: false,
-    });
-    if (isDidExistsInChannel) {
-      throw new ApiError(
-        httpStatus.OK,
-        "DID can't be deleted because it is currently used in other services"
-      );
-    }
+
     let deleted = await didManagementService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
