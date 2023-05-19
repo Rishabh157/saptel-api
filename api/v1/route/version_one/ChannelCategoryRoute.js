@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const didManagementController = require("../../controller/didManagement/DidManagementController");
+const channelCategoryController = require("../../controller/channelCategory/ChannelCategoryController");
 const validate = require("../../middleware/validate");
-const didManagementValidation = require("../../validation/DidManagementValidation");
+const channelCategoryValidation = require("../../validation/ChannelCategoryValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
@@ -16,19 +16,19 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.get),
-  didManagementController.get
+  validate(channelCategoryValidation.get),
+  channelCategoryController.get
 );
 /**
- * get all didManagement pagination filter
+ * get all channelCategory pagination filter
  */
 
 router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.getAllFilter),
-  didManagementController.allFilterPagination
+  validate(channelCategoryValidation.getAllFilter),
+  channelCategoryController.allFilterPagination
 );
 
 /**
@@ -38,8 +38,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.create),
-  didManagementController.add
+  validate(channelCategoryValidation.create),
+  channelCategoryController.add
 );
 /**
  * update document
@@ -48,19 +48,8 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.update),
-  didManagementController.update
-);
-
-/**
- * get by id document
- */
-router.get(
-  "/:id",
-  accessModuleCheck,
-  authCheckMiddleware,
-  validate(didManagementValidation.getById),
-  didManagementController.getById
+  validate(channelCategoryValidation.update),
+  channelCategoryController.update
 );
 /**
  * update status
@@ -69,8 +58,8 @@ router.put(
   "/status-change/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.changeStatus),
-  didManagementController.statusChange
+  validate(channelCategoryValidation.changeStatus),
+  channelCategoryController.statusChange
 );
 /**
  * delete document
@@ -79,8 +68,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.deleteDocument),
-  didManagementController.deleteDocument
+  validate(channelCategoryValidation.deleteDocument),
+  channelCategoryController.deleteDocument
 );
 
 module.exports = router;

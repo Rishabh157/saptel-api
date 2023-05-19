@@ -3,8 +3,9 @@ const mongoose = require("mongoose");
 const DidManagementSchema = new mongoose.Schema(
   {
     didNumber: { type: String, required: true, trim: true, lowercase: true },
+    schemeId: { type: ObjectId, required: true },
+    channelId: { type: ObjectId, required: true },
     companyId: { type: ObjectId, required: true },
-
     isDeleted: {
       type: Boolean,
       default: false,
@@ -19,6 +20,6 @@ const DidManagementSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["didNumber"];
+const searchKeys = ["didNumber", "schemeLable", "channelLabel"];
 module.exports = mongoose.model("DidManagement", DidManagementSchema);
 module.exports.searchKeys = [...searchKeys];

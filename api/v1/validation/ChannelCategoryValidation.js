@@ -8,9 +8,7 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    didNumber: Joi.string().lowercase().required(),
-    schemeId: Joi.string().custom(commonValidation.objectId).required(),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    channelCategory: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -23,9 +21,7 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    didNumber: Joi.string().lowercase().required(),
-    schemeId: Joi.string().custom(commonValidation.objectId).required(),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    channelCategory: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -81,7 +77,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      didNumber: Joi.string().optional(),
+      channelCategory: Joi.string().optional(),
     })
     .optional(),
 };
@@ -90,15 +86,6 @@ const get = {
  * delete a document
  */
 const deleteDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-/**
- * get a single document
- */
-const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
@@ -119,5 +106,4 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getById,
 };

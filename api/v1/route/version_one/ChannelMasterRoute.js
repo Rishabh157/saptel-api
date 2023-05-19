@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const didManagementController = require("../../controller/didManagement/DidManagementController");
+const channelMasterController = require("../../controller/channelMaster/ChannelMasterController");
 const validate = require("../../middleware/validate");
-const didManagementValidation = require("../../validation/DidManagementValidation");
+const channelMasterValidation = require("../../validation/ChannelMasterValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
@@ -16,19 +16,19 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.get),
-  didManagementController.get
+  validate(channelMasterValidation.get),
+  channelMasterController.get
 );
 /**
- * get all didManagement pagination filter
+ * get all channelMaster pagination filter
  */
 
 router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.getAllFilter),
-  didManagementController.allFilterPagination
+  validate(channelMasterValidation.getAllFilter),
+  channelMasterController.allFilterPagination
 );
 
 /**
@@ -38,8 +38,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.create),
-  didManagementController.add
+  validate(channelMasterValidation.create),
+  channelMasterController.add
 );
 /**
  * update document
@@ -48,8 +48,8 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.update),
-  didManagementController.update
+  validate(channelMasterValidation.update),
+  channelMasterController.update
 );
 
 /**
@@ -59,8 +59,8 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.getById),
-  didManagementController.getById
+  validate(channelMasterValidation.getById),
+  channelMasterController.getById
 );
 /**
  * update status
@@ -69,8 +69,8 @@ router.put(
   "/status-change/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.changeStatus),
-  didManagementController.statusChange
+  validate(channelMasterValidation.changeStatus),
+  channelMasterController.statusChange
 );
 /**
  * delete document
@@ -79,8 +79,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.deleteDocument),
-  didManagementController.deleteDocument
+  validate(channelMasterValidation.deleteDocument),
+  channelMasterController.deleteDocument
 );
 
 module.exports = router;
