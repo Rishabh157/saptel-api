@@ -51,6 +51,17 @@ router.put(
   validate(dispositionOneValidation.update),
   dispositionOneController.update
 );
+
+/**
+ * get by id
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionOneValidation.getById),
+  dispositionOneController.getById
+);
 /**
  * update status
  */
