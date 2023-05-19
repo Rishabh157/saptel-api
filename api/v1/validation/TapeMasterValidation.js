@@ -8,25 +8,15 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    channelName: Joi.string().lowercase().required(),
-    address: Joi.string().lowercase().allow(""),
-    phone: Joi.string().allow(""),
-    email: Joi.string().allow(""),
-    area: Joi.string().custom(commonValidation.objectId).required(),
-    channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
-    contactPerson: Joi.string().allow(""),
-    mobile: Joi.string().allow(""),
-    country: Joi.string().custom(commonValidation.objectId).required(),
-    language: Joi.string()
-      .custom(commonValidation.objectId)
-      .optional()
-      .allow(null),
-    channelCategory: Joi.string().custom(commonValidation.objectId).required(),
-    designation: Joi.string().lowercase().allow(""),
-    website: Joi.string().lowercase().allow(""),
-    state: Joi.string().custom(commonValidation.objectId).required(),
+    tapeName: Joi.string().lowercase().required(),
+    channelGroup: Joi.string().allow(null).custom(commonValidation.objectId),
+    tapeType: Joi.string().lowercase(),
+    scheme: Joi.string().allow(null).custom(commonValidation.objectId),
+    language: Joi.string().custom(commonValidation.objectId).required(),
+    duration: Joi.string().lowercase().required().allow(""),
+    artist: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    paymentType: Joi.string().allow(""),
+    remarks: Joi.string().lowercase().allow(""),
   }),
 };
 
@@ -38,22 +28,15 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    channelName: Joi.string().lowercase().required(),
-    address: Joi.string().lowercase().allow(""),
-    phone: Joi.string().allow(""),
-    email: Joi.string().allow(""),
-    area: Joi.string().custom(commonValidation.objectId).required(),
-    channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
-    contactPerson: Joi.string().allow(""),
-    mobile: Joi.string().allow(""),
-    country: Joi.string().custom(commonValidation.objectId).required(),
-    language: Joi.string().custom(commonValidation.objectId).allow(null),
-    channelCategory: Joi.string().custom(commonValidation.objectId).required(),
-    designation: Joi.string().lowercase().allow(""),
-    website: Joi.string().lowercase().allow(""),
-    state: Joi.string().custom(commonValidation.objectId).required(),
+    tapeName: Joi.string().lowercase().required(),
+    channelGroup: Joi.string().allow(null).custom(commonValidation.objectId),
+    tapeType: Joi.string().lowercase(),
+    scheme: Joi.string().allow(null).custom(commonValidation.objectId),
+    language: Joi.string().custom(commonValidation.objectId).required(),
+    duration: Joi.string().lowercase().required().allow(""),
+    artist: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    paymentType: Joi.string().allow(""),
+    remarks: Joi.string().lowercase().allow(""),
   }),
 };
 
@@ -108,7 +91,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      channelName: Joi.string().optional(),
+      tapeName: Joi.string().optional(),
     })
     .optional(),
 };
@@ -117,15 +100,6 @@ const get = {
  * delete a document
  */
 const deleteDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-/**
- * get a single document
- */
-const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
@@ -146,5 +120,4 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getById,
 };

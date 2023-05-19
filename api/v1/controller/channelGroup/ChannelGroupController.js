@@ -7,6 +7,8 @@ const { searchKeys } = require("../../model/ChannelGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const channelManagementService = require("../../services/ChannelManagementService");
+const slotMasterService = require("../../services/SlotMasterService");
+const tapeMasterService = require("../../services/TapeMasterService");
 
 const {
   getSearchQuery,
@@ -288,7 +290,20 @@ exports.deleteDocument = async (req, res) => {
         channelGroupId: _id,
         isDeleted: false,
       });
-    if (isChannelGroupExistsInChannel) {
+    const isChannelGroupExistsInslot = await slotMasterService.findCount({
+      channelGroup: _id,
+      isDeleted: false,
+    });
+    const isChannelGroupExistsInTape = await tapeMasterService.findCount({
+      channelGroup: _id,
+      isDeleted: false,
+    });
+
+    if (
+      isChannelGroupExistsInChannel ||
+      isChannelGroupExistsInslot ||
+      isChannelGroupExistsInTape
+    ) {
       throw new ApiError(
         httpStatus.OK,
         "Channel Group can't be deleted because it is currently used in other services"
