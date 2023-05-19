@@ -42,6 +42,7 @@ const dispositionOneRoute = require("./DispositionOneRoute");
 const cartonBoxBarcodeRoute = require("./CartonBoxBarcodeRoute");
 const adminRoute = require("./AdminRoute");
 const fileManagerRoute = require("./FileManagerRoute");
+const artistRoute = require("./ArtistRoute");
 const userRoute = require("./UserRoute");
 const config = require("../../../../config/config");
 
@@ -228,6 +229,10 @@ const defaultRoutes = [
   {
     path: "/disposition-one",
     route: dispositionOneRoute,
+  },
+  {
+    path: "/artist",
+    route: artistRoute,
   },
 ];
 
