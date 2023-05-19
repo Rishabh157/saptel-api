@@ -9,6 +9,7 @@ const { getQuery } = require("../../helper/utils");
 const channelManagementService = require("../../services/ChannelManagementService");
 const schemeService = require("../../services/SchemeService");
 const companyService = require("../../services/CompanyService");
+const channelManagementService = require("../../services/ChannelManagementService");
 
 const {
   getSearchQuery,
@@ -36,12 +37,20 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
 
+    const isChannelExists = await channelManagementService.findCount({
+      _id: channelId,
+      isDeleted: false,
+    });
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
     });
     if (!isSchemeIdExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme");
+    }
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel");
     }
 
     if (!isCompanyExists) {
@@ -74,7 +83,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { didNumber } = req.body;
+    let { didNumber, schemeId, channelId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -89,6 +98,13 @@ exports.update = async (req, res) => {
       _id: schemeId,
       isDeleted: false,
     });
+    const isChannelExists = await channelManagementService.findCount({
+      _id: channelId,
+      isDeleted: false,
+    });
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel");
+    }
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
