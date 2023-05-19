@@ -3,10 +3,11 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dispositionTwoService = require("../../services/DispositionTwoService");
-const dispositionOneService = require("../../services/DispositionOneService");
 const { searchKeys } = require("../../model/DispositionTwoSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const dispositionOneService = require("../../services/DispositionOneService");
+const companyService = require("../../services/CompanyService");
 
 const {
   getSearchQuery,
@@ -17,12 +18,28 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 // ============= add Disposition start  ================
 exports.add = async (req, res) => {
   try {
     let { dispositionName, dispositionOneId, companyId } = req.body;
 
+    const isDispositionOneExists = await dispositionOneService.findCount({
+      _id: dispositionOneId,
+      isDeleted: false,
+    });
+    if (!isDispositionOneExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
     // -----------------------check duplicate exist --------------------
     let dataExist = await dispositionTwoService.isExists([{ dispositionName }]);
     if (dataExist.exists && dataExist.existsSummary) {
@@ -67,6 +84,20 @@ exports.update = async (req, res) => {
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    const isDispositionOneExists = await dispositionOneService.findCount({
+      _id: dispositionOneId,
+      isDeleted: false,
+    });
+    if (!isDispositionOneExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition");
+    }
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
     }
     // ------------------------ find data ---------------------
     let dataFound = await dispositionTwoService.getOneByMultiField({
@@ -118,8 +149,38 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dispositionones",
+          localField: "dispositionOneId",
+          foreignField: "_id",
+          as: "dispositionData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
 
-    let dataExist = await dispositionTwoService.findAllWithQuery(matchQuery);
+      {
+        $addFields: {
+          dispostionOneLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dispositionData"],
+      },
+    ];
+    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -143,14 +204,109 @@ exports.get = async (req, res) => {
 };
 // =============update Disposition start end================
 
+// =============get DispositionTwo by Id start================
+exports.getById = async (req, res) => {
+  try {
+    _id = req.params.id;
+
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(_id),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionones",
+          localField: "dispositionOneId",
+          foreignField: "_id",
+          as: "dispositionData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispostionOneLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dispositionData"],
+      },
+    ];
+    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// =============get DispositionTwo by Id  end================
+
 // =============get all DispositionTwo by Id of DispositionOne Id start================
 exports.getByDispositionOneId = async (req, res) => {
   try {
     dispositionOneId = req.params.id;
-    console.log(dispositionOneId);
-    let dataExist = await dispositionTwoService.findAllWithQuery({
-      dispositionOneId,
-    });
+
+    let additionalQuery = [
+      {
+        $match: {
+          dispositionOneId: new mongoose.Types.ObjectId(dispositionOneId),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionones",
+          localField: "dispositionOneId",
+          foreignField: "_id",
+          as: "dispositionData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispostionOneLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dispositionData"],
+      },
+    ];
+    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -252,7 +408,34 @@ exports.getFilterPagination = async (req, res) => {
     //----------------------------
 
     // -------------for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array-----------
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "dispositionones",
+          localField: "dispositionOneId",
+          foreignField: "_id",
+          as: "dispositionData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispostionOneLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dispositionData"],
+      },
+    ];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }

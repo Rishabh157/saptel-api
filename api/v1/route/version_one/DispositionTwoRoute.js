@@ -14,6 +14,15 @@ router.get(
   dispositionTwoController.get
 );
 
+//===============get document by id===============
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionTwoValidation.getByDispositionOneId),
+  dispositionTwoController.getById
+);
+
 //===============get all document fo dispositionOne Id===============
 router.get(
   "/get-all/:id",

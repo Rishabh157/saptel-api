@@ -235,6 +235,8 @@ const defaultRoutes = [
   {
     path: "/disposition-two",
     route: dispositionTwo,
+  },
+  {
     path: "/channel-category",
     route: channelCategoryRoute,
   },
