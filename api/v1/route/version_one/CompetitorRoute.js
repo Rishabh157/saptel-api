@@ -1,17 +1,18 @@
 const router = require("express").Router();
-const artistController = require("../../controller/artist/ArtistController");
+const competitorController = require("../../controller/competitor/CompetitorController");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 const validate = require("../../middleware/validate");
-const artistValitation = require("../../validation/ArtistValidation");
+
+const competitorValidation = require("../../validation/CompetitorValidation");
 
 // ===============get new document==============
 router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(artistValitation.get),
-  artistController.get
+  validate(competitorValidation.get),
+  competitorController.get
 );
 // ------------------------
 
@@ -20,8 +21,8 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(artistValitation.getById),
-  artistController.getById
+  validate(competitorValidation.getById),
+  competitorController.getById
 );
 // ------------------------
 
@@ -30,8 +31,8 @@ router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(artistValitation.getAllFilter),
-  artistController.allFilterPagination
+  validate(competitorValidation.getAllFilter),
+  competitorController.allFilterPagination
 );
 // ----------------------------
 
@@ -40,8 +41,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(artistValitation.create),
-  artistController.add
+  validate(competitorValidation.create),
+  competitorController.add
 );
 // ----------------------------
 
@@ -50,8 +51,8 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(artistValitation.update),
-  artistController.update
+  validate(competitorValidation.update),
+  competitorController.update
 );
 // ---------------------------------
 
@@ -60,8 +61,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(artistValitation.deleteDocument),
-  artistController.deleteDocument
+  validate(competitorValidation.deleteDocument),
+  competitorController.deleteDocument
 );
 // ------------------------------------
 
