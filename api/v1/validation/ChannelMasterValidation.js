@@ -26,7 +26,7 @@ const create = {
     website: Joi.string().lowercase().allow(""),
     state: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    paymentType: Joi.string().allow(""),
+    paymentType: Joi.string().required(),
   }),
 };
 
@@ -53,7 +53,7 @@ const update = {
     website: Joi.string().lowercase().allow(""),
     state: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    paymentType: Joi.string().allow(""),
+    paymentType: Joi.string().required(),
   }),
 };
 

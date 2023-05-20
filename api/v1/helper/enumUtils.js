@@ -59,7 +59,13 @@ const apiAppEnum = Object.freeze({
   dashboard: "dashboard",
   all: "all",
 });
-
+const paymentType = Object.freeze({
+  cheque: "CHEQUE",
+  netBanking: "NETBANKING",
+  cash: "CASH",
+  creditCard: "CREDITCARD",
+  debitCard: "DEBITCARD",
+});
 /**
  * if other the following routes created. please add all actions with their method,
  */
@@ -86,4 +92,5 @@ module.exports = {
   tapeType,
   slotType,
   slotDaysType,
+  paymentType,
 };
