@@ -59,14 +59,14 @@ router.put(
   dispositionTwoController.update
 );
 
-//===============update document===============
+//===============update status document===============
 router.put(
   "/status-change/:id",
   validate(dispositionTwoValidation.changeStatus),
   dispositionTwoController.statusChange
 );
 
-//===============update document===============
+//===============delete document===============
 router.delete(
   "/:id",
   accessModuleCheck,

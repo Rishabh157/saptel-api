@@ -50,6 +50,7 @@ const artistRoute = require("./ArtistRoute");
 const userRoute = require("./UserRoute");
 const config = require("../../../../config/config");
 const dispositionTwo = require("./DispositionTwoRoute");
+const channelUpdationRoute = require("./ChannelUpdationRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -250,6 +251,10 @@ const defaultRoutes = [
   {
     path: "/channel-master",
     route: channelMasterRoute,
+  },
+  {
+    path: "/channel-updation",
+    route: channelUpdationRoute,
   },
   {
     path: "/tape-master",
