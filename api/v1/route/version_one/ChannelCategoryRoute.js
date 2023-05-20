@@ -52,6 +52,16 @@ router.put(
   channelCategoryController.update
 );
 /**
+ * get by id
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(channelCategoryValidation.getById),
+  channelCategoryController.getById
+);
+/**
  * update status
  */
 router.put(
