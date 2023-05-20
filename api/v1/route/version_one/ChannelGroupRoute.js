@@ -51,6 +51,17 @@ router.put(
   validate(channelGroupValidation.update),
   channelGroupController.update
 );
+
+/**
+ * get single document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(channelGroupValidation.getById),
+  channelGroupController.getById
+);
 /**
  * update status
  */

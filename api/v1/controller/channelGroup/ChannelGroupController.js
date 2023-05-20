@@ -278,6 +278,36 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+//get api
+exports.getById = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+
+    let dataExist = await channelGroupService.getOneByMultiField({
+      _id: idToBeSearch,
+      isDeleted: false,
+    });
+
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
