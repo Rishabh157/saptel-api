@@ -86,7 +86,13 @@ exports.update = async (req, res) => {
     let { didNumber, schemeId, channelId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await didManagementService.isExists(
+      [{ didNumber }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await didManagementService.getOneByMultiField({
       _id: idToBeSearch,
