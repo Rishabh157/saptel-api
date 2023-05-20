@@ -259,7 +259,7 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
-          from: "channelmanagements",
+          from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
           as: "channel_data",
@@ -370,7 +370,7 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
-          from: "channelmanagements",
+          from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
           as: "channel_data",
@@ -454,7 +454,7 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "channelmanagements",
+          from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
           as: "channel_data",
