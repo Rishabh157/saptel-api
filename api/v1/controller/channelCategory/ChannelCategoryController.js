@@ -292,7 +292,7 @@ exports.getById = async (req, res) => {
       isDeleted: false,
     });
 
-    if (!dataExist || !dataExist.length) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
