@@ -51,6 +51,7 @@ const userRoute = require("./UserRoute");
 const config = require("../../../../config/config");
 const dispositionTwo = require("./DispositionTwoRoute");
 const channelUpdationRoute = require("./ChannelUpdationRoute");
+const competitorRoute = require("./CompetitorRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -263,6 +264,10 @@ const defaultRoutes = [
   {
     path: "/slot-master",
     route: slotMasterRoute,
+  },
+  {
+    path: "/competitor",
+    route: competitorRoute,
   },
 ];
 

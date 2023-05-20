@@ -7,7 +7,7 @@ const createNewData = async (bodyData) => {
 };
 //-------------------------------------------
 
-// ================getOneByMultiField================
+// ================getOneAndUpdate================
 const getOneAndUpdate = async (matchObj, updateBody) => {
   return Artist.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
@@ -17,7 +17,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
 };
 //-------------------------------------------
 
-// ================findAllWithQuery================
+// ================getById================
 const getById = async (id) => {
   return Artist.findById(id);
 };
@@ -35,13 +35,13 @@ const getOneByMultiField = async (matchObj, projectObj) => {
 };
 //-------------------------------------------
 
-// ================isExists===============
+// ================aggregateQuery===============
 const aggregateQuery = async (aggregateQueryArray) => {
   return Artist.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 
-// ================isExists===============
+// ================getOneAndDelete===============
 const getOneAndDelete = async (matchObj) => {
   return Artist.findOneAndUpdate(
     { ...matchObj },

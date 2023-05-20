@@ -1,9 +1,9 @@
-const artistService = require("../../services/ArtistService");
+const competitorService = require("../../services/CompetitorService");
 const companyService = require("../../services/CompanyService");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const { searchKeys } = require("../../model/ArtistSchema");
+const { searchKeys } = require("../../model/CompetitorSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -20,10 +20,10 @@ const {
 // ==============add api start==============
 exports.add = async (req, res) => {
   try {
-    let { artistName, companyId } = req.body;
+    let { competitorName, companyId } = req.body;
 
     // -------check duplicate exist--------
-    let dataExist = await artistService.isExists([{ artistName }]);
+    let dataExist = await competitorService.isExists([{ competitorName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -35,7 +35,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
-    let dataCreated = await artistService.createNewData({
+    let dataCreated = await competitorService.createNewData({
       ...req.body,
     });
 
@@ -64,26 +64,34 @@ exports.add = async (req, res) => {
 // ==============upate api start==============
 exports.update = async (req, res) => {
   try {
-    let { artistName, companyId } = req.body;
+    let { competitorName, companyId } = req.body;
     let idToBeSearch = req.params.id;
 
-    let dataExist = await artistService.isExists(
-      [{ artistName }],
+    let dataExist = await competitorService.isExists(
+      [{ competitorName }],
       idToBeSearch
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
     //------------------Find data-------------------
 
-    let dataFound = await artistService.getOneByMultiField({
+    let dataFound = await competitorService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!dataFound) {
-      throw new ApiError(httpStatus.OK, `Artist not found.`);
+      throw new ApiError(httpStatus.OK, `Competitor not found.`);
     }
 
-    let dataUpdated = await artistService.getOneAndUpdate(
+    let dataUpdated = await competitorService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -94,6 +102,7 @@ exports.update = async (req, res) => {
         },
       }
     );
+
     if (dataUpdated) {
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
@@ -123,9 +132,7 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
-    let dataExist = await artistService.findAllWithQuery(matchQuery);
-
+    let dataExist = await competitorService.findAllWithQuery(matchQuery);
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -153,7 +160,7 @@ exports.getById = async (req, res) => {
   try {
     let _id = req.params.id;
 
-    let dataExist = await artistService.getOneByMultiField({
+    let dataExist = await competitorService.getOneByMultiField({
       _id: _id,
       isDeleted: false,
     });
@@ -181,6 +188,7 @@ exports.getById = async (req, res) => {
 // ==============get by id api end==============
 
 // ==============get all filter pagiantion start==============
+
 exports.allFilterPagination = async (req, res) => {
   try {
     let dateFilter = req.body.dateFilter;
@@ -230,7 +238,7 @@ exports.allFilterPagination = async (req, res) => {
 
     // -----------get filter query------------
     let booleanFields = [];
-    let numberFileds = ["artistName", "companyId"];
+    let numberFileds = ["competitorName", "companyId"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -260,7 +268,7 @@ exports.allFilterPagination = async (req, res) => {
       $match: matchQuery,
     });
 
-    let dataFound = await artistService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await competitorService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -278,8 +286,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
-    let result = await artistService.aggregateQuery(finalAggregateQuery);
+    let result = await competitorService.aggregateQuery(finalAggregateQuery);
 
     if (result.length) {
       return res.status(200).send({
@@ -306,15 +313,15 @@ exports.allFilterPagination = async (req, res) => {
 // ==============get all filter pagiantion  end==============
 
 // ==============delete api start==============
-
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await artistService.getOneByMultiField({ _id }))) {
+
+    if (!(await competitorService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    let deleted = await artistService.getOneAndDelete({ _id });
+    let deleted = await competitorService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
