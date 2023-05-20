@@ -21,6 +21,7 @@ const TapeMasterSchema = new mongoose.Schema(
     scheme: { type: ObjectId, required: false, default: null },
     language: { type: ObjectId, required: true },
     duration: { type: String, required: true, trim: true, lowercase: true },
+    youtubeLink: { type: String, required: false, trim: true, default: "" },
     artist: { type: ObjectId, required: true },
     companyId: { type: ObjectId, required: true },
     remarks: {

@@ -11,6 +11,7 @@ const channelGroupService = require("../../services/ChannelGroupService");
 const companyService = require("../../services/CompanyService");
 const languageService = require("../../services/LanguageService");
 const slotMasterService = require("../../services/SlotMasterService");
+const artistService = require("../../services/ArtistService");
 
 const {
   getSearchQuery,
@@ -21,6 +22,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -54,6 +56,10 @@ exports.add = async (req, res) => {
       _id: language,
       isDeleted: false,
     });
+    const isArtistExists = await artistService.findCount({
+      _id: artist,
+      isDeleted: false,
+    });
     const isSchemeExists = scheme?.length
       ? await schemeService.findCount({
           _id: scheme,
@@ -66,6 +72,9 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    if (!isArtistExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Artist");
     }
     if (!isLanguageExists) {
       throw new ApiError(httpStatus.OK, "Invalid language");
@@ -141,10 +150,20 @@ exports.update = async (req, res) => {
           isDeleted: false,
         })
       : null;
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
     });
+
+    const isArtistExists = await artistService.findCount({
+      _id: artist,
+      isDeleted: false,
+    });
+
+    if (!isArtistExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Artist");
+    }
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
@@ -336,6 +355,21 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "artists",
+          localField: "artist",
+          foreignField: "_id",
+          as: "artist_data",
+          pipeline: [
+            {
+              $project: {
+                artistName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           channelGroupLabel: {
             $arrayElemAt: ["$channel_group_data.groupName", 0],
@@ -346,10 +380,18 @@ exports.allFilterPagination = async (req, res) => {
           languageLabel: {
             $arrayElemAt: ["$language_data.languageName", 0],
           },
+          artistLabel: {
+            $arrayElemAt: ["$artist_data.artistName", 0],
+          },
         },
       },
       {
-        $unset: ["channel_group_data", "scheme_data", "language_data"],
+        $unset: [
+          "channel_group_data",
+          "scheme_data",
+          "language_data",
+          "artist_data",
+        ],
       },
     ];
     if (additionalQuery.length) {
@@ -406,12 +448,14 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    let idToBeSearch = req.params.id;
+    let matchQuery = { isDeleted: false };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
 
     let additionalQuery = [
       {
-        _id: new mongoose.Types.ObjectId(idToBeSearch),
-        isDeleted: false,
+        $match: matchQuery,
       },
       {
         $lookup: {
@@ -459,6 +503,21 @@ exports.get = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "artists",
+          localField: "artist",
+          foreignField: "_id",
+          as: "artist_data",
+          pipeline: [
+            {
+              $project: {
+                artistName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           channelGroupLabel: {
             $arrayElemAt: ["$channel_group_data.groupName", 0],
@@ -469,10 +528,18 @@ exports.get = async (req, res) => {
           languageLabel: {
             $arrayElemAt: ["$language_data.languageName", 0],
           },
+          artistLabel: {
+            $arrayElemAt: ["$artist_data.artistName", 0],
+          },
         },
       },
       {
-        $unset: ["channel_group_data", "scheme_data", "language_data"],
+        $unset: [
+          "channel_group_data",
+          "scheme_data",
+          "language_data",
+          "artist_data",
+        ],
       },
     ];
     let dataExist = await tapeMasterService.aggregateQuery(additionalQuery);
@@ -483,7 +550,7 @@ exports.get = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: dataExist,
         code: null,
         issue: null,
       });
@@ -501,20 +568,109 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
+    let idToBeSearch;
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "channelgroups",
+          localField: "channelGroup",
+          foreignField: "_id",
+          as: "channel_group_data",
+          pipeline: [
+            {
+              $project: {
+                groupName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "scheme",
+          foreignField: "_id",
+          as: "scheme_data",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "languages",
+          localField: "language",
+          foreignField: "_id",
+          as: "language_data",
+          pipeline: [
+            {
+              $project: {
+                languageName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "artists",
+          localField: "artist",
+          foreignField: "_id",
+          as: "artist_data",
+          pipeline: [
+            {
+              $project: {
+                artistName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          channelGroupLabel: {
+            $arrayElemAt: ["$channel_group_data.groupName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$scheme_data.schemeName", 0],
+          },
+          languageLabel: {
+            $arrayElemAt: ["$language_data.languageName", 0],
+          },
+          artistLabel: {
+            $arrayElemAt: ["$artist_data.artistName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "channel_group_data",
+          "scheme_data",
+          "language_data",
+          "artist_data",
+        ],
+      },
+    ];
 
-    let dataExist = await tapeMasterService.findAllWithQuery(matchQuery);
+    let dataExist = await tapeMasterService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });

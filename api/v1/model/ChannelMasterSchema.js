@@ -12,7 +12,7 @@ const ChannelMasterSchema = new mongoose.Schema(
     },
     phone: { type: String, required: false, trim: true, default: "" },
     email: { type: String, required: false, trim: true, default: "" },
-    area: { type: ObjectId, required: true, trim: true },
+    district: { type: ObjectId, required: true, trim: true },
     channelGroupId: {
       type: ObjectId,
       required: true,
@@ -57,7 +57,7 @@ const searchKeys = [
   "address",
   "phone",
   "email",
-  "area",
+  "district",
   "channelGroupId",
   "contactPerson",
   "mobile",
