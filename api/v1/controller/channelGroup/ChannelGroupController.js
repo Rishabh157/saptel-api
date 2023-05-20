@@ -61,7 +61,13 @@ exports.update = async (req, res) => {
     let { groupName, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await channelGroupService.isExists(
+      [{ groupName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await channelGroupService.getOneByMultiField({
       _id: idToBeSearch,
