@@ -50,7 +50,9 @@ const getOneAndDelete = async (matchObj) => {
   );
 };
 //-------------------------------------------
-
+const findCount = async (matchObj) => {
+  return Artist.find({ ...matchObj, isDeleted: false }).count();
+};
 // ================isExists===============
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
@@ -102,4 +104,5 @@ module.exports = {
   aggregateQuery,
   getOneAndDelete,
   getById,
+  findCount,
 };
