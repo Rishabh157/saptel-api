@@ -61,7 +61,13 @@ exports.update = async (req, res) => {
     let { groupName, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await channelGroupService.isExists(
+      [{ groupName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await channelGroupService.getOneByMultiField({
       _id: idToBeSearch,
@@ -259,6 +265,36 @@ exports.get = async (req, res) => {
     let dataExist = await channelGroupService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+//get api
+exports.getById = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+
+    let dataExist = await channelGroupService.getOneByMultiField({
+      _id: idToBeSearch,
+      isDeleted: false,
+    });
+
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

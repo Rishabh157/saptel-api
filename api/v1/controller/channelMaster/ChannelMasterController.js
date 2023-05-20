@@ -6,7 +6,7 @@ const channelMasterService = require("../../services/ChannelMasterService");
 const { searchKeys } = require("../../model/ChannelMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const areaService = require("../../services/AreaService");
+const districtService = require("../../services/DistrictService");
 const channelGroupService = require("../../services/ChannelGroupService");
 const stateService = require("../../services/StateService");
 const countryService = require("../../services/CountryService");
@@ -34,7 +34,7 @@ exports.add = async (req, res) => {
       address,
       phone,
       email,
-      area,
+      district,
       channelGroupId,
       contactPerson,
       mobile,
@@ -54,8 +54,8 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    const isAreaExists = await areaService.findCount({
-      _id: area,
+    const isAreaExists = await districtService.findCount({
+      _id: district,
       isDeleted: false,
     });
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -85,7 +85,7 @@ exports.add = async (req, res) => {
         })
       : null;
     if (!isAreaExists) {
-      throw new ApiError(httpStatus.OK, "Invalid area");
+      throw new ApiError(httpStatus.OK, "Invalid district");
     }
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
@@ -137,7 +137,7 @@ exports.update = async (req, res) => {
       address,
       phone,
       email,
-      area,
+      district,
       channelGroupId,
       contactPerson,
       mobile,
@@ -160,8 +160,8 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `ChannelMaster not found.`);
     }
-    const isAreaExists = await areaService.findCount({
-      _id: area,
+    const isAreaExists = await districtService.findCount({
+      _id: district,
       isDeleted: false,
     });
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -194,7 +194,7 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
     if (!isAreaExists) {
-      throw new ApiError(httpStatus.OK, "Invalid area");
+      throw new ApiError(httpStatus.OK, "Invalid district");
     }
     if (!isChannelGroupExists) {
       throw new ApiError(httpStatus.OK, "Invalid channel group");
@@ -353,14 +353,14 @@ exports.allFilterPagination = async (req, res) => {
     let additionalQuery = [
       {
         $lookup: {
-          from: "areas",
-          localField: "area",
+          from: "districts",
+          localField: "district",
           foreignField: "_id",
-          as: "area_data",
+          as: "district_data",
           pipeline: [
             {
               $project: {
-                area: 1,
+                districtName: 1,
               },
             },
           ],
@@ -443,8 +443,8 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $addFields: {
-          areaLabel: {
-            $arrayElemAt: ["$area_data.area", 0],
+          districtLabel: {
+            $arrayElemAt: ["$district_data.districtName", 0],
           },
           channelGroupLabel: {
             $arrayElemAt: ["$channel_group.groupName", 0],
@@ -467,7 +467,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $unset: [
           "channel_category_data",
-          "area_data",
+          "district_data",
           "channel_group",
           "country_data",
           "state_data",
@@ -540,14 +540,14 @@ exports.get = async (req, res) => {
       { $match: matchQuery },
       {
         $lookup: {
-          from: "areas",
-          localField: "area",
+          from: "districts",
+          localField: "district",
           foreignField: "_id",
-          as: "area_data",
+          as: "district_data",
           pipeline: [
             {
               $project: {
-                area: 1,
+                districtName: 1,
               },
             },
           ],
@@ -630,8 +630,8 @@ exports.get = async (req, res) => {
       },
       {
         $addFields: {
-          areaLabel: {
-            $arrayElemAt: ["$area_data.area", 0],
+          districtLabel: {
+            $arrayElemAt: ["$district_data.districtName", 0],
           },
           channelGroupLabel: {
             $arrayElemAt: ["$channel_group.groupName", 0],
@@ -654,7 +654,7 @@ exports.get = async (req, res) => {
       {
         $unset: [
           "channel_category_data",
-          "area_data",
+          "district_data",
           "channel_group",
           "country_data",
           "state_data",
@@ -698,14 +698,14 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "areas",
-          localField: "area",
+          from: "districts",
+          localField: "district",
           foreignField: "_id",
-          as: "area_data",
+          as: "district_data",
           pipeline: [
             {
               $project: {
-                area: 1,
+                districtName: 1,
               },
             },
           ],
@@ -788,8 +788,8 @@ exports.getById = async (req, res) => {
       },
       {
         $addFields: {
-          areaLabel: {
-            $arrayElemAt: ["$area_data.area", 0],
+          districtLabel: {
+            $arrayElemAt: ["$district_data.districtName", 0],
           },
           channelGroupLabel: {
             $arrayElemAt: ["$channel_group.groupName", 0],
@@ -812,7 +812,7 @@ exports.getById = async (req, res) => {
       {
         $unset: [
           "channel_category_data",
-          "area_data",
+          "district_data",
           "channel_group",
           "country_data",
           "state_data",

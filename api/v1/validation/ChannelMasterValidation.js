@@ -12,7 +12,7 @@ const create = {
     address: Joi.string().lowercase().allow(""),
     phone: Joi.string().allow(""),
     email: Joi.string().allow(""),
-    area: Joi.string().custom(commonValidation.objectId).required(),
+    district: Joi.string().custom(commonValidation.objectId).required(),
     channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
     contactPerson: Joi.string().allow(""),
     mobile: Joi.string().allow(""),
@@ -26,7 +26,7 @@ const create = {
     website: Joi.string().lowercase().allow(""),
     state: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    paymentType: Joi.string().allow(""),
+    paymentType: Joi.string().required(),
   }),
 };
 
@@ -42,7 +42,7 @@ const update = {
     address: Joi.string().lowercase().allow(""),
     phone: Joi.string().allow(""),
     email: Joi.string().allow(""),
-    area: Joi.string().custom(commonValidation.objectId).required(),
+    district: Joi.string().custom(commonValidation.objectId).required(),
     channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
     contactPerson: Joi.string().allow(""),
     mobile: Joi.string().allow(""),
@@ -53,7 +53,7 @@ const update = {
     website: Joi.string().lowercase().allow(""),
     state: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    paymentType: Joi.string().allow(""),
+    paymentType: Joi.string().required(),
   }),
 };
 

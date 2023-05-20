@@ -19,6 +19,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -85,7 +86,13 @@ exports.update = async (req, res) => {
     let { didNumber, schemeId, channelId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await didManagementService.isExists(
+      [{ didNumber }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------Find data-------------------
     let datafound = await didManagementService.getOneByMultiField({
       _id: idToBeSearch,
@@ -258,7 +265,7 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
-          from: "channelmanagements",
+          from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
           as: "channel_data",
@@ -369,7 +376,7 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
-          from: "channelmanagements",
+          from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
           as: "channel_data",
@@ -430,8 +437,10 @@ exports.getById = async (req, res) => {
 
     let additionalQuery = [
       {
-        _id: new mongoose.Types.ObjectId(idToBeSearch),
-        isDeleted: false,
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
       },
       {
         $lookup: {
@@ -451,7 +460,7 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "channelmanagements",
+          from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
           as: "channel_data",

@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { paymentType } = require("../helper/enumUtils");
 const ChannelMasterSchema = new mongoose.Schema(
   {
     channelName: { type: String, required: true, trim: true, lowercase: true },
@@ -12,7 +13,7 @@ const ChannelMasterSchema = new mongoose.Schema(
     },
     phone: { type: String, required: false, trim: true, default: "" },
     email: { type: String, required: false, trim: true, default: "" },
-    area: { type: ObjectId, required: true, trim: true },
+    district: { type: ObjectId, required: true, trim: true },
     channelGroupId: {
       type: ObjectId,
       required: true,
@@ -35,7 +36,18 @@ const ChannelMasterSchema = new mongoose.Schema(
     designation: { type: String, required: false, trim: true, default: "" },
     website: { type: String, required: false, trim: true, default: "" },
     state: { type: ObjectId, required: true, trim: true },
-    paymentType: { type: String, required: false, trim: true, default: "" },
+    paymentType: {
+      type: String,
+      enum: [
+        paymentType.cheque,
+        paymentType.netBanking,
+        paymentType.cash,
+        paymentType.creditCard,
+        paymentType.debitCard,
+      ],
+      uppercase: true,
+      required: true,
+    },
     companyId: { type: ObjectId, required: true, trim: true },
 
     isDeleted: {
@@ -57,7 +69,7 @@ const searchKeys = [
   "address",
   "phone",
   "email",
-  "area",
+  "district",
   "channelGroupId",
   "contactPerson",
   "mobile",
