@@ -2,12 +2,13 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const dispositionTwoService = require("../../services/DispositionTwoService");
-const { searchKeys } = require("../../model/DispositionTwoSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const dispositionOneService = require("../../services/DispositionOneService");
+// -------services----------
+const channelUpdationService = require("../../services/ChannelUpdationService");
+const slotMasterService = require("../../services/SlotMasterService");
 const companyService = require("../../services/CompanyService");
+const { searchKeys } = require("../../model/ChannelUpdationSchema");
 
 const {
   getSearchQuery,
@@ -18,19 +19,20 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const mongoose = require("mongoose");
 
-// ============= add Disposition start  ================
+// =================add api start================
 exports.add = async (req, res) => {
   try {
-    let { dispositionName, dispositionOneId, companyId } = req.body;
+    let { slotId, companyId, run, startTime, endTime, remark } = req.body;
 
-    const isDispositionOneExists = await dispositionOneService.findCount({
-      _id: dispositionOneId,
+    // -----------check slot exist-----------
+
+    const isSlotExists = await slotMasterService.findCount({
+      _id: slotId,
       isDeleted: false,
     });
-    if (!isDispositionOneExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition");
+    if (!isSlotExists) {
+      throw new ApiError(httpStatus.OK, "Invalid slot");
     }
 
     const isCompanyExists = await companyService.findCount({
@@ -40,16 +42,12 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    // -----------------------check duplicate exist --------------------
-    let dataExist = await dispositionTwoService.isExists([{ dispositionName }]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
 
-    // ----------------------create data-------------------------
-    let dataCreated = await dispositionTwoService.createNewData({
+    //------------------create data-------------------
+    let dataCreated = await channelUpdationService.createNewData({
       ...req.body,
     });
+
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -70,28 +68,24 @@ exports.add = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============add Disposition start end================
+// =================add api end================
 
-// =============update Disposition start================
+// =================update api start================
 exports.update = async (req, res) => {
   try {
-    let { dispositionName, dispositionOneId, companyId } = req.body;
+    let { slotId, companyId, run, startTime, endTime, remark } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await dispositionTwoService.isExists(
-      [{ dispositionName }],
-      idToBeSearch
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
-    const isDispositionOneExists = await dispositionOneService.findCount({
-      _id: dispositionOneId,
+    // let dataExist = await channelUpdationService.isExists([{}]);
+
+    const isSlotExists = await slotMasterService.findCount({
+      _id: slotId,
       isDeleted: false,
     });
-    if (!isDispositionOneExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition");
+    if (!isSlotExists) {
+      throw new ApiError(httpStatus.OK, "Invalid slot");
     }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -99,15 +93,16 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    // ------------------------ find data ---------------------
-    let dataFound = await dispositionTwoService.getOneByMultiField({
+
+    let dataFound = await channelUpdationService.getOneByMultiField({
       _id: idToBeSearch,
+      isDeleted: false,
     });
     if (!dataFound) {
-      throw new ApiError(httpStatus.OK, `DispositionOne not found.`);
+      throw new ApiError(httpStatus.OK, `Channel  not found.`);
     }
 
-    let dataUpdated = await dispositionTwoService.getOneAndUpdate(
+    let dataUpdated = await channelUpdationService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -118,7 +113,6 @@ exports.update = async (req, res) => {
         },
       }
     );
-
     if (dataUpdated) {
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
@@ -139,9 +133,9 @@ exports.update = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============update Disposition end================
+// =================update api end================
 
-// =============get Disposition start================
+// =================get api start================
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
@@ -149,20 +143,21 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+
     let additionalQuery = [
       {
         $match: matchQuery,
       },
       {
         $lookup: {
-          from: "dispositionones",
-          localField: "dispositionOneId",
+          from: "slotmasters",
+          localField: "slotId",
           foreignField: "_id",
-          as: "dispositionData",
+          as: "slotData",
           pipeline: [
             {
               $project: {
-                dispositionName: 1,
+                slotName: 1,
               },
             },
           ],
@@ -171,17 +166,19 @@ exports.get = async (req, res) => {
 
       {
         $addFields: {
-          dispostionOneLabel: {
-            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          slotLabel: {
+            $arrayElemAt: ["$slotData.slotName", 0],
           },
         },
       },
       {
-        $unset: ["dispositionData"],
+        $unset: ["slotData"],
       },
     ];
-    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
 
+    let dataExist = await channelUpdationService.aggregateQuery(
+      additionalQuery
+    );
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -202,135 +199,9 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============update Disposition start end================
+// =================get api end================
 
-// =============get DispositionTwo by Id start================
-exports.getById = async (req, res) => {
-  try {
-    _id = req.params.id;
-
-    let additionalQuery = [
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(_id),
-          isDeleted: false,
-        },
-      },
-      {
-        $lookup: {
-          from: "dispositionones",
-          localField: "dispositionOneId",
-          foreignField: "_id",
-          as: "dispositionData",
-          pipeline: [
-            {
-              $project: {
-                dispositionName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $addFields: {
-          dispostionOneLabel: {
-            $arrayElemAt: ["$dispositionData.dispositionName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["dispositionData"],
-      },
-    ];
-    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
-
-    if (!dataExist || !dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist[0],
-        code: null,
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-// =============get DispositionTwo by Id  end================
-
-// =============get all DispositionTwo by Id of DispositionOne Id start================
-exports.getByDispositionOneId = async (req, res) => {
-  try {
-    dispositionOneId = req.params.id;
-
-    let additionalQuery = [
-      {
-        $match: {
-          dispositionOneId: new mongoose.Types.ObjectId(dispositionOneId),
-          isDeleted: false,
-        },
-      },
-      {
-        $lookup: {
-          from: "dispositionones",
-          localField: "dispositionOneId",
-          foreignField: "_id",
-          as: "dispositionData",
-          pipeline: [
-            {
-              $project: {
-                dispositionName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $addFields: {
-          dispostionOneLabel: {
-            $arrayElemAt: ["$dispositionData.dispositionName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["dispositionData"],
-      },
-    ];
-    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
-
-    if (!dataExist || !dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist,
-        code: null,
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-// =============get all DispositionTwo by Id of DispositionOne Id start end================
-
-// =============all filter pagination api start================
+// =================all filter pagination api start================
 exports.getFilterPagination = async (req, res) => {
   try {
     let dateFilter = req.body.dateFilter;
@@ -357,7 +228,6 @@ exports.getFilterPagination = async (req, res) => {
     // -----------------------------
 
     // ---------------check search keys valid-----------------
-
     let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
 
     if (searchQueryCheck && !searchQueryCheck.status) {
@@ -384,7 +254,7 @@ exports.getFilterPagination = async (req, res) => {
 
     // ---------------get filter query---------------
     let booleanFields = [];
-    let numberFileds = ["dispositionName", "dispositionOneId", "companyId "];
+    let numberFileds = ["slotId", "run", "startTime", "endTime", "remark"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -407,18 +277,22 @@ exports.getFilterPagination = async (req, res) => {
     //----------------calander filter----------
     //----------------------------
 
-    // -------------for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array-----------
+    // ------------for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array----------
+
     let additionalQuery = [
       {
+        $match: matchQuery,
+      },
+      {
         $lookup: {
-          from: "dispositionones",
-          localField: "dispositionOneId",
+          from: "slotmasters",
+          localField: "slotId",
           foreignField: "_id",
-          as: "dispositionData",
+          as: "slotData",
           pipeline: [
             {
               $project: {
-                dispositionName: 1,
+                slotName: 1,
               },
             },
           ],
@@ -427,13 +301,13 @@ exports.getFilterPagination = async (req, res) => {
 
       {
         $addFields: {
-          dispostionOneLabel: {
-            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          slotLabel: {
+            $arrayElemAt: ["$slotData.slotName", 0],
           },
         },
       },
       {
-        $unset: ["dispositionData"],
+        $unset: ["slotData"],
       },
     ];
     if (additionalQuery.length) {
@@ -443,15 +317,18 @@ exports.getFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    // ------------------------------------------
-    let dataFound = await dispositionTwoService.aggregateQuery(
+
+    //-----------------------------------
+
+    let dataFound = await channelUpdationService.aggregateQuery(
       finalAggregateQuery
     );
+
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
-    let { limit, page, totalData, skip, totalPages } =
+    let { limit, page, totalData, skip, totalpages } =
       await getLimitAndTotalCount(
         req.body.limit,
         req.body.page,
@@ -465,13 +342,13 @@ exports.getFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await dispositionTwoService.aggregateQuery(
+    let result = await channelUpdationService.aggregateQuery(
       finalAggregateQuery
     );
     if (result.length) {
       return res.status(200).send({
         data: result,
-        totalPage: totalPages,
+        totalPage: totalpages,
         status: true,
         currentPage: page,
         totalItem: totalData,
@@ -490,56 +367,18 @@ exports.getFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============all filter pagination api end================
+// =================all filter pagination api end================
 
-// =============statusChange  start================
-exports.statusChange = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    let dataExist = await dispositionTwoService.getOneByMultiField({ _id });
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-
-    let isActive = dataExist.isActive ? false : true;
-
-    let statusChanged = await dispositionTwoService.getOneAndUpdate(
-      {
-        _id,
-      },
-      {
-        isActive,
-      }
-    );
-    if (!statusChanged) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
-    return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
-      data: statusChanged,
-      code: null,
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-// =============statusChange end================
-
-// =============delete api start==================
+// =================delete api start================
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await dispositionTwoService.getOneByMultiField({ _id }))) {
+
+    if (!(await channelUpdationService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await dispositionTwoService.getOneAndDelete({ _id });
+
+    let deleted = await channelUpdationService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -560,5 +399,4 @@ exports.deleteDocument = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-
-// =============delete api start end============
+// =================delete api end================
