@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const channelManagementService = require("../../services/ChannelManagementService");
 const companyService = require("../../services/CompanyService");
+const channelGroupService = require("../../services/ChannelGroupService");
 
 const { searchKeys } = require("../../model/ChannelManagementSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -30,6 +31,14 @@ exports.add = async (req, res) => {
     let dataExist = await channelManagementService.isExists([{ channelName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isChannelGroupExists = await channelGroupService.findCount({
+      _id: channelGroupId,
+      isDeleted: false,
+    });
+    if (!isChannelGroupExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
 
     const isCompanyExists = await companyService.findCount({

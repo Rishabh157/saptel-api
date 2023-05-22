@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const cartonBoxBarcodeService = require("../../services/CartonBoxBarcodeService");
 const companyService = require("../../services/CompanyService");
+const cartonBoxService = require("../../services/CartonBoxService");
 
 const { searchKeys } = require("../../model/CartonBoxBarcodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -37,6 +38,14 @@ exports.add = async (req, res) => {
     let dataExist = await cartonBoxBarcodeService.isExists([{ barcodeNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isCartonBoxExists = await cartonBoxService.findCount({
+      _id: cartonBoxId,
+      isDeleted: false,
+    });
+    if (!isCartonBoxExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
     const isCompanyExists = await companyService.findCount({
