@@ -54,7 +54,7 @@ router.put(
 /**
  * get by id
  */
-router.put(
+router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
