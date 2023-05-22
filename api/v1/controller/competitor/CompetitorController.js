@@ -225,7 +225,7 @@ exports.allFilterPagination = async (req, res) => {
     }
 
     // ----------get searchQuery----------
-    const searchQuery = getSearchQuery(searchIn, searchKeys);
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
     if (searchQuery && searchQuery.length) {
       matchQuery.$and.push({ $or: searchQuery });
     }
