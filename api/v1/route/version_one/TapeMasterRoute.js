@@ -52,6 +52,16 @@ router.put(
   tapeMasterController.update
 );
 /**
+ * get by id
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(tapeMasterValidation.getById),
+  tapeMasterController.getById
+);
+/**
  * update status
  */
 router.put(

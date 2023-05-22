@@ -106,6 +106,14 @@ const deleteDocument = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+/**
+ * get by id
+ */
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 
 /**
  * change status of document
@@ -122,4 +130,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getById,
 };

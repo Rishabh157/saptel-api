@@ -567,8 +567,7 @@ exports.get = async (req, res) => {
 //get by id api
 exports.getById = async (req, res) => {
   try {
-    //if no default query then pass {}
-    let idToBeSearch;
+    let idToBeSearch = req.params.id;
     let additionalQuery = [
       {
         $match: {
