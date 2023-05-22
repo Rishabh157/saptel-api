@@ -3,6 +3,9 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const cartonBoxBarcodeService = require("../../services/CartonBoxBarcodeService");
+const companyService = require("../../services/CompanyService");
+const cartonBoxService = require("../../services/CartonBoxService");
+
 const { searchKeys } = require("../../model/CartonBoxBarcodeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -28,12 +31,29 @@ exports.add = async (req, res) => {
       isUsed,
       companyId,
     } = req.body;
+
     /**
      * check duplicate exist
      */
     let dataExist = await cartonBoxBarcodeService.isExists([{ barcodeNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isCartonBoxExists = await cartonBoxService.findCount({
+      _id: cartonBoxId,
+      isDeleted: false,
+    });
+    if (!isCartonBoxExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
     let lastObject = await cartonBoxBarcodeService.aggregateQuery([
@@ -89,6 +109,14 @@ exports.update = async (req, res) => {
       req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await cartonBoxBarcodeService.getOneByMultiField({
