@@ -52,6 +52,16 @@ router.put(
   slotMasterController.update
 );
 /**
+ * get by id document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(slotMasterValidation.getById),
+  slotMasterController.getById
+);
+/**
  * update status
  */
 router.put(
