@@ -7,6 +7,8 @@ const { searchKeys } = require("../../model/ChannelGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const channelManagementService = require("../../services/ChannelManagementService");
+const companyService = require("../../services/CompanyService");
+
 const slotMasterService = require("../../services/SlotMasterService");
 const tapeMasterService = require("../../services/TapeMasterService");
 
@@ -31,6 +33,15 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     //------------------create data-------------------
     let dataCreated = await channelGroupService.createNewData({ ...req.body });
 
@@ -68,6 +79,15 @@ exports.update = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     //------------------Find data-------------------
     let datafound = await channelGroupService.getOneByMultiField({
       _id: idToBeSearch,

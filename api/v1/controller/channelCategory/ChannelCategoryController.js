@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const channelCategoryService = require("../../services/ChannelCategoryService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/ChannelCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -30,6 +32,15 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     //------------------create data-------------------
     let dataCreated = await channelCategoryService.createNewData({
       ...req.body,
@@ -62,6 +73,14 @@ exports.update = async (req, res) => {
     let { channelCategory, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await channelCategoryService.getOneByMultiField({
