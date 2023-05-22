@@ -51,6 +51,7 @@ router.put(
   validate(tabManagementValidation.update),
   tabManagementController.update
 );
+
 /**
  * update status
  */
