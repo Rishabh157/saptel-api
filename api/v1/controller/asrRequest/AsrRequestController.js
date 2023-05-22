@@ -2,7 +2,10 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
+
 const asrRequestService = require("../../services/AsrRequestService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/AsrRequestSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -20,7 +23,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { asrDetails, completed } = req.body;
+    let { asrDetails, completed, companyId } = req.body;
     /**
      * check duplicate exist
      */
@@ -28,6 +31,15 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     //------------------create data-------------------
     let dataCreated = await asrRequestService.createNewData({ ...req.body });
 
@@ -55,8 +67,17 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { asrDetails, completed } = req.body;
+    let { asrDetails, completed, companyId } = req.body;
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     let datafound = await asrRequestService.getOneByMultiField({
       _id: idToBeSearch,
     });
