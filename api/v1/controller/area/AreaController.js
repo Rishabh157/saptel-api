@@ -2,7 +2,15 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
+// -----------services-------------
 const areaService = require("../../services/AreaService");
+const pincodeService = require("../../services/PincodeService");
+const tehsilService = require("../../services/TehsilService");
+const districtService = require("../../services/DistrictService");
+const stateService = require("../../services/StateService");
+const countryService = require("../../services/CountryService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/AreaSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -20,8 +28,15 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { area, pincodeId, tehsilId, districtId, stateId, countryId } =
-      req.body;
+    let {
+      area,
+      pincodeId,
+      tehsilId,
+      districtId,
+      stateId,
+      countryId,
+      companyId,
+    } = req.body;
     /**
      * check duplicate exist
      */
@@ -29,6 +44,55 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    // ----------check all Id's exist----------
+    const isPincodeExists = await pincodeService.findCount({
+      _id: pincodeId,
+      isDeleted: false,
+    });
+    if (!isPincodeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid PinCode");
+    }
+
+    const isTehsilExists = await tehsilService.findCount({
+      _id: tehsilId,
+      isDeleted: false,
+    });
+    if (!isTehsilExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Tehsil");
+    }
+
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
+    }
+
+    const isStateExists = await stateService.findCount({
+      _id: stateId,
+      isDeleted: false,
+    });
+    if (!isStateExists) {
+      throw new ApiError(httpStatus.OK, "Invalid State");
+    }
+
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     //------------------create data-------------------
     let dataCreated = await areaService.createNewData({ ...req.body });
 
@@ -56,10 +120,66 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { area, pincodeId, tehsilId, districtId, stateId, countryId } =
-      req.body;
+    let {
+      area,
+      pincodeId,
+      tehsilId,
+      districtId,
+      stateId,
+      countryId,
+      companyId,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    // ----------check all Id's exist----------
+    const isPincodeExists = await pincodeService.findCount({
+      _id: pincodeId,
+      isDeleted: false,
+    });
+    if (!isPincodeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid PinCode");
+    }
+
+    const isTehsilExists = await tehsilService.findCount({
+      _id: tehsilId,
+      isDeleted: false,
+    });
+    if (!isTehsilExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Tehsil");
+    }
+
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
+    }
+
+    const isStateExists = await stateService.findCount({
+      _id: stateId,
+      isDeleted: false,
+    });
+    if (!isStateExists) {
+      throw new ApiError(httpStatus.OK, "Invalid State");
+    }
+
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await areaService.getOneByMultiField({ _id: idToBeSearch });
