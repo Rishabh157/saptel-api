@@ -6,7 +6,7 @@ const { tapeType } = require("../helper/enumUtils");
 const TapeMasterSchema = new mongoose.Schema(
   {
     tapeName: { type: String, required: true, trim: true, lowercase: true },
-    channelGroup: {
+    channelGroupId: {
       type: ObjectId,
       required: false,
       default: null,
@@ -18,11 +18,11 @@ const TapeMasterSchema = new mongoose.Schema(
       required: true,
       default: tapeType.promotional,
     },
-    scheme: { type: ObjectId, required: false, default: null },
-    language: { type: ObjectId, required: true },
+    schemeId: { type: ObjectId, required: false, default: null },
+    languageId: { type: ObjectId, required: true },
     duration: { type: String, required: true, trim: true, lowercase: true },
     youtubeLink: { type: String, required: false, trim: true, default: "" },
-    artist: { type: ObjectId, required: true },
+    artistId: { type: [ObjectId], required: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
     remarks: {
       type: String,

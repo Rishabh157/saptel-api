@@ -29,12 +29,12 @@ exports.add = async (req, res) => {
   try {
     let {
       tapeName,
-      channelGroup,
+      channelGroupId,
       tapeType,
-      scheme,
-      language,
+      schemeId,
+      languageId,
+      artistId,
       duration,
-      artist,
       remarks,
       companyId,
     } = req.body;
@@ -45,24 +45,24 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    const isChannelGroupExists = channelGroup?.length
+    const isChannelGroupExists = channelGroupId?.length
       ? await channelGroupService.findCount({
-          _id: channelGroup,
+          _id: channelGroupId,
           isDeleted: false,
         })
       : null;
 
     const isLanguageExists = await languageService.findCount({
-      _id: language,
+      _id: languageId,
       isDeleted: false,
     });
     const isArtistExists = await artistService.findCount({
-      _id: artist,
+      _id: artistId,
       isDeleted: false,
     });
-    const isSchemeExists = scheme?.length
+    const isSchemeExists = schemeId?.length
       ? await schemeService.findCount({
-          _id: scheme,
+          _id: schemeId,
           isDeleted: false,
         })
       : null;
@@ -79,10 +79,10 @@ exports.add = async (req, res) => {
     if (!isLanguageExists) {
       throw new ApiError(httpStatus.OK, "Invalid language");
     }
-    if (scheme?.length && !isSchemeExists) {
+    if (schemeId?.length && !isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
-    if (channelGroup?.length && !isChannelGroupExists) {
+    if (channelGroupId?.length && !isChannelGroupExists) {
       throw new ApiError(httpStatus.OK, "Invalid channel group");
     }
     //------------------create data-------------------
@@ -114,12 +114,12 @@ exports.update = async (req, res) => {
   try {
     let {
       tapeName,
-      channelGroup,
+      channelGroupId,
       tapeType,
-      scheme,
-      language,
+      schemeId,
+      languageId,
       duration,
-      artist,
+      artistId,
       remarks,
       companyId,
     } = req.body;
@@ -133,50 +133,46 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `TapeMaster not found.`);
     }
-    const isChannelGroupExists = channelGroup?.length
+    const isChannelGroupExists = channelGroupId?.length
       ? await channelGroupService.findCount({
-          _id: channelGroup,
+          _id: channelGroupId,
           isDeleted: false,
         })
       : null;
 
     const isLanguageExists = await languageService.findCount({
-      _id: language,
+      _id: languageId,
       isDeleted: false,
     });
-    const isSchemeExists = scheme?.length
+    const isArtistExists = await artistService.findCount({
+      _id: artistId,
+      isDeleted: false,
+    });
+    const isSchemeExists = schemeId?.length
       ? await schemeService.findCount({
-          _id: scheme,
+          _id: schemeId,
           isDeleted: false,
         })
       : null;
-
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
     });
-
-    const isArtistExists = await artistService.findCount({
-      _id: artist,
-      isDeleted: false,
-    });
-
-    if (!isArtistExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Artist");
-    }
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    if (!isArtistExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Artist");
     }
     if (!isLanguageExists) {
       throw new ApiError(httpStatus.OK, "Invalid language");
     }
-    if (scheme?.length && !isSchemeExists) {
+    if (schemeId?.length && !isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
-    if (channelGroup?.length && !isChannelGroupExists) {
+    if (channelGroupId?.length && !isChannelGroupExists) {
       throw new ApiError(httpStatus.OK, "Invalid channel group");
     }
-
     let dataUpdated = await tapeMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,
