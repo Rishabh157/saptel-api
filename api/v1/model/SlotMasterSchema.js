@@ -38,6 +38,7 @@ const SlotMasterSchema = new mongoose.Schema(
     channelName: { type: ObjectId, required: true },
     endDateTime: { type: String, required: true, trim: true, lowercase: true },
     channelTrp: { type: String, required: true, trim: true, lowercase: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     remarks: {
       type: String,
       required: false,
@@ -45,7 +46,6 @@ const SlotMasterSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
-    companyId: { type: ObjectId, required: true, trim: true },
 
     isDeleted: {
       type: Boolean,
