@@ -195,6 +195,7 @@ const searchKeys = [
   "contactInformation",
   "document",
   "otherDocument",
+  "companyId",
 ];
 module.exports = mongoose.model("Dealer", DealerSchema);
 module.exports.searchKeys = [...searchKeys];

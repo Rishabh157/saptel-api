@@ -3,6 +3,9 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dealerPincodeService = require("../../services/DealerPincodeService");
+const companyService = require("../../services/CompanyService");
+const dealerService = require("../../services/DealerService");
+
 const { searchKeys } = require("../../model/DealerPincodeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -16,6 +19,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { isCancel } = require("axios");
 
 //add start
 exports.add = async (req, res) => {
@@ -27,6 +31,21 @@ exports.add = async (req, res) => {
     let dataExist = await dealerPincodeService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
     const output = pincodeDetail.map((ele) => {
@@ -70,6 +89,14 @@ exports.update = async (req, res) => {
     let { dealerId, pincode, estTime, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await dealerPincodeService.getOneByMultiField({

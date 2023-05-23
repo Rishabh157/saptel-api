@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dealerService = require("../../services/DealerService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/DealerSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -41,6 +43,7 @@ exports.add = async (req, res) => {
       document,
       otherDocument,
       password,
+      companyId,
     } = req.body;
     /**
      * check duplicate exist
@@ -49,6 +52,15 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     let hashedPassword = await bcryptjs.hash(password, 12);
     if (!hashedPassword) {
       throw new ApiError(
@@ -97,9 +109,19 @@ exports.update = async (req, res) => {
       contactInformation,
       document,
       otherDocument,
+      companyId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     let dataExist = await dealerService.isExists(
       [{ dealerCode }],
       idToBeSearch,

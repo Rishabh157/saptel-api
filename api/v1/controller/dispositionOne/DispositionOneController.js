@@ -4,6 +4,8 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dispositionOneService = require("../../services/DispositionOneService");
 const dispositionTwoService = require("../../services/DispositionTwoService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/DispositionOneSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -22,6 +24,15 @@ const {
 exports.add = async (req, res) => {
   try {
     let { dispositionName, companyId } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -61,6 +72,14 @@ exports.update = async (req, res) => {
     let { dispositionName, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await dispositionOneService.getOneByMultiField({

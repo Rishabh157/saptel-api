@@ -21,7 +21,16 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { name, mobile, password } = req.body;
+    let { name, mobile, password, companyId } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -64,9 +73,17 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { name, mobile, password } = req.body;
+    let { name, mobile, password, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await deliveryBoyService.getOneByMultiField({

@@ -3,6 +3,10 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dealerSchemeService = require("../../services/DealerSchemeService");
+const companyService = require("../../services/CompanyService");
+const schemeService = require("../../services/SchemeService");
+const dealerService = require("../../services/DealerService");
+
 const { searchKeys } = require("../../model/DealerSchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -21,6 +25,31 @@ const {
 exports.add = async (req, res) => {
   try {
     let { dealerId, schemeId, companyId } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isSchemeExists = await schemeService.findCount({
+      _id: schemeId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -61,9 +90,33 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, schemeId } = req.body;
+    let { dealerId, schemeId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isSchemeExists = await schemeService.findCount({
+      _id: schemeId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await dealerSchemeService.getOneByMultiField({
