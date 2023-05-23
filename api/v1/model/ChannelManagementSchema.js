@@ -9,7 +9,7 @@ const ChannelManagementSchema = new mongoose.Schema(
     },
     didNumber: { type: ObjectId, required: true, trim: true, lowercase: true },
     scheme: { type: ObjectId, required: true },
-    companyId: { type: ObjectId, required: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

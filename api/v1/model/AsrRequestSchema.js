@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = require("mongodb");
 const AsrRequestSchema = new mongoose.Schema(
   {
     asrDetails: {
@@ -20,7 +21,7 @@ const AsrRequestSchema = new mongoose.Schema(
       required: true,
     },
     completed: { type: Boolean, default: false },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -20,7 +20,7 @@ const ProductSubCategorySchema = new mongoose.Schema(
     },
 
     hsnCode: { type: String, required: true, trim: true },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
