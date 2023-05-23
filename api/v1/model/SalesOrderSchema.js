@@ -53,7 +53,7 @@ const SalesOrderSchema = new mongoose.Schema(
       ],
       default: [],
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

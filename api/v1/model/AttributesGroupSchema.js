@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = require("mongodb");
 const AttributesGroupSchema = new mongoose.Schema(
   {
     groupName: { type: String, required: true, trim: true, lowercase: true },
@@ -21,7 +22,7 @@ const AttributesGroupSchema = new mongoose.Schema(
       required: true,
       minlength: 1,
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -1,5 +1,5 @@
 // model schema starts here
-
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const { userEnum } = require("../helper/enumUtils");
 const UserSchema = new mongoose.Schema(
@@ -37,7 +37,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: userEnum.user,
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

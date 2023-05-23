@@ -45,7 +45,7 @@ const SlotMasterSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
-    companyId: { type: ObjectId, required: true },
+    companyId: { type: ObjectId, required: true, trim: true },
 
     isDeleted: {
       type: Boolean,
