@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const productSubCategoryService = require("../../services/ProductSubCategoryService");
+const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/ProductSubCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -24,8 +25,22 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { subCategoryCode, subCategoryName, parentCategory, hsnCode } =
-      req.body;
+    let {
+      subCategoryCode,
+      subCategoryName,
+      parentCategory,
+      hsnCode,
+      companyId,
+    } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -65,10 +80,24 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { subCategoryCode, subCategoryName, parentCategory, hsnCode } =
-      req.body;
+    let {
+      subCategoryCode,
+      subCategoryName,
+      parentCategory,
+      hsnCode,
+      companyId,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     let dataExist = await productSubCategoryService.isExists(
       [{ subCategoryCode }, { subCategoryName }],
       idToBeSearch

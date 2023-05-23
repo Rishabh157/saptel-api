@@ -42,6 +42,7 @@ const SalesOrderSchema = new mongoose.Schema(
           approvalById: {
             type: ObjectId,
             required: true,
+            trim: true,
           },
           time: {
             type: String,
