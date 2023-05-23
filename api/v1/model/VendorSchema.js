@@ -39,22 +39,22 @@ const VendorSchema = new mongoose.Schema(
           trim: true,
           lowercase: true,
         },
-        country: {
+        countryId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        state: {
+        stateId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        district: {
+        districtId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        pincode: {
+        pincodeId: {
           type: ObjectId,
           required: true,
           trim: true,
@@ -75,22 +75,22 @@ const VendorSchema = new mongoose.Schema(
           trim: true,
           lowercase: true,
         },
-        country: {
+        countryId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        state: {
+        stateId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        district: {
+        districtId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        pincode: {
+        pincodeId: {
           type: ObjectId,
           required: true,
           trim: true,

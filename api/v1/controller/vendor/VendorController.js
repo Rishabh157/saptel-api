@@ -2,11 +2,12 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const vendorService = require("../../services/VendorService");
 const { searchKeys } = require("../../model/VendorSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const purchaseOrderService = require("../../services/PurchaseOrderService");
+const vendorService = require("../../services/VendorService");
+const companyService = require("../../services/CompanyService");
 
 const {
   getSearchQuery,
@@ -33,7 +34,17 @@ exports.add = async (req, res) => {
       contactInformation,
       document,
       bankInformation,
+      companyId,
     } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */

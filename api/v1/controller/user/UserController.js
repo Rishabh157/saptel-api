@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("../../services/UserService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/UserSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -33,6 +35,14 @@ const { userEnum } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let { firstName, lastName, mobile, email, companyId, password } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     /**
      * check duplicate exist
@@ -85,7 +95,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { firstName, lastName, mobile, email } = req.body;
+    let { firstName, lastName, mobile, email, companyId } = req.body;
     if (req.userData.userType !== userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
@@ -94,6 +104,14 @@ exports.update = async (req, res) => {
     }
 
     let idToBeSearch = req.userData.Id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     /**
      * check duplicate exist
