@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const deliveryBoyService = require("../../services/DeliveryBoyService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/DeliveryBoySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");

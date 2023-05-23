@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const inventoriesService = require("../../services/InventoriesService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/InventoriesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -29,6 +31,14 @@ exports.add = async (req, res) => {
       companyId,
       wareHouse,
     } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     /**
      * check duplicate exist
@@ -89,9 +99,18 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { productGroupName, groupBarcodeNumber, barcodeNumber } = req.body;
+    let { productGroupName, groupBarcodeNumber, barcodeNumber, companyId } =
+      req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await inventoriesService.getOneByMultiField({

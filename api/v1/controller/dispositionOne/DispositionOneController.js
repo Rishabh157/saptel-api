@@ -73,6 +73,17 @@ exports.update = async (req, res) => {
 
     let idToBeSearch = req.params.id;
 
+    /**
+     * check duplicate exist
+     */
+    let dataExist = await dispositionOneService.isExists(
+      [{ dispositionName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,

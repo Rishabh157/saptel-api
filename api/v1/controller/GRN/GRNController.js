@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const goodReceivedNoteService = require("../../services/GRNService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/GRNSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -22,8 +24,23 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { poCode, itemId, receivedQuantity, goodQuantity, defectiveQuantity } =
-      req.body;
+    let {
+      poCode,
+      itemId,
+      receivedQuantity,
+      goodQuantity,
+      defectiveQuantity,
+      companyId,
+    } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
