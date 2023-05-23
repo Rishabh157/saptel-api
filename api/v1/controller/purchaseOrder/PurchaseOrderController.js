@@ -3,6 +3,10 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const purchaseOrderService = require("../../services/PurchaseOrderService");
+const vendorService = require("../../services/CompanyService");
+const wareHouseService = require("../../services/WareHouseService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/PurchaseOrderSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -21,7 +25,33 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { poCode, vendorId, wareHouseId, purchaseOrder } = req.body;
+    let { poCode, vendorId, wareHouseId, purchaseOrder, companyId } = req.body;
+    console.log(req.body);
+
+    const isVendorExists = await vendorService.findCount({
+      _id: vendorId,
+      isDeleted: false,
+    });
+    if (!isVendorExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Vendor");
+    }
+
+    const isWareHouseExists = await wareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWareHouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid WareHouse");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -72,7 +102,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { poCode, vendorId, wareHouseId, purchaseOrder } = req.body;
+    let { poCode, vendorId, wareHouseId, purchaseOrder, companyId } = req.body;
 
     // let idToBeSearch = req.params.id;
     // let dataExist = await purchaseOrderService.isExists(
@@ -90,6 +120,31 @@ exports.update = async (req, res) => {
     // if (!datafound) {
     //   throw new ApiError(httpStatus.OK, `PurchaseOrder not found.`);
     // }
+
+    const isVendorExists = await vendorService.findCount({
+      _id: vendorId,
+      isDeleted: false,
+    });
+    if (!isVendorExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Vendor");
+    }
+
+    const isWareHouseExists = await wareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWareHouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid WareHouse");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     const output = purchaseOrder.map((order) => {
       return {
         poCode: req.body.poCode,

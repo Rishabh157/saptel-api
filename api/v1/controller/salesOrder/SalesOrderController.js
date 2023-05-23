@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const salesOrderService = require("../../services/SalesOrderService");
+const companyService = require("../../services/CompanyService");
+
 const { searchKeys } = require("../../model/SalesOrderSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -23,6 +25,15 @@ exports.add = async (req, res) => {
   try {
     let { soNumber, dealer, wareHouse, productSalesOrder, companyId } =
       req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -70,9 +81,18 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { soNumber, dealer, wareHouse, productSalesOrder } = req.body;
+    let { soNumber, dealer, wareHouse, productSalesOrder, companyId } =
+      req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
 
     //------------------Find data-------------------
     let datafound = await salesOrderService.getOneByMultiField({
