@@ -9,12 +9,14 @@ const commonValidation = require("./CommonValidation");
 const create = {
   body: Joi.object().keys({
     tapeName: Joi.string().lowercase().required(),
-    channelGroup: Joi.string().allow(null).custom(commonValidation.objectId),
+    channelGroupId: Joi.string().allow(null).custom(commonValidation.objectId),
     tapeType: Joi.string().lowercase(),
-    scheme: Joi.string().allow(null).custom(commonValidation.objectId),
-    language: Joi.string().custom(commonValidation.objectId).required(),
+    schemeId: Joi.string().allow(null).custom(commonValidation.objectId),
+    languageId: Joi.string().custom(commonValidation.objectId).required(),
     duration: Joi.string().lowercase().required().allow(""),
-    artist: Joi.string().custom(commonValidation.objectId).required(),
+    artistId: Joi.array().items(
+      Joi.custom(commonValidation.objectId).required()
+    ),
     youtubeLink: Joi.string().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     remarks: Joi.string().lowercase().allow(""),
@@ -30,12 +32,14 @@ const update = {
   }),
   body: Joi.object().keys({
     tapeName: Joi.string().lowercase().required(),
-    channelGroup: Joi.string().allow(null).custom(commonValidation.objectId),
+    channelGroupId: Joi.string().allow(null).custom(commonValidation.objectId),
     tapeType: Joi.string().lowercase(),
-    scheme: Joi.string().allow(null).custom(commonValidation.objectId),
-    language: Joi.string().custom(commonValidation.objectId).required(),
+    schemeId: Joi.string().allow(null).custom(commonValidation.objectId),
+    languageId: Joi.string().custom(commonValidation.objectId).required(),
     duration: Joi.string().lowercase().required().allow(""),
-    artist: Joi.string().custom(commonValidation.objectId).required(),
+    artistId: Joi.array().items(
+      Joi.custom(commonValidation.objectId).required()
+    ),
     youtubeLink: Joi.string().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     remarks: Joi.string().lowercase().allow(""),
