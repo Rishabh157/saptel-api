@@ -3,6 +3,11 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const tehsilService = require("../../services/TehsilService");
+const companyService = require("../../services/CompanyService");
+const countryService = require("../../services/CountryService");
+const stateService = require("../../services/StateService");
+const districtService = require("../../services/DistrictService");
+
 const { searchKeys } = require("../../model/TehsilSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -20,7 +25,37 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { tehsilName, districtId, stateId, countryId } = req.body;
+    let { tehsilName, districtId, stateId, countryId, companyId } = req.body;
+
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
+    }
+    const isStateExists = await stateService.findCount({
+      _id: stateId,
+      isDeleted: false,
+    });
+    if (!isStateExists) {
+      throw new ApiError(httpStatus.OK, "Invalid State");
+    }
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */

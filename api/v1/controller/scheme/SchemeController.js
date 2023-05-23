@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const schemeService = require("../../services/SchemeService");
+const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -37,7 +38,17 @@ exports.add = async (req, res) => {
       schemeDescription,
       productInformation,
       faq,
+      companyId,
     } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     /**
      * check duplicate exist
      */
@@ -90,8 +101,18 @@ exports.update = async (req, res) => {
       schemeDescription,
       productInformation,
       faq,
+      companyId,
     } = req.body;
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
     let dataExist = await schemeService.isExists(
       [{ schemeCode }, { schemeName }],
       idToBeSearch,

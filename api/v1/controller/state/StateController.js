@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const stateService = require("../../services/StateService");
+const companyService = require("../../services/CompanyService");
+const countryService = require("../../services/CountryService");
 const { searchKeys } = require("../../model/StateSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -20,7 +22,24 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { stateName, countryId } = req.body;
+    let { stateName, countryId, companyId } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Counrty");
+    }
+
     /**
      * check duplicate exist
      */
@@ -59,9 +78,25 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { stateName, countryId } = req.body;
+    let { stateName, countryId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
 
     //------------------Find data-------------------
     let datafound = await stateService.getOneByMultiField({
