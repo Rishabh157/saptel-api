@@ -8,7 +8,7 @@ const ChannelCategorySchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    companyId: { type: ObjectId, required: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

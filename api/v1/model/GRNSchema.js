@@ -7,7 +7,7 @@ const GoodReceivedNoteSchema = new mongoose.Schema(
     receivedQuantity: { type: Number, required: true, trim: true },
     goodQuantity: { type: Number, required: true, trim: true },
     defectiveQuantity: { type: Number, required: true, trim: true },
-    companyId: { type: ObjectId, required: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

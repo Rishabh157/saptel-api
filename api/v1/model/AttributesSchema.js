@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ObjectId } = require("mongodb");
 const AttributesSchema = new mongoose.Schema(
   {
     attributeName: {
@@ -7,7 +8,7 @@ const AttributesSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
