@@ -104,7 +104,7 @@ exports.update = async (req, res) => {
       _id: idToBeSearch,
     });
     if (!dataFound) {
-      throw new ApiError(httpStatus.OK, `DispositionOne not found.`);
+      throw new ApiError(httpStatus.OK, `DispositionTwo not found.`);
     }
 
     let dataUpdated = await dispositionTwoService.getOneAndUpdate(

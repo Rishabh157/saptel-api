@@ -83,3 +83,83 @@ exports.add = async (req, res) => {
   }
 };
 // =============add Disposition start end================
+
+// =============update Disposition start================
+exports.update = async (req, res) => {
+  try {
+    let { dispositionName, dispositionOneId, dispositionTwoId, companyId } =
+      req.body;
+
+    let idToBeSearch = req.params.id;
+
+    let dataExist = await dispositionThreeService.isExists(
+      [{ dispositionName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    const isDispositionOneExists = await dispositionOneService.findCount({
+      _id: dispositionOneId,
+      isDeleted: false,
+    });
+    if (!isDispositionOneExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition One");
+    }
+
+    const isDispositionTwoExists = await dispositionTwoService.findCount({
+      _id: dispositionTwoId,
+      isDeleted: false,
+    });
+    if (!isDispositionTwoExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Two");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    // ------------------------ find data ---------------------
+    let dataFound = await dispositionThreeService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!dataFound) {
+      throw new ApiError(httpStatus.OK, `DispositionThree not found.`);
+    }
+
+    let dataUpdated = await dispositionThreeService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      return res.status(httpStatus.CREATED).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: null,
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// =============update Disposition end================

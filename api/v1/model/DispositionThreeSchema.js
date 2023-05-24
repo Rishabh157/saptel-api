@@ -42,5 +42,5 @@ const searchKeys = [
   "dispositionTwoId",
   "companyId",
 ];
-module.exports = mongoose.model("dispositionThree", DispositionThreeSchema);
+module.exports = mongoose.model("DispositionThree", DispositionThreeSchema);
 module.exports.searchKeys = [...searchKeys];

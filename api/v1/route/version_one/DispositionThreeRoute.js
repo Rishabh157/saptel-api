@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const dispositionThreeController = require("../../controller/dispositionOne/DispositionOneController");
+const dispositionThreeController = require("../../controller/dispositionThree/DispositionThreeController");
 const dispositionThreeValidation = require("../../validation/DispositionThreeValidation");
 const validate = require("../../middleware/validate");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
@@ -51,13 +51,13 @@ router.post(
 );
 
 //===============update document===============
-// router.put(
-//   "/:id",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(dispositionThreeValidation.update),
-//   dispositionThreeController.update
-// );
+router.put(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.update),
+  dispositionThreeController.update
+);
 
 //===============update status document===============
 // router.put(

@@ -5,12 +5,7 @@ const SlotMasterSchema = new mongoose.Schema(
   {
     slotName: { type: String, required: true, trim: true, lowercase: true },
     channelGroup: { type: ObjectId, required: true },
-    startDateTime: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-    },
+
     type: {
       type: String,
       enum: [slotType.fixed, slotType.flexible],
@@ -34,14 +29,72 @@ const SlotMasterSchema = new mongoose.Schema(
       required: true,
       default: slotDaysType.monday,
     },
-    tapeName: { type: ObjectId, required: true },
-    channelName: { type: ObjectId, required: true },
-    endDateTime: { type: String, required: true, trim: true, lowercase: true },
+    tapeNameId: { type: ObjectId, required: true },
+    channelNameId: { type: ObjectId, required: true },
+
+    channelSlots: {
+      type: [
+        {
+          date: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+          startTime: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+          endTime: {
+            type: String,
+            required: true,
+            trim: true,
+            lowercase: true,
+          },
+        },
+      ],
+      required: true,
+    },
+
+    // startDateTime: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    //   lowercase: true,
+    // },
+    // endDateTime: { type: String, required: true, trim: true, lowercase: true },
+
     channelTrp: { type: String, required: true, trim: true, lowercase: true },
     companyId: { type: ObjectId, required: true, trim: true },
     remarks: {
       type: String,
       required: false,
+      trim: true,
+      lowercase: true,
+      default: "",
+    },
+
+    run: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    runStartTime: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    runEndTime: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    runRemark: {
+      type: String,
       trim: true,
       lowercase: true,
       default: "",
@@ -67,11 +120,16 @@ const searchKeys = [
   "startDateTime",
   "type",
   "days",
-  "tapeName",
-  "channelName",
+  "tapeNameId",
+  "channelNameId",
+  "companyId",
   "endDateTime",
   "channelTrp",
   "remarks",
+  "run",
+  "runStartTime",
+  "runEndTime",
+  "runRemark",
 ];
 module.exports = mongoose.model("SlotMaster", SlotMasterSchema);
 module.exports.searchKeys = [...searchKeys];

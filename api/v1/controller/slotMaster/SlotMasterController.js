@@ -28,15 +28,18 @@ exports.add = async (req, res) => {
     let {
       slotName,
       channelGroup,
-      startDateTime,
       type,
       days,
-      tapeName,
-      channelName,
-      endDateTime,
+      tapeNameId,
+      channelNameId,
       channelTrp,
       remarks,
       companyId,
+      channelSlots,
+      run,
+      runStartTime,
+      runEndTime,
+      runRemark,
     } = req.body;
     /**
      * check duplicate exist
@@ -49,29 +52,33 @@ exports.add = async (req, res) => {
       _id: channelGroup,
       isDeleted: false,
     });
+    if (!isChannelGroupExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel group");
+    }
+
     const isTapeExists = await tapeMasterService.findCount({
-      _id: tapeName,
+      _id: tapeNameId,
       isDeleted: false,
     });
+    console.log(isTapeExists);
+    if (!isTapeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid tape");
+    }
+
     const isChannelExists = await channelMasterService.findCount({
-      _id: channelName,
+      _id: channelNameId,
       isDeleted: false,
     });
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel");
+    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
-    if (!isChannelGroupExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel group");
-    }
-    if (!isTapeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid tape");
-    }
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel");
     }
 
     //------------------create data-------------------
@@ -104,15 +111,18 @@ exports.update = async (req, res) => {
     let {
       slotName,
       channelGroup,
-      startDateTime,
       type,
       days,
       tapeName,
       channelName,
-      endDateTime,
       channelTrp,
       remarks,
       companyId,
+      channelSlots,
+      run,
+      runStartTime,
+      runEndTime,
+      runRemark,
     } = req.body;
 
     let idToBeSearch = req.params.id;
