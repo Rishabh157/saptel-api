@@ -1,0 +1,78 @@
+const router = require("express").Router();
+const dispositionThreeController = require("../../controller/dispositionOne/DispositionOneController");
+const dispositionThreeValidation = require("../../validation/DispositionThreeValidation");
+const validate = require("../../middleware/validate");
+const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+
+//===============get one document (if query) / all document===============
+// router.get(
+//   "/",
+//   accessModuleCheck,
+//   authCheckMiddleware,
+//   validate(dispositionThreeValidation.get),
+//   dispositionThreeController.get
+// );
+
+//===============get document by id===============
+// router.get(
+//   "/:id",
+//   accessModuleCheck,
+//   authCheckMiddleware,
+//   validate(dispositionThreeValidation.getByDispositionOneId),
+//   dispositionThreeController.getById
+// );
+
+//===============get all document fo dispositionOne Id===============
+// router.get(
+//   "/get-all/:id",
+//   accessModuleCheck,
+//   authCheckMiddleware,
+//   validate(dispositionThreeValidation.getByDispositionOneId),
+//   dispositionThreeController.getByDispositionOneId
+// );
+
+//===============get all dispositionOne pagination filter===============
+
+// router.post(
+//   "/",
+//   accessModuleCheck,
+//   authCheckMiddleware,
+//   validate(dispositionThreeValidation.getAllFilter),
+//   dispositionThreeController.getFilterPagination
+// );
+//===============create new document===============
+router.post(
+  "/add",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.create),
+  dispositionThreeController.add
+);
+
+//===============update document===============
+// router.put(
+//   "/:id",
+//   accessModuleCheck,
+//   authCheckMiddleware,
+//   validate(dispositionThreeValidation.update),
+//   dispositionThreeController.update
+// );
+
+//===============update status document===============
+// router.put(
+//   "/status-change/:id",
+//   validate(dispositionThreeValidation.changeStatus),
+//   dispositionThreeController.statusChange
+// );
+
+//===============delete document===============
+// router.delete(
+//   "/:id",
+//   accessModuleCheck,
+//   authCheckMiddleware,
+//   validate(dispositionThreeValidation.deleteDocument),
+//   dispositionThreeController.deleteDocument
+// );
+
+module.exports = router;
