@@ -308,7 +308,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channel_group_data",
           pipeline: [
@@ -323,7 +323,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "schemes",
-          localField: "scheme",
+          localField: "schemeId",
           foreignField: "_id",
           as: "scheme_data",
           pipeline: [
@@ -338,7 +338,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "languages",
-          localField: "language",
+          localField: "languageId",
           foreignField: "_id",
           as: "language_data",
           pipeline: [
@@ -353,9 +353,9 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "artists",
-          localField: "artist",
+          localField: "artistId",
           foreignField: "_id",
-          as: "artist_data",
+          as: "artistId",
           pipeline: [
             {
               $project: {
@@ -376,18 +376,10 @@ exports.allFilterPagination = async (req, res) => {
           languageLabel: {
             $arrayElemAt: ["$language_data.languageName", 0],
           },
-          artistLabel: {
-            $arrayElemAt: ["$artist_data.artistName", 0],
-          },
         },
       },
       {
-        $unset: [
-          "channel_group_data",
-          "scheme_data",
-          "language_data",
-          "artist_data",
-        ],
+        $unset: ["channel_group_data", "scheme_data", "language_data"],
       },
     ];
     if (additionalQuery.length) {
@@ -456,7 +448,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channel_group_data",
           pipeline: [
@@ -471,7 +463,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "schemes",
-          localField: "scheme",
+          localField: "schemeId",
           foreignField: "_id",
           as: "scheme_data",
           pipeline: [
@@ -486,7 +478,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "languages",
-          localField: "language",
+          localField: "languageId",
           foreignField: "_id",
           as: "language_data",
           pipeline: [
@@ -501,9 +493,9 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "artists",
-          localField: "artist",
+          localField: "artistId",
           foreignField: "_id",
-          as: "artist_data",
+          as: "artistId",
           pipeline: [
             {
               $project: {
@@ -524,18 +516,10 @@ exports.get = async (req, res) => {
           languageLabel: {
             $arrayElemAt: ["$language_data.languageName", 0],
           },
-          artistLabel: {
-            $arrayElemAt: ["$artist_data.artistName", 0],
-          },
         },
       },
       {
-        $unset: [
-          "channel_group_data",
-          "scheme_data",
-          "language_data",
-          "artist_data",
-        ],
+        $unset: ["channel_group_data", "scheme_data", "language_data"],
       },
     ];
     let dataExist = await tapeMasterService.aggregateQuery(additionalQuery);
@@ -574,7 +558,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channel_group_data",
           pipeline: [
@@ -589,7 +573,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "schemes",
-          localField: "scheme",
+          localField: "schemeId",
           foreignField: "_id",
           as: "scheme_data",
           pipeline: [
@@ -604,7 +588,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "languages",
-          localField: "language",
+          localField: "languageId",
           foreignField: "_id",
           as: "language_data",
           pipeline: [
@@ -619,9 +603,9 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "artists",
-          localField: "artist",
+          localField: "artistId",
           foreignField: "_id",
-          as: "artist_data",
+          as: "artistId",
           pipeline: [
             {
               $project: {
@@ -642,18 +626,10 @@ exports.getById = async (req, res) => {
           languageLabel: {
             $arrayElemAt: ["$language_data.languageName", 0],
           },
-          artistLabel: {
-            $arrayElemAt: ["$artist_data.artistName", 0],
-          },
         },
       },
       {
-        $unset: [
-          "channel_group_data",
-          "scheme_data",
-          "language_data",
-          "artist_data",
-        ],
+        $unset: ["channel_group_data", "scheme_data", "language_data"],
       },
     ];
 
