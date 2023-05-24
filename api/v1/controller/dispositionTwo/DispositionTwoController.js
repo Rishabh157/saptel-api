@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dispositionTwoService = require("../../services/DispositionTwoService");
+const dispositionThreeService = require("../../services/DispositionThreeService");
+
 const { searchKeys } = require("../../model/DispositionTwoSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -539,6 +541,19 @@ exports.deleteDocument = async (req, res) => {
     if (!(await dispositionTwoService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+
+    // ------find disposition (if use in other module / not)------
+    let isDispositionTwoExists = await dispositionThreeService.findCount({
+      dispositionTwoId: _id,
+      isDeleted: false,
+    });
+    if (isDispositionTwoExists) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Disposition can't be deleted as it is used in other module"
+      );
+    }
+
     let deleted = await dispositionTwoService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

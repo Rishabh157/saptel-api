@@ -6,41 +6,41 @@ const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
-// router.get(
-//   "/",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(dispositionThreeValidation.get),
-//   dispositionThreeController.get
-// );
+router.get(
+  "/",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.get),
+  dispositionThreeController.get
+);
 
 //===============get document by id===============
-// router.get(
-//   "/:id",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(dispositionThreeValidation.getByDispositionOneId),
-//   dispositionThreeController.getById
-// );
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.getByDispositionOneId),
+  dispositionThreeController.getById
+);
 
-//===============get all document fo dispositionOne Id===============
-// router.get(
-//   "/get-all/:id",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(dispositionThreeValidation.getByDispositionOneId),
-//   dispositionThreeController.getByDispositionOneId
-// );
+//===============get all document fo dispositionTwo Id===============
+router.get(
+  "/get-all/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.getByDispositionOneId),
+  dispositionThreeController.getByDispositionTwoId
+);
 
-//===============get all dispositionOne pagination filter===============
+//===============get all pagination filter===============
+router.post(
+  "/",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.getAllFilter),
+  dispositionThreeController.getFilterPagination
+);
 
-// router.post(
-//   "/",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(dispositionThreeValidation.getAllFilter),
-//   dispositionThreeController.getFilterPagination
-// );
 //===============create new document===============
 router.post(
   "/add",
@@ -67,12 +67,12 @@ router.put(
 // );
 
 //===============delete document===============
-// router.delete(
-//   "/:id",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(dispositionThreeValidation.deleteDocument),
-//   dispositionThreeController.deleteDocument
-// );
+router.delete(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.deleteDocument),
+  dispositionThreeController.deleteDocument
+);
 
 module.exports = router;

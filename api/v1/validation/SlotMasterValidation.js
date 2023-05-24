@@ -9,11 +9,11 @@ const commonValidation = require("./CommonValidation");
 const create = {
   body: Joi.object().keys({
     slotName: Joi.string().lowercase().required(),
-    channelGroup: Joi.string().custom(commonValidation.objectId).required(),
+    channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
     type: Joi.string().required(),
     days: Joi.array().items(Joi.string().required()),
-    tapeName: Joi.string().custom(commonValidation.objectId).required(),
-    channelName: Joi.string().custom(commonValidation.objectId).required(),
+    tapeNameId: Joi.string().custom(commonValidation.objectId).required(),
+    channelNameId: Joi.string().custom(commonValidation.objectId).required(),
     channelTrp: Joi.string().lowercase().required(),
     channelSlots: Joi.array().items({
       date: Joi.string().required(),
@@ -38,17 +38,15 @@ const update = {
   }),
   body: Joi.object().keys({
     slotName: Joi.string().lowercase().required(),
-    channelGroup: Joi.string().custom(commonValidation.objectId).required(),
+    channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
     type: Joi.string().required(),
     days: Joi.array().items(Joi.string().required()),
-    tapeName: Joi.string().custom(commonValidation.objectId).required(),
-    channelName: Joi.string().custom(commonValidation.objectId).required(),
+    tapeNameId: Joi.string().custom(commonValidation.objectId).required(),
+    channelNameId: Joi.string().custom(commonValidation.objectId).required(),
     channelTrp: Joi.string().lowercase().required(),
-    channelSlots: Joi.array().items({
-      date: Joi.string().required(),
-      startTime: Joi.string().required(),
-      endTime: Joi.string().required(),
-    }),
+    slotDate: Joi.string().required(),
+    slotStartTime: Joi.string().required(),
+    slotEndTime: Joi.string().required(),
     run: Joi.boolean(),
     runStartTime: Joi.string().allow(""),
     runEndTime: Joi.string().allow(""),

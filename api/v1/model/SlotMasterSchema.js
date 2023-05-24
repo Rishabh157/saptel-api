@@ -4,7 +4,7 @@ const { slotType, slotDaysType } = require("../helper/enumUtils");
 const SlotMasterSchema = new mongoose.Schema(
   {
     slotName: { type: String, required: true, trim: true, lowercase: true },
-    channelGroup: { type: ObjectId, required: true },
+    channelGroupId: { type: ObjectId, required: true },
 
     type: {
       type: String,
@@ -32,39 +32,24 @@ const SlotMasterSchema = new mongoose.Schema(
     tapeNameId: { type: ObjectId, required: true },
     channelNameId: { type: ObjectId, required: true },
 
-    channelSlots: {
-      type: [
-        {
-          date: {
-            type: String,
-            required: true,
-            trim: true,
-            lowercase: true,
-          },
-          startTime: {
-            type: String,
-            required: true,
-            trim: true,
-            lowercase: true,
-          },
-          endTime: {
-            type: String,
-            required: true,
-            trim: true,
-            lowercase: true,
-          },
-        },
-      ],
+    slotDate: {
+      type: String,
       required: true,
+      trim: true,
+      lowercase: true,
     },
-
-    // startDateTime: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    //   lowercase: true,
-    // },
-    // endDateTime: { type: String, required: true, trim: true, lowercase: true },
+    slotStartTime: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    slotEndTime: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
 
     channelTrp: { type: String, required: true, trim: true, lowercase: true },
     companyId: { type: ObjectId, required: true, trim: true },

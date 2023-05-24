@@ -27,7 +27,7 @@ exports.add = async (req, res) => {
   try {
     let {
       slotName,
-      channelGroup,
+      channelGroupId,
       type,
       days,
       tapeNameId,
@@ -41,15 +41,9 @@ exports.add = async (req, res) => {
       runEndTime,
       runRemark,
     } = req.body;
-    /**
-     * check duplicate exist
-     */
-    let dataExist = await slotMasterService.isExists([{ slotName }]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     const isChannelGroupExists = await channelGroupService.findCount({
-      _id: channelGroup,
+      _id: channelGroupId,
       isDeleted: false,
     });
     if (!isChannelGroupExists) {
@@ -60,7 +54,6 @@ exports.add = async (req, res) => {
       _id: tapeNameId,
       isDeleted: false,
     });
-    console.log(isTapeExists);
     if (!isTapeExists) {
       throw new ApiError(httpStatus.OK, "Invalid tape");
     }
@@ -81,8 +74,36 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
+    /**
+     * check duplicate exist
+     */
+    let dataExist = await slotMasterService.isExists([{ slotName }]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const output = req.body.channelSlots.map((slot) => {
+      return {
+        slotName: req.body.slotName,
+        channelGroupId: req.body.channelGroupId,
+        tapeNameId: req.body.tapeNameId,
+        channelNameId: req.body.channelNameId,
+        companyId: req.body.companyId,
+        type: req.body.type,
+        days: req.body.days,
+        channelTrp: req.body.channelTrp,
+        remarks: req.body.remarks,
+        run: req.body.run,
+        runStartTime: req.body.runStartTime,
+        runEndTime: req.body.runEndTime,
+        runRemark: req.body.runRemark,
+        slotDate: slot.date,
+        slotStartTime: slot.startTime,
+        slotEndTime: slot.endTime,
+      };
+    });
     //------------------create data-------------------
-    let dataCreated = await slotMasterService.createNewData({ ...req.body });
+    let dataCreated = await slotMasterService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -110,11 +131,11 @@ exports.update = async (req, res) => {
   try {
     let {
       slotName,
-      channelGroup,
+      channelGroupId,
       type,
       days,
-      tapeName,
-      channelName,
+      tapeNameId,
+      channelNameId,
       channelTrp,
       remarks,
       companyId,
@@ -135,17 +156,31 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, `SlotMaster not found.`);
     }
     const isChannelGroupExists = await channelGroupService.findCount({
-      _id: channelGroup,
+      _id: channelGroupId,
       isDeleted: false,
     });
+    if (!isChannelGroupExists) {
+      throw new ApiError(httpStatus.OK, "Invalid language");
+    }
+
     const isTapeExists = await tapeMasterService.findCount({
-      _id: tapeName,
+      _id: tapeNameId,
       isDeleted: false,
     });
+
+    if (!isTapeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid tape");
+    }
+
     const isChannelExists = await channelMasterService.findCount({
-      _id: channelName,
+      _id: channelNameId,
       isDeleted: false,
     });
+
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid channel");
+    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -153,15 +188,7 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    if (!isChannelGroupExists) {
-      throw new ApiError(httpStatus.OK, "Invalid language");
-    }
-    if (!isTapeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid tape");
-    }
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel");
-    }
+
     let dataUpdated = await slotMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -258,12 +285,12 @@ exports.allFilterPagination = async (req, res) => {
     let booleanFields = [];
     let numberFileds = [
       "slotName",
-      "channelGroup",
+      "channelGroupId",
       "startDateTime",
       "type",
       "days",
-      "tapeName",
-      "channelName",
+      "tapeNameId",
+      "channelNameId",
       "endDateTime",
       "channelTrp",
       "remarks",
@@ -299,7 +326,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channelGroup_data",
           pipeline: [
@@ -314,7 +341,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "tapemasters",
-          localField: "tapeName",
+          localField: "tapeNameId",
           foreignField: "_id",
           as: "tape_data",
           pipeline: [
@@ -329,7 +356,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "channelmasters",
-          localField: "channelName",
+          localField: "channelNameId",
           foreignField: "_id",
           as: "channel_data",
           pipeline: [
