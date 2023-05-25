@@ -7,7 +7,7 @@ const initialCallTwoService = require("../../services/InitialCallTwoService");
 const initialCallOneService = require("../../services/InitialCallOneService");
 const companyService = require("../../services/CompanyService");
 
-const { searchKeys } = require("../../model/InitialCallOneSchema");
+const { searchKeys } = require("../../model/InitialCallTwoSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -268,7 +268,7 @@ exports.allFilterPagination = async (req, res) => {
   try {
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
-    let searchIn = req.body.params;
+    let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
@@ -297,7 +297,7 @@ exports.allFilterPagination = async (req, res) => {
      **/
 
     let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
-
+    console.log(searchQueryCheck);
     if (searchQueryCheck && !searchQueryCheck.status) {
       return res.status(httpStatus.OK).send({
         ...searchQueryCheck,

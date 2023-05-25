@@ -81,6 +81,18 @@ const changeStatus = {
   }),
 };
 
+//===============getByInitialCallOneId document===============
+
+const getByInitialCallOneId = {
+  query: Joi.object()
+    .keys({
+      initialCallOneId: Joi.string()
+        .custom(commonValidation.objectId)
+        .optional(),
+    })
+    .optional(),
+};
+
 //===============delete a document===============
 const deleteDocument = {
   params: Joi.object().keys({
@@ -94,4 +106,5 @@ module.exports = {
   changeStatus,
   getAllFilter,
   deleteDocument,
+  getByInitialCallOneId,
 };

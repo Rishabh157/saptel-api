@@ -38,7 +38,7 @@ const InitialCallThreeSchema = new mongoose.Schema(
 );
 
 const searchKeys = [
-  "initailCallName",
+  "initialCallName",
   "initialCallOneId",
   "initialCallTwoId",
   "companyId",

@@ -26,7 +26,7 @@ router.get(
   initialCallTwoController.getById
 );
 
-//===============get all document fo dispositionOne Id===============
+//===============get all document fo initialCallOne  Id===============
 router.get(
   "/get-all/:id",
   accessModuleCheck,

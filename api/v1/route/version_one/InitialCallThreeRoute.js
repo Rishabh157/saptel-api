@@ -23,13 +23,13 @@ router.get(
   initialCallThreeController.getById
 );
 
-//===============get all document fo dispositionTwo Id===============
+//===============get all document fo initialCallOne  Id===============
 router.get(
   "/get-all/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.getByDispositionOneId),
-  initialCallThreeController.getByDispositionTwoId
+  validate(initialCallThreeValidation.getByInitialCallTwoId),
+  initialCallThreeController.getByInitialCallOneId
 );
 
 //===============get all pagination filter===============
@@ -38,7 +38,7 @@ router.post(
   accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.getAllFilter),
-  initialCallThreeController.getFilterPagination
+  initialCallThreeController.allFilterPagination
 );
 
 //===============create new document===============

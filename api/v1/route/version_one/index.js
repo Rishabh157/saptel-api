@@ -284,6 +284,8 @@ const defaultRoutes = [
   {
     path: "/initialcall-three",
     route: initialCallThreeRoute,
+  },
+  {
     path: "/initialcall-two",
     route: initailCallTwoRoute,
   },
