@@ -693,8 +693,10 @@ exports.getById = async (req, res) => {
 
     let additionalQuery = [
       {
-        _id: new mongoose.Types.ObjectId(idToBeSearch),
-        isDeleted: false,
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
       },
       {
         $lookup: {
