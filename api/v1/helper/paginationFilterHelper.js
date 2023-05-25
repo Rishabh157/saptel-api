@@ -144,7 +144,6 @@ const getFilterQuery = (
                 },
               });
             });
-
             queryArray.push({ $or: orQuery });
           } else if (filterValue !== "") {
             if (

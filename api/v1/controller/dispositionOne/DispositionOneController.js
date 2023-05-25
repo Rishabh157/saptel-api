@@ -194,9 +194,15 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["dispositionName", "companyId"];
+    let numberFileds = [];
+    let objectIdFields = ["companyId "];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -320,7 +326,6 @@ exports.getById = async (req, res) => {
       _id: idToBeSearch,
       isDeleted: false,
     });
-    console.log(dataExist);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
