@@ -39,19 +39,25 @@ exports.add = async (req, res) => {
       companyId,
     } = req.body;
 
-    const isVendorExists = await vendorService.findCount({
-      _id: vendorId,
-      isDeleted: false,
-    });
-    if (!isVendorExists) {
+    const isVendorExists =
+      vendorId !== null
+        ? await vendorService.findCount({
+            _id: vendorId,
+            isDeleted: false,
+          })
+        : null;
+    if (isVendorExists !== null && !isVendorExists) {
       throw new ApiError(httpStatus.OK, "Invalid Vendor");
     }
 
-    const isDealerExists = await dealerService.findCount({
-      _id: dealerId,
-      isDeleted: false,
-    });
-    if (!isDealerExists) {
+    const isDealerExists =
+      dealerId !== null
+        ? await dealerService.findCount({
+            _id: dealerId,
+            isDeleted: false,
+          })
+        : null;
+    if (isDealerExists !== null && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 
@@ -115,19 +121,25 @@ exports.update = async (req, res) => {
 
     let idToBeSearch = req.params.id;
 
-    const isVendorExists = await vendorService.findCount({
-      _id: vendorId,
-      isDeleted: false,
-    });
-    if (!isVendorExists) {
+    const isVendorExists =
+      vendorId !== null
+        ? await vendorService.findCount({
+            _id: vendorId,
+            isDeleted: false,
+          })
+        : null;
+    if (isVendorExists !== null && !isVendorExists) {
       throw new ApiError(httpStatus.OK, "Invalid Vendor");
     }
 
-    const isDealerExists = await dealerService.findCount({
-      _id: dealerId,
-      isDeleted: false,
-    });
-    if (!isDealerExists) {
+    const isDealerExists =
+      dealerId !== null
+        ? await dealerService.findCount({
+            _id: dealerId,
+            isDeleted: false,
+          })
+        : null;
+    if (isDealerExists !== null && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 

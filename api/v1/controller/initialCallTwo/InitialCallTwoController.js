@@ -1,7 +1,9 @@
 const config = require("../../../../config/config");
+const mongoose = require("mongoose");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
+const initialCallTwoService = require("../../services/InitialCallTwoService");
 const initialCallOneService = require("../../services/InitialCallOneService");
 const companyService = require("../../services/CompanyService");
 
@@ -22,7 +24,7 @@ const {
 // ============= add  start  ================
 exports.add = async (req, res) => {
   try {
-    let { initialCallName, companyId } = req.body;
+    let { initialCallName, initialCallOneId, companyId } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -31,14 +33,23 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+
+    const isInitialCallOneExists = await initialCallOneService.findCount({
+      _id: initialCallOneId,
+      isDeleted: false,
+    });
+    if (!isInitialCallOneExists) {
+      throw new ApiError(httpStatus.OK, "Invalid InitialCallOne");
+    }
+
     // -----------------------check duplicate exist --------------------
-    let dataExist = await initialCallOneService.isExists([{ initialCallName }]);
+    let dataExist = await initialCallTwoService.isExists([{ initialCallName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
     // ----------------------create data-------------------------
-    let dataCreated = await initialCallOneService.createNewData({
+    let dataCreated = await initialCallTwoService.createNewData({
       ...req.body,
     });
     if (dataCreated) {
@@ -66,11 +77,11 @@ exports.add = async (req, res) => {
 // =============update  start================
 exports.update = async (req, res) => {
   try {
-    let { initialCallName, companyId } = req.body;
+    let { initialCallName, initialCallOneId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
-    let dataExist = await initialCallOneService.isExists(
+    let dataExist = await initialCallTwoService.isExists(
       [{ initialCallName }],
       idToBeSearch
     );
@@ -85,15 +96,24 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+
+    const isInitialCallOneExists = await initialCallOneService.findCount({
+      _id: initialCallOneId,
+      isDeleted: false,
+    });
+    if (!isInitialCallOneExists) {
+      throw new ApiError(httpStatus.OK, "Invalid InitialCallOne");
+    }
+
     // ------------------------ find data ---------------------
-    let dataFound = await initialCallOneService.getOneByMultiField({
+    let dataFound = await initialCallTwoService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `InitialCallOne not found.`);
     }
 
-    let dataUpdated = await initialCallOneService.getOneAndUpdate(
+    let dataUpdated = await initialCallTwoService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -136,8 +156,34 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await initialCallOneService.findAllWithQuery(matchQuery);
-
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["initialcallOneData"],
+      },
+    ];
+    let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -165,10 +211,35 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await initialCallOneService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["initialcallOneData"],
+      },
+    ];
+    let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -254,7 +325,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["companyId"];
+    let objectIdFields = ["initialCallOneId", "companyId"];
 
     const filterQuery = getFilterQuery(
       filterBy,
@@ -287,7 +358,33 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialcallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallOneName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialOneCallData.initialCallOneName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["initialOneCallData"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -298,7 +395,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await initialCallOneService.aggregateQuery(
+    let dataFound = await initialCallTwoService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -319,7 +416,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await initialCallOneService.aggregateQuery(
+    let result = await initialCallTwoService.aggregateQuery(
       finalAggregateQuery
     );
     if (result.length) {
@@ -350,11 +447,11 @@ exports.allFilterPagination = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await initialCallOneService.getOneByMultiField({ _id }))) {
+    if (!(await initialCallTwoService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     // ------find disposition (if use in other module / not)------
-    let isDispositionOneExists = await initialCallOneService.findCount({
+    let isDispositionOneExists = await initialCallTwoService.findCount({
       dispositionOneId: _id,
       isDeleted: false,
     });
@@ -364,7 +461,7 @@ exports.deleteDocument = async (req, res) => {
         "Disposition can't be deleted as it is used in other module"
       );
     }
-    let deleted = await initialCallOneService.getOneAndDelete({ _id });
+    let deleted = await initialCallTwoService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -386,3 +483,57 @@ exports.deleteDocument = async (req, res) => {
 };
 
 // =============delete api start end============
+
+// =============get all initialCallTwo by Id of initialCallOne Id start================
+exports.getByInitialCallOneId = async (req, res) => {
+  try {
+    initialCallOneId = req.params.id;
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["initialcallOneData"],
+      },
+    ];
+    let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// =============get all initialCallTwo by Id of initialCallOne Id end================

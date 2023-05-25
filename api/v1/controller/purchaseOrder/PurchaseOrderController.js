@@ -3,7 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const purchaseOrderService = require("../../services/PurchaseOrderService");
-const vendorService = require("../../services/CompanyService");
+const vendorService = require("../../services/VendorService");
 const wareHouseService = require("../../services/WareHouseService");
 const companyService = require("../../services/CompanyService");
 
