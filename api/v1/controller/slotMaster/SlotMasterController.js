@@ -289,7 +289,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channelGroup_data",
           pipeline: [
@@ -304,7 +304,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "tapemasters",
-          localField: "tapeName",
+          localField: "tapeNameId",
           foreignField: "_id",
           as: "tape_data",
           pipeline: [
@@ -319,7 +319,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "channelmasters",
-          localField: "channelName",
+          localField: "channelNameId",
           foreignField: "_id",
           as: "channel_data",
           pipeline: [
@@ -413,7 +413,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channelGroup_data",
           pipeline: [
@@ -428,7 +428,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "tapemasters",
-          localField: "tapeName",
+          localField: "tapeNameId",
           foreignField: "_id",
           as: "tape_data",
           pipeline: [
@@ -443,7 +443,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "channelmasters",
-          localField: "channelName",
+          localField: "channelNameId",
           foreignField: "_id",
           as: "channel_data",
           pipeline: [
@@ -512,7 +512,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "channelgroups",
-          localField: "channelGroup",
+          localField: "channelGroupId",
           foreignField: "_id",
           as: "channelGroup_data",
           pipeline: [
@@ -527,7 +527,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "tapemasters",
-          localField: "tapeName",
+          localField: "tapeNameId",
           foreignField: "_id",
           as: "tape_data",
           pipeline: [
@@ -542,7 +542,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "channelmasters",
-          localField: "channelName",
+          localField: "channelNameId",
           foreignField: "_id",
           as: "channel_data",
           pipeline: [
