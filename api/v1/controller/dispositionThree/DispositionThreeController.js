@@ -356,7 +356,11 @@ exports.getFilterPagination = async (req, res) => {
 
     // ---------------check search keys valid-----------------
 
-    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+    let searchQueryCheck = checkInvalidParams(
+      searchIn,
+      searchKeys,
+      searchValue
+    );
 
     if (searchQueryCheck && !searchQueryCheck.status) {
       return res.status(httpStatus.OK).send({
@@ -382,32 +386,33 @@ exports.getFilterPagination = async (req, res) => {
 
     // ---------------get filter query---------------
     let booleanFields = [];
-    let numberFileds = [
-      "dispositionName",
-      "dispositionOneId",
-      "dispositionTwoId",
-      "companyId ",
-    ];
+    let numberFileds = [];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    let objectIdFields = ["dispositionOneId", "dispositionTwoId", "companyId "];
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
     // ----------------------------------
 
-    // ---------calander filter---------
+    // ---------calendar filter---------
     // ---------ToDo : for date filter---------
 
-    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+    let allowedDateFilterKeys = ["createdAt", "updatedAt"];
 
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
-      allowedDateFiletrKeys
+      allowedDateFilterKeys
     );
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
-    //----------------calander filter----------
+    //----------------calendar filter----------
     //----------------------------
 
     // -------------for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array-----------
@@ -467,7 +472,7 @@ exports.getFilterPagination = async (req, res) => {
       $match: matchQuery,
     });
     // ------------------------------------------
-    let dataFound = await dispositionTwoService.aggregateQuery(
+    let dataFound = await dispositionThreeService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
