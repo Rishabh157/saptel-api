@@ -24,5 +24,5 @@ const InitialCallOneSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["initailCallName", "companyId"];
-module.exports = mongoose.model("InitailCallOne", InitialCallOneSchema);
+module.exports = mongoose.model("initialcallone", InitialCallOneSchema);
 module.exports.searchKeys = [...searchKeys];
