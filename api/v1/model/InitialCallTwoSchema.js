@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const InitialCallOneSchema = new mongoose.Schema(
+const InitialCallTwoSchema = new mongoose.Schema(
   {
     initialCallName: {
       type: String,
@@ -8,7 +8,16 @@ const InitialCallOneSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    initialCallOneId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -23,6 +32,6 @@ const InitialCallOneSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["initialCallName", "companyId"];
-module.exports = mongoose.model("InitialCallOne", InitialCallOneSchema);
+const searchKeys = ["initialCallName", "initialCallOneId", "companyId"];
+module.exports = mongoose.model("initialCallTwo", InitialCallTwoSchema);
 module.exports.searchKeys = [...searchKeys];
