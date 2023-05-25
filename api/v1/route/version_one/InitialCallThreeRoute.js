@@ -1,0 +1,78 @@
+const router = require("express").Router();
+const initialCallThreeController = require("../../controller/initialCallThree/InitialCallThreeController");
+const initialCallThreeValidation = require("../../validation/InitialCallThreeValidation");
+const validate = require("../../middleware/validate");
+const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+
+//===============get one document (if query) / all document===============
+router.get(
+  "/",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.get),
+  initialCallThreeController.get
+);
+
+//===============get document by id===============
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.getByDispositionOneId),
+  initialCallThreeController.getById
+);
+
+//===============get all document fo dispositionTwo Id===============
+router.get(
+  "/get-all/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.getByDispositionOneId),
+  initialCallThreeController.getByDispositionTwoId
+);
+
+//===============get all pagination filter===============
+router.post(
+  "/",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.getAllFilter),
+  initialCallThreeController.getFilterPagination
+);
+
+//===============create new document===============
+router.post(
+  "/add",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.create),
+  initialCallThreeController.add
+);
+
+//===============update document===============
+router.put(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.update),
+  initialCallThreeController.update
+);
+
+//===============update status document===============
+// router.put(
+//   "/status-change/:id",
+//   validate(initialCallThreeValidation.changeStatus),
+//   initialCallThreeController.statusChange
+// );
+
+//===============delete document===============
+router.delete(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(initialCallThreeValidation.deleteDocument),
+  initialCallThreeController.deleteDocument
+);
+
+module.exports = router;
