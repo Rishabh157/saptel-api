@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const BarCodeSchema = new mongoose.Schema(
   {
-    productGroup: { type: ObjectId, required: true, trim: true },
+    productGroupId: { type: ObjectId, required: true, trim: true },
     barcodeNumber: { type: String, required: true, trim: true },
     barcodeGroupNumber: { type: String, required: true, trim: true },
     isUsed: { type: Boolean, default: false },
@@ -23,7 +23,7 @@ const BarCodeSchema = new mongoose.Schema(
 );
 
 const searchKeys = [
-  "productGroup",
+  "productGroupId",
   "barcodeNumber",
   "productGroupLabel",
   "barcodeGroupNumber",
