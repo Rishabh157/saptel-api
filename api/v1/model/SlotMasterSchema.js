@@ -119,6 +119,9 @@ const searchKeys = [
   "runStartTime",
   "runEndTime",
   "runRemark",
+  "channelLabel",
+  "groupNameLabel",
+  "tapeLabel",
 ];
 module.exports = mongoose.model("SlotMaster", SlotMasterSchema);
 module.exports.searchKeys = [...searchKeys];
