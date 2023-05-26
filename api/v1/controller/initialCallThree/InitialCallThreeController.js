@@ -1,13 +1,14 @@
 const config = require("../../../../config/config");
-const mongoose = require("mongoose");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const initialCallTwoService = require("../../services/InitialCallTwoService");
 const initialCallOneService = require("../../services/InitialCallOneService");
+const initialCallThreeService = require("../../services/InitialCallThreeService");
+const initialCallTwoService = require("../../services/InitialCallTwoService");
 const companyService = require("../../services/CompanyService");
+const mongoose = require("mongoose");
 
-const { searchKeys } = require("../../model/InitialCallTwoSchema");
+const { searchKeys } = require("../../model/InitialCallThreeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -24,7 +25,8 @@ const {
 // ============= add  start  ================
 exports.add = async (req, res) => {
   try {
-    let { initialCallName, initialCallOneId, companyId } = req.body;
+    let { initialCallName, initialCallOneId, initialCallTwoId, companyId } =
+      req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -42,14 +44,24 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid InitialCallOne");
     }
 
+    const isInitialCallTwoExists = await initialCallTwoService.findCount({
+      _id: initialCallTwoId,
+      isDeleted: false,
+    });
+    if (!isInitialCallTwoExists) {
+      throw new ApiError(httpStatus.OK, "Invalid InitialCallTwo");
+    }
+
     // -----------------------check duplicate exist --------------------
-    let dataExist = await initialCallTwoService.isExists([{ initialCallName }]);
+    let dataExist = await initialCallThreeService.isExists([
+      { initialCallName },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
     // ----------------------create data-------------------------
-    let dataCreated = await initialCallTwoService.createNewData({
+    let dataCreated = await initialCallThreeService.createNewData({
       ...req.body,
     });
     if (dataCreated) {
@@ -77,12 +89,13 @@ exports.add = async (req, res) => {
 // =============update  start================
 exports.update = async (req, res) => {
   try {
-    let { initialCallName, initialCallOneId, companyId } = req.body;
+    let { initailCallName, initialCallOneId, initialCallTwoId, companyId } =
+      req.body;
 
     let idToBeSearch = req.params.id;
 
-    let dataExist = await initialCallTwoService.isExists(
-      [{ initialCallName }],
+    let dataExist = await initialCallThreeService.isExists(
+      [{ initailCallName }],
       idToBeSearch
     );
     if (dataExist.exists && dataExist.existsSummary) {
@@ -105,15 +118,23 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid InitialCallOne");
     }
 
+    const isInitialCallTwoExists = await initialCallTwoService.findCount({
+      _id: initialCallTwoId,
+      isDeleted: false,
+    });
+    if (!isInitialCallTwoExists) {
+      throw new ApiError(httpStatus.OK, "Invalid InitialCallTwo");
+    }
+
     // ------------------------ find data ---------------------
-    let dataFound = await initialCallTwoService.getOneByMultiField({
+    let dataFound = await initialCallThreeService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `InitialCallOne not found.`);
     }
 
-    let dataUpdated = await initialCallTwoService.getOneAndUpdate(
+    let dataUpdated = await initialCallThreeService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -155,14 +176,16 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
     let additionalQuery = [
       {
+        $match: matchQuery,
+      },
+      {
         $lookup: {
-          from: "initialcallones",
-          localField: "initialCallOneId",
+          from: "initialcalltwos",
+          localField: "initialCallTwoId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "initialcallTwoData",
           pipeline: [
             {
               $project: {
@@ -174,16 +197,20 @@ exports.get = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          initialCallTwoLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
         },
       },
       {
-        $unset: ["initialcallOneData"],
+        $unset: ["initialcallTwoData"],
       },
     ];
-    let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
+
+    let dataExist = await initialCallThreeService.aggregateQuery(
+      additionalQuery
+    );
+
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -211,14 +238,19 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-
     let additionalQuery = [
       {
+        $match: {
+          initialCallTwoId: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
-          from: "initialcallones",
-          localField: "initialCallOneId",
+          from: "initialcalltwos",
+          localField: "initialCallTwoId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "initialcallTwoData",
           pipeline: [
             {
               $project: {
@@ -230,17 +262,18 @@ exports.getById = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          initialCallTwoLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
         },
       },
       {
-        $unset: ["initialcallOneData"],
+        $unset: ["initialcallTwoData"],
       },
     ];
-    let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
-
+    let dataExist = await initialCallThreeService.aggregateQuery(
+      additionalQuery
+    );
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -297,7 +330,7 @@ exports.allFilterPagination = async (req, res) => {
      **/
 
     let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
-    console.log(searchQueryCheck);
+
     if (searchQueryCheck && !searchQueryCheck.status) {
       return res.status(httpStatus.OK).send({
         ...searchQueryCheck,
@@ -325,7 +358,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["initialCallOneId", "companyId"];
+    let objectIdFields = ["initialCallOneId", "initialCallTwoId", "companyId"];
 
     const filterQuery = getFilterQuery(
       filterBy,
@@ -361,14 +394,14 @@ exports.allFilterPagination = async (req, res) => {
     let additionalQuery = [
       {
         $lookup: {
-          from: "initialcallones",
-          localField: "initialcallOneId",
+          from: "initialcalltwos",
+          localField: "initialCallTwoId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "initialcallTwoData",
           pipeline: [
             {
               $project: {
-                initialCallOneName: 1,
+                initialCallName: 1,
               },
             },
           ],
@@ -376,15 +409,19 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialOneCallData.initialCallOneName", 0],
+          initialCallTwoLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
         },
       },
       {
-        $unset: ["initialOneCallData"],
+        $unset: ["initialcallTwoData"],
       },
     ];
+
+    let dataExist = await initialCallThreeService.aggregateQuery(
+      additionalQuery
+    );
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -395,7 +432,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await initialCallTwoService.aggregateQuery(
+    let dataFound = await initialCallThreeService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -416,7 +453,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await initialCallTwoService.aggregateQuery(
+    let result = await initialCallThreeService.aggregateQuery(
       finalAggregateQuery
     );
     if (result.length) {
@@ -447,11 +484,11 @@ exports.allFilterPagination = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await initialCallTwoService.getOneByMultiField({ _id }))) {
+    if (!(await initialCallThreeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     // ------find disposition (if use in other module / not)------
-    let isDispositionOneExists = await initialCallTwoService.findCount({
+    let isDispositionOneExists = await initialCallThreeService.findCount({
       dispositionOneId: _id,
       isDeleted: false,
     });
@@ -461,7 +498,7 @@ exports.deleteDocument = async (req, res) => {
         "Disposition can't be deleted as it is used in other module"
       );
     }
-    let deleted = await initialCallTwoService.getOneAndDelete({ _id });
+    let deleted = await initialCallThreeService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -484,17 +521,23 @@ exports.deleteDocument = async (req, res) => {
 
 // =============delete api start end============
 
-// =============get all initialCallTwo by Id of initialCallOne Id start================
+//  =============get all initialCallThree by Id of initialCallTwo Id start================
 exports.getByInitialCallOneId = async (req, res) => {
   try {
-    initialCallOneId = req.params.id;
+    initialCallTwoId = req.params.id;
     let additionalQuery = [
       {
+        $match: {
+          initialCallTwoId: new mongoose.Types.ObjectId(initialCallTwoId),
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
-          from: "initialcallones",
-          localField: "initialCallOneId",
+          from: "initialcalltwos",
+          localField: "initialCallTwoId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "initialcallTwoData",
           pipeline: [
             {
               $project: {
@@ -506,16 +549,18 @@ exports.getByInitialCallOneId = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          initialCallTwoLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
         },
       },
       {
-        $unset: ["initialcallOneData"],
+        $unset: ["initialcallTwoData"],
       },
     ];
-    let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
+    let dataExist = await initialCallThreeService.aggregateQuery(
+      additionalQuery
+    );
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -536,4 +581,4 @@ exports.getByInitialCallOneId = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============get all initialCallTwo by Id of initialCallOne Id end================
+//  =============get all initialCallThree by Id of initialCallTwo Id end================

@@ -1,20 +1,17 @@
 const router = require("express").Router();
+const initialCallThreeController = require("../../controller/initialCallThree/InitialCallThreeController");
+const initialCallThreeValidation = require("../../validation/InitialCallThreeValidation");
 const validate = require("../../middleware/validate");
-const initialCallTwoValidation = require("../../validation/InitialCallTwoValidation");
-const initialCallTwoController = require("../../controller/initialCallTwo/InitialCallTwoController");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
-const {
-  authCheckMiddleware,
-  otpVerifyToken,
-} = require("../../middleware/authenticationCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.get),
-  initialCallTwoController.get
+  validate(initialCallThreeValidation.get),
+  initialCallThreeController.get
 );
 
 //===============get document by id===============
@@ -22,8 +19,8 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.getByDispositionOneId),
-  initialCallTwoController.getById
+  validate(initialCallThreeValidation.getByDispositionOneId),
+  initialCallThreeController.getById
 );
 
 //===============get all document fo initialCallOne  Id===============
@@ -31,17 +28,17 @@ router.get(
   "/get-all/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.getByDispositionOneId),
-  initialCallTwoController.getByInitialCallOneId
+  validate(initialCallThreeValidation.getByInitialCallTwoId),
+  initialCallThreeController.getByInitialCallOneId
 );
 
-//===============get all dispositionOne pagination filter===============
+//===============get all pagination filter===============
 router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.getAllFilter),
-  initialCallTwoController.allFilterPagination
+  validate(initialCallThreeValidation.getAllFilter),
+  initialCallThreeController.allFilterPagination
 );
 
 //===============create new document===============
@@ -49,8 +46,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.create),
-  initialCallTwoController.add
+  validate(initialCallThreeValidation.create),
+  initialCallThreeController.add
 );
 
 //===============update document===============
@@ -58,15 +55,15 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.update),
-  initialCallTwoController.update
+  validate(initialCallThreeValidation.update),
+  initialCallThreeController.update
 );
 
 //===============update status document===============
 // router.put(
 //   "/status-change/:id",
-//   validate(initialCallOneValidation.changeStatus),
-//   initialCallOneController.statusChange
+//   validate(initialCallThreeValidation.changeStatus),
+//   initialCallThreeController.statusChange
 // );
 
 //===============delete document===============
@@ -74,8 +71,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.deleteDocument),
-  initialCallTwoController.deleteDocument
+  validate(initialCallThreeValidation.deleteDocument),
+  initialCallThreeController.deleteDocument
 );
 
 module.exports = router;

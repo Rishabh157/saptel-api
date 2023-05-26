@@ -54,6 +54,7 @@ const channelUpdationRoute = require("./ChannelUpdationRoute");
 const competitorRoute = require("./CompetitorRoute");
 const dispositionThreeRoute = require("./DispositionThreeRoute");
 const initialCallOneRoute = require("./InitialCallOneRoute");
+const initialCallThreeRoute = require("./InitialCallThreeRoute");
 const initailCallTwoRoute = require("./InitialCallTwoRoute");
 
 const devRoutes = [
@@ -279,6 +280,10 @@ const defaultRoutes = [
   {
     path: "/initialcall-one",
     route: initialCallOneRoute,
+  },
+  {
+    path: "/initialcall-three",
+    route: initialCallThreeRoute,
   },
   {
     path: "/initialcall-two",

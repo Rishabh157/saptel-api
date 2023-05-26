@@ -8,6 +8,7 @@ const create = {
   body: Joi.object().keys({
     initialCallName: Joi.string().lowercase().required(),
     initialCallOneId: Joi.string().custom(commonValidation.objectId).required(),
+    initialCallTwoId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -20,6 +21,7 @@ const update = {
   body: Joi.object().keys({
     initialCallName: Joi.string().lowercase().required(),
     initialCallOneId: Joi.string().custom(commonValidation.objectId).required(),
+    initialCallTwoId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -82,11 +84,10 @@ const changeStatus = {
 };
 
 //===============getByInitialCallOneId document===============
-
-const getByInitialCallOneId = {
+const getByInitialCallTwoId = {
   query: Joi.object()
     .keys({
-      initialCallOneId: Joi.string()
+      initialCallTwoId: Joi.string()
         .custom(commonValidation.objectId)
         .optional(),
     })
@@ -106,5 +107,5 @@ module.exports = {
   changeStatus,
   getAllFilter,
   deleteDocument,
-  getByInitialCallOneId,
+  getByInitialCallTwoId,
 };
