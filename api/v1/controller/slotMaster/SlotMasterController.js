@@ -29,7 +29,6 @@ exports.add = async (req, res) => {
       slotName,
       channelGroupId,
       type,
-      days,
       tapeNameId,
       channelNameId,
       channelTrp,
@@ -92,7 +91,6 @@ exports.add = async (req, res) => {
         channelNameId: req.body.channelNameId,
         companyId: req.body.companyId,
         type: req.body.type,
-        days: req.body.days,
         channelTrp: req.body.channelTrp,
         remarks: req.body.remarks,
         run: req.body.run,
@@ -137,7 +135,6 @@ exports.update = async (req, res) => {
       slotName,
       channelGroupId,
       type,
-      days,
       tapeNameId,
       channelNameId,
       channelTrp,
@@ -288,20 +285,15 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "slotName",
-      "channelGroupId",
-      "startDateTime",
-      "type",
-      "days",
-      "tapeNameId",
-      "channelNameId",
-      "endDateTime",
-      "channelTrp",
-      "remarks",
-    ];
+    let numberFileds = [];
+    let objectIdFileds = ["channelGroupId", "tapeNameId", "channelNameId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFileds
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

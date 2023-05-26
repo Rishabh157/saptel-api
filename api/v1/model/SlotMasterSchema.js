@@ -14,21 +14,6 @@ const SlotMasterSchema = new mongoose.Schema(
       default: slotType.fixed,
     },
 
-    days: {
-      type: [String],
-      enum: [
-        slotDaysType.monday,
-        slotDaysType.tuesday,
-        slotDaysType.wednesday,
-        slotDaysType.thursday,
-        slotDaysType.friday,
-        slotDaysType.saturday,
-        slotDaysType.sunday,
-      ],
-      uppercase: true,
-      required: true,
-      default: slotDaysType.monday,
-    },
     tapeNameId: { type: ObjectId, required: true },
     channelNameId: { type: ObjectId, required: true },
 
@@ -114,7 +99,6 @@ const searchKeys = [
   "channelGroup",
   "startDateTime",
   "type",
-  "days",
   "tapeNameId",
   "channelNameId",
   "companyId",
