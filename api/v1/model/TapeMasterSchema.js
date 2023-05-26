@@ -95,6 +95,8 @@ const searchKeys = [
   "youtubeLink",
   "webSiteLink",
   "remarks",
+  "schemeLabel",
+  "channelGroupLabel",
 ];
 module.exports = mongoose.model("TapeMaster", TapeMasterSchema);
 module.exports.searchKeys = [...searchKeys];

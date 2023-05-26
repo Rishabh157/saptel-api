@@ -29,7 +29,6 @@ exports.add = async (req, res) => {
       slotName,
       channelGroupId,
       type,
-      days,
       tapeNameId,
       channelNameId,
       channelTrp,
@@ -40,6 +39,8 @@ exports.add = async (req, res) => {
       runStartTime,
       runEndTime,
       runRemark,
+      runStatus,
+      runYoutubeLink,
     } = req.body;
 
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -90,13 +91,14 @@ exports.add = async (req, res) => {
         channelNameId: req.body.channelNameId,
         companyId: req.body.companyId,
         type: req.body.type,
-        days: req.body.days,
         channelTrp: req.body.channelTrp,
         remarks: req.body.remarks,
         run: req.body.run,
         runStartTime: req.body.runStartTime,
         runEndTime: req.body.runEndTime,
         runRemark: req.body.runRemark,
+        runYoutubeLink: runYoutubeLink,
+        runStatus: runStatus,
         slotDate: slot.date,
         slotStartTime: slot.startTime,
         slotEndTime: slot.endTime,
@@ -133,7 +135,6 @@ exports.update = async (req, res) => {
       slotName,
       channelGroupId,
       type,
-      days,
       tapeNameId,
       channelNameId,
       channelTrp,
@@ -144,6 +145,7 @@ exports.update = async (req, res) => {
       runStartTime,
       runEndTime,
       runRemark,
+      runStatus,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -283,20 +285,15 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "slotName",
-      "channelGroupId",
-      "startDateTime",
-      "type",
-      "days",
-      "tapeNameId",
-      "channelNameId",
-      "endDateTime",
-      "channelTrp",
-      "remarks",
-    ];
+    let numberFileds = [];
+    let objectIdFileds = ["channelGroupId", "tapeNameId", "channelNameId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFileds
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

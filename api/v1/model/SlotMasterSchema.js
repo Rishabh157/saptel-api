@@ -14,21 +14,6 @@ const SlotMasterSchema = new mongoose.Schema(
       default: slotType.fixed,
     },
 
-    days: {
-      type: [String],
-      enum: [
-        slotDaysType.monday,
-        slotDaysType.tuesday,
-        slotDaysType.wednesday,
-        slotDaysType.thursday,
-        slotDaysType.friday,
-        slotDaysType.saturday,
-        slotDaysType.sunday,
-      ],
-      uppercase: true,
-      required: true,
-      default: slotDaysType.monday,
-    },
     tapeNameId: { type: ObjectId, required: true },
     channelNameId: { type: ObjectId, required: true },
 
@@ -84,7 +69,17 @@ const SlotMasterSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
-
+    runYoutubeLink: {
+      type: String,
+      trim: true,
+      required: false,
+      default: "",
+    },
+    runStatus: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -104,7 +99,6 @@ const searchKeys = [
   "channelGroup",
   "startDateTime",
   "type",
-  "days",
   "tapeNameId",
   "channelNameId",
   "companyId",
@@ -115,6 +109,9 @@ const searchKeys = [
   "runStartTime",
   "runEndTime",
   "runRemark",
+  "channelLabel",
+  "groupNameLabel",
+  "tapeLabel",
 ];
 module.exports = mongoose.model("SlotMaster", SlotMasterSchema);
 module.exports.searchKeys = [...searchKeys];
