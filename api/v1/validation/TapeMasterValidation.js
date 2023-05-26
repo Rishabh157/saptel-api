@@ -9,15 +9,18 @@ const commonValidation = require("./CommonValidation");
 const create = {
   body: Joi.object().keys({
     tapeName: Joi.string().lowercase().required(),
-    channelGroupId: Joi.string().allow(null).custom(commonValidation.objectId),
     tapeType: Joi.string().lowercase(),
     schemeId: Joi.string().allow(null).custom(commonValidation.objectId),
-    languageId: Joi.string().custom(commonValidation.objectId).required(),
+    languageId: Joi.array().items(
+      Joi.allow(null).custom(commonValidation.objectId).required()
+    ),
     duration: Joi.string().lowercase().required().allow(""),
     artistId: Joi.array().items(
-      Joi.custom(commonValidation.objectId).required()
+      Joi.allow(null).custom(commonValidation.objectId).required()
     ),
+    phone: Joi.array().items(Joi.string().required()),
     youtubeLink: Joi.string().allow(""),
+    webSiteLink: Joi.string().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     remarks: Joi.string().lowercase().allow(""),
   }),
@@ -32,15 +35,18 @@ const update = {
   }),
   body: Joi.object().keys({
     tapeName: Joi.string().lowercase().required(),
-    channelGroupId: Joi.string().allow(null).custom(commonValidation.objectId),
     tapeType: Joi.string().lowercase(),
     schemeId: Joi.string().allow(null).custom(commonValidation.objectId),
-    languageId: Joi.string().custom(commonValidation.objectId).required(),
+    languageId: Joi.array().items(
+      Joi.allow(null).custom(commonValidation.objectId).required()
+    ),
     duration: Joi.string().lowercase().required().allow(""),
     artistId: Joi.array().items(
-      Joi.custom(commonValidation.objectId).required()
+      Joi.allow(null).custom(commonValidation.objectId).required()
     ),
+    phone: Joi.array().items(Joi.string().required()),
     youtubeLink: Joi.string().allow(""),
+    webSiteLink: Joi.string().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     remarks: Joi.string().lowercase().allow(""),
   }),

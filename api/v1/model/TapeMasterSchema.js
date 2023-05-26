@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 const { tapeType } = require("../helper/enumUtils");
 const TapeMasterSchema = new mongoose.Schema(
   {
-    tapeName: { type: String, required: true, trim: true, lowercase: true },
-    channelGroupId: {
-      type: ObjectId,
-      required: false,
-      default: null,
+    tapeName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
     },
     tapeType: {
       type: String,
@@ -18,12 +18,50 @@ const TapeMasterSchema = new mongoose.Schema(
       required: true,
       default: tapeType.promotional,
     },
-    schemeId: { type: ObjectId, required: false, default: null },
-    languageId: { type: ObjectId, required: true },
-    duration: { type: String, required: true, trim: true, lowercase: true },
-    youtubeLink: { type: String, required: false, trim: true, default: "" },
-    artistId: { type: [ObjectId], required: true, trim: true },
-    companyId: { type: ObjectId, required: true, trim: true },
+    schemeId: {
+      type: ObjectId,
+      required: false,
+      default: null,
+    },
+    languageId: {
+      type: [ObjectId],
+      required: true,
+    },
+    artistId: {
+      type: [ObjectId],
+      required: true,
+      trim: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    phone: {
+      type: [String],
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    duration: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    youtubeLink: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    webSiteLink: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+
     remarks: {
       type: String,
       required: false,
@@ -47,12 +85,15 @@ const TapeMasterSchema = new mongoose.Schema(
 
 const searchKeys = [
   "tapeName",
-  "channelGroup",
   "tapeType",
-  "scheme",
-  "language",
+  "schemeId",
+  "languageId",
+  "artistId",
+  "companyId",
+  "phone",
   "duration",
-  "artist",
+  "youtubeLink",
+  "webSiteLink",
   "remarks",
 ];
 module.exports = mongoose.model("TapeMaster", TapeMasterSchema);

@@ -23,7 +23,7 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroup, barcodeGroupNumber, companyId } = req.body;
+    let { productGroupId, barcodeGroupNumber, companyId } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -80,7 +80,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { productGroup, companyId } = req.body;
+    let { productGroupId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -194,9 +194,15 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["productGroup"];
+    let numberFileds = [];
+    let objectIdFields = ["productGroupId", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -226,7 +232,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "product_group",
           pipeline: [
@@ -358,7 +364,7 @@ exports.allFilterGroupPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["productGroup"];
+    let numberFileds = ["productGroupId"];
 
     const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
@@ -390,7 +396,7 @@ exports.allFilterGroupPagination = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "product_group",
           pipeline: [
@@ -483,7 +489,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "product_group",
           pipeline: [
@@ -543,7 +549,7 @@ exports.getAllByGroup = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "product_group",
           pipeline: [
@@ -598,7 +604,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "product_group",
           pipeline: [

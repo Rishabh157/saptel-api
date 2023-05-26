@@ -7,7 +7,6 @@ const { searchKeys } = require("../../model/TapeMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const schemeService = require("../../services/SchemeService");
-const channelGroupService = require("../../services/ChannelGroupService");
 const companyService = require("../../services/CompanyService");
 const languageService = require("../../services/LanguageService");
 const slotMasterService = require("../../services/SlotMasterService");
@@ -29,14 +28,16 @@ exports.add = async (req, res) => {
   try {
     let {
       tapeName,
-      channelGroupId,
       tapeType,
       schemeId,
       languageId,
       artistId,
-      duration,
-      remarks,
       companyId,
+      phone,
+      duration,
+      youtubeLink,
+      webSiteLink,
+      remarks,
     } = req.body;
     /**
      * check duplicate exist
@@ -45,27 +46,36 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    const isChannelGroupExists = channelGroupId?.length
-      ? await channelGroupService.findCount({
-          _id: channelGroupId,
-          isDeleted: false,
-        })
-      : null;
 
     const isLanguageExists = await languageService.findCount({
       _id: languageId,
       isDeleted: false,
     });
+
+    if (!isLanguageExists) {
+      throw new ApiError(httpStatus.OK, "Invalid language");
+    }
+
     const isArtistExists = await artistService.findCount({
       _id: artistId,
       isDeleted: false,
     });
+
+    if (!isArtistExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Artist");
+    }
+
     const isSchemeExists = schemeId?.length
       ? await schemeService.findCount({
           _id: schemeId,
           isDeleted: false,
         })
       : null;
+
+    if (schemeId?.length && !isSchemeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid scheme");
+    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -73,18 +83,7 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    if (!isArtistExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Artist");
-    }
-    if (!isLanguageExists) {
-      throw new ApiError(httpStatus.OK, "Invalid language");
-    }
-    if (schemeId?.length && !isSchemeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid scheme");
-    }
-    if (channelGroupId?.length && !isChannelGroupExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel group");
-    }
+
     //------------------create data-------------------
     let dataCreated = await tapeMasterService.createNewData({ ...req.body });
 
@@ -114,14 +113,16 @@ exports.update = async (req, res) => {
   try {
     let {
       tapeName,
-      channelGroupId,
       tapeType,
       schemeId,
       languageId,
-      duration,
       artistId,
-      remarks,
       companyId,
+      phone,
+      duration,
+      youtubeLink,
+      webSiteLink,
+      remarks,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -133,27 +134,34 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `TapeMaster not found.`);
     }
-    const isChannelGroupExists = channelGroupId?.length
-      ? await channelGroupService.findCount({
-          _id: channelGroupId,
-          isDeleted: false,
-        })
-      : null;
 
     const isLanguageExists = await languageService.findCount({
       _id: languageId,
       isDeleted: false,
     });
+    if (!isLanguageExists) {
+      throw new ApiError(httpStatus.OK, "Invalid language");
+    }
+
     const isArtistExists = await artistService.findCount({
       _id: artistId,
       isDeleted: false,
     });
+    if (!isArtistExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Artist");
+    }
+
     const isSchemeExists = schemeId?.length
       ? await schemeService.findCount({
           _id: schemeId,
           isDeleted: false,
         })
       : null;
+
+    if (schemeId?.length && !isSchemeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Scheme");
+    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -161,18 +169,7 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    if (!isArtistExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Artist");
-    }
-    if (!isLanguageExists) {
-      throw new ApiError(httpStatus.OK, "Invalid language");
-    }
-    if (schemeId?.length && !isSchemeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid scheme");
-    }
-    if (channelGroupId?.length && !isChannelGroupExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel group");
-    }
+
     let dataUpdated = await tapeMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -267,18 +264,15 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "tapeName",
-      "channelGroup",
-      "tapeType",
-      "scheme",
-      "language",
-      "duration",
-      "artist",
-      "remarks",
-    ];
+    let numberFileds = [];
+    let objectIdFields = ["schemeId", "languageId", "artistId", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -307,21 +301,6 @@ exports.allFilterPagination = async (req, res) => {
     let additionalQuery = [
       {
         $lookup: {
-          from: "channelgroups",
-          localField: "channelGroupId",
-          foreignField: "_id",
-          as: "channel_group_data",
-          pipeline: [
-            {
-              $project: {
-                groupName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
           from: "schemes",
           localField: "schemeId",
           foreignField: "_id",
@@ -340,7 +319,7 @@ exports.allFilterPagination = async (req, res) => {
           from: "languages",
           localField: "languageId",
           foreignField: "_id",
-          as: "language_data",
+          as: "languageId",
           pipeline: [
             {
               $project: {
@@ -367,19 +346,16 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $addFields: {
-          channelGroupLabel: {
-            $arrayElemAt: ["$channel_group_data.groupName", 0],
-          },
           schemeLabel: {
             $arrayElemAt: ["$scheme_data.schemeName", 0],
           },
-          languageLabel: {
-            $arrayElemAt: ["$language_data.languageName", 0],
-          },
+          // languageLabel: {
+          //   $arrayElemAt: ["$language_data.languageName", 0],
+          // },
         },
       },
       {
-        $unset: ["channel_group_data", "scheme_data", "language_data"],
+        $unset: ["scheme_data"],
       },
     ];
     if (additionalQuery.length) {
