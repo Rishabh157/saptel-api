@@ -20,6 +20,6 @@ const DidManagementSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["didNumber", "schemeLable", "channelLabel"];
+const searchKeys = ["didNumber", "schemeLabel", "channelLabel"];
 module.exports = mongoose.model("DidManagement", DidManagementSchema);
 module.exports.searchKeys = [...searchKeys];
