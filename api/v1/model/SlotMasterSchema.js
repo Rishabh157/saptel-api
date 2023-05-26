@@ -84,6 +84,12 @@ const SlotMasterSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
+    runYoutubeLink: {
+      type: String,
+      trim: true,
+      required: false,
+      default: "",
+    },
     runStatus: {
       type: Boolean,
       required: false,

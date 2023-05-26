@@ -41,6 +41,7 @@ exports.add = async (req, res) => {
       runEndTime,
       runRemark,
       runStatus,
+      runYoutubeLink,
     } = req.body;
 
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -98,6 +99,7 @@ exports.add = async (req, res) => {
         runStartTime: req.body.runStartTime,
         runEndTime: req.body.runEndTime,
         runRemark: req.body.runRemark,
+        runYoutubeLink: runYoutubeLink,
         runStatus: runStatus,
         slotDate: slot.date,
         slotStartTime: slot.startTime,
