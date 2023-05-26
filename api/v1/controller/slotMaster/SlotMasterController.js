@@ -40,6 +40,7 @@ exports.add = async (req, res) => {
       runStartTime,
       runEndTime,
       runRemark,
+      runStatus,
     } = req.body;
 
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -97,6 +98,7 @@ exports.add = async (req, res) => {
         runStartTime: req.body.runStartTime,
         runEndTime: req.body.runEndTime,
         runRemark: req.body.runRemark,
+        runStatus: runStatus,
         slotDate: slot.date,
         slotStartTime: slot.startTime,
         slotEndTime: slot.endTime,
@@ -144,6 +146,7 @@ exports.update = async (req, res) => {
       runStartTime,
       runEndTime,
       runRemark,
+      runStatus,
     } = req.body;
 
     let idToBeSearch = req.params.id;

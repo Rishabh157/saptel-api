@@ -24,6 +24,7 @@ const create = {
     runStartTime: Joi.string().allow(""),
     runEndTime: Joi.string().allow(""),
     runRemark: Joi.string().allow(""),
+    runStatus: Joi.boolean(),
     remarks: Joi.string().lowercase().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -52,6 +53,7 @@ const update = {
     runEndTime: Joi.string().allow(""),
     runRemark: Joi.string().allow(""),
     remarks: Joi.string().lowercase().allow(""),
+    runStatus: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

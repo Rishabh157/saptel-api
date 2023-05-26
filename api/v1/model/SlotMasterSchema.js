@@ -84,7 +84,11 @@ const SlotMasterSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
-
+    runStatus: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
