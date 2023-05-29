@@ -13,6 +13,14 @@ router.get(
   validate(dispositionTwoValidation.get),
   dispositionTwoController.get
 );
+//===============get all document fo dispositionTwo Id Wihtout token===============
+router.get(
+  "/unauth/get-all/:id",
+  // accessModuleCheck,
+  // authCheckMiddleware,
+  validate(dispositionTwoValidation.getByDispositionOneId),
+  dispositionTwoController.getByDispositionOneId
+);
 
 //===============get document by id===============
 router.get(
