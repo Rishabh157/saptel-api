@@ -52,6 +52,17 @@ router.put(
   dispositionOneController.update
 );
 
+//-----------------------------------------------------
+/**
+/**
+ * get one document (if query) / all documents (without token)
+ */
+router.get(
+  "/unauth/get-all",
+  validate(dispositionOneValidation.get),
+  dispositionOneController.get
+);
+/**
 /**
  * get by id
  */
