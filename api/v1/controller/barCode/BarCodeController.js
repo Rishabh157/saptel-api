@@ -23,7 +23,7 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroupId, barcodeGroupNumber, companyId } = req.body;
+    let { productGroupId, barcodeGroupNumber, lotNumber, companyId } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -36,10 +36,10 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    // let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
-    // if (dataExist.exists && dataExist.existsSummary) {
-    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    // }
+    let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     let lastObject = await barCodeService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
@@ -48,10 +48,10 @@ exports.add = async (req, res) => {
     if (lastObject.length) {
       const barcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
       const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
-      req.body.barcodeNumber = paddedBarcodeNumber;
+      req.body.barcodeNumber = lotNumber + paddedBarcodeNumber;
       console.log(paddedBarcodeNumber);
     } else {
-      req.body.barcodeNumber = "000001";
+      req.body.barcodeNumber = lotNumber + "000001";
     }
     //------------------create data-------------------
     let dataCreated = await barCodeService.createNewData({ ...req.body });
@@ -83,7 +83,13 @@ exports.update = async (req, res) => {
     let { productGroupId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-
+    let dataExist = await barCodeService.isExists(
+      [{ barcodeNumber }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
