@@ -12,19 +12,21 @@ const create = {
     address: Joi.string().lowercase().allow(""),
     phone: Joi.string().allow(""),
     email: Joi.string().allow(""),
-    district: Joi.string().custom(commonValidation.objectId).required(),
+    districtId: Joi.string().custom(commonValidation.objectId).required(),
     channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
     contactPerson: Joi.string().allow(""),
     mobile: Joi.string().allow(""),
-    country: Joi.string().custom(commonValidation.objectId).required(),
-    language: Joi.string()
+    countryId: Joi.string().custom(commonValidation.objectId).required(),
+    languageId: Joi.string()
       .custom(commonValidation.objectId)
       .optional()
       .allow(null),
-    channelCategory: Joi.string().custom(commonValidation.objectId).required(),
+    channelCategoryId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
     designation: Joi.string().lowercase().allow(""),
     website: Joi.string().lowercase().allow(""),
-    state: Joi.string().custom(commonValidation.objectId).required(),
+    stateId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     paymentType: Joi.string().required(),
   }),
@@ -42,16 +44,21 @@ const update = {
     address: Joi.string().lowercase().allow(""),
     phone: Joi.string().allow(""),
     email: Joi.string().allow(""),
-    district: Joi.string().custom(commonValidation.objectId).required(),
+    districtId: Joi.string().custom(commonValidation.objectId).required(),
     channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
     contactPerson: Joi.string().allow(""),
     mobile: Joi.string().allow(""),
-    country: Joi.string().custom(commonValidation.objectId).required(),
-    language: Joi.string().custom(commonValidation.objectId).allow(null),
-    channelCategory: Joi.string().custom(commonValidation.objectId).required(),
+    countryId: Joi.string().custom(commonValidation.objectId).required(),
+    languageId: Joi.string()
+      .custom(commonValidation.objectId)
+      .optional()
+      .allow(null),
+    channelCategoryId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
     designation: Joi.string().lowercase().allow(""),
     website: Joi.string().lowercase().allow(""),
-    state: Joi.string().custom(commonValidation.objectId).required(),
+    stateId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     paymentType: Joi.string().required(),
   }),

@@ -8,7 +8,7 @@ const ChannelManagementSchema = new mongoose.Schema(
       required: true,
     },
     didNumber: { type: ObjectId, required: true, trim: true, lowercase: true },
-    scheme: { type: ObjectId, required: true },
+    schemeId: { type: ObjectId, required: true },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
@@ -28,7 +28,7 @@ const searchKeys = [
   "channelName",
   "channelGroupId",
   "didNumber",
-  "scheme",
+  "schemeId",
   "companyId",
 ];
 module.exports = mongoose.model("ChannelManagement", ChannelManagementSchema);

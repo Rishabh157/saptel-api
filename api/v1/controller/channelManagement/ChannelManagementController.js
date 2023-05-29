@@ -23,7 +23,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { channelName, channelGroupId, didNumber, scheme, companyId } =
+    let { channelName, channelGroupId, didNumber, schemeId, companyId } =
       req.body;
     /**
      * check duplicate exist
@@ -78,7 +78,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { channelName, channelGroupId, didNumber, scheme, companyId } =
+    let { channelName, channelGroupId, didNumber, schemeId, companyId } =
       req.body;
 
     let idToBeSearch = req.params.id;
@@ -139,6 +139,7 @@ exports.allFilterPagination = async (req, res) => {
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
+    console.log(filterBy);
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -193,15 +194,16 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "channelName",
-      "channelGroupId",
-      "didNumber",
-      "scheme",
-      "companyId",
-    ];
+    let numberFileds = [];
+    let objectIdFields = ["channelGroupId", "schemeId", "companyId"];
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    console.log(filterQuery);
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
