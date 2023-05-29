@@ -2,8 +2,8 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const websiteMasterService = require("../../services/WebsiteMasterService");
-const { searchKeys } = require("../../model/WebsiteMasterSchema");
+const websiteBlogService = require("../../services/WebsiteBlogService");
+const { searchKeys } = require("../../model/WebsiteBlogSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -20,24 +20,17 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      productName,
-      url,
-      gaTagIp,
-      searchConsoleIp,
-      headerSpace,
-      footerSpace,
-      siteMap,
-    } = req.body;
+    let { blogName, blogTitle, blogSubtitle, image, blogDescription } =
+      req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await websiteMasterService.isExists([{ productName }]);
+    let dataExist = await websiteBlogService.isExists([{ blogName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await websiteMasterService.createNewData({ ...req.body });
+    let dataCreated = await websiteBlogService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -63,30 +56,26 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let {
-      productName,
-      url,
-      gaTagIp,
-      searchConsoleIp,
-      headerSpace,
-      footerSpace,
-      siteMap,
-    } = req.body;
+    let { blogName, blogTitle, blogSubtitle, image, blogDescription } =
+      req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await websiteMasterService.isExists([{ productName }]);
+    let dataExist = await websiteBlogService.isExists(
+      [{ blogName }],
+      idToBeSearch
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------Find data-------------------
-    let datafound = await websiteMasterService.getOneByMultiField({
+    let datafound = await websiteBlogService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `WebsiteMaster not found.`);
+      throw new ApiError(httpStatus.OK, `WebsiteBlog not found.`);
     }
 
-    let dataUpdated = await websiteMasterService.getOneAndUpdate(
+    let dataUpdated = await websiteBlogService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -219,7 +208,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await websiteMasterService.aggregateQuery(
+    let dataFound = await websiteBlogService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -240,7 +229,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await websiteMasterService.aggregateQuery(finalAggregateQuery);
+    let result = await websiteBlogService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -272,7 +261,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await websiteMasterService.findAllWithQuery(matchQuery);
+    let dataExist = await websiteBlogService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -299,7 +288,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await websiteMasterService.getOneByMultiField({
+    let dataExist = await websiteBlogService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
@@ -324,14 +313,15 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await websiteMasterService.getOneByMultiField({ _id }))) {
+    if (!(await websiteBlogService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await websiteMasterService.getOneAndDelete({ _id });
+    let deleted = await websiteBlogService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -355,13 +345,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await websiteMasterService.getOneByMultiField({ _id });
+    let dataExist = await websiteBlogService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await websiteMasterService.getOneAndUpdate(
+    let statusChanged = await websiteBlogService.getOneAndUpdate(
       { _id },
       { isActive }
     );
