@@ -22,6 +22,14 @@ router.get(
   validate(dispositionThreeValidation.getByDispositionOneId),
   dispositionThreeController.getById
 );
+//===============get all document fo dispositionTwo Id=============== (without token)
+router.get(
+  "/unauth/get-all/:id",
+  // accessModuleCheck,
+  // authCheckMiddleware,
+  validate(dispositionThreeValidation.getByDispositionOneId),
+  dispositionThreeController.getByDispositionTwoId
+);
 
 //===============get all document fo dispositionTwo Id===============
 router.get(
