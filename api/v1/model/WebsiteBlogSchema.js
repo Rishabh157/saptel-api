@@ -17,6 +17,8 @@ const WebsiteBlogSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    websiteId: { type: ObjectId, required: true, trim: true },
+
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,

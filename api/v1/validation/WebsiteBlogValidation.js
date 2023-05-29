@@ -13,6 +13,7 @@ const create = {
     blogSubtitle: Joi.string().allow(""),
     image: Joi.string().allow(""),
     blogDescription: Joi.string().allow(""),
+    websiteId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -30,6 +31,7 @@ const update = {
     blogSubtitle: Joi.string().allow(""),
     image: Joi.string().allow(""),
     blogDescription: Joi.string().allow(""),
+    websiteId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
