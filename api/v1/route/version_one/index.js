@@ -56,6 +56,7 @@ const dispositionThreeRoute = require("./DispositionThreeRoute");
 const initialCallOneRoute = require("./InitialCallOneRoute");
 const initialCallThreeRoute = require("./InitialCallThreeRoute");
 const initailCallTwoRoute = require("./InitialCallTwoRoute");
+const websiteMasterRoute = require("./WebsiteMasterRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -288,6 +289,10 @@ const defaultRoutes = [
   {
     path: "/initialcall-two",
     route: initailCallTwoRoute,
+  },
+  {
+    path: "/website-master",
+    route: websiteMasterRoute,
   },
 ];
 
