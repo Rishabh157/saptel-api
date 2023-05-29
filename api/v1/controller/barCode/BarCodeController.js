@@ -36,10 +36,10 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+    // let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
+    // if (dataExist.exists && dataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    // }
     let lastObject = await barCodeService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
