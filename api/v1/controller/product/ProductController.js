@@ -214,16 +214,20 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "productCode",
-      "productName",
+    let numberFileds = [];
+    let objectIdFields = [
       "productCategory",
-      "productSubCategory",
-      "productGroup",
-      "description",
+      "productSubCategoryId",
+      "productGroupId",
+      "companyId",
     ];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

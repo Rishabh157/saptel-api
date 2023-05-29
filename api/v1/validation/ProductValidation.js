@@ -10,11 +10,13 @@ const create = {
   body: Joi.object().keys({
     productCode: Joi.string().lowercase().required(),
     productName: Joi.string().lowercase().required(),
-    productCategory: Joi.string().custom(commonValidation.objectId).required(),
-    productSubCategory: Joi.string()
+    productCategoryId: Joi.string()
       .custom(commonValidation.objectId)
       .required(),
-    productGroup: Joi.string().custom(commonValidation.objectId).required(),
+    productSubCategoryId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     productWeight: Joi.number().required(),
     dimension: Joi.object().keys({
       height: Joi.number().required(),
@@ -54,11 +56,13 @@ const update = {
   body: Joi.object().keys({
     productCode: Joi.string().lowercase().required(),
     productName: Joi.string().lowercase().required(),
-    productCategory: Joi.string().custom(commonValidation.objectId).required(),
-    productSubCategory: Joi.string()
+    productCategoryId: Joi.string()
       .custom(commonValidation.objectId)
       .required(),
-    productGroup: Joi.string().custom(commonValidation.objectId).required(),
+    productSubCategoryId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     productWeight: Joi.number().required(),
     dimension: Joi.object().keys({
       height: Joi.number().required(),

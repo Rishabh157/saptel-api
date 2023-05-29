@@ -128,6 +128,7 @@ const getFilterQuery = (
         if (!invalidData.includes(filterBy[each].fieldName)) {
           let fieldName = filterBy[each].fieldName;
           let filterValue = filterBy[each].value;
+
           if (
             Array.isArray(filterValue) &&
             filterValue.length &&
@@ -170,7 +171,6 @@ const getFilterQuery = (
                     [fieldName]: parseInt(val),
                   });
                 });
-
                 queryArray.push({ $or: orQuery });
               } else {
                 queryArray.push({
@@ -189,7 +189,6 @@ const getFilterQuery = (
                     [fieldName]: new ObjectId(val),
                   });
                 });
-
                 queryArray.push({ $or: orQuery });
               } else {
                 queryArray.push({

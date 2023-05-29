@@ -252,7 +252,6 @@ exports.allFilterPagination = async (req, res) => {
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
-    console.log(filterBy, "7*/7*7*7*77*7****7*77*77");
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -318,14 +317,12 @@ exports.allFilterPagination = async (req, res) => {
       "channelCategoryId",
       "companyId",
     ];
-    console.log(objectIdFields, "8-8-8--8-8-8-8-8-88-88-88");
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
       numberFileds,
       objectIdFields
     );
-    console.log(filterQuery);
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

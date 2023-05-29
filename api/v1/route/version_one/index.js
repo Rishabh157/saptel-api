@@ -35,7 +35,6 @@ const dealerSchemeRoute = require("./DealerSchemeRoute");
 const dealerPincodeRoute = require("./DealerPincodeRoute");
 const deliveryBoyRoute = require("./DeliveryBoyRoute");
 const didRoute = require("./DidManagementRoute");
-const tabRoute = require("./TabManagementRoute");
 const channelGroupRoute = require("./ChannelGroupRoute");
 const channelManagementRoute = require("./ChannelManagementRoute");
 const dispositionOneRoute = require("./DispositionOneRoute");
@@ -225,10 +224,7 @@ const defaultRoutes = [
     path: "/did-management",
     route: didRoute,
   },
-  {
-    path: "/tab-management",
-    route: tabRoute,
-  },
+
   {
     path: "/channel-group",
     route: channelGroupRoute,

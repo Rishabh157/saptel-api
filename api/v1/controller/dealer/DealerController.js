@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dealerService = require("../../services/DealerService");
 const companyService = require("../../services/CompanyService");
+const dealersCategoryService = require("../../services/DealersCategoryService");
 
 const { searchKeys } = require("../../model/DealerSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -35,7 +36,7 @@ exports.add = async (req, res) => {
       firmName,
       firstName,
       lastName,
-      dealerCategory,
+      dealerCategoryId,
       email,
       registrationAddress,
       billingAddress,
@@ -51,6 +52,14 @@ exports.add = async (req, res) => {
     let dataExist = await dealerService.isExists([{ dealerCode }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isDealersCategoryExists = await dealersCategoryService.findCount({
+      _id: dealerCategoryId,
+      isDeleted: false,
+    });
+    if (!isDealersCategoryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealers Category");
     }
 
     const isCompanyExists = await companyService.findCount({
@@ -102,13 +111,14 @@ exports.update = async (req, res) => {
       firmName,
       firstName,
       lastName,
-      dealerCategory,
+      dealerCategoryId,
       email,
       registrationAddress,
       billingAddress,
       contactInformation,
       document,
       otherDocument,
+      password,
       companyId,
     } = req.body;
 
@@ -328,7 +338,6 @@ exports.allFilterPagination = async (req, res) => {
      **/
 
     let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
-
     if (searchQueryCheck && !searchQueryCheck.status) {
       return res.status(httpStatus.OK).send({
         ...searchQueryCheck,
@@ -355,16 +364,15 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "dealerCode",
-      "firmName",
-      "firstName",
-      "lastName",
-      "dealerCategory",
-      "email",
-    ];
+    let numberFileds = [];
+    let objectIdFields = ["dealerCategory", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -394,7 +402,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "dealerscategories",
-          localField: "dealerCategory",
+          localField: "dealerCategoryId",
           foreignField: "_id",
           as: "dealerCategory_name",
           pipeline: [{ $project: { dealersCategory: 1 } }],
@@ -403,7 +411,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "countries",
-          localField: "registrationAddress.country",
+          localField: "registrationAddress.countryId",
           foreignField: "_id",
           as: "country_name",
           pipeline: [{ $project: { countryName: 1 } }],
@@ -412,7 +420,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "registrationAddress.state",
+          localField: "registrationAddress.stateId",
           foreignField: "_id",
           as: "state_name",
           pipeline: [{ $project: { stateName: 1 } }],
@@ -421,7 +429,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "registrationAddress.district",
+          localField: "registrationAddress.districtId",
           foreignField: "_id",
           as: "district_name",
           pipeline: [{ $project: { districtName: 1 } }],
@@ -430,7 +438,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "registrationAddress.pincode",
+          localField: "registrationAddress.pincodeId",
           foreignField: "_id",
           as: "pincode_name",
           pipeline: [{ $project: { pincode: 1 } }],
@@ -440,7 +448,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "countries",
-          localField: "billingAddress.country",
+          localField: "billingAddress.countryId",
           foreignField: "_id",
           as: "b_country_name",
           pipeline: [{ $project: { countryName: 1 } }],
@@ -449,7 +457,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "billingAddress.state",
+          localField: "billingAddress.stateId",
           foreignField: "_id",
           as: "b_state_name",
           pipeline: [{ $project: { stateName: 1 } }],
@@ -458,7 +466,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "billingAddress.district",
+          localField: "billingAddress.districtId",
           foreignField: "_id",
           as: "b_district_name",
           pipeline: [{ $project: { districtName: 1 } }],
@@ -467,7 +475,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "billingAddress.pincode",
+          localField: "billingAddress.pincodeId",
           foreignField: "_id",
           as: "b_pincode_name",
           pipeline: [{ $project: { pincode: 1 } }],

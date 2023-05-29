@@ -3,12 +3,32 @@ const mongoose = require("mongoose");
 const { inventoryStatus, inventoryCondition } = require("../helper/enumUtils");
 const InventoriesSchema = new mongoose.Schema(
   {
-    productGroupName: { type: String, required: true, trim: true },
-    groupBarcodeNumber: { type: String, required: true },
-    barcodeNumber: { type: String, required: true },
-    wareHouse: { type: ObjectId, required: true },
-    expiryDate: { type: String, required: false, trim: true },
-    quantity: { type: Number, default: 1 },
+    productGroupName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    groupBarcodeNumber: {
+      type: String,
+      required: true,
+    },
+    barcodeNumber: {
+      type: String,
+      required: true,
+    },
+    wareHouseId: {
+      type: ObjectId,
+      required: true,
+    },
+    expiryDate: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    quantity: {
+      type: Number,
+      default: 1,
+    },
 
     status: {
       type: String,
@@ -22,7 +42,11 @@ const InventoriesSchema = new mongoose.Schema(
       trim: true,
       default: inventoryCondition.good,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -37,6 +61,11 @@ const InventoriesSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["productGroupName", "groupBarcode"];
+const searchKeys = [
+  "productGroupName",
+  "wareHouseId",
+  "companyId",
+  "groupBarcode",
+];
 module.exports = mongoose.model("Inventories", InventoriesSchema);
 module.exports.searchKeys = [...searchKeys];

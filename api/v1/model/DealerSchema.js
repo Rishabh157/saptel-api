@@ -2,17 +2,46 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const DealerSchema = new mongoose.Schema(
   {
-    dealerCode: { type: String, required: true, trim: true, lowercase: true },
-    firmName: { type: String, required: true, trim: true, lowercase: true },
-    firstName: { type: String, required: true, trim: true, lowercase: true },
-    lastName: { type: String, required: true, trim: true, lowercase: true },
-    dealerCategory: {
+    dealerCode: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    firmName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    dealerCategoryId: {
       type: ObjectId,
       required: true,
       trim: true,
     },
-    email: { type: String, required: true, trim: true, lowercase: true },
-    password: { type: String, required: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     registrationAddress: {
       type: {
         phone: {
@@ -26,22 +55,22 @@ const DealerSchema = new mongoose.Schema(
           trim: true,
           lowercase: true,
         },
-        country: {
+        countryId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        state: {
+        stateId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        district: {
+        districtId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        pincode: {
+        pincodeId: {
           type: ObjectId,
           required: true,
           trim: true,
@@ -62,22 +91,22 @@ const DealerSchema = new mongoose.Schema(
           trim: true,
           lowercase: true,
         },
-        country: {
+        countryId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        state: {
+        stateId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        district: {
+        districtId: {
           type: ObjectId,
           required: true,
           trim: true,
         },
-        pincode: {
+        pincodeId: {
           type: ObjectId,
           required: true,
           trim: true,
@@ -168,7 +197,11 @@ const DealerSchema = new mongoose.Schema(
         },
       ],
     },
-    companyId: { type: String, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -188,7 +221,7 @@ const searchKeys = [
   "firmName",
   "firstName",
   "lastName",
-  "dealerCategory",
+  "dealerCategoryId",
   "email",
   "registrationAddress",
   "billingAddress",

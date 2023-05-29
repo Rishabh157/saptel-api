@@ -2,20 +2,38 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const ProductSchema = new mongoose.Schema(
   {
-    productCode: { type: String, required: true, trim: true, lowercase: true },
-    productName: { type: String, required: true, trim: true, lowercase: true },
-    productCategory: {
+    productCode: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    productName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    productCategoryId: {
       type: ObjectId,
       required: true,
       trim: true,
     },
-    productSubCategory: {
+    productSubCategoryId: {
       type: ObjectId,
       required: true,
       trim: true,
     },
-    productGroup: { type: ObjectId, required: true, trim: true },
-    productWeight: { type: Number, required: true, trim: true },
+    productGroupId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    productWeight: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
     dimension: {
       type: {
         height: {
@@ -37,7 +55,12 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
     // productImage: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true, lowercase: true },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     item: {
       type: [
         {
@@ -114,7 +137,11 @@ const ProductSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -132,15 +159,14 @@ const ProductSchema = new mongoose.Schema(
 const searchKeys = [
   "productCode",
   "productName",
-  "productCategory",
-  "productSubCategory",
-  "productGroup",
+  "productCategoryId",
+  "productSubCategoryId",
+  "productGroupId",
+  "companyId",
   "productWeight",
   "dimension",
-  // "productImage",
   "description",
   "item",
-
   "faq",
   "video",
   "callScript",
