@@ -12,7 +12,7 @@ const SchemeSchema = new mongoose.Schema(
       lowercase: true,
     },
     schemePrice: { type: Number, required: true },
-    commition: { type: Number, required: true },
+    commission: { type: Number, required: true },
     dimension: {
       type: {
         height: {
