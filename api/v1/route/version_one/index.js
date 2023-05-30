@@ -58,6 +58,7 @@ const initailCallTwoRoute = require("./InitialCallTwoRoute");
 const websiteMasterRoute = require("./WebsiteMasterRoute");
 const websitePageRoute = require("./WebsitePageRoute");
 const websiteBlogRoute = require("./WebsiteBlogRoute");
+const complaintDispositionRoute = require("./ComplaintDispositionRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -299,6 +300,10 @@ const defaultRoutes = [
   {
     path: "/website-blog",
     route: websiteBlogRoute,
+  },
+  {
+    path: "/complaint-disposition",
+    route: complaintDispositionRoute,
   },
 ];
 
