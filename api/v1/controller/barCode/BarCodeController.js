@@ -43,6 +43,11 @@ exports.add = async (req, res) => {
     let lastObject = await barCodeService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
+      {
+        $match: {
+          lotNumber: lotNumber,
+        },
+      },
     ]);
 
     if (lastObject.length) {
