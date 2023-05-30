@@ -52,7 +52,11 @@ exports.add = async (req, res) => {
 
     if (lastObject.length) {
       const barcodeNumber =
-        parseInt(lastObject[0].barcodeNumber.substring(2)) + 1;
+        parseInt(
+          lastObject[0].barcodeNumber.substring(
+            lastObject[0].barcodeNumber.length - 6
+          )
+        ) + 1;
       const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
       req.body.barcodeNumber = lotNumber + paddedBarcodeNumber;
     } else {

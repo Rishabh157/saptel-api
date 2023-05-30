@@ -28,6 +28,7 @@ const searchKeys = [
   "headerSpace",
   "footerSpace",
   "websiteId",
+  "websiteLabel",
 ];
 module.exports = mongoose.model("WebsitePage", WebsitePageSchema);
 module.exports.searchKeys = [...searchKeys];
