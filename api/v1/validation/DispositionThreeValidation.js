@@ -10,6 +10,10 @@ const create = {
     dispositionOneId: Joi.string().custom(commonValidation.objectId).required(),
     dispositionTwoId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    smsType: Joi.string().required(),
+    emailType: Joi.string().required(),
+    priority: Joi.string().required(),
+    applicableCriteria: Joi.array().items(Joi.string().required()),
   }),
 };
 
@@ -23,6 +27,10 @@ const update = {
     dispositionOneId: Joi.string().custom(commonValidation.objectId).required(),
     dispositionTwoId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    smsType: Joi.string().required(),
+    emailType: Joi.string().required(),
+    priority: Joi.string().required(),
+    applicableCriteria: Joi.array().items(Joi.string().required()),
   }),
 };
 //===============get either all data or single document===============

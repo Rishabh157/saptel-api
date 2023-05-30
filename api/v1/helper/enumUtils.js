@@ -1,3 +1,5 @@
+const { object } = require("joi");
+
 const allFileEnum = Object.freeze({
   image: "IMAGE",
   document: "DOCUMENT",
@@ -47,6 +49,32 @@ const companyEnum = Object.freeze({
   sec: "Section 8 Company",
 });
 
+const smsType = Object.freeze({
+  alcobanSms: "ALCOBAN SMS",
+  complaintCCA_CNC: "CUSTOMER NOT CONTACTABLE",
+  complaintCCA_OWEI: "COMPLAINT CCA-ORDERS WITH EMAIL ID",
+  complaintCCA_OWNEI: "COMPLAINT CCA-ORDERS WITHOUT EMAIL ID",
+  complaintORC: "CREATE ORDER REFUND-CHEQUE",
+  complaintORN: "CREATE ORDER REFUND-NEFT",
+  complaintRPIM: "CREATE RPI-MANUAL",
+  complaintRPI: "CREATE RPI-TV-SHOP COURIER ASSIGNED",
+  complaintSCD: "COMPLAINT SERVICE DETAILS",
+  createComplant: "CREATE COMPLAINT",
+  dealerDelivered: "DEALER DELIVERED",
+  dealerDeliveredBI: "DEALER DELIVERED BOY INTRANSIT",
+  dispositionMsg: "DISPOSITION MESSAGE",
+  hold: "HOLD",
+  inTransitDB: "IN-TRANSIT-DELIVERY-BOY",
+  invoiceSent: "INVOICE SENT",
+});
+
+const emailType = Object.freeze({
+  personalEmail: "PERSONAL EMAIL",
+  officialEmail: "OFFICIAL EMAIL",
+  buisnessEmail: "BUISNESS EMAIL",
+  companyEmail: "COMPANY EMAIL",
+});
+
 const userEnum = Object.freeze({
   user: "USER",
   admin: "ADMIN",
@@ -93,4 +121,6 @@ module.exports = {
   slotType,
   slotDaysType,
   paymentType,
+  smsType,
+  emailType,
 };
