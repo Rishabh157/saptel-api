@@ -24,8 +24,16 @@ const mongoose = require("mongoose");
 // ============= add Disposition start  ================
 exports.add = async (req, res) => {
   try {
-    let { dispositionName, dispositionOneId, dispositionTwoId, companyId } =
-      req.body;
+    let {
+      dispositionName,
+      dispositionOneId,
+      dispositionTwoId,
+      companyId,
+      smsType,
+      emailType,
+      priority,
+      applicableCriteria,
+    } = req.body;
 
     const isDispositionOneExists = await dispositionOneService.findCount({
       _id: dispositionOneId,
@@ -87,8 +95,16 @@ exports.add = async (req, res) => {
 // =============update Disposition start================
 exports.update = async (req, res) => {
   try {
-    let { dispositionName, dispositionOneId, dispositionTwoId, companyId } =
-      req.body;
+    let {
+      dispositionName,
+      dispositionOneId,
+      dispositionTwoId,
+      companyId,
+      smsType,
+      emailType,
+      priority,
+      applicableCriteria,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
 

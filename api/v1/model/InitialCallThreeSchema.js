@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { complaintType } = require("../helper/enumUtils");
+const { complaintType, smsType, emailType } = require("../helper/enumUtils");
 const InitialCallThreeSchema = new mongoose.Schema(
   {
     complaintType: {
@@ -10,12 +10,33 @@ const InitialCallThreeSchema = new mongoose.Schema(
     },
     emailType: {
       type: String,
-      enum: ["EMAIL1", "EMAIL2"],
+      enum: [
+        emailType.buisnessEmail,
+        emailType.officialEmail,
+        emailType.personalEmail,
+      ],
       required: true,
     },
     smsType: {
       type: String,
-      enum: ["SMS1", "SMS2"],
+      enum: [
+        smsType.alcobanSms,
+        smsType.complaintCCA_CNC,
+        smsType.complaintCCA_OWEI,
+        smsType.complaintCCA_OWNEI,
+        smsType.complaintORC,
+        smsType.complaintORN,
+        smsType.complaintRPI,
+        smsType.complaintRPIM,
+        smsType.complaintSCD,
+        smsType.createComplant,
+        smsType.dealerDelivered,
+        smsType.dealerDeliveredBI,
+        smsType.dispositionMsg,
+        smsType.hold,
+        smsType.inTransitDB,
+        smsType.invoiceSent,
+      ],
       required: true,
     },
     returnType: {
