@@ -227,14 +227,19 @@ exports.allFilterPagination = async (req, res) => {
     let numberFileds = [
       "schemeCode",
       "schemeName",
-      "category",
-      "subCategory",
+
       "startDate",
       "endDate",
       "schemeDescription",
     ];
+    let objectIdFields = ["category", "subCategory", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

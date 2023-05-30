@@ -146,6 +146,7 @@ exports.allFilterPagination = async (req, res) => {
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
+    console.log(filterBy);
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -200,7 +201,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = ["pincode"];
+    let numberFileds = [];
     let objectIdFields = ["dealerId", "companyId"];
 
     const filterQuery = getFilterQuery(

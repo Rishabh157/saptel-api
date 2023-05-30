@@ -153,6 +153,7 @@ exports.allFilterPagination = async (req, res) => {
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
+    console.log(filterBy);
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -207,14 +208,16 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "subCategoryCode",
-      "subCategoryName",
-      "parentCategory",
-      "hsnCode",
-    ];
+    let numberFileds = [];
+    let objectIdFields = ["parentCategory", "applicableTaxes", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    console.log(filterQuery);
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

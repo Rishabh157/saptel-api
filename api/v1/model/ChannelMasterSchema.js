@@ -3,7 +3,12 @@ const mongoose = require("mongoose");
 const { paymentType } = require("../helper/enumUtils");
 const ChannelMasterSchema = new mongoose.Schema(
   {
-    channelName: { type: String, required: true, trim: true, lowercase: true },
+    channelName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     address: {
       type: String,
       required: false,
@@ -11,9 +16,23 @@ const ChannelMasterSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
-    phone: { type: String, required: false, trim: true, default: "" },
-    email: { type: String, required: false, trim: true, default: "" },
-    district: { type: ObjectId, required: true, trim: true },
+    phone: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    email: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    districtId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     channelGroupId: {
       type: ObjectId,
       required: true,
@@ -25,17 +44,44 @@ const ChannelMasterSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
-    mobile: { type: String, required: false, trim: true, default: "" },
-    country: { type: ObjectId, required: true, trim: true },
-    language: { type: ObjectId, required: false, default: null },
-    channelCategory: {
+    mobile: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    countryId: {
       type: ObjectId,
       required: true,
       trim: true,
     },
-    designation: { type: String, required: false, trim: true, default: "" },
-    website: { type: String, required: false, trim: true, default: "" },
-    state: { type: ObjectId, required: true, trim: true },
+    languageId: {
+      type: ObjectId,
+      required: false,
+      default: null,
+    },
+    channelCategoryId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    designation: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    website: {
+      type: String,
+      required: false,
+      trim: true,
+      default: "",
+    },
+    stateId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     paymentType: {
       type: String,
       enum: [
@@ -48,7 +94,11 @@ const ChannelMasterSchema = new mongoose.Schema(
       uppercase: true,
       required: true,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
 
     isDeleted: {
       type: Boolean,
@@ -69,16 +119,17 @@ const searchKeys = [
   "address",
   "phone",
   "email",
-  "district",
+  "districtId",
   "channelGroupId",
+  "countryId",
+  "languageId",
+  "channelCategoryId",
+  "stateId",
+  "companyId",
   "contactPerson",
   "mobile",
-  "country",
-  "language",
-  "channelCategory",
   "designation",
   "website",
-  "state",
   "paymentType",
   "areaLabel",
   "channelGroupLabel",

@@ -29,7 +29,7 @@ exports.add = async (req, res) => {
       groupBarcodeNumber,
       barcodeNumber,
       companyId,
-      wareHouse,
+      wareHouseId,
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -215,8 +215,14 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
+    let objectIdFields = ["wareHouse", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -246,7 +252,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "warehouses",
-          localField: "wareHouse",
+          localField: "wareHouseId",
           foreignField: "_id",
           as: "wareHouse_name",
           pipeline: [

@@ -2,8 +2,16 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const TabManagementSchema = new mongoose.Schema(
   {
-    tabCode: { type: String, required: true, trim: true },
-    youtubeLink: { type: String, required: true, trim: true },
+    tabCode: { 
+      type: String,
+       required: true,
+        trim: true 
+      },
+    youtubeLink: { 
+      type: String, 
+      required: true,
+       trim: true
+       },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,

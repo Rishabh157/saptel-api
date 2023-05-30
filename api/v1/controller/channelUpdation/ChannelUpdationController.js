@@ -254,9 +254,15 @@ exports.getFilterPagination = async (req, res) => {
 
     // ---------------get filter query---------------
     let booleanFields = [];
-    let numberFileds = ["slotId", "run", "startTime", "endTime", "remark"];
+    let numberFileds = [];
+    let objectIdFields = ["slotId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

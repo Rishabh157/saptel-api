@@ -34,18 +34,18 @@ exports.add = async (req, res) => {
       address,
       phone,
       email,
-      district,
+      districtId,
       channelGroupId,
+      countryId,
+      languageId,
+      channelCategoryId,
+      stateId,
+      companyId,
       contactPerson,
       mobile,
-      country,
-      language,
-      channelCategory,
       designation,
       website,
-      state,
       paymentType,
-      companyId,
     } = req.body;
     /**
      * check duplicate exist
@@ -54,8 +54,8 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    const isAreaExists = await districtService.findCount({
-      _id: district,
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
       isDeleted: false,
     });
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -63,15 +63,15 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
     const isStateExists = await stateService.findCount({
-      _id: state,
+      _id: stateId,
       isDeleted: false,
     });
     const isCountryExists = await countryService.findCount({
-      _id: country,
+      _id: countryId,
       isDeleted: false,
     });
     const isChannelCategoryExists = await channelCategoryService.findCount({
-      _id: channelCategory,
+      _id: channelCategoryId,
       isDeleted: false,
     });
     const isCompanyExists = await companyService.findCount({
@@ -84,23 +84,23 @@ exports.add = async (req, res) => {
           isDeleted: false,
         })
       : null;
-    if (!isAreaExists) {
-      throw new ApiError(httpStatus.OK, "Invalid district");
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
     }
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
     if (!isChannelGroupExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel group");
+      throw new ApiError(httpStatus.OK, "Invalid ChannelGroup");
     }
     if (!isStateExists) {
-      throw new ApiError(httpStatus.OK, "Invalid state");
+      throw new ApiError(httpStatus.OK, "Invalid State");
     }
     if (!isCountryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid country");
+      throw new ApiError(httpStatus.OK, "Invalid Country");
     }
     if (!isChannelCategoryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel category");
+      throw new ApiError(httpStatus.OK, "Invalid ChannelCategory");
     }
     if (languageService?.length && !isLanguageExists) {
       throw new ApiError(httpStatus.OK, "Invalid Language");
@@ -137,18 +137,18 @@ exports.update = async (req, res) => {
       address,
       phone,
       email,
-      district,
+      districtId,
       channelGroupId,
+      countryId,
+      languageId,
+      channelCategoryId,
+      stateId,
+      companyId,
       contactPerson,
       mobile,
-      country,
-      language,
-      channelCategory,
       designation,
       website,
-      state,
       paymentType,
-      companyId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -160,8 +160,8 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `ChannelMaster not found.`);
     }
-    const isAreaExists = await districtService.findCount({
-      _id: district,
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
       isDeleted: false,
     });
     const isChannelGroupExists = await channelGroupService.findCount({
@@ -169,15 +169,19 @@ exports.update = async (req, res) => {
       isDeleted: false,
     });
     const isStateExists = await stateService.findCount({
-      _id: state,
+      _id: stateId,
       isDeleted: false,
     });
     const isCountryExists = await countryService.findCount({
-      _id: country,
+      _id: countryId,
       isDeleted: false,
     });
     const isChannelCategoryExists = await channelCategoryService.findCount({
-      _id: channelCategory,
+      _id: channelCategoryId,
+      isDeleted: false,
+    });
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
       isDeleted: false,
     });
     const isLanguageExists = languageService?.length
@@ -186,32 +190,28 @@ exports.update = async (req, res) => {
           isDeleted: false,
         })
       : null;
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
+
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
+    }
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    if (!isAreaExists) {
-      throw new ApiError(httpStatus.OK, "Invalid district");
-    }
     if (!isChannelGroupExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel group");
+      throw new ApiError(httpStatus.OK, "Invalid ChannelGroup");
     }
     if (!isStateExists) {
-      throw new ApiError(httpStatus.OK, "Invalid state");
+      throw new ApiError(httpStatus.OK, "Invalid State");
     }
     if (!isCountryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid country");
+      throw new ApiError(httpStatus.OK, "Invalid Country");
     }
     if (!isChannelCategoryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel category");
+      throw new ApiError(httpStatus.OK, "Invalid ChannelCategory");
     }
     if (languageService?.length && !isLanguageExists) {
       throw new ApiError(httpStatus.OK, "Invalid Language");
     }
-
     let dataUpdated = await channelMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -306,25 +306,23 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [
-      "channelName",
-      "address",
-      "phone",
-      "email",
-      "area",
-      "channelGroupId",
-      "contactPerson",
-      "mobile",
-      "country",
-      "language",
-      "channelCategory",
-      "designation",
-      "website",
-      "state",
-      "paymentType",
-    ];
+    let numberFileds = [];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    let objectIdFields = [
+      "districtId",
+      "channelGroupId",
+      "countryId",
+      "languageId",
+      "stateId",
+      "channelCategoryId",
+      "companyId",
+    ];
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

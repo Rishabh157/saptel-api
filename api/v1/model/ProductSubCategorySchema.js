@@ -13,14 +13,22 @@ const ProductSubCategorySchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    parentCategory: {
+    parentCategoryId: {
       type: ObjectId,
       required: true,
       trim: true,
     },
 
-    hsnCode: { type: String, required: true, trim: true },
-    companyId: { type: ObjectId, required: true, trim: true },
+    hsnCode: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -38,8 +46,9 @@ const ProductSubCategorySchema = new mongoose.Schema(
 const searchKeys = [
   "subCategoryCode",
   "subCategoryName",
-  "parentCategory",
+  "parentCategoryId",
   "hsnCode",
+  "companyId",
 ];
 module.exports = mongoose.model("ProductSubCategory", ProductSubCategorySchema);
 module.exports.searchKeys = [...searchKeys];

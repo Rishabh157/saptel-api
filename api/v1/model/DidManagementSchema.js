@@ -2,10 +2,27 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const DidManagementSchema = new mongoose.Schema(
   {
-    didNumber: { type: String, required: true, trim: true, lowercase: true },
-    schemeId: { type: ObjectId, required: true, trim: true },
-    channelId: { type: ObjectId, required: true, trim: true },
-    companyId: { type: ObjectId, required: true, trim: true },
+    didNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    schemeId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    channelId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -20,6 +37,13 @@ const DidManagementSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["didNumber", "schemeLabel", "channelLabel"];
+const searchKeys = [
+  "didNumber",
+  "schemeId",
+  "channelId",
+  "companyId",
+  "schemeLabel",
+  "channelLabel",
+];
 module.exports = mongoose.model("DidManagement", DidManagementSchema);
 module.exports.searchKeys = [...searchKeys];
