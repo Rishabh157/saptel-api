@@ -435,7 +435,7 @@ exports.getByParentCategory = async (req, res) => {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
     let dataExist = await productSubCategoryService.findAllWithQuery({
-      parentCategory: idToBeSearch,
+      parentCategoryId: idToBeSearch,
       isDeleted: false,
     });
 
