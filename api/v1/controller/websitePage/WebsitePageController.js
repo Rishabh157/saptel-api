@@ -6,6 +6,8 @@ const websitePageService = require("../../services/WebsitePageService");
 const { searchKeys } = require("../../model/WebsitePageSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const companyService = require("../../services/CompanyService");
+const websiteMasterService = require("../../services/WebsiteMasterService");
 
 const {
   getSearchQuery,
@@ -16,11 +18,13 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { pageUrl, pageName, headerSpace, footerSpace } = req.body;
+    let { pageUrl, pageName, headerSpace, footerSpace, companyId, websiteId } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -30,6 +34,20 @@ exports.add = async (req, res) => {
     ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isWebsiteExists = await websiteMasterService.findCount({
+      _id: websiteId,
+      isDeleted: false,
+    });
+    if (!isWebsiteExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Website");
     }
     //------------------create data-------------------
     let dataCreated = await websitePageService.createNewData({ ...req.body });
@@ -58,7 +76,8 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { pageUrl, pageName, headerSpace, footerSpace } = req.body;
+    let { pageUrl, pageName, headerSpace, footerSpace, companyId, websiteId } =
+      req.body;
 
     let idToBeSearch = req.params.id;
     let dataExist = await websitePageService.isExists(
@@ -67,6 +86,20 @@ exports.update = async (req, res) => {
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isWebsiteExists = await websiteMasterService.findCount({
+      _id: websiteId,
+      isDeleted: false,
+    });
+    if (!isWebsiteExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Website");
     }
     //------------------Find data-------------------
     let datafound = await websitePageService.getOneByMultiField({
@@ -171,8 +204,14 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
+    let objectIdFields = ["websiteId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -198,7 +237,28 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "websitemasters",
+          localField: "websiteId",
+          foreignField: "_id",
+          as: "websiteData",
+          pipeline: [{ $project: { productName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          websiteLabel: {
+            $arrayElemAt: ["$websiteData.productName", 0],
+          },
+        },
+      },
+
+      {
+        $unset: ["websiteData"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -261,8 +321,30 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "websitemasters",
+          localField: "websiteId",
+          foreignField: "_id",
+          as: "websiteData",
+          pipeline: [{ $project: { productName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          websiteLabel: {
+            $arrayElemAt: ["$websiteData.productName", 0],
+          },
+        },
+      },
 
-    let dataExist = await websitePageService.findAllWithQuery(matchQuery);
+      {
+        $unset: ["websiteData"],
+      },
+    ];
+    let dataExist = await websitePageService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -289,11 +371,35 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "websitemasters",
+          localField: "websiteId",
+          foreignField: "_id",
+          as: "websiteData",
+          pipeline: [{ $project: { productName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          websiteLabel: {
+            $arrayElemAt: ["$websiteData.productName", 0],
+          },
+        },
+      },
 
-    let dataExist = await websitePageService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+      {
+        $unset: ["websiteData"],
+      },
+    ];
+    let dataExist = await websitePageService.aggregateQuery(additionalQuery);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");

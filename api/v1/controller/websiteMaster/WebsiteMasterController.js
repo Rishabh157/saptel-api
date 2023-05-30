@@ -6,6 +6,8 @@ const websiteMasterService = require("../../services/WebsiteMasterService");
 const { searchKeys } = require("../../model/WebsiteMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const websiteBlogSchema = require("../../model/WebsiteBlogSchema");
+const websitePageSchema = require("../../model/WebsitePageSchema");
 
 const {
   getSearchQuery,
@@ -16,6 +18,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -334,6 +337,15 @@ exports.deleteDocument = async (req, res) => {
     if (!(await websiteMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+
+    await websiteBlogSchema.deleteMany({
+      websiteId: new mongoose.Types.ObjectId(_id),
+    });
+
+    await websitePageSchema.deleteMany({
+      websiteId: new mongoose.Types.ObjectId(_id),
+    });
+
     let deleted = await websiteMasterService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
