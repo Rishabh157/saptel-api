@@ -49,6 +49,7 @@ const searchKeys = [
   "parentCategoryId",
   "hsnCode",
   "companyId",
+  "parentCategoryLabel",
 ];
 module.exports = mongoose.model("ProductSubCategory", ProductSubCategorySchema);
 module.exports.searchKeys = [...searchKeys];
