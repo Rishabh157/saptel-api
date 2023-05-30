@@ -46,10 +46,10 @@ exports.add = async (req, res) => {
     ]);
 
     if (lastObject.length) {
-      const barcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
+      const barcodeNumber =
+        parseInt(lastObject[0].barcodeNumber.substring(2)) + 1;
       const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
       req.body.barcodeNumber = lotNumber + paddedBarcodeNumber;
-      console.log(paddedBarcodeNumber);
     } else {
       req.body.barcodeNumber = lotNumber + "000001";
     }
@@ -268,6 +268,7 @@ exports.allFilterPagination = async (req, res) => {
 
     //-----------------------------------
     let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
+
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
