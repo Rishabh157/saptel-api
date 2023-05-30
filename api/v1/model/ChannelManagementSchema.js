@@ -2,14 +2,31 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const ChannelManagementSchema = new mongoose.Schema(
   {
-    channelName: { type: String, required: true, trim: true, lowercase: true },
+    channelName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     channelGroupId: {
       type: ObjectId,
       required: true,
     },
-    didNumber: { type: ObjectId, required: true, trim: true, lowercase: true },
-    schemeId: { type: ObjectId, required: true },
-    companyId: { type: ObjectId, required: true, trim: true },
+    didNumberId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    schemeId: {
+      type: ObjectId,
+      required: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -27,7 +44,7 @@ const ChannelManagementSchema = new mongoose.Schema(
 const searchKeys = [
   "channelName",
   "channelGroupId",
-  "didNumber",
+  "didNumberId",
   "schemeId",
   "companyId",
 ];
