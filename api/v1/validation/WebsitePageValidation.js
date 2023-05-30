@@ -12,6 +12,7 @@ const create = {
     pageName: Joi.string().required(),
     headerSpace: Joi.string().allow(""),
     footerSpace: Joi.string().allow(""),
+    websiteId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -28,6 +29,7 @@ const update = {
     pageName: Joi.string().required(),
     headerSpace: Joi.string().allow(""),
     footerSpace: Joi.string().allow(""),
+    websiteId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

@@ -6,6 +6,7 @@ const WebsitePageSchema = new mongoose.Schema(
     pageName: { type: String, required: true, trim: true },
     headerSpace: { type: String, required: false, trim: true, default: "" },
     footerSpace: { type: String, required: false, trim: true, default: "" },
+    websiteId: { type: ObjectId, required: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
@@ -21,6 +22,12 @@ const WebsitePageSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["pageUrl", "pageName", "headerSpace", "footerSpace"];
+const searchKeys = [
+  "pageUrl",
+  "pageName",
+  "headerSpace",
+  "footerSpace",
+  "websiteId",
+];
 module.exports = mongoose.model("WebsitePage", WebsitePageSchema);
 module.exports.searchKeys = [...searchKeys];
