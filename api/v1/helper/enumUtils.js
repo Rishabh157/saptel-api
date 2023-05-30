@@ -22,6 +22,11 @@ const tapeType = Object.freeze({
   intruption: "INTRUPTION",
 });
 
+const complaintType = Object.freeze({
+  complaint: "COMPLAINT",
+  enquiry: "ENQUIRY",
+});
+
 const slotType = Object.freeze({
   fixed: "FIXED",
   flexible: "FLEXIBLE",
@@ -93,4 +98,5 @@ module.exports = {
   slotType,
   slotDaysType,
   paymentType,
+  complaintType,
 };
