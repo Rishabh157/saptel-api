@@ -10,7 +10,7 @@ const create = {
   body: Joi.object().keys({
     subCategoryCode: Joi.string().required(),
     subCategoryName: Joi.string().lowercase().required(),
-    parentCategory: Joi.string().custom(commonValidation.objectId).required(),
+    parentCategoryId: Joi.string().custom(commonValidation.objectId).required(),
     hsnCode: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -26,7 +26,7 @@ const update = {
   body: Joi.object().keys({
     subCategoryCode: Joi.string().required(),
     subCategoryName: Joi.string().lowercase().required(),
-    parentCategory: Joi.string().custom(commonValidation.objectId).required(),
+    parentCategoryId: Joi.string().custom(commonValidation.objectId).required(),
     hsnCode: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

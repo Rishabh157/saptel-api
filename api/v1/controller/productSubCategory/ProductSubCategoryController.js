@@ -28,7 +28,7 @@ exports.add = async (req, res) => {
     let {
       subCategoryCode,
       subCategoryName,
-      parentCategory,
+      parentCategoryId,
       hsnCode,
       companyId,
     } = req.body;
@@ -83,7 +83,7 @@ exports.update = async (req, res) => {
     let {
       subCategoryCode,
       subCategoryName,
-      parentCategory,
+      parentCategoryId,
       hsnCode,
       companyId,
     } = req.body;
@@ -209,7 +209,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["parentCategory", "applicableTaxes", "companyId"];
+    let objectIdFields = ["parentCategoryId", "applicableTaxes", "companyId"];
 
     const filterQuery = getFilterQuery(
       filterBy,
@@ -247,7 +247,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "productcategories",
-          localField: "parentCategory",
+          localField: "parentCategoryId",
           foreignField: "_id",
           as: "product_category",
           pipeline: [{ $project: { categoryName: 1 } }],
@@ -333,7 +333,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "productcategories",
-          localField: "parentCategory",
+          localField: "parentCategoryId",
           foreignField: "_id",
           as: "product_category",
           pipeline: [{ $project: { categoryName: 1 } }],
@@ -389,7 +389,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "productcategories",
-          localField: "parentCategory",
+          localField: "parentCategoryId",
           foreignField: "_id",
           as: "product_category",
           pipeline: [{ $project: { categoryName: 1 } }],
