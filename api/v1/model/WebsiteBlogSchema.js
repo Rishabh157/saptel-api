@@ -40,6 +40,7 @@ const searchKeys = [
   "blogSubtitle",
   "image",
   "blogDescription",
+  "websiteLabel",
 ];
 module.exports = mongoose.model("WebsiteBlog", WebsiteBlogSchema);
 module.exports.searchKeys = [...searchKeys];
