@@ -454,7 +454,7 @@ exports.allFilterPagination = async (req, res) => {
     );
     if (result.length) {
       return res.status(200).send({
-        data: result[0],
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
