@@ -157,6 +157,7 @@ exports.get = async (req, res) => {
     }
 
     let additionalQuery = [
+      { $match: matchQuery },
       {
         $lookup: {
           from: "initialcallones",
