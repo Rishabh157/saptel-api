@@ -157,6 +157,7 @@ exports.get = async (req, res) => {
     }
 
     let additionalQuery = [
+      { $match: matchQuery },
       {
         $lookup: {
           from: "initialcallones",
@@ -213,6 +214,12 @@ exports.getById = async (req, res) => {
     let idToBeSearch = req.params.id;
 
     let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
       {
         $lookup: {
           from: "initialcallones",
@@ -489,6 +496,12 @@ exports.getByInitialCallOneId = async (req, res) => {
   try {
     initialCallOneId = req.params.id;
     let additionalQuery = [
+      {
+        $match: {
+          initialCallOneId: new mongoose.Types.ObjectId(initialCallOneId),
+          isDeleted: false,
+        },
+      },
       {
         $lookup: {
           from: "initialcallones",

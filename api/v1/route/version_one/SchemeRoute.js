@@ -52,6 +52,15 @@ router.post(
 );
 
 /**
+ * get all scheme pagination filter without token
+ */
+
+router.post(
+  "/inbound",
+  validate(schemeValidation.getAllFilter),
+  schemeController.allFilterPagination
+);
+/**
  * create new document
  */
 router.post(
