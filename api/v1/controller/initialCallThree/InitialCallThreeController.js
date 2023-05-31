@@ -89,13 +89,13 @@ exports.add = async (req, res) => {
 // =============update  start================
 exports.update = async (req, res) => {
   try {
-    let { initailCallName, initialCallOneId, initialCallTwoId, companyId } =
+    let { initialCallName, initialCallOneId, initialCallTwoId, companyId } =
       req.body;
 
     let idToBeSearch = req.params.id;
 
     let dataExist = await initialCallThreeService.isExists(
-      [{ initailCallName }],
+      [{ initialCallName }],
       idToBeSearch
     );
     if (dataExist.exists && dataExist.existsSummary) {
