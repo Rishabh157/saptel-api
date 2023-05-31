@@ -23,7 +23,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { channelName, channelGroupId, didNumber, schemeId, companyId } =
+    let { channelName, channelGroupId, didNumberId, schemeId, companyId } =
       req.body;
     /**
      * check duplicate exist
@@ -78,7 +78,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { channelName, channelGroupId, didNumber, schemeId, companyId } =
+    let { channelName, channelGroupId, didNumberId, schemeId, companyId } =
       req.body;
 
     let idToBeSearch = req.params.id;

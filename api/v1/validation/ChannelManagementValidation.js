@@ -10,7 +10,7 @@ const create = {
   body: Joi.object().keys({
     channelName: Joi.string().lowercase().required(),
     channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
-    didNumber: Joi.string().custom(commonValidation.objectId).required(),
+    didNumberId: Joi.string().custom(commonValidation.objectId).required(),
     schemeId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -26,7 +26,7 @@ const update = {
   body: Joi.object().keys({
     channelName: Joi.string().lowercase().required(),
     channelGroupId: Joi.string().custom(commonValidation.objectId).required(),
-    didNumber: Joi.string().custom(commonValidation.objectId).required(),
+    didNumberId: Joi.string().custom(commonValidation.objectId).required(),
     schemeId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

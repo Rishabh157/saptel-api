@@ -80,6 +80,13 @@ const emailType = Object.freeze({
   companyEmail: "COMPANY EMAIL",
 });
 
+const applicableCriteria = Object.freeze({
+  isOrder: "IS ORDER",
+  isPrepaid: "IS PREPAID",
+  isReplacement: "IS REPLACEMENT",
+  isCallBack: "IS CALLBACK",
+});
+
 const genderType = Object.freeze({
   male: "MALE",
   female: "FEMALE",
@@ -136,4 +143,5 @@ module.exports = {
   smsType,
   emailType,
   genderType,
+  applicableCriteria,
 };
