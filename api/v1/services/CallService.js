@@ -1,29 +1,32 @@
-const Inbound = require("../model/InboundSchema");
+const CallSchema = require("../model/CallSchema");
 const { combineObjects } = require("../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return Inbound.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return CallSchema.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
 
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return Inbound.findOne({ ...matchObj, isDeleted: false }, { ...projectObj });
+  return CallSchema.findOne(
+    { ...matchObj, isDeleted: false },
+    { ...projectObj }
+  );
 };
 
 //-------------------------------------------
 
 const createNewData = async (bodyData) => {
-  return Inbound.create({ ...bodyData });
+  return CallSchema.create({ ...bodyData });
 };
 //-------------------------------------------
 
 const getById = async (id) => {
-  return Inbound.findById(id);
+  return CallSchema.findById(id);
 };
 //-------------------------------------------
 
 const getByIdAndUpdate = async (id, updateBody) => {
-  return Inbound.findByIdAndUpdate(
+  return CallSchema.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -32,7 +35,7 @@ const getByIdAndUpdate = async (id, updateBody) => {
 //-------------------------------------------
 
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return Inbound.findOneAndUpdate(
+  return CallSchema.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -41,7 +44,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return Inbound.updateOne(
+  return CallSchema.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -50,12 +53,12 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const getByIdAndDelete = async (id) => {
-  return Inbound.findByIdAndDelete(id);
+  return CallSchema.findByIdAndDelete(id);
 };
 //-------------------------------------------
 
 const getOneAndDelete = async (matchObj) => {
-  return Inbound.findOneAndUpdate(
+  return CallSchema.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -64,27 +67,27 @@ const getOneAndDelete = async (matchObj) => {
 //-------------------------------------------
 
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return Inbound.find({ ...matchObj, isDeleted: false }, { ...projectObj });
+  return CallSchema.find({ ...matchObj, isDeleted: false }, { ...projectObj });
 };
 //-------------------------------------------
 
 const findAll = async () => {
-  return Inbound.find();
+  return CallSchema.find();
 };
 //-------------------------------------------
 
 const aggregateQuery = async (aggregateQueryArray) => {
-  return Inbound.aggregate(aggregateQueryArray);
+  return CallSchema.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 
 const createMany = async (insertDataArray) => {
-  return Inbound.insertMany(insertDataArray);
+  return CallSchema.insertMany(insertDataArray);
 };
 //-------------------------------------------
 
 const findCount = async (matchObj) => {
-  return Inbound.find({ ...matchObj, isDeleted: false }).count();
+  return CallSchema.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
 

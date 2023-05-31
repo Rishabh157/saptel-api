@@ -2,10 +2,14 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const inboundService = require("../../services/InboundService");
-const { searchKeys } = require("../../model/InboundSchema");
+const callService = require("../../services/CallService");
+const orderService = require("../../services/OrderService");
+const dispositionThreeService = require("../../services/DispositionThreeService");
+const { searchKeys } = require("../../model/CallSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const mongoose = require("mongoose");
+const { applicableCriteria } = require("../../helper/enumUtils");
 
 const {
   getSearchQuery,
@@ -28,12 +32,13 @@ exports.add = async (req, res) => {
       deliveryCharges,
       discount,
       total,
-      country,
-      state,
-      district,
-      tehsil,
-      pincode,
-      area,
+      countryId,
+      stateId,
+      schemeId,
+      districtId,
+      tehsilId,
+      pincodeId,
+      areaId,
       expectedDeliveryDate,
       profileDeliveredBy,
       complaintDetails,
@@ -43,27 +48,40 @@ exports.add = async (req, res) => {
       age,
       address,
       realtion,
-      agentDistrict,
+      agentDistrictId,
       landmark,
       alternateNo1,
       watsappNo,
       gender,
       prepaid,
       emailId,
-      channel,
+      channelId,
       remark,
-      dispositionLevelOne,
-      dispositionLevelTwo,
+      dispositionLevelTwoId,
+      dispositionLevelThreeId,
     } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await inboundService.isExists([]);
+    let dataExist = await callService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await inboundService.createNewData({ ...req.body });
+    let dataCreated = await callService.createNewData({ ...req.body });
+
+    let dispositionThreeId = dataCreated.dispositionLevelThreeId;
+
+    let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
+      _id: new mongoose.Types.ObjectId(dispositionThreeId),
+    });
+    if (
+      dispositionThreeData[0].applicableCriteria.includes(
+        applicableCriteria.isOrder
+      )
+    ) {
+      let orderCreated = await orderService.createNewData({ ...req.body });
+    }
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -97,12 +115,13 @@ exports.update = async (req, res) => {
       deliveryCharges,
       discount,
       total,
-      country,
-      state,
-      district,
-      tehsil,
-      pincode,
-      area,
+      countryId,
+      stateId,
+      districtId,
+      tehsilId,
+      schemeId,
+      pincodeId,
+      areaId,
       expectedDeliveryDate,
       profileDeliveredBy,
       complaintDetails,
@@ -112,7 +131,7 @@ exports.update = async (req, res) => {
       age,
       address,
       realtion,
-      agentDistrict,
+      agentDistrictId,
       landmark,
       alternateNo1,
       watsappNo,
@@ -121,24 +140,24 @@ exports.update = async (req, res) => {
       emailId,
       channel,
       remark,
-      dispositionLevelOne,
-      dispositionLevelTwo,
+      dispositionLevelTwoId,
+      dispositionLevelThreeId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await inboundService.isExists([]);
+    let dataExist = await callService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------Find data-------------------
-    let datafound = await inboundService.getOneByMultiField({
+    let datafound = await callService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Inbound not found.`);
     }
 
-    let dataUpdated = await inboundService.getOneAndUpdate(
+    let dataUpdated = await callService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -276,7 +295,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await inboundService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await callService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -295,10 +314,10 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await inboundService.aggregateQuery(finalAggregateQuery);
+    let result = await callService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
-        data: result,
+        data: result[0],
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -327,7 +346,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await inboundService.findAllWithQuery(matchQuery);
+    let dataExist = await callService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -354,7 +373,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await inboundService.getOneByMultiField({
+    let dataExist = await callService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
@@ -384,10 +403,10 @@ exports.getById = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await inboundService.getOneByMultiField({ _id }))) {
+    if (!(await callService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await inboundService.getOneAndDelete({ _id });
+    let deleted = await callService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -411,13 +430,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await inboundService.getOneByMultiField({ _id });
+    let dataExist = await callService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await inboundService.getOneAndUpdate(
+    let statusChanged = await callService.getOneAndUpdate(
       { _id },
       { isActive }
     );

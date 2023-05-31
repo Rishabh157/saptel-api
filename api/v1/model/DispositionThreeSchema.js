@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const { ObjectId } = require("mongodb");
-const { smsType, emailType } = require("../helper/enumUtils");
+const {
+  smsType,
+  emailType,
+  applicableCriteria,
+} = require("../helper/enumUtils");
 
 const DispositionThreeSchema = new mongoose.Schema(
   {
@@ -66,9 +70,14 @@ const DispositionThreeSchema = new mongoose.Schema(
     },
     applicableCriteria: {
       type: [String],
+      enum: [
+        applicableCriteria.isOrder,
+        applicableCriteria.isPrepaid,
+        applicableCriteria.isCallBack,
+        applicableCriteria.isReplacement,
+      ],
       required: true,
       trim: true,
-      lowercase: true,
     },
     isDeleted: {
       type: Boolean,

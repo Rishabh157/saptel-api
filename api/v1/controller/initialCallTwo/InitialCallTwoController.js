@@ -191,7 +191,7 @@ exports.get = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -247,14 +247,13 @@ exports.getById = async (req, res) => {
       },
     ];
     let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
-
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -304,7 +303,6 @@ exports.allFilterPagination = async (req, res) => {
      **/
 
     let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
-    console.log(searchQueryCheck);
     if (searchQueryCheck && !searchQueryCheck.status) {
       return res.status(httpStatus.OK).send({
         ...searchQueryCheck,
@@ -428,7 +426,7 @@ exports.allFilterPagination = async (req, res) => {
     );
     if (result.length) {
       return res.status(200).send({
-        data: result,
+        data: result[0],
         totalPage: totalpages,
         status: true,
         currentPage: page,
