@@ -59,6 +59,7 @@ const websiteMasterRoute = require("./WebsiteMasterRoute");
 const websitePageRoute = require("./WebsitePageRoute");
 const websiteBlogRoute = require("./WebsiteBlogRoute");
 const complaintDispositionRoute = require("./ComplaintDispositionRoute");
+const inboundRoute = require("./InboundRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -304,6 +305,10 @@ const defaultRoutes = [
   {
     path: "/complaint-disposition",
     route: complaintDispositionRoute,
+  },
+  {
+    path: "/inbound",
+    route: inboundRoute,
   },
 ];
 

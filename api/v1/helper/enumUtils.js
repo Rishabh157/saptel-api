@@ -80,6 +80,12 @@ const emailType = Object.freeze({
   companyEmail: "COMPANY EMAIL",
 });
 
+const genderType = Object.freeze({
+  male: "MALE",
+  female: "FEMALE",
+  other: "OTHER",
+});
+
 const userEnum = Object.freeze({
   user: "USER",
   admin: "ADMIN",
@@ -129,4 +135,5 @@ module.exports = {
   complaintType,
   smsType,
   emailType,
+  genderType,
 };
