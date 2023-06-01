@@ -163,7 +163,7 @@ exports.update = async (req, res) => {
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Inbound not found.`);
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
 
     let dataUpdated = await orderService.getOneAndUpdate(
@@ -432,10 +432,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let dataExist = await orderService.aggregateQuery(
-        additionalQuery
-      );
-   
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -869,3 +866,32 @@ exports.allFilterPagination = async (req, res) => {
   }
 };
 // =============all filter pagination api end================
+
+// =============delete start================
+exports.deleteDocument = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    if (!(await orderService.getOneByMultiField({ _id }))) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let deleted = await orderService.getOneAndDelete({ _id });
+    if (!deleted) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: null,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// =============delete end================

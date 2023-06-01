@@ -19,7 +19,7 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.getByDispositionOneId),
+  validate(initialCallThreeValidation.getById),
   initialCallThreeController.getById
 );
 

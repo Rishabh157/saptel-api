@@ -33,8 +33,14 @@ const get = {
     .optional(),
 };
 
-//===============change status of document===============
+//===============getbyid document===============
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 
+//===============change status of document===============
 const getByDispositionOneId = {
   query: Joi.object()
     .keys({
@@ -102,6 +108,7 @@ module.exports = {
   create,
   update,
   get,
+  getById,
   changeStatus,
   getByDispositionOneId,
   getAllFilter,

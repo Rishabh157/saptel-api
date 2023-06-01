@@ -22,7 +22,7 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallTwoValidation.getByDispositionOneId),
+  validate(initialCallTwoValidation.getById),
   initialCallTwoController.getById
 );
 

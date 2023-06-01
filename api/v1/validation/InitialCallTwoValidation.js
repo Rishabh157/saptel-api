@@ -74,6 +74,14 @@ const getAllFilter = {
     isPaginationRequired: Joi.boolean().default(true).optional(),
   }),
 };
+
+//===============getbyid document===============
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 //===============change status of document===============
 const changeStatus = {
   params: Joi.object().keys({
@@ -103,6 +111,7 @@ module.exports = {
   create,
   update,
   get,
+  getById,
   changeStatus,
   getAllFilter,
   deleteDocument,

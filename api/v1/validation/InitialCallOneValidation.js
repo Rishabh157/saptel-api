@@ -31,6 +31,13 @@ const get = {
     .optional(),
 };
 
+//===============getbyid document===============
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 //===============  filter and pagination api===============
 const getAllFilter = {
   body: Joi.object().keys({
@@ -89,6 +96,7 @@ module.exports = {
   create,
   update,
   get,
+  getById,
   changeStatus,
   getAllFilter,
   deleteDocument,
