@@ -60,6 +60,7 @@ const websitePageRoute = require("./WebsitePageRoute");
 const websiteBlogRoute = require("./WebsiteBlogRoute");
 const complaintDispositionRoute = require("./ComplaintDispositionRoute");
 const callRoute = require("./CallRoute");
+const orderRoute = require("./OrderRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -310,7 +311,12 @@ const defaultRoutes = [
     path: "/call",
     route: callRoute,
   },
+  {
+    path: "/order",
+    route: orderRoute,
+  },
 ];
+orderRoute;
 
 defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);

@@ -8,6 +8,11 @@ const OrderSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    orderNumber: {
+      type: Number,
+      required: true,
+    },
+
     batchNo: {
       type: String,
       default: "",
@@ -196,6 +201,7 @@ const OrderSchema = new mongoose.Schema(
 
 const searchKeys = [
   "didNo",
+  "orderNumber",
   "inOutBound",
   "incomingCallerNo",
   "mobileNo",
@@ -225,7 +231,7 @@ const searchKeys = [
   "gender",
   "prepaid",
   "emailId",
-  "channel",
+  "channelId",
   "remark",
   "dispositionLevelTwoId",
   "dispositionLevelThreeId",
