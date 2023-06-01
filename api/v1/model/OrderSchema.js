@@ -123,7 +123,7 @@ const OrderSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    realtion: {
+    relation: {
       type: String,
       required: true,
       trim: true,
@@ -223,7 +223,7 @@ const searchKeys = [
   "name",
   "age",
   "address",
-  "realtion",
+  "relation",
   "agentDistrictId",
   "landmark",
   "alternateNo1",

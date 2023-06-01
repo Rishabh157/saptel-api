@@ -58,7 +58,7 @@ exports.update = async (req, res) => {
       name,
       age,
       address,
-      realtion,
+      relation,
       agentDistrictId,
       landmark,
       alternateNo1,
