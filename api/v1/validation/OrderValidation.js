@@ -6,101 +6,101 @@ const commonValidation = require("./CommonValidation");
 /**
  * create new document
  */
-// const create = {
-//   body: Joi.object().keys({
-//     didNo: Joi.string().required(),
-//     orderNumber: Joi.number().required(),
-//     batchNo: Joi.string().required(),
-//     inOutBound: Joi.string().allow(""),
-//     incomingCallerNo: Joi.string().allow(""),
-//     mobileNo: Joi.string().required(),
-//     deliveryCharges: Joi.number(),
-//     discount: Joi.number(),
-//     total: Joi.number(),
-//     countryId: Joi.string().custom(commonValidation.objectId).required(),
-//     stateId: Joi.string().custom(commonValidation.objectId).required(),
-//     districtId: Joi.string().custom(commonValidation.objectId).required(),
-//     tehsilId: Joi.string().custom(commonValidation.objectId).required(),
-//     pincodeId: Joi.string().custom(commonValidation.objectId).required(),
-//     schemeId: Joi.string().custom(commonValidation.objectId).required(),
-//     areaId: Joi.string().custom(commonValidation.objectId).required(),
-//     expectedDeliveryDate: Joi.string().allow(""),
-//     profileDeliveredBy: Joi.string().allow(""),
-//     complaintDetails: Joi.string().allow(""),
-//     complaintNo: Joi.string().allow(""),
-//     agentName: Joi.string().allow(""),
-//     name: Joi.string().allow(""),
-//     age: Joi.number(),
-//     address: Joi.string().allow(""),
-//     agentDistrictId: Joi.string().custom(commonValidation.objectId).required(),
-//     realtion: Joi.string().required(),
-//     landmark: Joi.string().required(),
-//     alternateNo1: Joi.string().allow(""),
-//     watsappNo: Joi.string().allow(""),
-//     gender: Joi.string().required(),
-//     prepaid: Joi.boolean(),
-//     emailId: Joi.string().allow(""),
-//     channelId: Joi.string().custom(commonValidation.objectId).required(),
-//     remark: Joi.string().lowercase().allow(""),
-//     dispositionLevelTwoId: Joi.string()
-//       .custom(commonValidation.objectId)
-//       .required(),
-//     dispositionLevelThreeId: Joi.string()
-//       .custom(commonValidation.objectId)
-//       .required(),
-//   }),
-// };
+const create = {
+  body: Joi.object().keys({
+    didNo: Joi.string().required(),
+    orderNumber: Joi.number().required(),
+    batchNo: Joi.string().required(),
+    inOutBound: Joi.string().allow(""),
+    incomingCallerNo: Joi.string().allow(""),
+    mobileNo: Joi.string().required(),
+    deliveryCharges: Joi.number(),
+    discount: Joi.number(),
+    total: Joi.number(),
+    countryId: Joi.string().custom(commonValidation.objectId).required(),
+    stateId: Joi.string().custom(commonValidation.objectId).required(),
+    districtId: Joi.string().custom(commonValidation.objectId).required(),
+    tehsilId: Joi.string().custom(commonValidation.objectId).required(),
+    pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+    areaId: Joi.string().custom(commonValidation.objectId).required(),
+    expectedDeliveryDate: Joi.string().allow(""),
+    profileDeliveredBy: Joi.string().allow(""),
+    complaintDetails: Joi.string().allow(""),
+    complaintNo: Joi.string().allow(""),
+    agentName: Joi.string().allow(""),
+    name: Joi.string().allow(""),
+    age: Joi.number(),
+    address: Joi.string().allow(""),
+    agentDistrictId: Joi.string().custom(commonValidation.objectId).required(),
+    realtion: Joi.string().required(),
+    landmark: Joi.string().required(),
+    alternateNo1: Joi.string().allow(""),
+    watsappNo: Joi.string().allow(""),
+    gender: Joi.string().required(),
+    prepaid: Joi.boolean(),
+    emailId: Joi.string().allow(""),
+    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    remark: Joi.string().lowercase().allow(""),
+    dispositionLevelTwoId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    dispositionLevelThreeId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+  }),
+};
 
 /**
  * update existing document
  */
-// const update = {
-//   params: Joi.object().keys({
-//     id: Joi.required().custom(commonValidation.objectId),
-//   }),
-//   body: Joi.object().keys({
-//     didNo: Joi.string().required(),
-//     orderNumber: Joi.number().required(),
-//     batchNo: Joi.string().allow(""),
-//     inOutBound: Joi.string().allow(""),
-//     incomingCallerNo: Joi.string().allow(""),
-//     mobileNo: Joi.string().required(),
-//     deliveryCharges: Joi.number(),
-//     discount: Joi.number(),
-//     total: Joi.number(),
-//     countryId: Joi.string().custom(commonValidation.objectId).required(),
-//     stateId: Joi.string().custom(commonValidation.objectId).required(),
-//     districtId: Joi.string().custom(commonValidation.objectId).required(),
-//     tehsilId: Joi.string().custom(commonValidation.objectId).required(),
-//     pincodeId: Joi.string().custom(commonValidation.objectId).required(),
-//     schemeId: Joi.string().custom(commonValidation.objectId).required(),
-//     areaId: Joi.string().custom(commonValidation.objectId).required(),
-//     expectedDeliveryDate: Joi.string().allow(""),
-//     profileDeliveredBy: Joi.string().allow(""),
-//     complaintDetails: Joi.string().allow(""),
-//     complaintNo: Joi.string().allow(""),
-//     agentName: Joi.string().allow(""),
-//     name: Joi.string().allow(""),
-//     age: Joi.number(),
-//     address: Joi.string().allow(""),
-//     agentDistrictId: Joi.string().custom(commonValidation.objectId).required(),
-//     relation: Joi.string().required(),
-//     landmark: Joi.string().required(),
-//     alternateNo1: Joi.string().allow(""),
-//     watsappNo: Joi.string().allow(""),
-//     gender: Joi.string().required(),
-//     prepaid: Joi.boolean(),
-//     emailId: Joi.string().allow(""),
-//     channelId: Joi.string().custom(commonValidation.objectId).required(),
-//     remark: Joi.string().lowercase().allow(""),
-//     dispositionLevelTwoId: Joi.string()
-//       .custom(commonValidation.objectId)
-//       .required(),
-//     dispositionLevelThreeId: Joi.string()
-//       .custom(commonValidation.objectId)
-//       .required(),
-//   }),
-// };
+const update = {
+  params: Joi.object().keys({
+    id: Joi.required().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    didNo: Joi.string().required(),
+    orderNumber: Joi.number().required(),
+    batchNo: Joi.string().allow(""),
+    inOutBound: Joi.string().allow(""),
+    incomingCallerNo: Joi.string().allow(""),
+    mobileNo: Joi.string().required(),
+    deliveryCharges: Joi.number(),
+    discount: Joi.number(),
+    total: Joi.number(),
+    countryId: Joi.string().custom(commonValidation.objectId).required(),
+    stateId: Joi.string().custom(commonValidation.objectId).required(),
+    districtId: Joi.string().custom(commonValidation.objectId).required(),
+    tehsilId: Joi.string().custom(commonValidation.objectId).required(),
+    pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+    areaId: Joi.string().custom(commonValidation.objectId).required(),
+    expectedDeliveryDate: Joi.string().allow(""),
+    profileDeliveredBy: Joi.string().allow(""),
+    complaintDetails: Joi.string().allow(""),
+    complaintNo: Joi.string().allow(""),
+    agentName: Joi.string().allow(""),
+    name: Joi.string().allow(""),
+    age: Joi.number(),
+    address: Joi.string().allow(""),
+    agentDistrictId: Joi.string().custom(commonValidation.objectId).required(),
+    relation: Joi.string().required(),
+    landmark: Joi.string().required(),
+    alternateNo1: Joi.string().allow(""),
+    watsappNo: Joi.string().allow(""),
+    gender: Joi.string().required(),
+    prepaid: Joi.boolean(),
+    emailId: Joi.string().allow(""),
+    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    remark: Joi.string().lowercase().allow(""),
+    dispositionLevelTwoId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    dispositionLevelThreeId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+  }),
+};
 
 /**
  * filter and pagination api

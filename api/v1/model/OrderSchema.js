@@ -223,7 +223,7 @@ const searchKeys = [
   "name",
   "age",
   "address",
-  "realtion",
+  "relation",
   "agentDistrictId",
   "landmark",
   "alternateNo1",
