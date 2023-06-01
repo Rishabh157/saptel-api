@@ -19,7 +19,7 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionThreeValidation.getByDispositionOneId),
+  validate(dispositionThreeValidation.getById),
   dispositionThreeController.getById
 );
 //===============get all document fo dispositionTwo Id=============== (without token)

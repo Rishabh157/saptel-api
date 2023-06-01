@@ -26,20 +26,13 @@ router.get(
   orderController.getById
 );
 
-//===============get all dispositionOne pagination filter===============
+//===============get all pagination filter===============
 router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
   orderController.allFilterPagination
 );
-// router.post(
-//   "/",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   //   validate(orderValidation.getAllFilter),
-//   orderController.allFilterPagination
-// );
 
 //===============create new document===============
 // router.post(
@@ -51,13 +44,13 @@ router.post(
 // );
 
 //===============update document===============
-// router.put(
-//   "/:id",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(orderValidation.update),
-//   orderController.update
-// );
+router.put(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(orderValidation.update),
+  orderController.update
+);
 
 //===============update status document===============
 // router.put(
@@ -67,12 +60,12 @@ router.post(
 // );
 
 //===============delete document===============
-// router.delete(
-//   "/:id",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(orderValidation.deleteDocument),
-//   orderController.deleteDocument
-// );
+router.delete(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(orderValidation.deleteDocument),
+  orderController.deleteDocument
+);
 
 module.exports = router;

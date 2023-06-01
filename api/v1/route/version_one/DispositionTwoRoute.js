@@ -27,7 +27,7 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(dispositionTwoValidation.getByDispositionOneId),
+  validate(dispositionTwoValidation.getById),
   dispositionTwoController.getById
 );
 

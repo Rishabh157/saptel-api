@@ -95,6 +95,13 @@ const changeStatus = {
   }),
 };
 
+//===============getbyid document===============
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 //===============getByInitialCallOneId document===============
 const getByInitialCallTwoId = {
   query: Joi.object()
@@ -116,6 +123,7 @@ module.exports = {
   create,
   update,
   get,
+  getById,
   changeStatus,
   getAllFilter,
   deleteDocument,
