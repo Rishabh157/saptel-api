@@ -66,7 +66,7 @@ exports.update = async (req, res) => {
       gender,
       prepaid,
       emailId,
-      channelId,
+      channel,
       remark,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
@@ -134,13 +134,13 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
     }
 
-    const isChannelExists = await channelService.findCount({
-      _id: channelId,
-      isDeleted: false,
-    });
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Channel.");
-    }
+    // const isChannelExists = await channelService.findCount({
+    //   _id: channelId,
+    //   isDeleted: false,
+    // });
+    // if (!isChannelExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Channel.");
+    // }
 
     const isDispositionTwoExists = await dispositionTwoService.findCount({
       _id: dispositionLevelTwoId,
@@ -348,21 +348,21 @@ exports.get = async (req, res) => {
           ],
         },
       },
-      {
-        $lookup: {
-          from: "channelmasters",
-          localField: "channelId",
-          foreignField: "_id",
-          as: "channelData",
-          pipeline: [
-            {
-              $project: {
-                channelName: 1,
-              },
-            },
-          ],
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
       {
         $lookup: {
           from: "districts",
@@ -407,9 +407,9 @@ exports.get = async (req, res) => {
           areaLabel: {
             $arrayElemAt: ["$areaData.area", 0],
           },
-          channelLabel: {
-            $arrayElemAt: ["$channelData.channelName", 0],
-          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
@@ -426,7 +426,7 @@ exports.get = async (req, res) => {
           "tehsilData",
           "pincodeData",
           "areaData",
-          "channelData",
+          // "channelData",
           "agentDistrictData",
         ],
       },
@@ -460,10 +460,234 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await orderService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+        ],
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -471,7 +695,7 @@ exports.getById = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -559,7 +783,7 @@ exports.allFilterPagination = async (req, res) => {
       "tehsilId",
       "pincodeId",
       "areaId",
-      "channelId",
+      "channel",
       "agentDistrictId",
     ];
 

@@ -40,7 +40,7 @@ const create = {
     gender: Joi.string().required(),
     prepaid: Joi.boolean(),
     emailId: Joi.string().allow(""),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    channel: Joi.string().custom(commonValidation.objectId).allow(""),
     remark: Joi.string().lowercase().allow(""),
     dispositionLevelTwoId: Joi.string()
       .custom(commonValidation.objectId)
@@ -91,7 +91,7 @@ const update = {
     gender: Joi.string().required(),
     prepaid: Joi.boolean(),
     emailId: Joi.string().allow(""),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    channel: Joi.string().allow(""),
     remark: Joi.string().lowercase().allow(""),
     dispositionLevelTwoId: Joi.string()
       .custom(commonValidation.objectId)
