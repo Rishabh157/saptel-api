@@ -123,7 +123,7 @@ const OrderSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    realtion: {
+    relation: {
       type: String,
       required: true,
       trim: true,
@@ -143,7 +143,7 @@ const OrderSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    watsappNo: {
+    whatsappNo: {
       type: String,
       required: false,
       default: "",
