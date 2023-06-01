@@ -61,6 +61,7 @@ const websiteBlogRoute = require("./WebsiteBlogRoute");
 const complaintDispositionRoute = require("./ComplaintDispositionRoute");
 const callRoute = require("./CallRoute");
 const orderRoute = require("./OrderRoute");
+const batchRoute = require("./BatchRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -314,6 +315,10 @@ const defaultRoutes = [
   {
     path: "/order",
     route: orderRoute,
+  },
+  {
+    path: "/batch",
+    route: batchRoute,
   },
 ];
 orderRoute;

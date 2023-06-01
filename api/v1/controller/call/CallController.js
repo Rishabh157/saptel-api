@@ -67,7 +67,7 @@ exports.add = async (req, res) => {
       gender,
       prepaid,
       emailId,
-      channelId,
+      channel,
       remark,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
@@ -129,13 +129,13 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
     }
 
-    const isChannelExists = await channelService.findCount({
-      _id: channelId,
-      isDeleted: false,
-    });
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Channel.");
-    }
+    // const isChannelExists = await channelService.findCount({
+    //   _id: channelId,
+    //   isDeleted: false,
+    // });
+    // if (!isChannelExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Channel.");
+    // }
 
     const isDispositionTwoExists = await dispositionTwoService.findCount({
       _id: dispositionLevelTwoId,
@@ -246,7 +246,7 @@ exports.update = async (req, res) => {
       gender,
       prepaid,
       emailId,
-      channelId,
+      channel,
       remark,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
@@ -314,13 +314,13 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
     }
 
-    const isChannelExists = await channelService.findCount({
-      _id: channelId,
-      isDeleted: false,
-    });
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Channel.");
-    }
+    // const isChannelExists = await channelService.findCount({
+    //   _id: channelId,
+    //   isDeleted: false,
+    // });
+    // if (!isChannelExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Channel.");
+    // }
 
     const isDispositionTwoExists = await dispositionTwoService.findCount({
       _id: dispositionLevelTwoId,

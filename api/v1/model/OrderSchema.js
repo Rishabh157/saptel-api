@@ -135,7 +135,7 @@ const OrderSchema = new mongoose.Schema(
     },
     landmark: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     alternateNo1: {
@@ -143,7 +143,7 @@ const OrderSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    watsappNo: {
+    whatsappNo: {
       type: String,
       required: false,
       default: "",
@@ -164,9 +164,9 @@ const OrderSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    channelId: {
-      type: ObjectId,
-      required: true,
+    channel: {
+      type: String,
+      default: "",
       trim: true,
     },
     remark: {
@@ -227,11 +227,11 @@ const searchKeys = [
   "agentDistrictId",
   "landmark",
   "alternateNo1",
-  "watsappNo",
+  "whatsappNo",
   "gender",
   "prepaid",
   "emailId",
-  "channelId",
+  "channel",
   "remark",
   "dispositionLevelTwoId",
   "dispositionLevelThreeId",

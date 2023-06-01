@@ -33,14 +33,14 @@ const create = {
     age: Joi.number(),
     address: Joi.string().allow(""),
     agentDistrictId: Joi.string().custom(commonValidation.objectId).required(),
-    relation: Joi.string().required(),
+    realtion: Joi.string().required(),
     landmark: Joi.string().required(),
     alternateNo1: Joi.string().allow(""),
     watsappNo: Joi.string().allow(""),
     gender: Joi.string().required(),
     prepaid: Joi.boolean(),
     emailId: Joi.string().allow(""),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    channel: Joi.string().custom(commonValidation.objectId).allow(""),
     remark: Joi.string().lowercase().allow(""),
     dispositionLevelTwoId: Joi.string()
       .custom(commonValidation.objectId)
@@ -91,7 +91,7 @@ const update = {
     gender: Joi.string().required(),
     prepaid: Joi.boolean(),
     emailId: Joi.string().allow(""),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    channel: Joi.string().allow(""),
     remark: Joi.string().lowercase().allow(""),
     dispositionLevelTwoId: Joi.string()
       .custom(commonValidation.objectId)
@@ -184,10 +184,9 @@ const changeStatus = {
   }),
 };
 module.exports = {
-  create,
   getAllFilter,
   get,
-  update,
+  // update,
   deleteDocument,
   changeStatus,
   getById,
