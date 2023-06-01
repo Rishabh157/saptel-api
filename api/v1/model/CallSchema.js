@@ -113,7 +113,7 @@ const CallSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    realtion: {
+    relation: {
       type: String,
       required: true,
       trim: true,
@@ -133,7 +133,7 @@ const CallSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    watsappNo: {
+    whatsappNo: {
       type: String,
       required: false,
       default: "",
@@ -212,11 +212,11 @@ const searchKeys = [
   "name",
   "age",
   "address",
-  "realtion",
+  "relation",
   "agentDistrictId",
   "landmark",
   "alternateNo1",
-  "watsappNo",
+  "whatsappNo",
   "gender",
   "prepaid",
   "emailId",
