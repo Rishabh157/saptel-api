@@ -157,6 +157,36 @@ exports.update = async (req, res) => {
   }
 };
 
+// getByDidNo
+exports.getByDidNo = async (req, res) => {
+  try {
+    let didNo = req.params.didno;
+    console.log(didNo);
+
+    let dataExist = await didManagementService.findAllWithQuery({
+      didNumber: didNo,
+    });
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {

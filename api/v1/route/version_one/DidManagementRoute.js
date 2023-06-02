@@ -16,9 +16,22 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(didManagementValidation.get),
+  validate(didManagementValidation.getByDidNo),
   didManagementController.get
 );
+
+//-----------------------------------------------------
+/**
+ * getByDid Number
+ */
+router.get(
+  "/unauth/:didno",
+  // accessModuleCheck,
+  // authCheckMiddleware,
+  // validate(didManagementValidation.get),
+  didManagementController.getByDidNo
+);
+
 /**
  * get all didManagement pagination filter
  */

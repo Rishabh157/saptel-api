@@ -87,6 +87,15 @@ const get = {
 };
 
 /**
+ * get either all data or single document
+ */
+const getByDidNo = {
+  query: Joi.object().keys({
+    didno: Joi.string().optional(),
+  }),
+};
+
+/**
  * delete a document
  */
 const deleteDocument = {
@@ -117,6 +126,7 @@ module.exports = {
   getAllFilter,
   get,
   update,
+  getByDidNo,
   deleteDocument,
   changeStatus,
   getById,
