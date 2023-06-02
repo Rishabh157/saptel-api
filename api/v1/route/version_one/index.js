@@ -62,6 +62,7 @@ const complaintDispositionRoute = require("./ComplaintDispositionRoute");
 const callRoute = require("./CallRoute");
 const orderRoute = require("./OrderRoute");
 const batchRoute = require("./BatchRoute");
+const websiteMetaTagRoute = require("./WebsiteMetaTagRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -319,6 +320,10 @@ const defaultRoutes = [
   {
     path: "/batch",
     route: batchRoute,
+  },
+  {
+    path: "/website-metatag",
+    route: websiteMetaTagRoute,
   },
 ];
 orderRoute;

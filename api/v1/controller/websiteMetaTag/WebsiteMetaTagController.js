@@ -2,12 +2,10 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const websiteMasterService = require("../../services/WebsiteMasterService");
-const { searchKeys } = require("../../model/WebsiteMasterSchema");
+const websiteMetaTagService = require("../../services/WebsiteMetaTagService");
+const { searchKeys } = require("../../model/WebsiteMetaTagSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const websiteBlogSchema = require("../../model/WebsiteBlogSchema");
-const websitePageSchema = require("../../model/WebsitePageSchema");
 
 const {
   getSearchQuery,
@@ -20,27 +18,29 @@ const {
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
 
-// ============= add Disposition start  ================
+// ============= add  start  ================
 exports.add = async (req, res) => {
   try {
     let {
-      productName,
-      url,
-      gaTagIp,
-      searchConsoleIp,
-      headerSpace,
-      footerSpace,
-      siteMap,
+      websitPageId,
+      websiteMasterId,
+      companyId,
+      metaDescription,
+      metaKeyword,
+      metaOgTitle,
+      metaOgUrl,
+      metaOgImage,
+      metaOgDescription,
+      metaOgType,
+      metaTwitterTitle,
+      metaTwitterCard,
+      metaTwitterImage,
     } = req.body;
-    /**
-     * check duplicate exist
-     */
-    let dataExist = await websiteMasterService.isExists([{ productName }]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     //------------------create data-------------------
-    let dataCreated = await websiteMasterService.createNewData({ ...req.body });
+    let dataCreated = await websiteMetaTagService.createNewData({
+      ...req.body,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -62,38 +62,38 @@ exports.add = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============add Disposition start end================
+// =============add  start end================
 
-// =============update Disposition start================
+// =============update  start================
 exports.update = async (req, res) => {
   try {
     let {
-      productName,
-      url,
-      gaTagIp,
-      searchConsoleIp,
-      headerSpace,
-      footerSpace,
-      siteMap,
+      websitPageId,
+      websiteMasterId,
+      metaDescription,
+      metaKeyword,
+      metaOgTitle,
+      metaOgUrl,
+      metaOgImage,
+      metaOgDescription,
+      metaOgType,
+      metaTwitterTitle,
+      metaTwitterCard,
+      metaTwitterImage,
+      companyId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await websiteMasterService.isExists(
-      [{ productName }],
-      idToBeSearch
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     //------------------Find data-------------------
-    let datafound = await websiteMasterService.getOneByMultiField({
+    let datafound = await websiteMetaTagService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `WebsiteMaster not found.`);
+      throw new ApiError(httpStatus.OK, `WebsiteMetaTag not found.`);
     }
 
-    let dataUpdated = await websiteMasterService.getOneAndUpdate(
+    let dataUpdated = await websiteMetaTagService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -189,8 +189,14 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
+    let objectIdFields = ["websitPageId", "websiteMasterId", "companyId"];
 
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -216,7 +222,54 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "websitemasters",
+          localField: "websiteMasterId",
+          foreignField: "_id",
+          as: "websiteMasterData",
+          pipeline: [
+            {
+              $project: {
+                productName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "websitepages",
+          localField: "websitPageId",
+          foreignField: "_id",
+          as: "websitePageData",
+          pipeline: [
+            {
+              $project: {
+                pageName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          websiteMasterLabel: {
+            $arrayElemAt: ["$websiteMasterData.productName", 0],
+          },
+          websitePageLabel: {
+            $arrayElemAt: ["$websitePageData.pageName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["websiteMasterData", "websitePageData"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -227,7 +280,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await websiteMasterService.aggregateQuery(
+    let dataFound = await websiteMetaTagService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -248,7 +301,9 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await websiteMasterService.aggregateQuery(finalAggregateQuery);
+    let result = await websiteMetaTagService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -273,7 +328,7 @@ exports.allFilterPagination = async (req, res) => {
 };
 // =============all filter pagination api end================
 
-//get api
+// =============get ALl api start================
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
@@ -282,7 +337,53 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await websiteMasterService.findAllWithQuery(matchQuery);
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "websitemasters",
+          localField: "websiteMasterId",
+          foreignField: "_id",
+          as: "websiteMasterData",
+          pipeline: [
+            {
+              $project: {
+                productName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "websitepages",
+          localField: "websitPageId",
+          foreignField: "_id",
+          as: "websitePageData",
+          pipeline: [
+            {
+              $project: {
+                pageName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          websiteMasterLabel: {
+            $arrayElemAt: ["$websiteMasterData.productName", 0],
+          },
+          websitePageLabel: {
+            $arrayElemAt: ["$websitePageData.pageName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["websiteMasterData", "websitePageData"],
+      },
+    ];
+    let dataExist = await websiteMetaTagService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -290,7 +391,7 @@ exports.get = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -304,15 +405,64 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+// =============get ALl api end================
 
-//get by id
+// =============getbyid api start================
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await websiteMasterService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "websitemasters",
+          localField: "websiteMasterId",
+          foreignField: "_id",
+          as: "websiteMasterData",
+          pipeline: [
+            {
+              $project: {
+                productName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "websitepages",
+          localField: "websitPageId",
+          foreignField: "_id",
+          as: "websitePageData",
+          pipeline: [
+            {
+              $project: {
+                pageName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          websiteMasterLabel: {
+            $arrayElemAt: ["$websiteMasterData.productName", 0],
+          },
+          websitePageLabel: {
+            $arrayElemAt: ["$websitePageData.pageName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["websiteMasterData", "websitePageData"],
+      },
+    ];
+    let dataExist = await websiteMetaTagService.aggregateQuery(additionalQuery);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -320,7 +470,7 @@ exports.getById = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -334,23 +484,17 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-//delete api
+// =============getbyid api end================
+
+// =============delete api start================
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await websiteMasterService.getOneByMultiField({ _id }))) {
+    if (!(await websiteMetaTagService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    await websiteBlogSchema.deleteMany({
-      websiteId: new mongoose.Types.ObjectId(_id),
-    });
-
-    await websitePageSchema.deleteMany({
-      websiteId: new mongoose.Types.ObjectId(_id),
-    });
-
-    let deleted = await websiteMasterService.getOneAndDelete({ _id });
+    let deleted = await websiteMetaTagService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -370,17 +514,20 @@ exports.deleteDocument = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-//statusChange
+// =============delete api end================
+
+// =============statusChange api start================
+
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await websiteMasterService.getOneByMultiField({ _id });
+    let dataExist = await websiteMetaTagService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await websiteMasterService.getOneAndUpdate(
+    let statusChanged = await websiteMetaTagService.getOneAndUpdate(
       { _id },
       { isActive }
     );
@@ -403,3 +550,4 @@ exports.statusChange = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+// =============statusChange api end================
