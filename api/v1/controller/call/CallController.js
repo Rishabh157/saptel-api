@@ -73,83 +73,114 @@ exports.add = async (req, res) => {
       dispositionLevelThreeId,
     } = req.body;
     // ===============check id Exist in DB==========
-    const isCounrtyExists = await countryService.findCount({
-      _id: countryId,
-      isDeleted: false,
-    });
-    if (!isCounrtyExists) {
+
+    const isCounrtyExists =
+      countryId !== null
+        ? await countryService.findCount({
+            _id: countryId,
+            isDeleted: false,
+          })
+        : null;
+    if (countryId !== null && !isCounrtyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Country.");
     }
 
-    const isStateExists = await stateService.findCount({
-      _id: stateId,
-      isDeleted: false,
-    });
-    if (!isStateExists) {
+    const isStateExists =
+      stateId !== null
+        ? await stateService.findCount({
+            _id: stateId,
+            isDeleted: false,
+          })
+        : null;
+    if (stateId !== null && !isStateExists) {
       throw new ApiError(httpStatus.OK, "Invalid State.");
     }
 
-    const isSchemeExists = await schemeService.findCount({
-      _id: schemeId,
-      isDeleted: false,
-    });
-    if (!isSchemeExists) {
+    const isSchemeExists =
+      schemeId !== null
+        ? await schemeService.findCount({
+            _id: schemeId,
+            isDeleted: false,
+          })
+        : null;
+    if (schemeId !== null && !isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
     }
 
-    const isDistrictExists = await districtService.findCount({
-      _id: districtId,
-      isDeleted: false,
-    });
-    if (!isDistrictExists) {
+    const isDistrictExists =
+      districtId !== null
+        ? await districtService.findCount({
+            _id: districtId,
+            isDeleted: false,
+          })
+        : null;
+    if (districtId !== null && !isDistrictExists) {
       throw new ApiError(httpStatus.OK, "Invalid District.");
     }
 
-    const isTehsilExists = await tehsilService.findCount({
-      _id: tehsilId,
-      isDeleted: false,
-    });
-    if (!isTehsilExists) {
+    const isTehsilExists =
+      tehsilId !== null
+        ? await tehsilService.findCount({
+            _id: tehsilId,
+            isDeleted: false,
+          })
+        : null;
+    if (tehsilId !== null && !isTehsilExists) {
       throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
     }
 
-    const isAreaExists = await areaService.findCount({
-      _id: areaId,
-      isDeleted: false,
-    });
-    if (!isAreaExists) {
+    const isAreaExists =
+      areaId !== null
+        ? await areaService.findCount({
+            _id: areaId,
+            isDeleted: false,
+          })
+        : null;
+    if (areaId !== null && !isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid Area.");
     }
 
-    const isPincodeExists = await pincodeService.findCount({
-      _id: pincodeId,
-      isDeleted: false,
-    });
-    if (!isPincodeExists) {
+    const isPincodeExists =
+      pincodeId !== null
+        ? await pincodeService.findCount({
+            _id: pincodeId,
+            isDeleted: false,
+          })
+        : null;
+    if (pincodeId !== null && !isPincodeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
     }
 
-    // const isChannelExists = await channelService.findCount({
-    //   _id: channelId,
-    //   isDeleted: false,
-    // });
-    // if (!isChannelExists) {
+    // const isChannelExists =
+    //   channel !== null
+    //     ? await channelService.findCount({
+    //         _id: channel,
+    //         isDeleted: false,
+    //       })
+    //     : null;
+    // if (channel !== null && !isChannelExists) {
     //   throw new ApiError(httpStatus.OK, "Invalid Channel.");
     // }
 
-    const isDispositionTwoExists = await dispositionTwoService.findCount({
-      _id: dispositionLevelTwoId,
-      isDeleted: false,
-    });
-    if (!isDispositionTwoExists) {
+    const isDispositionTwoExists =
+      dispositionLevelTwoId !== null
+        ? await dispositionTwoService.findCount({
+            _id: dispositionLevelTwoId,
+            isDeleted: false,
+          })
+        : null;
+    if (dispositionLevelTwoId !== null && !isDispositionTwoExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
     }
 
-    const isDispositionThreeExists = await dispositionThreeService.findCount({
-      _id: dispositionLevelThreeId,
-      isDeleted: false,
-    });
-    if (!isDispositionThreeExists) {
+    const isDispositionThreeExists =
+      dispositionLevelThreeId !== null
+        ? await dispositionTwoService.findCount({
+            _id: dispositionLevelThreeId,
+            isDeleted: false,
+          })
+        : null;
+    if (dispositionLevelThreeId !== null && !isDispositionThreeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
     }
     // ===============check id Exist in DB end==========
@@ -164,32 +195,6 @@ exports.add = async (req, res) => {
 
     //------------------create data-------------------
     let dataCreated = await callService.createNewData({ ...req.body });
-
-    let dispositionThreeId = dataCreated.dispositionLevelThreeId;
-
-    let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
-      _id: new mongoose.Types.ObjectId(dispositionThreeId),
-    });
-
-    if (
-      dispositionThreeData[0].applicableCriteria.includes(
-        applicableCriteria.isOrder
-      )
-    ) {
-      let lastObject = await orderService.aggregateQuery([
-        { $sort: { _id: -1 } },
-        { $limit: 1 },
-      ]);
-
-      if (lastObject.length) {
-        const orderNumber = parseInt(lastObject[0].orderNumber) + 1;
-
-        req.body.orderNumber = orderNumber;
-      } else {
-        req.body.orderNumber = 1;
-      }
-      let orderCreated = await orderService.createNewData({ ...req.body });
-    }
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -344,6 +349,40 @@ exports.update = async (req, res) => {
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Inbound not found.`);
+    }
+
+    // let dispositionThreeId = dataCreated.dispositionLevelThreeId;
+
+    let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
+      _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
+    });
+    console.log(dispositionThreeData[0].applicableCriteria);
+    let applicableCriteriaArray = [
+      applicableCriteria.isOrder,
+      applicableCriteria.isPrepaid,
+      applicableCriteria.isReplacement,
+      applicableCriteria.isCallBack,
+    ];
+    let flag = false;
+    dispositionThreeData[0].applicableCriteria.map((e) => {
+      if (applicableCriteriaArray.includes(e)) {
+        flag = true;
+      }
+    });
+    if (flag) {
+      let lastObject = await orderService.aggregateQuery([
+        { $sort: { _id: -1 } },
+        { $limit: 1 },
+      ]);
+
+      if (lastObject.length) {
+        const orderNumber = parseInt(lastObject[0].orderNumber) + 1;
+
+        req.body.orderNumber = orderNumber;
+      } else {
+        req.body.orderNumber = 1;
+      }
+      let orderCreated = await orderService.createNewData({ ...req.body });
     }
 
     let dataUpdated = await callService.getOneAndUpdate(

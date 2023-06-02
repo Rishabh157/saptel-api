@@ -24,13 +24,13 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 // );
 
 //===============get all pagination filter===============
-// router.post(
-//   "/",
-//   accessModuleCheck,
-//   authCheckMiddleware,
-//   validate(batchValidation.getAllFilter),
-//   batchController.getFilterPagination
-// );
+router.post(
+  "/",
+  accessModuleCheck,
+  authCheckMiddleware,
+  // validate(batchValidation.getAllFilter),
+  batchController.getFilterPagination
+);
 
 //===============create new document===============
 router.post(
