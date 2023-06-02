@@ -161,18 +161,62 @@ exports.update = async (req, res) => {
 exports.getByDidNo = async (req, res) => {
   try {
     let didNo = req.params.didno;
-    console.log(didNo);
 
-    let dataExist = await didManagementService.findAllWithQuery({
-      didNumber: didNo,
-    });
+    let additionalQuery = [
+      { $match: { didNumber: didNo } },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "scheme_data",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelId",
+          foreignField: "_id",
+          as: "channel_data",
+          pipeline: [
+            {
+              $project: {
+                channelName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          schemeLabel: {
+            $arrayElemAt: ["$scheme_data.schemeName", 0],
+          },
+          channelLabel: {
+            $arrayElemAt: ["$channel_data.channelName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["channel_data", "scheme_data"],
+      },
+    ];
+    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
+
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
