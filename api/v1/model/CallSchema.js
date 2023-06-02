@@ -25,103 +25,90 @@ const CallSchema = new mongoose.Schema(
     },
     deliveryCharges: {
       type: Number,
-      required: false,
       default: 0,
     },
     discount: {
       type: Number,
-      required: false,
       default: 0,
     },
     total: {
       type: Number,
-      required: false,
       default: 0,
     },
     countryId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     stateId: {
       type: ObjectId,
-      required: true,
       trim: true,
     },
     districtId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     tehsilId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     schemeId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     pincodeId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     areaId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     expectedDeliveryDate: {
       type: String,
-      required: false,
       default: "",
     },
     profileDeliveredBy: {
       type: String,
-      required: false,
       default: "",
     },
     complaintDetails: {
       type: String,
-      required: false,
       default: "",
     },
     complaintNo: {
       type: String,
-      required: false,
       default: "",
     },
     agentName: {
       type: String,
-      required: false,
       default: "",
     },
     name: {
       type: String,
-      required: false,
       default: "",
     },
     age: {
       type: Number,
-      required: false,
       default: 0,
     },
     address: {
       type: String,
-      required: false,
       default: "",
     },
     relation: {
       type: String,
-      required: true,
       trim: true,
     },
     agentDistrictId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     landmark: {
       type: String,
@@ -130,28 +117,23 @@ const CallSchema = new mongoose.Schema(
     },
     alternateNo1: {
       type: String,
-      required: false,
       default: "",
     },
     whatsappNo: {
       type: String,
-      required: false,
       default: "",
     },
     gender: {
       type: String,
       enum: [genderType.male, genderType.female, genderType.other],
-      required: true,
       trim: true,
     },
     prepaid: {
       type: Boolean,
-      required: true,
       default: false,
     },
     emailId: {
       type: String,
-      required: false,
       default: "",
     },
     channel: {
@@ -161,19 +143,18 @@ const CallSchema = new mongoose.Schema(
     },
     remark: {
       type: String,
-      required: false,
       default: "",
       lowercase: true,
     },
     dispositionLevelTwoId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     dispositionLevelThreeId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     isDeleted: {
       type: Boolean,

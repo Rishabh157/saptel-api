@@ -85,6 +85,13 @@ const applicableCriteria = Object.freeze({
   isPrepaid: "IS PREPAID",
   isReplacement: "IS REPLACEMENT",
   isCallBack: "IS CALLBACK",
+  isSchemeApp: "IS SCHEME APP",
+  outOfStock: "OUT OF STOCK",
+  isProductApp: "IS PRODUCT APP",
+  adtApplicable: "ADT APPLICABLE",
+  isTextboxReq: "IS TEXTBOX REQ",
+  isUrgent: "IS URGENT",
+  isRemarkDateApp: "IS REMARK DATE APP",
 });
 
 const genderType = Object.freeze({
