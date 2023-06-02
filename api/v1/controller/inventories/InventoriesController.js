@@ -67,7 +67,7 @@ exports.add = async (req, res) => {
         status: barcode?.status,
         condition: barcode?.condition,
         companyId: companyId,
-        wareHouse: wareHouseId,
+        wareHouseId: wareHouseId,
       };
     });
     req.body.productDetail.map(async (barcode) => {
