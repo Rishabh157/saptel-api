@@ -9,6 +9,7 @@ const { searchKeys } = require("../../model/InventoriesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const barCodeService = require("../../services/BarCodeService");
+const wareHouseService = require("../../services/WareHouseService");
 
 const {
   getSearchQuery,
@@ -40,6 +41,13 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
+    const isWarehouseExists = await wareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWarehouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Warehouse");
+    }
     /**
      * check duplicate exist
      */
@@ -59,7 +67,7 @@ exports.add = async (req, res) => {
         status: barcode?.status,
         condition: barcode?.condition,
         companyId: companyId,
-        wareHouse: wareHouse,
+        wareHouse: wareHouseId,
       };
     });
     req.body.productDetail.map(async (barcode) => {
@@ -99,8 +107,13 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { productGroupName, groupBarcodeNumber, barcodeNumber, companyId } =
-      req.body;
+    let {
+      productGroupName,
+      groupBarcodeNumber,
+      barcodeNumber,
+      companyId,
+      wareHouseId,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -110,6 +123,13 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isWarehouseExists = await wareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWarehouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Warehouse");
     }
 
     //------------------Find data-------------------
@@ -215,7 +235,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["wareHouse", "companyId"];
+    let objectIdFields = ["wareHouseId", "companyId"];
 
     const filterQuery = getFilterQuery(
       filterBy,
@@ -353,7 +373,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "warehouses",
-          localField: "wareHouse",
+          localField: "wareHouseId",
           foreignField: "_id",
           as: "wareHouse_name",
           pipeline: [
@@ -415,7 +435,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "warehouses",
-          localField: "wareHouse",
+          localField: "wareHouseId",
           foreignField: "_id",
           as: "wareHouse_name",
           pipeline: [
