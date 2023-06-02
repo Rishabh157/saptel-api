@@ -6,17 +6,21 @@ const commonValidation = require("./CommonValidation");
 /**
  * create new document
  */
-
 const create = {
   body: Joi.object().keys({
-    productName: Joi.string().lowercase().required(),
-    url: Joi.string().required(),
-    gaTagIp: Joi.string().allow(""),
-    searchConsoleIp: Joi.string().allow(""),
-    headerSpace: Joi.string().allow(""),
-    footerSpace: Joi.string().allow(""),
-    siteMap: Joi.string().allow(""),
+    websitPageId: Joi.string().custom(commonValidation.objectId).required(),
+    websiteMasterId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    metaDescription: Joi.string().lowercase().required(),
+    metaKeyword: Joi.string().lowercase().required(),
+    metaOgTitle: Joi.string().lowercase().required(),
+    metaOgUrl: Joi.string().lowercase().required(),
+    metaOgImage: Joi.string().lowercase().required(),
+    metaOgDescription: Joi.string().lowercase().required(),
+    metaOgType: Joi.string().lowercase().required(),
+    metaTwitterTitle: Joi.string().lowercase().required(),
+    metaTwitterCard: Joi.string().lowercase().required(),
+    metaTwitterImage: Joi.string().lowercase().required(),
   }),
 };
 
@@ -27,15 +31,21 @@ const update = {
   params: Joi.object().keys({
     id: Joi.required().custom(commonValidation.objectId),
   }),
+
   body: Joi.object().keys({
-    productName: Joi.string().lowercase().required(),
-    url: Joi.string().required(),
-    gaTagIp: Joi.string().allow(""),
-    searchConsoleIp: Joi.string().allow(""),
-    headerSpace: Joi.string().allow(""),
-    footerSpace: Joi.string().allow(""),
-    siteMap: Joi.string().allow(""),
+    websitPageId: Joi.string().custom(commonValidation.objectId).required(),
+    websiteMasterId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    metaDescription: Joi.string().lowercase().required(),
+    metaKeyword: Joi.string().lowercase().required(),
+    metaOgTitle: Joi.string().lowercase().required(),
+    metaOgUrl: Joi.string().lowercase().required(),
+    metaOgImage: Joi.string().lowercase().required(),
+    metaOgDescription: Joi.string().lowercase().required(),
+    metaOgType: Joi.string().lowercase().required(),
+    metaTwitterTitle: Joi.string().lowercase().required(),
+    metaTwitterCard: Joi.string().lowercase().required(),
+    metaTwitterImage: Joi.string().lowercase().required(),
   }),
 };
 
