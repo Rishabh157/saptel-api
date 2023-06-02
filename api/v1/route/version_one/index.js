@@ -63,6 +63,7 @@ const callRoute = require("./CallRoute");
 const orderRoute = require("./OrderRoute");
 const batchRoute = require("./BatchRoute");
 const assetCategoryRoute = require("./AssetCategoryRoute");
+const assetRoute = require("./AssetRoute");
 const websiteMetaTagRoute = require("./WebsiteMetaTagRoute");
 
 const devRoutes = [
@@ -325,6 +326,12 @@ const defaultRoutes = [
   {
     path: "/asset-category",
     route: assetCategoryRoute,
+  },
+  {
+    path: "/asset",
+    route: assetRoute,
+  },
+  {
     path: "/website-metatag",
     route: websiteMetaTagRoute,
   },
