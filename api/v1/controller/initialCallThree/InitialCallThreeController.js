@@ -182,6 +182,22 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
           from: "initialcalltwos",
           localField: "initialCallTwoId",
           foreignField: "_id",
@@ -200,10 +216,13 @@ exports.get = async (req, res) => {
           initialCallTwoLabel: {
             $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
         },
       },
       {
-        $unset: ["initialcallTwoData"],
+        $unset: ["initialcallTwoData", "initialcallOneData"],
       },
     ];
 
@@ -247,6 +266,22 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
           from: "initialcalltwos",
           localField: "initialCallTwoId",
           foreignField: "_id",
@@ -265,10 +300,13 @@ exports.getById = async (req, res) => {
           initialCallTwoLabel: {
             $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
         },
       },
       {
-        $unset: ["initialcallTwoData"],
+        $unset: ["initialcallTwoData", "initialcallOneData"],
       },
     ];
     let dataExist = await initialCallThreeService.aggregateQuery(
@@ -408,14 +446,32 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           initialCallTwoLabel: {
             $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
           },
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
         },
       },
       {
-        $unset: ["initialcallTwoData"],
+        $unset: ["initialcallTwoData", "initialcallOneData"],
       },
     ];
 

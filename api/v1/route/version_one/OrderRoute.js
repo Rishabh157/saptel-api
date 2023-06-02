@@ -48,7 +48,7 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(orderValidation.update),
+  // validate(orderValidation.update),
   orderController.update
 );
 
