@@ -407,7 +407,7 @@ exports.getById = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
