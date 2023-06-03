@@ -10,7 +10,6 @@ const create = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     inquiryNumber: Joi.number().required(),
-    batchNo: Joi.string().required(),
     inOutBound: Joi.string().allow(""),
     incomingCallerNo: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
@@ -61,7 +60,6 @@ const update = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     inquiryNumber: Joi.number().required(),
-    batchNo: Joi.string().allow(""),
     inOutBound: Joi.string().allow(""),
     incomingCallerNo: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
