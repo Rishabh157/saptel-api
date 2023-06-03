@@ -92,6 +92,7 @@ const applicableCriteria = Object.freeze({
   isTextboxReq: "IS TEXTBOX REQ",
   isUrgent: "IS URGENT",
   isRemarkDateApp: "IS REMARK DATE APP",
+  isInquiry: "IS INQUIRY",
 });
 
 const genderType = Object.freeze({

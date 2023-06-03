@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 // ----service---------
 const callService = require("../../services/CallService");
+const InquiryService = require("../../services/InquiryService");
 const orderService = require("../../services/OrderService");
 const countryService = require("../../services/CountryService");
 const stateService = require("../../services/StateService");
@@ -12,7 +13,6 @@ const districtService = require("../../services/DistrictService");
 const tehsilService = require("../../services/TehsilService");
 const pincodeService = require("../../services/PincodeService");
 const areaService = require("../../services/AreaService");
-const channelService = require("../../services/ChannelMasterService");
 const dispositionTwoService = require("../../services/DispositionTwoService");
 const dispositionThreeService = require("../../services/DispositionThreeService");
 
@@ -356,7 +356,7 @@ exports.update = async (req, res) => {
     let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
       _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
     });
-    console.log(dispositionThreeData[0].applicableCriteria);
+
     let applicableCriteriaArray = [
       applicableCriteria.isOrder,
       applicableCriteria.isPrepaid,
@@ -382,9 +382,36 @@ exports.update = async (req, res) => {
       } else {
         req.body.orderNumber = 1;
       }
+
       let orderCreated = await orderService.createNewData({ ...req.body });
     }
 
+    // =============create Inquiry=========
+
+    let isInquiryExist = [applicableCriteria.isInquiry];
+    let existingInquiry = false;
+    dispositionThreeData[0].applicableCriteria.map((e) => {
+      if (isInquiryExist.includes(e)) {
+        existingInquiry = true;
+      }
+    });
+    if (existingInquiry) {
+      let lastObject = await InquiryService.aggregateQuery([
+        { $sort: { _id: -1 } },
+        { $limit: 1 },
+      ]);
+
+      if (lastObject.length) {
+        const inquiryNumber = parseInt(lastObject[0].inquiryNumber) + 1;
+
+        req.body.inquiryNumber = inquiryNumber;
+      } else {
+        req.body.inquiryNumber = 1;
+      }
+
+      let InquiryData = await InquiryService.createNewData({ ...req.body });
+    }
+    // =============create Inquiry end=========
     let dataUpdated = await callService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -480,7 +507,17 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = ["prepaid"];
     let numberFileds = [];
-    let objectIdFields = [];
+    let objectIdFields = [
+      "countryId",
+      "stateId",
+      "districtId",
+      "tehsilId",
+      "schemeId",
+      "pincodeId",
+      "areaId",
+      "dispositionLevelTwoId",
+      "dispositionLevelThreeId",
+    ];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -512,7 +549,228 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          dispositionLevelTwoLabel: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThreeLabel: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+        ],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -545,7 +803,7 @@ exports.allFilterPagination = async (req, res) => {
     let result = await callService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
-        data: result[0],
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
