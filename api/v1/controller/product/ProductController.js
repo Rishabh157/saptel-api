@@ -26,9 +26,9 @@ exports.add = async (req, res) => {
     let {
       productCode,
       productName,
-      productCategory,
-      productSubCategory,
-      productGroup,
+      productCategoryId,
+      productSubCategoryId,
+      productGroupId,
       productWeight,
       dimension,
       // productImage,
@@ -88,9 +88,9 @@ exports.update = async (req, res) => {
     let {
       productCode,
       productName,
-      productCategory,
-      productSubCategory,
-      productGroup,
+      productCategoryId,
+      productSubCategoryId,
+      productGroupId,
       productWeight,
       dimension,
       description,
@@ -216,7 +216,7 @@ exports.allFilterPagination = async (req, res) => {
     let booleanFields = [];
     let numberFileds = [];
     let objectIdFields = [
-      "productCategory",
+      "productCategoryId",
       "productSubCategoryId",
       "productGroupId",
       "companyId",
@@ -257,7 +257,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "productcategories",
-          localField: "productCategory",
+          localField: "productCategoryId",
           foreignField: "_id",
           as: "productCategory_name",
           pipeline: [{ $project: { categoryName: 1 } }],
@@ -266,7 +266,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "productsubcategories",
-          localField: "productSubCategory",
+          localField: "productSubCategoryId",
           foreignField: "_id",
           as: "productSubCategory_name",
           pipeline: [{ $project: { subCategoryName: 1 } }],
@@ -275,7 +275,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "productGroup_name",
           pipeline: [{ $project: { groupName: 1 } }],
@@ -530,7 +530,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "productcategories",
-          localField: "productCategory",
+          localField: "productCategoryId",
           foreignField: "_id",
           as: "productCategory_name",
           pipeline: [{ $project: { categoryName: 1 } }],
@@ -539,7 +539,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "productsubcategories",
-          localField: "productSubCategory",
+          localField: "productSubCategoryId",
           foreignField: "_id",
           as: "productSubCategory_name",
           pipeline: [{ $project: { subCategoryName: 1 } }],
@@ -548,7 +548,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "productGroup_name",
           pipeline: [{ $project: { groupName: 1 } }],
@@ -777,7 +777,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "productcategories",
-          localField: "productCategory",
+          localField: "productCategoryId",
           foreignField: "_id",
           as: "productCategory_name",
           pipeline: [{ $project: { categoryName: 1 } }],
@@ -786,7 +786,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "productsubcategories",
-          localField: "productSubCategory",
+          localField: "productSubCategoryId",
           foreignField: "_id",
           as: "productSubCategory_name",
           pipeline: [{ $project: { subCategoryName: 1 } }],
@@ -795,7 +795,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "productgroups",
-          localField: "productGroup",
+          localField: "productGroupId",
           foreignField: "_id",
           as: "productGroup_name",
           pipeline: [{ $project: { groupName: 1 } }],
