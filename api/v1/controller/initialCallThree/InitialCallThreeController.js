@@ -574,7 +574,7 @@ exports.deleteDocument = async (req, res) => {
 // =============delete api start end============
 
 //  =============get all initialCallThree by Id of initialCallTwo Id start================
-exports.getByInitialCallOneId = async (req, res) => {
+exports.getByInitialCallTwoId = async (req, res) => {
   try {
     initialCallTwoId = req.params.id;
     let additionalQuery = [
