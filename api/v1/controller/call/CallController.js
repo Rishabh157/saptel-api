@@ -175,7 +175,7 @@ exports.add = async (req, res) => {
 
     const isDispositionThreeExists =
       dispositionLevelThreeId !== null
-        ? await dispositionTwoService.findCount({
+        ? await dispositionThreeService.findCount({
             _id: dispositionLevelThreeId,
             isDeleted: false,
           })
