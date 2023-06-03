@@ -65,6 +65,7 @@ const batchRoute = require("./BatchRoute");
 const assetCategoryRoute = require("./AssetCategoryRoute");
 const assetRoute = require("./AssetRoute");
 const websiteMetaTagRoute = require("./WebsiteMetaTagRoute");
+const inquiryRoute = require("./InquiryRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -334,6 +335,10 @@ const defaultRoutes = [
   {
     path: "/website-metatag",
     route: websiteMetaTagRoute,
+  },
+  {
+    path: "/inquiry",
+    route: inquiryRoute,
   },
 ];
 orderRoute;
