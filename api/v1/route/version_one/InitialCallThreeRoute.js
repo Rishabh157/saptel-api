@@ -29,7 +29,7 @@ router.get(
   accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.getByInitialCallTwoId),
-  initialCallThreeController.getByInitialCallOneId
+  initialCallThreeController.getByInitialCallTwoId
 );
 
 //===============get all pagination filter===============

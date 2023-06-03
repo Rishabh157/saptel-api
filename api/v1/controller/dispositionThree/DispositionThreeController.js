@@ -543,6 +543,12 @@ exports.getByDispositionTwoId = async (req, res) => {
 
     let additionalQuery = [
       {
+        $match: {
+          dispositionTwoId: new mongoose.Types.ObjectId(dispositionTwoId),
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
           from: "dispositiontwos",
           localField: "dispositionTwoId",
