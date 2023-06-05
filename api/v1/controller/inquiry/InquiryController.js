@@ -4,8 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 
 // ----service---------
-const orderService = require("../../services/OrderService");
-// const callService = require("../../services/CallService");
+const inquiryService = require("../../services/InquiryService");
 const countryService = require("../../services/CountryService");
 const stateService = require("../../services/StateService");
 const schemeService = require("../../services/SchemeService");
@@ -13,7 +12,7 @@ const districtService = require("../../services/DistrictService");
 const tehsilService = require("../../services/TehsilService");
 const pincodeService = require("../../services/PincodeService");
 const areaService = require("../../services/AreaService");
-const channelService = require("../../services/ChannelMasterService");
+// const channelService = require("../../services/ChannelMasterService");
 const dispositionTwoService = require("../../services/DispositionTwoService");
 const dispositionThreeService = require("../../services/DispositionThreeService");
 // ----service---------
@@ -73,7 +72,7 @@ exports.update = async (req, res) => {
     } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await orderService.isExists([]);
+    let dataExist = await inquiryService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -159,14 +158,14 @@ exports.update = async (req, res) => {
     }
 
     //------------------Find data-------------------
-    let datafound = await orderService.getOneByMultiField({
+    let datafound = await inquiryService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Orders not found.`);
+      throw new ApiError(httpStatus.OK, `Inquiry not found.`);
     }
 
-    let dataUpdated = await orderService.getOneAndUpdate(
+    let dataUpdated = await inquiryService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -432,7 +431,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    let dataExist = await inquiryService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -687,8 +686,7 @@ exports.getById = async (req, res) => {
       },
     ];
 
-    let dataExist = await orderService.aggregateQuery(additionalQuery);
-
+    let dataExist = await inquiryService.aggregateQuery(additionalQuery);
     if (!dataExist[0]) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -1047,7 +1045,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await inquiryService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -1066,7 +1064,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await orderService.aggregateQuery(finalAggregateQuery);
+    let result = await inquiryService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -1095,10 +1093,10 @@ exports.allFilterPagination = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await orderService.getOneByMultiField({ _id }))) {
+    if (!(await inquiryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await orderService.getOneAndDelete({ _id });
+    let deleted = await inquiryService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }

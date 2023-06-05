@@ -8,10 +8,19 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    didNumber: Joi.string().lowercase().required(),
-    schemeId: Joi.string().custom(commonValidation.objectId).required(),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    websitPageId: Joi.string().custom(commonValidation.objectId).required(),
+    websiteMasterId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    metaDescription: Joi.string().lowercase().required(),
+    metaKeyword: Joi.string().lowercase().required(),
+    metaOgTitle: Joi.string().lowercase().required(),
+    metaOgUrl: Joi.string().lowercase().required(),
+    metaOgImage: Joi.string().lowercase().required(),
+    metaOgDescription: Joi.string().lowercase().required(),
+    metaOgType: Joi.string().lowercase().required(),
+    metaTwitterTitle: Joi.string().lowercase().required(),
+    metaTwitterCard: Joi.string().lowercase().required(),
+    metaTwitterImage: Joi.string().lowercase().required(),
   }),
 };
 
@@ -22,11 +31,21 @@ const update = {
   params: Joi.object().keys({
     id: Joi.required().custom(commonValidation.objectId),
   }),
+
   body: Joi.object().keys({
-    didNumber: Joi.string().lowercase().required(),
-    schemeId: Joi.string().custom(commonValidation.objectId).required(),
-    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    websitPageId: Joi.string().custom(commonValidation.objectId).required(),
+    websiteMasterId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    metaDescription: Joi.string().lowercase().required(),
+    metaKeyword: Joi.string().lowercase().required(),
+    metaOgTitle: Joi.string().lowercase().required(),
+    metaOgUrl: Joi.string().lowercase().required(),
+    metaOgImage: Joi.string().lowercase().required(),
+    metaOgDescription: Joi.string().lowercase().required(),
+    metaOgType: Joi.string().lowercase().required(),
+    metaTwitterTitle: Joi.string().lowercase().required(),
+    metaTwitterCard: Joi.string().lowercase().required(),
+    metaTwitterImage: Joi.string().lowercase().required(),
   }),
 };
 
@@ -81,18 +100,9 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      didNumber: Joi.string().optional(),
+      productName: Joi.string().optional(),
     })
     .optional(),
-};
-
-/**
- * get either all data or single document
- */
-const getByDidNo = {
-  query: Joi.object().keys({
-    didno: Joi.string().optional(),
-  }),
 };
 
 /**
@@ -105,7 +115,7 @@ const deleteDocument = {
 };
 
 /**
- * get a single document
+ * get by id
  */
 const getById = {
   params: Joi.object().keys({
@@ -126,7 +136,6 @@ module.exports = {
   getAllFilter,
   get,
   update,
-  getByDidNo,
   deleteDocument,
   changeStatus,
   getById,

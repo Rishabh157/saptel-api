@@ -1,18 +1,24 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 
-const BatchSchema = mongoose.Schema(
+const AssetSchema = mongoose.Schema(
   {
-    batchNo: {
-      type: Number,
+    assetName: {
+      type: String,
       required: true,
       trim: true,
     },
-    orderCount: {
-      type: Number,
+    assetCategoryId: {
+      type: ObjectId,
       required: true,
       trim: true,
     },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+
     isDeleted: {
       type: Boolean,
       default: false,
@@ -26,8 +32,6 @@ const BatchSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-
-const searchKeys = ["batchNo"];
-
-module.exports = mongoose.model("batch", BatchSchema);
+const searchKeys = ["assetCategoryId", "companyId", "assetName"];
+module.exports = mongoose.model("Asset", AssetSchema);
 module.exports.searchKeys = [...searchKeys];

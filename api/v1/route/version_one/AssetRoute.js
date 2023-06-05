@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const initialCallThreeController = require("../../controller/initialCallThree/InitialCallThreeController");
-const initialCallThreeValidation = require("../../validation/InitialCallThreeValidation");
+const assetController = require("../../controller/asset/AssetController");
+const assetValidation = require("../../validation/AssetValidation");
 const validate = require("../../middleware/validate");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
@@ -10,8 +10,8 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.get),
-  initialCallThreeController.get
+  validate(assetValidation.get),
+  assetController.get
 );
 
 //===============get document by id===============
@@ -19,17 +19,8 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.getById),
-  initialCallThreeController.getById
-);
-
-//===============get all document fo initialCallOne  Id===============
-router.get(
-  "/get-all/:id",
-  accessModuleCheck,
-  authCheckMiddleware,
-  validate(initialCallThreeValidation.getByInitialCallTwoId),
-  initialCallThreeController.getByInitialCallTwoId
+  validate(assetValidation.getById),
+  assetController.getById
 );
 
 //===============get all pagination filter===============
@@ -37,8 +28,8 @@ router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.getAllFilter),
-  initialCallThreeController.allFilterPagination
+  validate(assetValidation.getAllFilter),
+  assetController.allFilterPagination
 );
 
 //===============create new document===============
@@ -46,8 +37,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.create),
-  initialCallThreeController.add
+  validate(assetValidation.create),
+  assetController.add
 );
 
 //===============update document===============
@@ -55,15 +46,15 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.update),
-  initialCallThreeController.update
+  validate(assetValidation.update),
+  assetController.update
 );
 
 //===============update status document===============
 // router.put(
 //   "/status-change/:id",
-//   validate(initialCallThreeValidation.changeStatus),
-//   initialCallThreeController.statusChange
+//   validate(assetValidation.changeStatus),
+//   assetController.statusChange
 // );
 
 //===============delete document===============
@@ -71,8 +62,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.deleteDocument),
-  initialCallThreeController.deleteDocument
+  validate(assetValidation.deleteDocument),
+  assetController.deleteDocument
 );
 
 module.exports = router;

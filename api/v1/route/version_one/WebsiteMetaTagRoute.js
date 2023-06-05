@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const initialCallThreeController = require("../../controller/initialCallThree/InitialCallThreeController");
-const initialCallThreeValidation = require("../../validation/InitialCallThreeValidation");
+const websiteMetaTagController = require("../../controller/websiteMetaTag/WebsiteMetaTagController");
+const websiteMetaTagValidation = require("../../validation/WebsiteMetaTagValidation");
 const validate = require("../../middleware/validate");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
@@ -10,8 +10,8 @@ router.get(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.get),
-  initialCallThreeController.get
+  validate(websiteMetaTagValidation.get),
+  websiteMetaTagController.get
 );
 
 //===============get document by id===============
@@ -19,17 +19,8 @@ router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.getById),
-  initialCallThreeController.getById
-);
-
-//===============get all document fo initialCallOne  Id===============
-router.get(
-  "/get-all/:id",
-  accessModuleCheck,
-  authCheckMiddleware,
-  validate(initialCallThreeValidation.getByInitialCallTwoId),
-  initialCallThreeController.getByInitialCallTwoId
+  validate(websiteMetaTagValidation.getById),
+  websiteMetaTagController.getById
 );
 
 //===============get all pagination filter===============
@@ -37,8 +28,8 @@ router.post(
   "/",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.getAllFilter),
-  initialCallThreeController.allFilterPagination
+  validate(websiteMetaTagValidation.getAllFilter),
+  websiteMetaTagController.allFilterPagination
 );
 
 //===============create new document===============
@@ -46,8 +37,8 @@ router.post(
   "/add",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.create),
-  initialCallThreeController.add
+  validate(websiteMetaTagValidation.create),
+  websiteMetaTagController.add
 );
 
 //===============update document===============
@@ -55,15 +46,15 @@ router.put(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.update),
-  initialCallThreeController.update
+  validate(websiteMetaTagValidation.update),
+  websiteMetaTagController.update
 );
 
 //===============update status document===============
 // router.put(
 //   "/status-change/:id",
-//   validate(initialCallThreeValidation.changeStatus),
-//   initialCallThreeController.statusChange
+//   validate(websiteMetaTagValidation.changeStatus),
+//   websiteMetaTagController.statusChange
 // );
 
 //===============delete document===============
@@ -71,8 +62,8 @@ router.delete(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(initialCallThreeValidation.deleteDocument),
-  initialCallThreeController.deleteDocument
+  validate(websiteMetaTagValidation.deleteDocument),
+  websiteMetaTagController.deleteDocument
 );
 
 module.exports = router;

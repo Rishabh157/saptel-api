@@ -2,13 +2,10 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const didManagementService = require("../../services/DidManagementService");
-const { searchKeys } = require("../../model/DidManagementSchema");
+const assetCategoryService = require("../../services/AssetCategoryService");
+const { searchKeys } = require("../../model/AssetCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const schemeService = require("../../services/SchemeService");
-const companyService = require("../../services/CompanyService");
-const channelMasterService = require("../../services/ChannelMasterService");
 
 const {
   getSearchQuery,
@@ -19,45 +16,22 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { didNumber, schemeId, channelId, companyId } = req.body;
+    let { assetCategoryName, companyId } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await didManagementService.isExists([{ didNumber }]);
+    let dataExist = await assetCategoryService.isExists([
+      { assetCategoryName },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    const isSchemeIdExists = await schemeService.findCount({
-      _id: schemeId,
-      isDeleted: false,
-    });
-
-    const isChannelExists = await channelMasterService.findCount({
-      _id: channelId,
-      isDeleted: false,
-    });
-
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isSchemeIdExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Scheme");
-    }
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel");
-    }
-
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid company");
-    }
     //------------------create data-------------------
-    let dataCreated = await didManagementService.createNewData({ ...req.body });
+    let dataCreated = await assetCategoryService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -83,48 +57,24 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { didNumber, schemeId, channelId, companyId } = req.body;
+    let { assetCategoryName, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await didManagementService.isExists(
-      [{ didNumber }],
-      idToBeSearch
-    );
+    let dataExist = await assetCategoryService.isExists([
+      { assetCategoryName },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------Find data-------------------
-    let datafound = await didManagementService.getOneByMultiField({
+    let datafound = await assetCategoryService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `DidManagement not found.`);
-    }
-    const isSchemeIdExists = await schemeService.findCount({
-      _id: schemeId,
-      isDeleted: false,
-    });
-    const isChannelExists = await channelMasterService.findCount({
-      _id: channelId,
-      isDeleted: false,
-    });
-    if (!isChannelExists) {
-      throw new ApiError(httpStatus.OK, "Invalid channel");
+      throw new ApiError(httpStatus.OK, `AssetCategory not found.`);
     }
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isSchemeIdExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Scheme");
-    }
-
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid company");
-    }
-
-    let dataUpdated = await didManagementService.getOneAndUpdate(
+    let dataUpdated = await assetCategoryService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -146,80 +96,6 @@ exports.update = async (req, res) => {
       });
     } else {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-// getByDidNo
-exports.getByDidNo = async (req, res) => {
-  try {
-    let didNo = req.params.didno;
-
-    let additionalQuery = [
-      { $match: { didNumber: didNo } },
-      {
-        $lookup: {
-          from: "schemes",
-          localField: "schemeId",
-          foreignField: "_id",
-          as: "scheme_data",
-          pipeline: [
-            {
-              $project: {
-                schemeName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "channelmasters",
-          localField: "channelId",
-          foreignField: "_id",
-          as: "channel_data",
-          pipeline: [
-            {
-              $project: {
-                channelName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          schemeLabel: {
-            $arrayElemAt: ["$scheme_data.schemeName", 0],
-          },
-          channelLabel: {
-            $arrayElemAt: ["$channel_data.channelName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["channel_data", "scheme_data"],
-      },
-    ];
-    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
-
-    if (!dataExist || !dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist[0],
-        code: null,
-        issue: null,
-      });
     }
   } catch (err) {
     let errData = errorRes(err);
@@ -293,15 +169,13 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["schemeId", "channelId", "companyId"];
-
+    let objectIdFields = ["companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
       numberFileds,
       objectIdFields
     );
-    console.log(filterQuery);
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -327,55 +201,8 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [
-      {
-        $lookup: {
-          from: "schemes",
-          localField: "schemeId",
-          foreignField: "_id",
-          as: "scheme_data",
-          pipeline: [
-            {
-              $project: {
-                schemeName: 1,
-                schemeCode: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "channelmasters",
-          localField: "channelId",
-          foreignField: "_id",
-          as: "channel_data",
-          pipeline: [
-            {
-              $project: {
-                channelName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          schemeLabel: {
-            $arrayElemAt: ["$scheme_data.schemeName", 0],
-          },
-          schemeCode: {
-            $arrayElemAt: ["$scheme_data.schemeCode", 0],
-          },
-          channelLabel: {
-            $arrayElemAt: ["$channel_data.channelName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["channel_data", "scheme_data"],
-      },
-    ];
+    let additionalQuery = [];
+
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
@@ -385,7 +212,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await didManagementService.aggregateQuery(
+    let dataFound = await assetCategoryService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -406,7 +233,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await didManagementService.aggregateQuery(finalAggregateQuery);
+    let result = await assetCategoryService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -437,57 +264,8 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-    let additionalQuery = [
-      { $match: matchQuery },
-      {
-        $lookup: {
-          from: "schemes",
-          localField: "schemeId",
-          foreignField: "_id",
-          as: "scheme_data",
-          pipeline: [
-            {
-              $project: {
-                schemeName: 1,
-                schemeCode: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "channelmasters",
-          localField: "channelId",
-          foreignField: "_id",
-          as: "channel_data",
-          pipeline: [
-            {
-              $project: {
-                channelName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          schemeLabel: {
-            $arrayElemAt: ["$scheme_data.schemeName", 0],
-          },
-          schemeCode: {
-            $arrayElemAt: ["$scheme_data.schemeCode", 0],
-          },
-          channelLabel: {
-            $arrayElemAt: ["$channel_data.channelName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["channel_data", "scheme_data"],
-      },
-    ];
-    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
+
+    let dataExist = await assetCategoryService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -510,75 +288,22 @@ exports.get = async (req, res) => {
   }
 };
 
-// get by id
+//get by id
 exports.getById = async (req, res) => {
   try {
-    //if no default query then pass {}
     let idToBeSearch = req.params.id;
+    let dataExist = await assetCategoryService.getOneByMultiField({
+      _id: idToBeSearch,
+      isDeleted: false,
+    });
 
-    let additionalQuery = [
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(idToBeSearch),
-          isDeleted: false,
-        },
-      },
-      {
-        $lookup: {
-          from: "schemes",
-          localField: "schemeId",
-          foreignField: "_id",
-          as: "scheme_data",
-          pipeline: [
-            {
-              $project: {
-                schemeName: 1,
-                schemeCode: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "channelmasters",
-          localField: "channelId",
-          foreignField: "_id",
-          as: "channel_data",
-          pipeline: [
-            {
-              $project: {
-                channelName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          schemeLabel: {
-            $arrayElemAt: ["$scheme_data.schemeName", 0],
-          },
-          schemeCode: {
-            $arrayElemAt: ["$scheme_data.schemeCode", 0],
-          },
-          channelLabel: {
-            $arrayElemAt: ["$channel_data.channelName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["channel_data", "scheme_data"],
-      },
-    ];
-    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: dataExist,
         code: null,
         issue: null,
       });
@@ -592,15 +317,15 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await didManagementService.getOneByMultiField({ _id }))) {
+    if (!(await assetCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-
-    let deleted = await didManagementService.getOneAndDelete({ _id });
+    let deleted = await assetCategoryService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -624,13 +349,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await didManagementService.getOneByMultiField({ _id });
+    let dataExist = await assetCategoryService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await didManagementService.getOneAndUpdate(
+    let statusChanged = await assetCategoryService.getOneAndUpdate(
       { _id },
       { isActive }
     );

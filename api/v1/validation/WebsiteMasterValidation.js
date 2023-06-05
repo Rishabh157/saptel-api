@@ -6,6 +6,7 @@ const commonValidation = require("./CommonValidation");
 /**
  * create new document
  */
+
 const create = {
   body: Joi.object().keys({
     productName: Joi.string().lowercase().required(),
