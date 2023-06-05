@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dispositionOneService = require("../../services/DispositionOneService");
 const dispositionTwoService = require("../../services/DispositionTwoService");
+const dispositionThreeService = require("../../services/DispositionThreeService");
 const companyService = require("../../services/CompanyService");
 
 const { searchKeys } = require("../../model/DispositionOneSchema");
@@ -355,6 +356,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     // ------find disposition (if use in other module / not)------
+
     let isDispositionOneExists = await dispositionTwoService.findCount({
       dispositionOneId: _id,
       isDeleted: false,
@@ -365,6 +367,19 @@ exports.deleteDocument = async (req, res) => {
         "Disposition can't be deleted as it is used in other module"
       );
     }
+
+    let isDispositionOneExistsInDispositionThree =
+      await dispositionThreeService.findCount({
+        dispositionOneId: _id,
+        isDeleted: false,
+      });
+    if (isDispositionOneExistsInDispositionThree) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Disposition can't be deleted as it is used in other module"
+      );
+    }
+
     let deleted = await dispositionOneService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

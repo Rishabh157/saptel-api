@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const initialCallOneService = require("../../services/InitialCallOneService");
+const initialCallTwoService = require("../../services/InitialCallTwoService");
+const initialCallThreeService = require("../../services/InitialCallThreeService");
 const companyService = require("../../services/CompanyService");
 
 const { searchKeys } = require("../../model/InitialCallOneSchema");
@@ -354,16 +356,30 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     // ------find disposition (if use in other module / not)------
-    let isDispositionOneExists = await initialCallOneService.findCount({
-      dispositionOneId: _id,
+    let isInitialCallOneExists = await initialCallTwoService.findCount({
+      initialCallOneId: _id,
       isDeleted: false,
     });
-    if (isDispositionOneExists) {
+    console.log(isInitialCallOneExists);
+    if (isInitialCallOneExists) {
       throw new ApiError(
         httpStatus.OK,
-        "Disposition can't be deleted as it is used in other module"
+        "InitialCall One can't be deleted as it is used in other module"
       );
     }
+
+    let isInitialCallOneExistsInIcThree =
+      await initialCallThreeService.findCount({
+        dispositionOneId: _id,
+        isDeleted: false,
+      });
+    if (isInitialCallOneExistsInIcThree) {
+      throw new ApiError(
+        httpStatus.OK,
+        "InitialCall One  can't be deleted as it is used in other module"
+      );
+    }
+
     let deleted = await initialCallOneService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
