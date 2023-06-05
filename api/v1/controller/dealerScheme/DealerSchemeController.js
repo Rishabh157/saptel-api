@@ -2,6 +2,7 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
+const mongoose = require("mongoose");
 const dealerSchemeService = require("../../services/DealerSchemeService");
 const companyService = require("../../services/CompanyService");
 const schemeService = require("../../services/SchemeService");
@@ -370,6 +371,90 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// getbydealerSchema api
+exports.getbydealerId = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+    let additionalQuery = [
+      {
+        $match: {
+          dealerId: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "scheme_data",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                schemePrice: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          schemeName: {
+            $arrayElemAt: ["$scheme_data.schemeName", 0],
+          },
+          price: {
+            $arrayElemAt: ["$scheme_data.schemePrice", 0],
+          },
+          dealerName: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["scheme_data", "dealerData"],
+      },
+    ];
+    let dataExist = await dealerSchemeService.aggregateQuery(additionalQuery);
+
+    if (!dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
