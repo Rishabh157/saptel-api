@@ -368,13 +368,13 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "initialcallones",
-          localField: "initialcallOneId",
+          localField: "initialCallOneId",
           foreignField: "_id",
           as: "initialcallOneData",
           pipeline: [
             {
               $project: {
-                initialCallOneName: 1,
+                initialCallName: 1,
               },
             },
           ],
@@ -383,15 +383,14 @@ exports.allFilterPagination = async (req, res) => {
       {
         $addFields: {
           initialCallOneLabel: {
-            $arrayElemAt: ["$initialOneCallData.initialCallOneName", 0],
+            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
           },
         },
       },
       {
-        $unset: ["initialOneCallData"],
+        $unset: ["initialcallOneData"],
       },
     ];
-
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
