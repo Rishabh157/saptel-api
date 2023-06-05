@@ -5,6 +5,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const initialCallTwoService = require("../../services/InitialCallTwoService");
 const initialCallOneService = require("../../services/InitialCallOneService");
+const initialCallThreeService = require("../../services/InitialCallThreeService");
 const companyService = require("../../services/CompanyService");
 
 const { searchKeys } = require("../../model/InitialCallTwoSchema");
@@ -456,16 +457,17 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     // ------find disposition (if use in other module / not)------
-    let isDispositionOneExists = await initialCallTwoService.findCount({
-      dispositionOneId: _id,
+    let initialCallTwoExist = await initialCallThreeService.findCount({
+      initialCallTwoId: _id,
       isDeleted: false,
     });
-    if (isDispositionOneExists) {
+    if (initialCallTwoExist) {
       throw new ApiError(
         httpStatus.OK,
-        "Disposition can't be deleted as it is used in other module"
+        "InitialCall Two can't be deleted as it is used in other module"
       );
     }
+
     let deleted = await initialCallTwoService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
