@@ -1,5 +1,6 @@
 const competitorService = require("../../services/CompetitorService");
 const companyService = require("../../services/CompanyService");
+const ispositionThreeService = require("../../services/DispositionThreeService");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
@@ -20,7 +21,17 @@ const {
 // ==============add api start==============
 exports.add = async (req, res) => {
   try {
-    let { competitorName, companyId } = req.body;
+    let {
+      competitorName,
+      companyName,
+      productName,
+      websiteLink,
+      youtubeLink,
+      whatsapp,
+      price,
+      dispositionThreeId,
+      companyId,
+    } = req.body;
 
     // -------check duplicate exist--------
     let dataExist = await competitorService.isExists([{ competitorName }]);
@@ -33,6 +44,14 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isDispositionThreeExist = await ispositionThreeService.findCount({
+      _id: dispositionThreeId,
+      isDeleted: false,
+    });
+    if (!isDispositionThreeExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
     }
 
     let dataCreated = await competitorService.createNewData({
@@ -64,7 +83,17 @@ exports.add = async (req, res) => {
 // ==============upate api start==============
 exports.update = async (req, res) => {
   try {
-    let { competitorName, companyId } = req.body;
+    let {
+      competitorName,
+      companyName,
+      productName,
+      websiteLink,
+      youtubeLink,
+      whatsapp,
+      price,
+      dispositionThreeId,
+      companyId,
+    } = req.body;
     let idToBeSearch = req.params.id;
 
     let dataExist = await competitorService.isExists(
@@ -82,6 +111,17 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+    const isDispositionThreeExist = await ispositionThreeService.findCount({
+      _id: dispositionThreeId,
+      isDeleted: false,
+    });
+    if (!isDispositionThreeExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+    }
+
+    let dataCreated = await competitorService.createNewData({
+      ...req.body,
+    });
     //------------------Find data-------------------
 
     let dataFound = await competitorService.getOneByMultiField({
