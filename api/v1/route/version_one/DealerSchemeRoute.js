@@ -19,6 +19,18 @@ router.get(
   validate(dealerSchemeValidation.get),
   dealerSchemeController.get
 );
+
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/get-all/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  // validate(dealerSchemeValidation.get),
+  dealerSchemeController.getbydealerId
+);
+
 /**
  * get all dealerScheme pagination filter
  */
