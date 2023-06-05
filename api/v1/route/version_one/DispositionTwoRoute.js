@@ -14,7 +14,7 @@ router.get(
   dispositionTwoController.get
 );
 
-//===============get one document (if query) / all document===============
+//===============get one document (if query) / all document  (without token)===============
 router.get(
   "/unauth/",
   // accessModuleCheck,
