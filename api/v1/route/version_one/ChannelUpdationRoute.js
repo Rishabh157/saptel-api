@@ -7,7 +7,7 @@ const channelUpdationValidation = require("../../validation/ChannelUpdationValid
 
 //===============get one document (if query) / all document===============
 router.get(
-  "/",
+  "/:companyid",
   accessModuleCheck,
   authCheckMiddleware,
   validate(channelUpdationValidation.get),
