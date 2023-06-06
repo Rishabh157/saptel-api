@@ -1,6 +1,7 @@
 const competitorService = require("../../services/CompetitorService");
 const companyService = require("../../services/CompanyService");
 const ispositionThreeService = require("../../services/DispositionThreeService");
+const channelMasterService = require("../../services/ChannelMasterService")
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
@@ -27,10 +28,12 @@ exports.add = async (req, res) => {
       productName,
       websiteLink,
       youtubeLink,
-      whatsapp,
-      price,
-      dispositionThreeId,
+      whatsappNumber,
+      schemePrice,
+      channelId,
       companyId,
+      startTime,
+      endTime,
     } = req.body;
 
     // -------check duplicate exist--------
@@ -46,12 +49,12 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
-    const isDispositionThreeExist = await ispositionThreeService.findCount({
-      _id: dispositionThreeId,
+    const isChannelExists = await channelMasterService.findCount({
+      _id: channelId,
       isDeleted: false,
     });
-    if (!isDispositionThreeExist) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
 
     let dataCreated = await competitorService.createNewData({
@@ -89,10 +92,12 @@ exports.update = async (req, res) => {
       productName,
       websiteLink,
       youtubeLink,
-      whatsapp,
-      price,
-      dispositionThreeId,
+      whatsappNumber,
+      schemePrice,
+      channelId,
       companyId,
+      startTime,
+      endTime,
     } = req.body;
     let idToBeSearch = req.params.id;
 
@@ -111,12 +116,13 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    const isDispositionThreeExist = await ispositionThreeService.findCount({
-      _id: dispositionThreeId,
+
+    const isChannelExists = await channelMasterService.findCount({
+      _id: channelId,
       isDeleted: false,
     });
-    if (!isDispositionThreeExist) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+    if (!isChannelExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
 
     let dataCreated = await competitorService.createNewData({

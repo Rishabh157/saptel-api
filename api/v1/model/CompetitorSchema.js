@@ -33,27 +33,39 @@ const CompetitorSchema = mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    whatsapp: {
+    whatsappNumber: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
     },
-    price: {
+    schemePrice: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
-    },
-    dispositionThreeId: {
-      type: ObjectId,
-      required: true,
-      trim: true,
     },
     companyId: {
       type: ObjectId,
       required: true,
       trim: true,
+    },
+    channelId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    startTime: {
+      type: String,
+      default: '',
+      trim: true,
+      lowercase: true,
+    },
+    endTime: {
+      type: String,
+      default: '',
+      trim: true,
+      lowercase: true,
     },
     isDeleted: {
       type: Boolean,
