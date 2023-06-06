@@ -11,7 +11,6 @@ const dealerService = require("../../services/DealerService");
 const { searchKeys } = require("../../model/DealerSchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-
 const {
   getSearchQuery,
   checkInvalidParams,
