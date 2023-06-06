@@ -36,10 +36,10 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    // let dataExist = await barCodeService.isExists([{ barcodeNumber }]);
-    // if (dataExist.exists && dataExist.existsSummary) {
-    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    // }
+    let dataExist = await barCodeService.isExists([{ lotNumber }]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     let lastObject = await barCodeService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
@@ -62,6 +62,7 @@ exports.add = async (req, res) => {
     } else {
       req.body.barcodeNumber = lotNumber + "000001";
     }
+
     //------------------create data-------------------
     let dataCreated = await barCodeService.createNewData({ ...req.body });
 
@@ -92,13 +93,13 @@ exports.update = async (req, res) => {
     let { productGroupId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await barCodeService.isExists(
-      [{ barcodeNumber }],
-      idToBeSearch
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+    // let dataExist = await barCodeService.isExists(
+    //   [{ barcodeNumber }],
+    //   idToBeSearch
+    // );
+    // if (dataExist.exists && dataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    // }
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -106,6 +107,17 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+
+    /**
+     * check duplicate exist
+     */
+    // let isdataExist = await barCodeService.isExists(
+    //   [{ lotNumber }],
+    //   idToBeSearch
+    // );
+    // if (isdataExist.exists && isdataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, isdataExist.existsSummary);
+    // }
 
     //------------------Find data-------------------
     let datafound = await barCodeService.getOneByMultiField({
