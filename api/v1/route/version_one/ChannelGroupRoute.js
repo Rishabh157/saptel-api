@@ -13,7 +13,7 @@ const {
  * get one document (if query) / all documents
  */
 router.get(
-  "/",
+  "/:companyid",
   accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.get),

@@ -19,7 +19,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -308,8 +308,13 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
+    let companyId = req.params.companyid;
+
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

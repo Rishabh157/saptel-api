@@ -1,7 +1,7 @@
 const competitorService = require("../../services/CompetitorService");
 const companyService = require("../../services/CompanyService");
 const ispositionThreeService = require("../../services/DispositionThreeService");
-const channelMasterService = require("../../services/ChannelMasterService")
+const channelMasterService = require("../../services/ChannelMasterService");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
@@ -174,7 +174,13 @@ exports.update = async (req, res) => {
 // ==============get api end==============
 exports.get = async (req, res) => {
   try {
-    let matchQuery = { isDeleted: false };
+    let companyId = req.params.companyid;
+
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: companyId,
+      isDeleted: false,
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
