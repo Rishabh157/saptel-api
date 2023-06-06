@@ -102,6 +102,8 @@ exports.add = async (req, res) => {
         slotDate: slot.date,
         slotStartTime: slot.startTime,
         slotEndTime: slot.endTime,
+        showOk: req.body.showOk,
+        reasonNotShow: req.body.reasonNotShow
       };
     });
     //------------------create data-------------------

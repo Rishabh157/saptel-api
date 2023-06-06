@@ -30,7 +30,7 @@ exports.add = async (req, res) => {
       youtubeLink,
       whatsappNumber,
       schemePrice,
-      channelId,
+      channelNameId,
       companyId,
       startTime,
       endTime,
@@ -50,7 +50,7 @@ exports.add = async (req, res) => {
     }
 
     const isChannelExists = await channelMasterService.findCount({
-      _id: channelId,
+      _id: channelNameId,
       isDeleted: false,
     });
     if (!isChannelExists) {
@@ -94,7 +94,7 @@ exports.update = async (req, res) => {
       youtubeLink,
       whatsappNumber,
       schemePrice,
-      channelId,
+      channelNameId,
       companyId,
       startTime,
       endTime,
@@ -118,7 +118,7 @@ exports.update = async (req, res) => {
     }
 
     const isChannelExists = await channelMasterService.findCount({
-      _id: channelId,
+      _id: channelNameId,
       isDeleted: false,
     });
     if (!isChannelExists) {
