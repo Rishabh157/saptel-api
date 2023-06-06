@@ -29,6 +29,8 @@ const create = {
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     showOk: Joi.boolean(),
     reasonNotShow: Joi.string(),
+    slotRunImage: Joi.string().allow(""),
+    slotRunVideo: Joi.string().allow(""),
   }),
 };
 
@@ -59,6 +61,8 @@ const update = {
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     showOk: Joi.boolean(),
     reasonNotShow: Joi.string(),
+    slotRunImage: Joi.string().allow(""),
+    slotRunVideo: Joi.string().allow(""),
   }),
 };
 
