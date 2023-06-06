@@ -11,12 +11,12 @@ const create = {
     productName: Joi.string().lowercase().required(),
     websiteLink: Joi.string().lowercase().required(),
     youtubeLink: Joi.string().lowercase().required(),
-    whatsapp: Joi.string().lowercase().required(),
-    price: Joi.string().lowercase().required(),
+    whatsappNumber: Joi.string().lowercase().required(),
+    schemePrice: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    dispositionThreeId: Joi.string()
-      .custom(commonValidation.objectId)
-      .required(),
+    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    startTime: Joi.string().optional().allow(""),
+    endTime: Joi.string().optional().allow(""),
   }),
 };
 // -------------------------------
@@ -32,12 +32,12 @@ const update = {
     productName: Joi.string().lowercase().required(),
     websiteLink: Joi.string().lowercase().required(),
     youtubeLink: Joi.string().lowercase().required(),
-    whatsapp: Joi.string().lowercase().required(),
-    price: Joi.string().lowercase().required(),
+    whatsappNumber: Joi.string().lowercase().required(),
+    schemePrice: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    dispositionThreeId: Joi.string()
-      .custom(commonValidation.objectId)
-      .required(),
+    channelId: Joi.string().custom(commonValidation.objectId).required(),
+    startTime: Joi.string().optional().allow(""),
+    endTime: Joi.string().optional().allow(""),
   }),
 };
 // -------------------------------
