@@ -314,9 +314,13 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    //if no default query then pass {}
+    let companyId = req.params.companyid;
 
-    let matchQuery = { isDeleted: false };
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: companyId,
+      isDeleted: false,
+    };
     if (req.userData.userType === userEnum.user) {
       matchQuery["_id"] = req.userData.Id;
     }
