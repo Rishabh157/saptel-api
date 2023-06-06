@@ -7,10 +7,18 @@ const commonValidation = require("./CommonValidation");
 const create = {
   body: Joi.object().keys({
     competitorName: Joi.string().lowercase().required(),
+    companyName: Joi.string().lowercase().required(),
+    productName: Joi.string().lowercase().required(),
+    websiteLink: Joi.string().lowercase().required(),
+    youtubeLink: Joi.string().lowercase().required(),
+    whatsapp: Joi.string().lowercase().required(),
+    price: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    dispositionThreeId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
   }),
 };
-
 // -------------------------------
 
 // ===============update existing document=====================
@@ -20,7 +28,16 @@ const update = {
   }),
   body: Joi.object().keys({
     competitorName: Joi.string().lowercase().required(),
+    companyName: Joi.string().lowercase().required(),
+    productName: Joi.string().lowercase().required(),
+    websiteLink: Joi.string().lowercase().required(),
+    youtubeLink: Joi.string().lowercase().required(),
+    whatsapp: Joi.string().lowercase().required(),
+    price: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    dispositionThreeId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
   }),
 };
 // -------------------------------
