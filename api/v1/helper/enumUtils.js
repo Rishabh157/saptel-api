@@ -126,6 +126,10 @@ const paymentType = Object.freeze({
   creditCard: "CREDITCARD",
   debitCard: "DEBITCARD",
 });
+const ledgerType = Object.freeze({
+  credit: "CREDIT",
+  debit: "DEBIT",
+});
 /**
  * if other the following routes created. please add all actions with their method,
  */
@@ -167,5 +171,6 @@ module.exports = {
   genderType,
   applicableCriteria,
   whatsType,
-  reasonNotShowSlot
+  reasonNotShowSlot,
+  ledgerType,
 };
