@@ -80,6 +80,12 @@ const emailType = Object.freeze({
   companyEmail: "COMPANY EMAIL",
 });
 
+const whatsType = Object.freeze({
+  temp1: "TEMP ONE",
+  temp2: "TEMP TWO",
+  temp3: "TEMP THREE",
+});
+
 const applicableCriteria = Object.freeze({
   isOrder: "IS ORDER",
   isPrepaid: "IS PREPAID",
@@ -152,4 +158,5 @@ module.exports = {
   emailType,
   genderType,
   applicableCriteria,
+  whatsType,
 };

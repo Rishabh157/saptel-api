@@ -4,6 +4,7 @@ const {
   smsType,
   emailType,
   applicableCriteria,
+  whatsType,
 } = require("../helper/enumUtils");
 
 const DispositionThreeSchema = new mongoose.Schema(
@@ -31,9 +32,8 @@ const DispositionThreeSchema = new mongoose.Schema(
     },
     priority: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
-      lowercase: true,
     },
     smsType: {
       type: String,
@@ -55,7 +55,7 @@ const DispositionThreeSchema = new mongoose.Schema(
         smsType.inTransitDB,
         smsType.invoiceSent,
       ],
-      required: true,
+      default: null,
       trim: true,
     },
     emailType: {
@@ -65,7 +65,13 @@ const DispositionThreeSchema = new mongoose.Schema(
         emailType.officialEmail,
         emailType.personalEmail,
       ],
-      required: true,
+      default: null,
+      trim: true,
+    },
+    whatsApp: {
+      type: String,
+      enum: [whatsType.temp1, whatsType.temp2, whatsType.temp3],
+      default: null,
       trim: true,
     },
     applicableCriteria: {
@@ -108,6 +114,7 @@ const searchKeys = [
   "smsType",
   "emailType",
   "priority",
+  "whatsApp",
   "applicableCriteria",
 ];
 module.exports = mongoose.model("DispositionThree", DispositionThreeSchema);
