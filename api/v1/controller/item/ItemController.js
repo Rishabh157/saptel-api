@@ -2,6 +2,7 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
+const mongoose = require("mongoose");
 const itemService = require("../../services/ItemService");
 const companyService = require("../../services/CompanyService");
 
@@ -276,8 +277,13 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
+    let companyId = req.params.companyid;
+
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
