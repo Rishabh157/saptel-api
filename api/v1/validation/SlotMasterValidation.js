@@ -27,6 +27,8 @@ const create = {
     runStatus: Joi.boolean(),
     remarks: Joi.string().lowercase().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    showOk: Joi.boolean(),
+    reasonNotShow: Joi.string(),
   }),
 };
 
@@ -55,6 +57,8 @@ const update = {
     runYoutubeLink: Joi.string().allow(""),
     runStatus: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    showOk: Joi.boolean(),
+    reasonNotShow: Joi.string(),
   }),
 };
 

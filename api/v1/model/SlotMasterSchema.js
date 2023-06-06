@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { slotType, slotDaysType } = require("../helper/enumUtils");
+const { slotType, slotDaysType, reasonNotShowSlot } = require("../helper/enumUtils");
 const SlotMasterSchema = new mongoose.Schema(
   {
     slotName: { type: String, required: true, trim: true, lowercase: true },
@@ -79,6 +79,17 @@ const SlotMasterSchema = new mongoose.Schema(
       type: Boolean,
       required: false,
       default: false,
+    },
+    showOk: {
+      type: Boolean,
+      required: false,
+      default: true
+    },
+    reasonNotShow: {
+      type: String,
+      enum: [reasonNotShowSlot.scrollOnNumbers, reasonNotShowSlot.audioWasNotProper, reasonNotShowSlot.disortionInVideo, reasonNotShowSlot.showNotRunFully, reasonNotShowSlot.other, null],
+      uppercase: true,
+      default: null,
     },
     isDeleted: {
       type: Boolean,

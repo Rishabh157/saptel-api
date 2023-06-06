@@ -139,6 +139,14 @@ const actionMethodEnum = Object.freeze({
   view: "get",
 });
 
+const reasonNotShowSlot = Object.freeze({
+  scrollOnNumbers: "SCROLL ON NUMBERS",
+  audioWasNotProper: "AUDIO WAS NOT PROPER",
+  showNotRunFully: "SHOW NOT RUN FULLY",
+  disortionInVideo: "DISTORTION IN VIDEO",
+  other: "OTHER",
+});
+
 module.exports = {
   allFileEnum,
   tokenEnum,
@@ -159,4 +167,5 @@ module.exports = {
   genderType,
   applicableCriteria,
   whatsType,
+  reasonNotShowSlot
 };
