@@ -50,7 +50,7 @@ const CompetitorSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    channelId: {
+    channelNameId: {
       type: ObjectId,
       required: true,
       trim: true,
@@ -87,10 +87,10 @@ const searchKeys = [
   "productName",
   "websiteLink",
   "youtubeLink",
-  "whatsapp",
-  "price",
-  "dispositionThreeId",
+  "whatsappNumber",
+  "schemePrice",
   "companyId",
+  "channelNameId",
 ];
 module.exports = mongoose.model("Competitor", CompetitorSchema);
 module.exports.searchKeys = [...searchKeys];
