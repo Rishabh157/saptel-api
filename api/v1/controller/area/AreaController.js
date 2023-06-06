@@ -288,6 +288,7 @@ exports.allFilterPagination = async (req, res) => {
       "districtId",
       "stateId",
       "countryId",
+      "companyId",
     ];
 
     const filterQuery = getFilterQuery(
@@ -377,14 +378,14 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
+    let companyId = req.params.companyid;
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = { companyId: companyId, isDeleted: false };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
     let dataExist = await areaService.findAllWithQuery(matchQuery);
-
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -441,7 +442,6 @@ exports.getAreaByPincode = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    console.log(idToBeSearch);
     let dataExist = await areaService.findAllWithQuery({
       pincodeId: idToBeSearch,
       isDeleted: false,
