@@ -331,8 +331,13 @@ exports.allFilterPagination = async (req, res) => {
 // =============get ALl api start================
 exports.get = async (req, res) => {
   try {
+    let companyId = req.params.companyid;
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+    };
+
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
@@ -366,8 +371,8 @@ exports.get = async (req, res) => {
         $unset: ["assetcategorieData"],
       },
     ];
-    let dataExist = await assetService.aggregateQuery(additionalQuery);
 
+    let dataExist = await assetService.aggregateQuery(additionalQuery);
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
