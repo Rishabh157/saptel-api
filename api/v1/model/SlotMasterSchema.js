@@ -75,6 +75,18 @@ const SlotMasterSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    slotRunVideo: {
+      type: String,
+      trim: true,
+      required: false,
+      default: "",
+    },
+    slotRunImage: {
+      type: String,
+      trim: true,
+      required: false,
+      default: "",
+    },
     runStatus: {
       type: Boolean,
       required: false,
