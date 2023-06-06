@@ -132,7 +132,8 @@ const update = {
   }),
   body: Joi.object().keys({
     fileType: Joi.string().required().valid('IMAGE', 'VIDEO', 'DOCUMENT'),
-    fileUrl: Joi.string().required()
+    fileUrl: Joi.string().required(),
+    category: Joi.string().required()
   })
 }
 
