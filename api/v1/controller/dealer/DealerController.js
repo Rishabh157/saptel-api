@@ -45,6 +45,7 @@ exports.add = async (req, res) => {
       otherDocument,
       password,
       companyId,
+      openingBalance
     } = req.body;
     /**
      * check duplicate exist
@@ -120,6 +121,7 @@ exports.update = async (req, res) => {
       otherDocument,
       password,
       companyId,
+      openingBalance
     } = req.body;
 
     let idToBeSearch = req.params.id;
