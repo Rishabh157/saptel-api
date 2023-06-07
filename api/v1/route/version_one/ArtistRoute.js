@@ -7,7 +7,7 @@ const artistValitation = require("../../validation/ArtistValidation");
 
 // ===============get new document==============
 router.get(
-  "/:companyid",
+  "/company/:companyid",
   accessModuleCheck,
   authCheckMiddleware,
   validate(artistValitation.get),
