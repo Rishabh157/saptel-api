@@ -66,6 +66,7 @@ const assetCategoryRoute = require("./AssetCategoryRoute");
 const assetRoute = require("./AssetRoute");
 const websiteMetaTagRoute = require("./WebsiteMetaTagRoute");
 const inquiryRoute = require("./InquiryRoute");
+const dealerSupervisorRoute = require("./DealerSupervisorRoute");
 const ledgerRoute = require("./LedgerRoute");
 
 const devRoutes = [
@@ -340,6 +341,10 @@ const defaultRoutes = [
   {
     path: "/inquiry",
     route: inquiryRoute,
+  },
+  {
+    path: "/dealer-supervisor",
+    route: dealerSupervisorRoute,
   },
   {
     path: "/ledger",

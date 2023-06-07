@@ -40,7 +40,7 @@ const CompetitorSchema = mongoose.Schema(
       lowercase: true,
     },
     schemePrice: {
-      type: String,
+      type: Number,
       required: true,
       trim: true,
       lowercase: true,
