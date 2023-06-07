@@ -17,9 +17,6 @@ const create = {
  * update existing document
  */
 const update = {
-  params: Joi.object().keys({
-    id: Joi.required().custom(commonValidation.objectId),
-  }),
   body: Joi.object().keys({
     countryName: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
