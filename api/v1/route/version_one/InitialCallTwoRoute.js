@@ -10,7 +10,7 @@ const {
 
 //===============get one document (if query) / all document===============
 router.get(
-  "/",
+  "/:companyid",
   accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.get),
