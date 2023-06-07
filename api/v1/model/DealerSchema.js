@@ -202,6 +202,11 @@ const DealerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    openingBalance: {
+      type: Number,
+      default: 0,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -229,6 +234,7 @@ const searchKeys = [
   "document",
   "otherDocument",
   "companyId",
+  "openingBalance"
 ];
 module.exports = mongoose.model("Dealer", DealerSchema);
 module.exports.searchKeys = [...searchKeys];

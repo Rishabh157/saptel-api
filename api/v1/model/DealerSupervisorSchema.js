@@ -8,7 +8,7 @@ const DealerSupervisorSchema = new mongoose.Schema(
             trim: true,
         },
         supervisorName: {
-            type: [String],
+            type: String,
             required: true,
             trim: true,
             lowercase: true,

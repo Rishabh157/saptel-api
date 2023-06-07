@@ -209,7 +209,11 @@ const VendorSchema = new mongoose.Schema(
       required: true,
     },
     companyId: { type: ObjectId, required: true, trim: true },
-
+    openingBalance: {
+      type: Number,
+      default: 0,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -236,6 +240,7 @@ const searchKeys = [
   "contactInformation",
   "document",
   "bankInformation",
+  "openingBalance"
 ];
 module.exports = mongoose.model("Vendor", VendorSchema);
 module.exports.searchKeys = [...searchKeys];
