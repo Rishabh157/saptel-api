@@ -14,7 +14,7 @@ const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
  * get one document (if query) / all documents
  */
 router.get(
-  "/:companyid",
+  "/company/:companyid",
   accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.get),
