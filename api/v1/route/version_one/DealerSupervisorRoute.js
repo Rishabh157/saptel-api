@@ -64,5 +64,15 @@ router.get(
     dealerSupervisorController.getById
 );
 
+/**
+ * update status
+ */
+router.put(
+    "/status-change/:id",
+    authCheckMiddleware,
+    validate(dealerSupervisorValidation.changeStatus),
+    dealerSupervisorController.statusChange
+);
+
 
 module.exports = router;
