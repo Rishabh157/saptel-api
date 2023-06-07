@@ -227,7 +227,6 @@ exports.allFilterPagination = async (req, res) => {
     let numberFileds = [
       "schemeCode",
       "schemeName",
-
       "startDate",
       "endDate",
       "schemeDescription",
