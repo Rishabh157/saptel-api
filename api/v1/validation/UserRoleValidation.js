@@ -8,9 +8,9 @@ const commonValidation = require("./CommonValidation");
  */
 const create = {
     body: Joi.object().keys({
-        dealerId: Joi.string().custom(commonValidation.objectId).required(),
-        supervisorName: Joi.string().required(),
+        roleName: Joi.string().lowercase().required(),
         companyId: Joi.string().custom(commonValidation.objectId).required(),
+
     }),
 };
 
@@ -22,9 +22,9 @@ const update = {
         id: Joi.required().custom(commonValidation.objectId),
     }),
     body: Joi.object().keys({
-        dealerId: Joi.string().custom(commonValidation.objectId).required(),
-        supervisorName: Joi.string().required(),
+        roleName: Joi.string().lowercase().required(),
         companyId: Joi.string().custom(commonValidation.objectId).required(),
+
     }),
 };
 
@@ -72,21 +72,15 @@ const getAllFilter = {
     }),
 };
 
+
 /**
- * get either all data or single document
+ * get a document
  */
-const get = {
+const getDocument = {
     params: Joi.object().keys({
         id: Joi.string().custom(commonValidation.objectId),
     }),
-    query: Joi.object()
-        .keys({
-            _id: Joi.string().custom(commonValidation.objectId).optional(),
-            dealerId: Joi.string().optional(),
-        })
-        .optional(),
 };
-
 /**
  * delete a document
  */
@@ -107,8 +101,8 @@ const changeStatus = {
 module.exports = {
     create,
     getAllFilter,
-    get,
     update,
     deleteDocument,
     changeStatus,
+    getDocument,
 };

@@ -3,9 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const mongoose = require("mongoose");
-const dealerSupervisorService = require("../../services/DealerSupervisorService");
-const dealerService = require("../../services/DealerService");
-const { searchKeys } = require("../../model/DealerSupervisorSchema");
+const userRoleService = require("../../services/UserRoleService");
+const { searchKeys } = require("../../model/UserRoleSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const companyService = require("../../services/CompanyService");
@@ -24,14 +23,14 @@ const {
 //add start
 exports.add = async (req, res) => {
     try {
-        let { dealerId, supervisorName, companyId } = req.body;
+        let { roleName, companyId } = req.body;
 
-        const isDealerExists = await dealerService.findCount({
-            _id: dealerId,
-            isDeleted: false,
-        });
-        if (!isDealerExists) {
-            throw new ApiError(httpStatus.OK, "Invalid Dealer");
+        /**
+        * check duplicate exist
+        */
+        let dataExist = await userRoleService.isExists([{ roleName }]);
+        if (dataExist.exists && dataExist.existsSummary) {
+            throw new ApiError(httpStatus.OK, dataExist.existsSummary);
         }
 
         const isCompanyExists = await companyService.findCount({
@@ -41,10 +40,9 @@ exports.add = async (req, res) => {
         if (!isCompanyExists) {
             throw new ApiError(httpStatus.OK, "Invalid Company");
         }
-
         //------------------create data-------------------
 
-        let dataCreated = await dealerSupervisorService.createNewData({ ...req.body });
+        let dataCreated = await userRoleService.createNewData({ ...req.body });
 
         if (dataCreated) {
             return res.status(httpStatus.CREATED).send({
@@ -70,17 +68,9 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
     try {
-        let { dealerId, supervisorName, companyId } = req.body;
+        let { roleName, companyId } = req.body;
 
         let idToBeSearch = req.params.id;
-
-        const isDealerExists = await dealerService.findCount({
-            _id: dealerId,
-            isDeleted: false,
-        });
-        if (!isDealerExists) {
-            throw new ApiError(httpStatus.OK, "Invalid Dealer");
-        }
 
         const isCompanyExists = await companyService.findCount({
             _id: companyId,
@@ -91,15 +81,15 @@ exports.update = async (req, res) => {
         }
 
         //------------------Find data-------------------
-        let datafound = await dealerSupervisorService.getOneByMultiField({
+        let datafound = await userRoleService.getOneByMultiField({
             _id: idToBeSearch,
             isDeleted: false
         });
         if (!datafound) {
-            throw new ApiError(httpStatus.OK, `Dealer supervisor not found.`);
+            throw new ApiError(httpStatus.OK, `Dealer role not found.`);
         }
 
-        let dataUpdated = await dealerSupervisorService.getOneAndUpdate(
+        let dataUpdated = await userRoleService.getOneAndUpdate(
             {
                 _id: idToBeSearch,
                 isDeleted: false,
@@ -237,7 +227,7 @@ exports.allFilterPagination = async (req, res) => {
         });
 
         //-----------------------------------
-        let dataFound = await dealerSupervisorService.aggregateQuery(
+        let dataFound = await userRoleService.aggregateQuery(
             finalAggregateQuery
         );
         if (dataFound.length === 0) {
@@ -258,7 +248,7 @@ exports.allFilterPagination = async (req, res) => {
             finalAggregateQuery.push({ $limit: limit });
         }
 
-        let result = await dealerSupervisorService.aggregateQuery(finalAggregateQuery);
+        let result = await userRoleService.aggregateQuery(finalAggregateQuery);
         if (result.length) {
             return res.status(200).send({
                 data: result,
@@ -286,11 +276,11 @@ exports.allFilterPagination = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
     try {
         let _id = req.params.id;
-        if (!(await dealerSupervisorService.getOneByMultiField({ _id }))) {
+        if (!(await userRoleService.getOneByMultiField({ _id }))) {
             throw new ApiError(httpStatus.OK, "Data not found.");
         }
 
-        let deleted = await dealerSupervisorService.getOneAndDelete({ _id });
+        let deleted = await userRoleService.getOneAndDelete({ _id });
         if (!deleted) {
             throw new ApiError(httpStatus.OK, "Some thing went wrong.");
         }
@@ -311,7 +301,6 @@ exports.deleteDocument = async (req, res) => {
     }
 };
 
-
 // get by id
 exports.getById = async (req, res) => {
     try {
@@ -326,7 +315,7 @@ exports.getById = async (req, res) => {
                 },
             },
         ];
-        let dataExist = await dealerSupervisorService.aggregateQuery(additionalQuery);
+        let dataExist = await userRoleService.aggregateQuery(additionalQuery);
         if (!dataExist.length) {
             throw new ApiError(httpStatus.OK, "Data not found.");
         } else {
@@ -352,13 +341,13 @@ exports.getById = async (req, res) => {
 exports.statusChange = async (req, res) => {
     try {
         let _id = req.params.id;
-        let dataExist = await dealerSupervisorService.getOneByMultiField({ _id });
+        let dataExist = await userRoleService.getOneByMultiField({ _id });
         if (!dataExist) {
             throw new ApiError(httpStatus.OK, "Data not found.");
         }
         let isActive = dataExist.isActive ? false : true;
 
-        let statusChanged = await dealerSupervisorService.getOneAndUpdate(
+        let statusChanged = await userRoleService.getOneAndUpdate(
             { _id },
             { isActive }
         );
