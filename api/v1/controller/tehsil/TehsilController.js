@@ -201,7 +201,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFileds = ["districtId", "stateId", "countryId"];
+    let objectIdFileds = ["districtId", "stateId", "countryId", "companyId"];
 
     const filterQuery = getFilterQuery(
       filterBy,

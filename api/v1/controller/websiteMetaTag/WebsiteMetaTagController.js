@@ -3,6 +3,9 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const websiteMetaTagService = require("../../services/WebsiteMetaTagService");
+const companyService = require("../../services/WebsiteMetaTagService");
+const websiteMasterService = require("../../services/WebsiteMasterService");
+const websitPageService = require("../../services/WebsitePageService");
 const { searchKeys } = require("../../model/WebsiteMetaTagSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -36,6 +39,28 @@ exports.add = async (req, res) => {
       metaTwitterCard,
       metaTwitterImage,
     } = req.body;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isWebsiteMasterExists = await websiteMasterService.findCount({
+      _id: websiteMasterId,
+      isDeleted: false,
+    });
+    if (!isWebsiteMasterExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Website Master");
+    }
+    const isWebsitPageExists = await websitPageService.findCount({
+      _id: websitPageId,
+      isDeleted: false,
+    });
+    if (!isWebsitPageExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Websit Page.");
+    }
 
     //------------------create data-------------------
     let dataCreated = await websiteMetaTagService.createNewData({
@@ -84,6 +109,25 @@ exports.update = async (req, res) => {
     } = req.body;
 
     let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isWebsiteMasterExists = await websiteMasterService.findCount({
+      _id: websiteMasterId,
+      isDeleted: false,
+    });
+    if (!isWebsiteMasterExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Website Master");
+    }
+    const isWebsitPageExists = await websitPageService.findCount({
+      _id: websitPageId,
+      isDeleted: false,
+    });
 
     //------------------Find data-------------------
     let datafound = await websiteMetaTagService.getOneByMultiField({
