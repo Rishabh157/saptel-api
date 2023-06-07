@@ -293,7 +293,7 @@ exports.get = async (req, res) => {
 
     //if no default query then pass {}
     let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
+      companyId: companyId,
       isDeleted: false,
     };
     if (req.query && Object.keys(req.query).length) {
