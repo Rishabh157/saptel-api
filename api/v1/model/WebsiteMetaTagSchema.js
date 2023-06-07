@@ -19,52 +19,52 @@ const WebsiteMetaTagSchema = mongoose.Schema(
     },
     metaDescription: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaKeyword: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaOgTitle: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaOgUrl: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaOgImage: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaOgDescription: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaOgType: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaTwitterTitle: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaTwitterCard: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     metaTwitterImage: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     isDeleted: {

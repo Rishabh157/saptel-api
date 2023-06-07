@@ -39,7 +39,7 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
     if (!isDealerExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+      throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
     const isSchemeExists = await schemeService.findCount({
@@ -47,7 +47,7 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
     if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+      throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
 
     /**
@@ -107,7 +107,7 @@ exports.update = async (req, res) => {
       isDeleted: false,
     });
     if (!isDealerExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+      throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
     const isSchemeExists = await schemeService.findCount({
@@ -115,7 +115,7 @@ exports.update = async (req, res) => {
       isDeleted: false,
     });
     if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+      throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
 
     //------------------Find data-------------------
