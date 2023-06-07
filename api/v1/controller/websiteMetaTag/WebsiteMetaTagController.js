@@ -3,7 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const websiteMetaTagService = require("../../services/WebsiteMetaTagService");
-const companyService = require("../../services/WebsiteMetaTagService");
+const companyService = require("../../services/CompanyService");
 const websiteMasterService = require("../../services/WebsiteMasterService");
 const websitPageService = require("../../services/WebsitePageService");
 const { searchKeys } = require("../../model/WebsiteMetaTagSchema");
@@ -44,6 +44,8 @@ exports.add = async (req, res) => {
       _id: companyId,
       isDeleted: false,
     });
+
+    console.log(isCompanyExists)
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
