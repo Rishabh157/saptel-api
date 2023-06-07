@@ -14,7 +14,7 @@ const {
  * get one document (if query) / all documents
  */
 router.get(
-  "/:companyid",
+  "/company/:companyid",
   accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.get),
