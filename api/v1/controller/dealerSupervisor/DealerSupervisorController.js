@@ -9,6 +9,7 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/DealerSupervisorSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -68,7 +69,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, supervisorName } = req.body;
+    let { dealerId, supervisorName, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -78,6 +79,14 @@ exports.update = async (req, res) => {
     });
     if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
+    }
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
     //------------------Find data-------------------
@@ -121,6 +130,47 @@ exports.update = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+//------------------Find data-------------------
+//     let datafound = await dealerSupervisorService.getOneByMultiField({
+//       _id: idToBeSearch,
+//       isDeleted: false,
+//     });
+//     if (!datafound) {
+//       throw new ApiError(httpStatus.OK, `Dealer supervisor not found.`);
+//     }
+
+//     let dataUpdated = await dealerSupervisorService.getOneAndUpdate(
+//       {
+//         _id: idToBeSearch,
+//         isDeleted: false,
+//       },
+//       {
+//         $set: {
+//           ...req.body,
+//         },
+//       }
+//     );
+
+//     if (dataUpdated) {
+//       return res.status(httpStatus.CREATED).send({
+//         message: "Updated successfully.",
+//         data: dataUpdated,
+//         status: true,
+//         code: null,
+//         issue: null,
+//       });
+//     } else {
+//       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {

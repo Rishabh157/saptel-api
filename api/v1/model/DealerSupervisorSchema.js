@@ -7,6 +7,7 @@ const DealerSupervisorSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        companyId: { type: ObjectId, required: true, trim: true },
         supervisorName: {
             type: String,
             required: true,
@@ -30,6 +31,7 @@ const DealerSupervisorSchema = new mongoose.Schema(
 const searchKeys = [
     "dealerId",
     "supervisorName",
+    "companyId"
 ];
 module.exports = mongoose.model("DealerSupervisor", DealerSupervisorSchema);
 module.exports.searchKeys = [...searchKeys];

@@ -201,8 +201,8 @@ exports.allFilterPagination = async (req, res) => {
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
-      objectIdFileds,
-      numberFileds
+      numberFileds,
+      objectIdFileds
     );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
