@@ -30,5 +30,29 @@ router.put(
     dealerSupervisorController.update
 );
 
+/**
+ * get all with pagination filter
+ */
+
+router.post(
+    "/",
+    accessModuleCheck,
+    authCheckMiddleware,
+    validate(dealerSupervisorValidation.getAllFilter),
+    dealerSupervisorController.allFilterPagination
+);
+
+/**
+ * delete document
+ */
+router.delete(
+    "/:id",
+    accessModuleCheck,
+    authCheckMiddleware,
+    validate(dealerSupervisorValidation.deleteDocument),
+    dealerSupervisorController.deleteDocument
+);
+
+
 
 module.exports = router;
