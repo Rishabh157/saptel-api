@@ -4,6 +4,9 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const productService = require("../../services/ProductService");
 const companyService = require("../../services/CompanyService");
+const productSubCategoryService = require("../../services/ProductSubCategoryService");
+const productCategoryService = require("../../services/ProductCategoryService");
+const productGroupService = require("../../services/ProductGroupService");
 
 const { searchKeys } = require("../../model/ProductSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -47,6 +50,31 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isproductCategoryExist = await productCategoryService.findCount({
+      _id: productCategoryId,
+      isDeleted: false,
+    });
+    if (!isproductCategoryExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Category.");
+    }
+
+    const isproductSubCategoryExist = await productSubCategoryService.findCount(
+      {
+        _id: productSubCategoryId,
+        isDeleted: false,
+      }
+    );
+    if (!isproductSubCategoryExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Sub Category.");
+    }
+
+    const isproductGroupExist = await productGroupService.findCount({
+      _id: productGroupId,
+      isDeleted: false,
+    });
+    if (!isproductGroupExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Group.");
     }
     /**
      * check duplicate exist
@@ -111,7 +139,31 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+    const isproductCategoryExist = await productCategoryService.findCount({
+      _id: productCategoryId,
+      isDeleted: false,
+    });
+    if (!isproductCategoryExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Category.");
+    }
 
+    const isproductSubCategoryExist = await productSubCategoryService.findCount(
+      {
+        _id: productSubCategoryId,
+        isDeleted: false,
+      }
+    );
+    if (!isproductSubCategoryExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Sub Category.");
+    }
+
+    const isproductGroupExist = await productGroupService.findCount({
+      _id: productGroupId,
+      isDeleted: false,
+    });
+    if (!isproductGroupExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Group.");
+    }
     //------------------Find data-------------------
     let datafound = await productService.getOneByMultiField({
       _id: idToBeSearch,
