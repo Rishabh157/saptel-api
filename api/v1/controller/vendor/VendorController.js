@@ -35,6 +35,7 @@ exports.add = async (req, res) => {
       document,
       bankInformation,
       companyId,
+      openingBalance
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -93,6 +94,7 @@ exports.update = async (req, res) => {
       contactInformation,
       document,
       bankInformation,
+      openingBalance
     } = req.body;
 
     let idToBeSearch = req.params.id;
