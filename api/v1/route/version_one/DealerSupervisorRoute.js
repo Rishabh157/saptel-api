@@ -53,6 +53,16 @@ router.delete(
     dealerSupervisorController.deleteDocument
 );
 
+/**
+ * get by id document
+ */
+router.get(
+    "/:id",
+    accessModuleCheck,
+    authCheckMiddleware,
+    validate(dealerSupervisorValidation.getById),
+    dealerSupervisorController.getById
+);
 
 
 module.exports = router;
