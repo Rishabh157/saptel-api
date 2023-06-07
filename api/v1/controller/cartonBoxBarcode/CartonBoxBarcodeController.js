@@ -46,7 +46,7 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
     if (!isCartonBoxExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+      throw new ApiError(httpStatus.OK, "Invalid carton box");
     }
 
     const isCompanyExists = await companyService.findCount({
