@@ -2,6 +2,7 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
+const mongoose = require("mongoose")
 // -----------services-------------
 const allocationService = require("../../services/AllocationService");
 const companyService = require("../../services/CompanyService");
@@ -369,13 +370,34 @@ exports.get = async (req, res) => {
 //single view api
 exports.getById = async (req, res) => {
     try {
-
         let idToBeSearch = req.params.id;
-
-        let dataExist = await allocationService.getOneByMultiField({
-            _id: idToBeSearch,
-            isDeleted: false,
-        })
+        let additionalQuery = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(idToBeSearch),
+                    isDeleted: false,
+                },
+            },
+            {
+                $lookup: {
+                    from: "assetlocations",
+                    localField: "assetLocationId",
+                    foreignField: "_id",
+                    as: "assetlocationData",
+                },
+            },
+            {
+                $addFields: {
+                    assetlocationName: {
+                        $arrayElemAt: ["$assetlocationData.locationName", 0],
+                    },
+                },
+            },
+            {
+                $unset: ["assetlocationData"],
+            },
+        ];
+        let dataExist = await allocationService.aggregateQuery(additionalQuery);
 
         if (!dataExist) {
             throw new ApiError(httpStatus.OK, "Data not found.");
@@ -383,7 +405,7 @@ exports.getById = async (req, res) => {
             return res.status(httpStatus.OK).send({
                 message: "Successfull.",
                 status: true,
-                data: dataExist,
+                data: dataExist[0],
                 code: null,
                 issue: null,
             });
