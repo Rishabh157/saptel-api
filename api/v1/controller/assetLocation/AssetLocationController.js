@@ -5,7 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 // -----------services-------------
 const assetLocationService = require("../../services/AssetLocationService");
 const companyService = require("../../services/CompanyService");
-
+const allocationService = require("../../services/AllocationService")
 const { searchKeys } = require("../../model/AssetLocationSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -336,6 +336,21 @@ exports.deleteDocument = async (req, res) => {
         if (!(await assetLocationService.getOneByMultiField({ _id }))) {
             throw new ApiError(httpStatus.OK, "Data not found.");
         }
+        const islocationExistInAllocation =
+            await allocationService.findCount({
+                assetLocationId: _id,
+                isDeleted: false,
+            });
+
+        if (
+            islocationExistInAllocation
+        ) {
+            throw new ApiError(
+                httpStatus.OK,
+                "Asset location can't be deleted because it is currently used in other services"
+            );
+        }
+
         let deleted = await assetLocationService.getOneAndDelete({ _id });
         if (!deleted) {
             throw new ApiError(httpStatus.OK, "Some thing went wrong.");
