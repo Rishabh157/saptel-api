@@ -42,9 +42,9 @@ exports.add = async (req, res) => {
     const isVendorExists =
       vendorId !== null
         ? await vendorService.findCount({
-            _id: vendorId,
-            isDeleted: false,
-          })
+          _id: vendorId,
+          isDeleted: false,
+        })
         : null;
     if (isVendorExists !== null && !isVendorExists) {
       throw new ApiError(httpStatus.OK, "Invalid Vendor");
@@ -53,9 +53,9 @@ exports.add = async (req, res) => {
     const isDealerExists =
       dealerId !== null
         ? await dealerService.findCount({
-            _id: dealerId,
-            isDeleted: false,
-          })
+          _id: dealerId,
+          isDeleted: false,
+        })
         : null;
     if (isDealerExists !== null && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
@@ -87,7 +87,7 @@ exports.add = async (req, res) => {
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: null,
+        code: "CREATED",
         issue: null,
       });
     } else {
@@ -124,9 +124,9 @@ exports.update = async (req, res) => {
     const isVendorExists =
       vendorId !== null
         ? await vendorService.findCount({
-            _id: vendorId,
-            isDeleted: false,
-          })
+          _id: vendorId,
+          isDeleted: false,
+        })
         : null;
     if (isVendorExists !== null && !isVendorExists) {
       throw new ApiError(httpStatus.OK, "Invalid Vendor");
@@ -135,9 +135,9 @@ exports.update = async (req, res) => {
     const isDealerExists =
       dealerId !== null
         ? await dealerService.findCount({
-            _id: dealerId,
-            isDeleted: false,
-          })
+          _id: dealerId,
+          isDeleted: false,
+        })
         : null;
     if (isDealerExists !== null && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
@@ -172,11 +172,11 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      return res.status(httpStatus.CREATED).send({
+      return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
         status: true,
-        code: null,
+        code: "OK",
         issue: null,
       });
     } else {
@@ -618,7 +618,7 @@ exports.get = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: null,
+        code: "OK",
         issue: null,
       });
     }
@@ -781,7 +781,7 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist[0],
-        code: null,
+        code: "OK",
         issue: null,
       });
     }

@@ -114,7 +114,7 @@ const checkAdminValid = async (userData) => {
       return {
         message: "All OK",
         data: userExist,
-        code: null,
+        code: "OK",
         issue: null,
         status: true,
       };
@@ -160,7 +160,7 @@ const checkUserValid = async (userData) => {
       return {
         message: "All OK",
         data: userExist,
-        code: null,
+        code: "OK",
         issue: null,
         status: true,
       };
