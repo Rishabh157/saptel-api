@@ -57,7 +57,6 @@ exports.add = async (req, res) => {
       };
     });
     //------------------create data-------------------
-    console.log(output);
     let dataCreated = await dealerPincodeService.createMany(output);
 
     //------------------create data-------------------

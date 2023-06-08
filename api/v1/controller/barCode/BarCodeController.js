@@ -23,7 +23,8 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroupId, barcodeGroupNumber, lotNumber, companyId } = req.body;
+    let { productGroupId, barcodeGroupNumber, quantity, lotNumber, companyId } =
+      req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -50,21 +51,31 @@ exports.add = async (req, res) => {
       },
     ]);
 
+    let currentBarcode = "";
     if (lastObject.length) {
-      const barcodeNumber =
-        parseInt(
-          lastObject[0].barcodeNumber.substring(
-            lastObject[0].barcodeNumber.length - 6
-          )
-        ) + 1;
-      const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
-      req.body.barcodeNumber = lotNumber + paddedBarcodeNumber;
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Duplicate Lot Number.`);
     } else {
-      req.body.barcodeNumber = lotNumber + "000001";
+      currentBarcode = "000001";
+    }
+
+    let output = [];
+
+    for (let i = 0; i < quantity; i++) {
+      if (i > 0) {
+        paddeeBarcode = JSON.stringify(parseInt(currentBarcode) + 1);
+        currentBarcode = paddeeBarcode.toString().padStart(6, "0");
+      }
+      output.push({
+        productGroupId,
+        barcodeGroupNumber,
+        barcodeNumber: lotNumber + currentBarcode,
+        lotNumber,
+        companyId,
+      });
     }
 
     //------------------create data-------------------
-    let dataCreated = await barCodeService.createNewData({ ...req.body });
+    let dataCreated = await barCodeService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -507,11 +518,8 @@ exports.allFilterGroupPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
-
     //if no default query then pass {}
     let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
     };
     if (req.query && Object.keys(req.query).length) {

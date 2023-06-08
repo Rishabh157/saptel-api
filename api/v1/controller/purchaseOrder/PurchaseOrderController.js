@@ -26,7 +26,6 @@ const { default: mongoose } = require("mongoose");
 exports.add = async (req, res) => {
   try {
     let { poCode, vendorId, wareHouseId, purchaseOrder, companyId } = req.body;
-    console.log(req.body);
 
     const isVendorExists = await vendorService.findCount({
       _id: vendorId,
