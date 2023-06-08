@@ -69,6 +69,8 @@ const inquiryRoute = require("./InquiryRoute");
 const dealerSupervisorRoute = require("./DealerSupervisorRoute");
 const ledgerRoute = require("./LedgerRoute");
 const userRoleRoute = require("./UserRoleRoute");
+const allocationRoute = require("./AllocationRoute");
+const assetLocationRoute = require("./AssetLocationRoute");
 
 
 const devRoutes = [
@@ -355,6 +357,14 @@ const defaultRoutes = [
   {
     path: "/user-role",
     route: userRoleRoute,
+  },
+  {
+    path: "/allocation",
+    route: allocationRoute,
+  },
+  {
+    path: "/asset-location",
+    route: assetLocationRoute,
   },
 ];
 orderRoute;
