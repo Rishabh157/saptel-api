@@ -4,9 +4,14 @@ Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("./CommonValidation");
 
 //===============create new document===============
+
 const create = {
   body: Joi.object().keys({
     assetName: Joi.string().lowercase().required(),
+    quantity: Joi.string().lowercase().required(),
+    price: Joi.string().lowercase().required(),
+    remark: Joi.string().lowercase().required(),
+    assetDetails: Joi.array().required(),
     assetCategoryId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -19,6 +24,10 @@ const update = {
   }),
   body: Joi.object().keys({
     assetName: Joi.string().lowercase().required(),
+    quantity: Joi.string().lowercase().required(),
+    price: Joi.string().lowercase().required(),
+    remark: Joi.string().lowercase().required(),
+    assetDetails: Joi.array().required(),
     assetCategoryId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

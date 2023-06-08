@@ -18,6 +18,26 @@ const AssetSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    quantity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    price: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    remark: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    assetDetails: {
+      type: [String],
+      required: true,
+      trim: true,
+    },
 
     isDeleted: {
       type: Boolean,
@@ -32,6 +52,14 @@ const AssetSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-const searchKeys = ["assetCategoryId", "companyId", "assetName"];
+const searchKeys = [
+  "assetCategoryId",
+  "companyId",
+  "assetName",
+  "quantity",
+  "price",
+  "remark",
+  "assetDetails",
+];
 module.exports = mongoose.model("Asset", AssetSchema);
 module.exports.searchKeys = [...searchKeys];

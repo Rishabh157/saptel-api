@@ -24,12 +24,24 @@ const { default: mongoose } = require("mongoose");
 // ============= add  start  ================
 exports.add = async (req, res) => {
   try {
-    let { assetCategoryId, companyId, assetName } = req.body;
+    let {
+      assetCategoryId,
+      companyId,
+      assetName,
+      quantity,
+      price,
+      remark,
+      assetDetails,
+    } = req.body;
 
     /**
      * check duplicate exist
      */
-    let dataExist = await assetService.isExists([{ assetName }]);
+    let dataExist = await assetService.isExists(
+      [{ assetName }, { companyId }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -111,7 +123,7 @@ exports.update = async (req, res) => {
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `WebsiteMetaTag not found.`);
+      throw new ApiError(httpStatus.OK, `Asset not found.`);
     }
 
     let dataUpdated = await assetService.getOneAndUpdate(
