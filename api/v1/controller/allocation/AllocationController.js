@@ -208,13 +208,9 @@ exports.allFilterPagination = async (req, res) => {
          * get filter query
          */
         let booleanFields = [];
-        let numberFileds = ["Allocation"];
+        let numberFileds = ["quantity"];
         let objectIdFileds = [
-            "pincodeId",
-            "tehsilId",
-            "districtId",
-            "stateId",
-            "countryId",
+            "assetLocationId",
             "companyId",
         ];
 
@@ -249,7 +245,28 @@ exports.allFilterPagination = async (req, res) => {
         /**
          * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
          */
-        let additionalQuery = [];
+        let additionalQuery = [
+            {
+                $lookup: {
+                    from: "assetlocations",
+                    localField: "assetLocationId",
+                    foreignField: "_id",
+                    as: "assetlocationData",
+                },
+            },
+
+            {
+                $addFields: {
+                    assetlocationName: {
+                        $arrayElemAt: ["$assetlocationData.locationName", 0],
+                    },
+                },
+            },
+            {
+                $unset: ["assetlocationData"],
+            },
+        ];
+
 
         if (additionalQuery.length) {
             finalAggregateQuery.push(...additionalQuery);
@@ -307,7 +324,27 @@ exports.get = async (req, res) => {
     try {
         let matchQuery = { isDeleted: false };
 
-        let dataExist = await allocationService.findAllWithQuery(matchQuery);
+        let dataExist = await allocationService.aggregateQuery([
+            { $match: { ...matchQuery } },
+            {
+                $lookup: {
+                    from: "assetlocations",
+                    localField: "assetLocationId",
+                    foreignField: "_id",
+                    as: "assetlocationData",
+                },
+            },
+            {
+                $addFields: {
+                    assetlocationName: {
+                        $arrayElemAt: ["$assetlocationData.locationName", 0],
+                    },
+                },
+            },
+            {
+                $unset: ["assetlocationData"],
+            },
+        ]);
         if (!dataExist || !dataExist.length) {
             throw new ApiError(httpStatus.OK, "Data not found.");
         } else {
@@ -332,12 +369,13 @@ exports.get = async (req, res) => {
 //single view api
 exports.getById = async (req, res) => {
     try {
-        //if no default query then pass {}
+
         let idToBeSearch = req.params.id;
+
         let dataExist = await allocationService.getOneByMultiField({
             _id: idToBeSearch,
             isDeleted: false,
-        });
+        })
 
         if (!dataExist) {
             throw new ApiError(httpStatus.OK, "Data not found.");
