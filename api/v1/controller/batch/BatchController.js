@@ -201,6 +201,8 @@ exports.getFilterPagination = async (req, res) => {
         totalItem: totalData,
         pageSize: limit,
         message: "Data Found",
+        code: "OK",
+        issue: null,
       });
     } else {
       throw new ApiError(httpStatus.OK, `No data Found`);

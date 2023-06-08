@@ -41,9 +41,8 @@ exports.add = async (req, res) => {
      */
     console.log(req.body.fileUrl, 'req.body.fileUrl')
     let path_array = req.body.fileUrl.split('public')
-    let filePath = `${config.base_url}public${
-      path_array[path_array.length - 1]
-    }`
+    let filePath = `${config.base_url}public${path_array[path_array.length - 1]
+      }`
     req.body.fileUrl = filePath
 
     /**
@@ -61,7 +60,7 @@ exports.add = async (req, res) => {
         message: `Successfull`,
         data: dataCreated,
         status: true,
-        code: null,
+        code: "OK",
         issue: null
       })
     } else {
@@ -102,9 +101,8 @@ exports.update = async (req, res) => {
      */
     console.log(req.body.fileUrl, 'req.body.fileUrl')
     let path_array = req.body.fileUrl.split('public')
-    let filePath = `${config.base_url}public${
-      path_array[path_array.length - 1]
-    }`
+    let filePath = `${config.base_url}public${path_array[path_array.length - 1]
+      }`
     req.body.fileUrl = filePath
 
     //------------------Find data-------------------
@@ -132,7 +130,7 @@ exports.update = async (req, res) => {
         message: `Successfull`,
         data: dataUpdated,
         status: true,
-        code: null,
+        code: "OK",
         issue: null
       })
     } else {
@@ -329,7 +327,7 @@ exports.get = async (req, res) => {
         message: 'Successfull.',
         status: true,
         data: dataExist,
-        code: null,
+        code: "OK",
         issue: null
       })
     }
@@ -379,7 +377,7 @@ exports.deleteDocument = async (req, res) => {
       message: 'Successfull.',
       status: true,
       data: null,
-      code: null,
+      code: "OK",
       issue: null
     })
   } catch (err) {
@@ -424,7 +422,7 @@ exports.statusChange = async (req, res) => {
       message: 'Successfull.',
       status: true,
       data: statusChanged,
-      code: null,
+      code: "OK",
       issue: null
     })
   } catch (err) {

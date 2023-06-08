@@ -326,6 +326,8 @@ exports.allFilterPagination = async (req, res) => {
         totalItem: totalData,
         pageSize: limit,
         message: "Data Found",
+        code: "OK",
+        issue: null,
       });
     } else {
       throw new ApiError(httpStatus.OK, `No data Found`);
@@ -471,7 +473,7 @@ exports.deleteDocument = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: null,
-      code: null,
+      code: "OK",
       issue: null,
     });
   } catch (err) {
@@ -504,7 +506,7 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
-      code: null,
+      code: "OK",
       issue: null,
     });
   } catch (err) {

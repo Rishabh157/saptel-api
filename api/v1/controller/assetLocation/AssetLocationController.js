@@ -284,7 +284,7 @@ exports.get = async (req, res) => {
                 message: "Successfull.",
                 status: true,
                 data: dataExist,
-                code: null,
+                code: "OK",
                 issue: null,
             });
         }
@@ -315,7 +315,7 @@ exports.getById = async (req, res) => {
                 message: "Successfull.",
                 status: true,
                 data: dataExist,
-                code: null,
+                code: "OK",
                 issue: null,
             });
         }
@@ -344,7 +344,7 @@ exports.deleteDocument = async (req, res) => {
             message: "Successfull.",
             status: true,
             data: null,
-            code: null,
+            code: "OK",
             issue: null,
         });
     } catch (err) {
@@ -377,7 +377,7 @@ exports.statusChange = async (req, res) => {
             message: "Successfull.",
             status: true,
             data: statusChanged,
-            code: null,
+            code: "OK",
             issue: null,
         });
     } catch (err) {
