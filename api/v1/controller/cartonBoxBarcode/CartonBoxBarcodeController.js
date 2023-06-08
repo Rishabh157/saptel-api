@@ -65,7 +65,6 @@ exports.add = async (req, res) => {
       const barcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
       const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
       req.body.barcodeNumber = paddedBarcodeNumber;
-      console.log(paddedBarcodeNumber);
     } else {
       req.body.barcodeNumber = "000001";
     }

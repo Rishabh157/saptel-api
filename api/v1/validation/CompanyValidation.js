@@ -11,7 +11,7 @@ const create = {
     companyName: Joi.string().lowercase().required(),
     websiteUrl: Joi.string(),
     companyLogo: Joi.string(),
-    gstNo: Joi.string().lowercase().required(),
+    gstNo: Joi.string().required(),
     address: Joi.string().lowercase().required(),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(

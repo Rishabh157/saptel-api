@@ -10,6 +10,7 @@ const create = {
   body: Joi.object().keys({
     productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     barcodeGroupNumber: Joi.string().required(),
+    quantity: Joi.number().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
