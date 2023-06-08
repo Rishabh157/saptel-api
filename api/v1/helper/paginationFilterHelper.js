@@ -40,7 +40,7 @@ const checkInvalidParams = (searchIn, searchKeys) => {
     message: `All OK`,
     status: true,
     data: null,
-    code: null,
+    code: "OK",
     issue: null,
   };
 };

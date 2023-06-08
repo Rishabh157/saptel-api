@@ -184,7 +184,7 @@ exports.allFilterPagination = async (req, res) => {
          */
         let booleanFields = [];
         let numberFileds = [];
-        let objectIdFields = ["dealerId"];
+        let objectIdFields = [];
 
         const filterQuery = getFilterQuery(
             filterBy,
@@ -288,7 +288,7 @@ exports.deleteDocument = async (req, res) => {
             message: "Successfull.",
             status: true,
             data: null,
-            code: null,
+            code: "OK",
             issue: null,
         });
     } catch (err) {
@@ -323,7 +323,7 @@ exports.getById = async (req, res) => {
                 message: "Successfull.",
                 status: true,
                 data: dataExist[0],
-                code: null,
+                code: "OK",
                 issue: null,
             });
         }
@@ -358,7 +358,7 @@ exports.statusChange = async (req, res) => {
             message: "Successfull.",
             status: true,
             data: statusChanged,
-            code: null,
+            code: "OK",
             issue: null,
         });
     } catch (err) {
