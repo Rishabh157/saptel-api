@@ -13,6 +13,7 @@ router.get(
     "/",
     accessModuleCheck,
     authCheckMiddleware,
+    validate(allocationValidation.get),
     allocationController.get
 );
 

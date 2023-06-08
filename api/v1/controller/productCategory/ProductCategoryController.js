@@ -55,7 +55,7 @@ exports.add = async (req, res) => {
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: null,
+        code: "CREATED",
         issue: null,
       });
     } else {
@@ -114,11 +114,11 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      return res.status(httpStatus.CREATED).send({
+      return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
         status: true,
-        code: null,
+        code: "OK",
         issue: null,
       });
     } else {
@@ -309,7 +309,7 @@ exports.get = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: null,
+        code: "OK",
         issue: null,
       });
     }
@@ -340,7 +340,7 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: null,
+        code: "OK",
         issue: null,
       });
     }

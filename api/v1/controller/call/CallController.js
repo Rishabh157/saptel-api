@@ -77,9 +77,9 @@ exports.add = async (req, res) => {
     const isCounrtyExists =
       countryId !== null
         ? await countryService.findCount({
-            _id: countryId,
-            isDeleted: false,
-          })
+          _id: countryId,
+          isDeleted: false,
+        })
         : null;
     if (countryId !== null && !isCounrtyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Country.");
@@ -88,9 +88,9 @@ exports.add = async (req, res) => {
     const isStateExists =
       stateId !== null
         ? await stateService.findCount({
-            _id: stateId,
-            isDeleted: false,
-          })
+          _id: stateId,
+          isDeleted: false,
+        })
         : null;
     if (stateId !== null && !isStateExists) {
       throw new ApiError(httpStatus.OK, "Invalid State.");
@@ -99,9 +99,9 @@ exports.add = async (req, res) => {
     const isSchemeExists =
       schemeId !== null
         ? await schemeService.findCount({
-            _id: schemeId,
-            isDeleted: false,
-          })
+          _id: schemeId,
+          isDeleted: false,
+        })
         : null;
     if (schemeId !== null && !isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
@@ -110,9 +110,9 @@ exports.add = async (req, res) => {
     const isDistrictExists =
       districtId !== null
         ? await districtService.findCount({
-            _id: districtId,
-            isDeleted: false,
-          })
+          _id: districtId,
+          isDeleted: false,
+        })
         : null;
     if (districtId !== null && !isDistrictExists) {
       throw new ApiError(httpStatus.OK, "Invalid District.");
@@ -121,9 +121,9 @@ exports.add = async (req, res) => {
     const isTehsilExists =
       tehsilId !== null
         ? await tehsilService.findCount({
-            _id: tehsilId,
-            isDeleted: false,
-          })
+          _id: tehsilId,
+          isDeleted: false,
+        })
         : null;
     if (tehsilId !== null && !isTehsilExists) {
       throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
@@ -132,9 +132,9 @@ exports.add = async (req, res) => {
     const isAreaExists =
       areaId !== null
         ? await areaService.findCount({
-            _id: areaId,
-            isDeleted: false,
-          })
+          _id: areaId,
+          isDeleted: false,
+        })
         : null;
     if (areaId !== null && !isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid Area.");
@@ -143,9 +143,9 @@ exports.add = async (req, res) => {
     const isPincodeExists =
       pincodeId !== null
         ? await pincodeService.findCount({
-            _id: pincodeId,
-            isDeleted: false,
-          })
+          _id: pincodeId,
+          isDeleted: false,
+        })
         : null;
     if (pincodeId !== null && !isPincodeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
@@ -165,9 +165,9 @@ exports.add = async (req, res) => {
     const isDispositionTwoExists =
       dispositionLevelTwoId !== null
         ? await dispositionTwoService.findCount({
-            _id: dispositionLevelTwoId,
-            isDeleted: false,
-          })
+          _id: dispositionLevelTwoId,
+          isDeleted: false,
+        })
         : null;
     if (dispositionLevelTwoId !== null && !isDispositionTwoExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
@@ -176,9 +176,9 @@ exports.add = async (req, res) => {
     const isDispositionThreeExists =
       dispositionLevelThreeId !== null
         ? await dispositionThreeService.findCount({
-            _id: dispositionLevelThreeId,
-            isDeleted: false,
-          })
+          _id: dispositionLevelThreeId,
+          isDeleted: false,
+        })
         : null;
     if (dispositionLevelThreeId !== null && !isDispositionThreeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
@@ -201,7 +201,7 @@ exports.add = async (req, res) => {
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: null,
+        code: "CREATED",
         issue: null,
       });
     } else {
@@ -425,11 +425,11 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      return res.status(httpStatus.CREATED).send({
+      return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
         status: true,
-        code: null,
+        code: "OK",
         issue: null,
       });
     } else {
@@ -841,7 +841,7 @@ exports.get = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: null,
+        code: "OK",
         issue: null,
       });
     }
@@ -871,7 +871,7 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: null,
+        code: "OK",
         issue: null,
       });
     }

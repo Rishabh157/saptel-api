@@ -62,7 +62,7 @@ exports.add = async (req, res) => {
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: null,
+        code: "CREATED",
         issue: null,
       });
     } else {
