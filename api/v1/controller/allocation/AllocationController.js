@@ -323,7 +323,11 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
     try {
+        //if no default query then pass {}
         let matchQuery = { isDeleted: false };
+        if (req.query && Object.keys(req.query).length) {
+            matchQuery = getQuery(matchQuery, req.query);
+        }
 
         let dataExist = await allocationService.aggregateQuery([
             { $match: { ...matchQuery } },

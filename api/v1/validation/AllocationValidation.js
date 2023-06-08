@@ -101,10 +101,23 @@ const deleteDocument = {
         id: Joi.string().custom(commonValidation.objectId),
     }),
 };
+
+/**
+ * get either all data or single document
+ */
+const get = {
+    query: Joi.object()
+        .keys({
+            _id: Joi.string().custom(commonValidation.objectId).optional(),
+            allocationName: Joi.string().optional(),
+        })
+        .optional(),
+};
 // ----------------------------
 module.exports = {
     create,
     update,
+    get,
     getAllFilter,
     deleteDocument,
     getById,

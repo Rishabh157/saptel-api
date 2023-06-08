@@ -13,6 +13,7 @@ router.get(
     "/",
     accessModuleCheck,
     authCheckMiddleware,
+    validate(assetLocationValidation.get),
     assetLocationController.get
 );
 
