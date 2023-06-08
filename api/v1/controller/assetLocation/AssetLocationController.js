@@ -81,7 +81,7 @@ exports.update = async (req, res) => {
         //------------------Find data-------------------
         let datafound = await assetLocationService.getOneByMultiField({ _id: idToBeSearch });
         if (!datafound) {
-            throw new ApiError(httpStatus.OK, `Area not found.`);
+            throw new ApiError(httpStatus.OK, `Asset location not found.`);
         }
 
         let dataUpdated = await assetLocationService.getOneAndUpdate(
@@ -178,7 +178,7 @@ exports.allFilterPagination = async (req, res) => {
          * get filter query
          */
         let booleanFields = [];
-        let numberFileds = ["area"];
+        let numberFileds = ["Asset location"];
         let objectIdFileds = [
             "pincodeId",
             "tehsilId",

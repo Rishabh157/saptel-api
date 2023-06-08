@@ -111,7 +111,7 @@ exports.update = async (req, res) => {
         //------------------Find data-------------------
         let datafound = await allocationService.getOneByMultiField({ _id: idToBeSearch });
         if (!datafound) {
-            throw new ApiError(httpStatus.OK, `Area not found.`);
+            throw new ApiError(httpStatus.OK, `Allocation not found.`);
         }
 
         let dataUpdated = await allocationService.getOneAndUpdate(
@@ -208,7 +208,7 @@ exports.allFilterPagination = async (req, res) => {
          * get filter query
          */
         let booleanFields = [];
-        let numberFileds = ["area"];
+        let numberFileds = ["Allocation"];
         let objectIdFileds = [
             "pincodeId",
             "tehsilId",

@@ -363,7 +363,7 @@ const defaultRoutes = [
     route: allocationRoute,
   },
   {
-    path: "/assetLocation",
+    path: "/asset-location",
     route: assetLocationRoute,
   },
 ];

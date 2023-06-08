@@ -64,7 +64,6 @@ router.put(
  */
 router.put(
     "/status-change/:id",
-    accessModuleCheck,
     authCheckMiddleware,
     validate(allocationValidation.changeStatus),
     allocationController.statusChange
