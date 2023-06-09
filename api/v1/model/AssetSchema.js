@@ -1,3 +1,4 @@
+const { number } = require("joi");
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 
@@ -19,12 +20,12 @@ const AssetSchema = mongoose.Schema(
       trim: true,
     },
     quantity: {
-      type: String,
+      type: Number,
       required: true,
       trim: true,
     },
     price: {
-      type: String,
+      type: Number,
       required: true,
       trim: true,
     },

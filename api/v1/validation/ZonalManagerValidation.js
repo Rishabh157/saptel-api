@@ -10,7 +10,7 @@ const create = {
   body: Joi.object().keys({
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    supervisorName: Joi.string().required(),
+    zonalManagerName: Joi.string().required(),
   }),
 };
 
@@ -24,7 +24,7 @@ const update = {
   body: Joi.object().keys({
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    supervisorName: Joi.string().required(),
+    zonalManagerName: Joi.string().required(),
   }),
 };
 

@@ -91,7 +91,15 @@ exports.add = async (req, res) => {
 // =============update  start================
 exports.update = async (req, res) => {
   try {
-    let { assetCategoryId, companyId, assetName } = req.body;
+    let {
+      assetCategoryId,
+      companyId,
+      assetName,
+      quantity,
+      price,
+      remark,
+      assetDetails,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
 

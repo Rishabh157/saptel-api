@@ -66,12 +66,11 @@ const assetCategoryRoute = require("./AssetCategoryRoute");
 const assetRoute = require("./AssetRoute");
 const websiteMetaTagRoute = require("./WebsiteMetaTagRoute");
 const inquiryRoute = require("./InquiryRoute");
-const dealerSupervisorRoute = require("./DealerSupervisorRoute");
+const ZonalManagerRoute = require("./ZonalManagerRoute");
 const ledgerRoute = require("./LedgerRoute");
 const userRoleRoute = require("./UserRoleRoute");
 const allocationRoute = require("./AllocationRoute");
 const assetLocationRoute = require("./AssetLocationRoute");
-
 
 const devRoutes = [
   // routes available only in development mode
@@ -347,8 +346,8 @@ const defaultRoutes = [
     route: inquiryRoute,
   },
   {
-    path: "/dealer-supervisor",
-    route: dealerSupervisorRoute,
+    path: "/zonal-manager",
+    route: ZonalManagerRoute,
   },
   {
     path: "/ledger",

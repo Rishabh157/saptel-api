@@ -11,37 +11,31 @@ const CompetitorSchema = mongoose.Schema(
     },
     companyName: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
     productName: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
     websiteLink: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
     youtubeLink: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
     whatsappNumber: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
     schemePrice: {
       type: Number,
-      required: true,
       trim: true,
       lowercase: true,
     },
@@ -57,13 +51,13 @@ const CompetitorSchema = mongoose.Schema(
     },
     startTime: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
       lowercase: true,
     },
     endTime: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
       lowercase: true,
     },

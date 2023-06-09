@@ -12,6 +12,7 @@ const LedgerSchema = new mongoose.Schema(
     price: { type: Number, required: true, trim: true },
     remark: { type: String, required: true, trim: true, lowercase: true },
     companyId: { type: ObjectId, required: true },
+    dealerId: { type: ObjectId, required: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -26,6 +27,6 @@ const LedgerSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["noteType", "price", "remark", "companyId"];
+const searchKeys = ["noteType", "price", "remark", "companyId", "dealerId"];
 module.exports = mongoose.model("Ledger", LedgerSchema);
 module.exports.searchKeys = [...searchKeys];
