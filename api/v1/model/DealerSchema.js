@@ -185,13 +185,11 @@ const DealerSchema = new mongoose.Schema(
         {
           documentName: {
             type: String,
-            required: true,
             trim: true,
             lowercase: true,
           },
           documentFile: {
             type: String,
-            required: true,
             trim: true,
           },
         },
@@ -234,7 +232,7 @@ const searchKeys = [
   "document",
   "otherDocument",
   "companyId",
-  "openingBalance"
+  "openingBalance",
 ];
 module.exports = mongoose.model("Dealer", DealerSchema);
 module.exports.searchKeys = [...searchKeys];

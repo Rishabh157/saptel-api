@@ -6,7 +6,9 @@ const ledgerService = require("../../services/LedgerService");
 const { searchKeys } = require("../../model/LedgerSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const mongoose = require("mongoose");
 const companyService = require("../../services/CompanyService");
+const dealerService = require("../../services/DealerService");
 
 const {
   getSearchQuery,
@@ -21,7 +23,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { noteType, price, remark, companyId } = req.body;
+    let { noteType, price, remark, companyId, dealerId } = req.body;
     /**
      * check duplicate exist
      */
@@ -35,6 +37,13 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer.");
     }
     //------------------create data-------------------
     let dataCreated = await ledgerService.createNewData({ ...req.body });
@@ -63,7 +72,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { noteType, price, remark, companyId } = req.body;
+    let { noteType, price, remark, companyId, dealerId } = req.body;
 
     let idToBeSearch = req.params.id;
     let dataExist = await ledgerService.isExists([]);
@@ -75,7 +84,14 @@ exports.update = async (req, res) => {
       isDeleted: false,
     });
     if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+      throw new ApiError(httpStatus.OK, "Invalid Company.");
+    }
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer.");
     }
     //------------------Find data-------------------
     let datafound = await ledgerService.getOneByMultiField({
@@ -180,7 +196,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["comanyId"];
+    let objectIdFields = ["comanyId", "dealerId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -212,7 +228,38 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -274,14 +321,46 @@ exports.get = async (req, res) => {
 
     //if no default query then pass {}
     let matchQuery = {
-      companyId: companyId,
+      companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
 
-    let dataExist = await ledgerService.findAllWithQuery(matchQuery);
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
+    ];
+
+    let dataExist = await ledgerService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -308,11 +387,42 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await ledgerService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
 
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
+    ];
+    let dataExist = await ledgerService.aggregateQuery(additionalQuery);
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
