@@ -3,10 +3,10 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const mongoose = require("mongoose");
-const dealerSupervisorService = require("../../services/DealerSupervisorService");
+const zonalManagerService = require("../../services/ZonalManagerService");
 const dealerService = require("../../services/DealerService");
 const companyService = require("../../services/CompanyService");
-const { searchKeys } = require("../../model/DealerSupervisorSchema");
+const { searchKeys } = require("../../model/ZonalManagerSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -23,7 +23,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dealerId, supervisorName, companyId } = req.body;
+    let { dealerId, zonalManagerName, companyId } = req.body;
 
     const isDealerExists = await dealerService.findCount({
       _id: dealerId,
@@ -41,7 +41,7 @@ exports.add = async (req, res) => {
     }
     //------------------create data-------------------
 
-    let dataCreated = await dealerSupervisorService.createNewData({
+    let dataCreated = await zonalManagerService.createNewData({
       ...req.body,
     });
 
@@ -69,7 +69,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, supervisorName, companyId } = req.body;
+    let { dealerId, zonalManagerName, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -90,15 +90,15 @@ exports.update = async (req, res) => {
     }
 
     //------------------Find data-------------------
-    let datafound = await dealerSupervisorService.getOneByMultiField({
+    let datafound = await zonalManagerService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Dealer supervisor not found.`);
+      throw new ApiError(httpStatus.OK, `Zonal Manager not found.`);
     }
 
-    let dataUpdated = await dealerSupervisorService.getOneAndUpdate(
+    let dataUpdated = await zonalManagerService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -131,7 +131,7 @@ exports.update = async (req, res) => {
   }
 };
 //------------------Find data-------------------
-//     let datafound = await dealerSupervisorService.getOneByMultiField({
+//     let datafound = await zonalManagerService.getOneByMultiField({
 //       _id: idToBeSearch,
 //       isDeleted: false,
 //     });
@@ -139,7 +139,7 @@ exports.update = async (req, res) => {
 //       throw new ApiError(httpStatus.OK, `Dealer supervisor not found.`);
 //     }
 
-//     let dataUpdated = await dealerSupervisorService.getOneAndUpdate(
+//     let dataUpdated = await zonalManagerService.getOneAndUpdate(
 //       {
 //         _id: idToBeSearch,
 //         isDeleted: false,
@@ -173,6 +173,75 @@ exports.update = async (req, res) => {
 // };
 
 // all filter pagination api
+
+// =============get Disposition start================
+exports.get = async (req, res) => {
+  try {
+    let companyId = req.params.companyid;
+
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
+    ];
+    let dataExist = await zonalManagerService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// =============update Disposition start end================
+
 exports.allFilterPagination = async (req, res) => {
   try {
     var dateFilter = req.body.dateFilter;
@@ -267,7 +336,37 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
+    ];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
@@ -277,7 +376,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await dealerSupervisorService.aggregateQuery(
+    let dataFound = await zonalManagerService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -298,9 +397,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await dealerSupervisorService.aggregateQuery(
-      finalAggregateQuery
-    );
+    let result = await zonalManagerService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -330,11 +427,11 @@ exports.allFilterPagination = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await dealerSupervisorService.getOneByMultiField({ _id }))) {
+    if (!(await zonalManagerService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    let deleted = await dealerSupervisorService.getOneAndDelete({ _id });
+    let deleted = await zonalManagerService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -368,10 +465,34 @@ exports.getById = async (req, res) => {
           isDeleted: false,
         },
       },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealerData.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
     ];
-    let dataExist = await dealerSupervisorService.aggregateQuery(
-      additionalQuery
-    );
+    let dataExist = await zonalManagerService.aggregateQuery(additionalQuery);
     if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -397,13 +518,13 @@ exports.getById = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await dealerSupervisorService.getOneByMultiField({ _id });
+    let dataExist = await zonalManagerService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await dealerSupervisorService.getOneAndUpdate(
+    let statusChanged = await zonalManagerService.getOneAndUpdate(
       { _id },
       { isActive }
     );
