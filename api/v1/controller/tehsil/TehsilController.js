@@ -7,7 +7,7 @@ const companyService = require("../../services/CompanyService");
 const countryService = require("../../services/CountryService");
 const stateService = require("../../services/StateService");
 const districtService = require("../../services/DistrictService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/TehsilSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -392,7 +392,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await tehsilService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'tehsilId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'tehsilId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await tehsilService.getOneAndDelete({ _id });

@@ -11,7 +11,7 @@ const companyService = require("../../services/CompanyService");
 const languageService = require("../../services/LanguageService");
 const slotMasterService = require("../../services/SlotMasterService");
 const artistService = require("../../services/ArtistService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -647,7 +647,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await tapeMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'tapeNameId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'tapeNameId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await tapeMasterService.getOneAndDelete({ _id });

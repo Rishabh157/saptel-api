@@ -8,7 +8,7 @@ const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const companyService = require("../../services/CompanyService");
 const websiteMasterService = require("../../services/WebsiteMasterService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -448,7 +448,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await websiteBlogService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'websiteBlogId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'websiteBlogId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await websiteBlogService.getOneAndDelete({ _id });

@@ -21,7 +21,7 @@ const mongoose = require("mongoose");
 const { searchKeys } = require("../../model/OrderSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -1101,7 +1101,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'orderId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'orderId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await orderService.getOneAndDelete({ _id });

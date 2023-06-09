@@ -8,7 +8,7 @@ const countryService = require("../../services/CountryService");
 const stateService = require("../../services/StateService");
 const districtService = require("../../services/DistrictService");
 const tehsilService = require("../../services/TehsilService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/PincodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -485,7 +485,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'pincodeId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'pincodeId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await pincodeService.getOneAndDelete({ _id });

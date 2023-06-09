@@ -11,7 +11,7 @@ const { searchKeys } = require("../../model/DispositionOneSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const {
-  deleteUser,
+  checkIdInCollectionsThenDelete,
   collectionArrToMatch,
 } = require("../../helper/commonHelper");
 const {
@@ -364,7 +364,7 @@ exports.deleteDocument = async (req, res) => {
     }
     // ------find disposition (if use in other module / not)------
 
-    const deleteRefCheck = await deleteUser(
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
       collectionArrToMatch,
       "dispositionOneId",
       _id

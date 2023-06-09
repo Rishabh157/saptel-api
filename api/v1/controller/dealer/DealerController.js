@@ -14,7 +14,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const {
-  deleteUser,
+  checkIdInCollectionsThenDelete,
   collectionArrToMatch,
 } = require("../../helper/commonHelper");
 const {
@@ -922,7 +922,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await dealerService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
       collectionArrToMatch,
       "dealerId",
       _id

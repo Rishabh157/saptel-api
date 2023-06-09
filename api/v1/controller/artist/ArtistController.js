@@ -7,7 +7,7 @@ const { searchKeys } = require("../../model/ArtistSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const {
-  deleteUser,
+  checkIdInCollectionsThenDelete,
   collectionArrToMatch,
 } = require("../../helper/commonHelper");
 const {
@@ -327,7 +327,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await deleteUser(
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
       collectionArrToMatch,
       "artistId",
       _id

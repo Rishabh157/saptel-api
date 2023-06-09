@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("../../services/UserService");
 const companyService = require("../../services/CompanyService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/UserSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -371,7 +371,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await userService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'userId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'userId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await userService.getOneAndDelete({ _id });

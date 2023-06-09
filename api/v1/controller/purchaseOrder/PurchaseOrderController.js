@@ -6,7 +6,7 @@ const purchaseOrderService = require("../../services/PurchaseOrderService");
 const vendorService = require("../../services/VendorService");
 const wareHouseService = require("../../services/WareHouseService");
 const companyService = require("../../services/CompanyService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/PurchaseOrderSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -844,7 +844,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await purchaseOrderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'purchaseOrderId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'purchaseOrderId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await purchaseOrderService.getOneAndDelete({ _id });

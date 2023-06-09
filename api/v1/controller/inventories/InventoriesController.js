@@ -10,7 +10,7 @@ const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const barCodeService = require("../../services/BarCodeService");
 const wareHouseService = require("../../services/WareHouseService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -495,7 +495,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await inventoriesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'inventoryId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'inventoryId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await inventoriesService.getOneAndDelete({ _id });

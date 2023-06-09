@@ -9,7 +9,7 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/ZonalManagerSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -432,7 +432,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'zonalManagerId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'zonalManagerId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await zonalManagerService.getOneAndDelete({ _id });

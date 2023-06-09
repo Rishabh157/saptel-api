@@ -138,7 +138,7 @@ const collectionArrToMatch = [
     ZonalManagerSchema
 ]
 
-const deleteUser = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
+const checkIdInCollectionsThenDelete = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
     // Check for references in each collection
     let hasReferences = false;
 
@@ -165,6 +165,6 @@ const deleteUser = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
 }
 
 module.exports = {
-    deleteUser,
+    checkIdInCollectionsThenDelete,
     collectionArrToMatch
 }

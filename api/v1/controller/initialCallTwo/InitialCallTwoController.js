@@ -7,7 +7,7 @@ const initialCallTwoService = require("../../services/InitialCallTwoService");
 const initialCallOneService = require("../../services/InitialCallOneService");
 const initialCallThreeService = require("../../services/InitialCallThreeService");
 const companyService = require("../../services/CompanyService");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/InitialCallTwoSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -465,7 +465,7 @@ exports.deleteDocument = async (req, res) => {
     }
     // ------find disposition (if use in other module / not)------
 
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'initialCallTwoId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'initialCallTwoId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await initialCallTwoService.getOneAndDelete({ _id });

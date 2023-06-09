@@ -9,7 +9,7 @@ const websitPageService = require("../../services/WebsitePageService");
 const { searchKeys } = require("../../model/WebsiteMetaTagSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -548,7 +548,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'websiteMetaTagId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'websiteMetaTagId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await websiteMetaTagService.getOneAndDelete({ _id });
