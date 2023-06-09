@@ -242,7 +242,6 @@ exports.allFilterPagination = async (req, res) => {
             {
               $project: {
                 firstName: 1,
-                lastName: 1,
               },
             },
           ],
@@ -341,7 +340,6 @@ exports.get = async (req, res) => {
             {
               $project: {
                 firstName: 1,
-                lastName: 1,
               },
             },
           ],
@@ -404,7 +402,6 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 firstName: 1,
-                lastName: 1,
               },
             },
           ],
