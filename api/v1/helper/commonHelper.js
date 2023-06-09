@@ -1,32 +1,41 @@
-const deleteUser = async (moduleName, userIdToDelete) => {
-    const usersCollection = database.collection(moduleName);
-    const collectionsToCheck = ['warehouses', 'dealers', 'orders'];
+const mongoose = require("mongoose")
+const AdminSchema = require("../model/AdminSchema")
+const AllocationSchema = require("../model/AllocationSchema")
+const AreaSchema = require("../model/AreaSchema")
+const ArtistSchema = require("../model/ArtistSchema")
+const AsrSchema = require("../model/AsrRequestSchema")
+const AssetCategorySchema = require("../model/AssetCategorySchema")
+const AssetLocationSchema = require("../model/AssetLocationSchema")
+const AssetSchema = require("../model/AssetSchema")
 
+
+const deleteUser = async (collectionArrToMatch, IdToDelete) => {
+    // Check for references in each collection
     let hasReferences = false;
 
-    // Check for references in each collection
-    for (const collection of collectionsToCheck) {
-        const currentCollection = database.collection(collection);
-        const userReference = await currentCollection.findOne({ userId: userIdToDelete });
-
-        if (userReference) {
+    for (const collectionSchema of collectionArrToMatch) {
+        const reference = await collectionSchema.findOne({ companyId: IdToDelete });
+        if (reference) {
             hasReferences = true;
-            console.log(`Cannot delete user. Found reference in ${collection} collection.`);
+            return {
+                message: `Cannot delete. Found reference in ${collectionSchema.modelName} collection.`,
+                status: false
+            };
         }
     }
-
     if (!hasReferences) {
-        // Delete the user
-        const deleteResult = await usersCollection.deleteOne({ _id: userIdToDelete });
-
-        if (deleteResult.deletedCount === 1) {
-            console.log('User deleted successfully.');
-        } else {
-            console.log('User deletion failed.');
-        }
+        return {
+            message: "Successfull.",
+            status: true
+        };
     }
+    return {
+        message: "All OK",
+        status: false
+    };
 }
 
 module.exports = {
-    deleteUser
+    deleteUser,
+    AdminSchema
 }

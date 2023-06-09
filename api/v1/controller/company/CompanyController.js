@@ -8,7 +8,7 @@ const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const userService = require("../../services/UserService");
 const adminService = require("../../services/AdminService");
-
+const { deleteUser, AdminSchema } = require("../../helper/commonHelper")
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -344,27 +344,19 @@ exports.deleteDocument = async (req, res) => {
     if (!(await companyService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isCompanyAssigned = await userService.findCount({
-      companyId: _id,
-      isDeleted: false,
-    });
-    const isCompanyAssignedToAdmin = await adminService.findCount({
-      companyId: _id,
-      isDeleted: false,
-    });
 
-    if (isCompanyAssigned || isCompanyAssignedToAdmin) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Company can't be deleted because it is currently used in other services"
-      );
+    const collectionArrToMatch = [AdminSchema]
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, _id)
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await companyService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
-    let deleted = await companyService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",
