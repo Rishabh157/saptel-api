@@ -147,7 +147,7 @@ const checkIdInCollectionsThenDelete = async (collectionArrToMatch, IdToMatch, I
         if (reference) {
             hasReferences = true;
             return {
-                message: `The ${collectionSchema.modelName} collection is currently utilizing this item, so it cannot be deleted right now.`,
+                message: `This item cannot be deleted right now , because it is currently used in ${collectionSchema.modelName} collection`,
                 status: false
             };
         }
