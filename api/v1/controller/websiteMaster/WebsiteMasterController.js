@@ -354,10 +354,6 @@ exports.deleteDocument = async (req, res) => {
       websiteId: new mongoose.Types.ObjectId(_id),
     });
 
-    await websitePageSchema.deleteMany({
-      websiteId: new mongoose.Types.ObjectId(_id),
-    });
-
     let deleted = await websiteMasterService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

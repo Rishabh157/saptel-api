@@ -8,6 +8,7 @@ const { getQuery } = require("../../helper/utils");
 const purchaseOrderService = require("../../services/PurchaseOrderService");
 const vendorService = require("../../services/VendorService");
 const companyService = require("../../services/CompanyService");
+const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -713,23 +714,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await vendorService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isVendorExistsInPo = await purchaseOrderService.findCount({
-      vendorId: _id,
-      isDeleted: false,
-    });
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'vendorId', _id)
 
-    if (isVendorExistsInPo) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Vendor can't be deleted because it is currently used in other services"
-      );
-    }
-    let deleted = await vendorService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (deleteRefCheck.status === true) {
+      let deleted = await vendorService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const salesOrderService = require("../../services/SalesOrderService");
 const companyService = require("../../services/CompanyService");
+const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/SalesOrderSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -719,12 +720,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await salesOrderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await salesOrderService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'salesOrderId', _id)
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await salesOrderService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

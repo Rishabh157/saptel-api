@@ -20,6 +20,7 @@ const mongoose = require("mongoose");
 const { searchKeys } = require("../../model/OrderSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -1098,12 +1099,17 @@ exports.deleteDocument = async (req, res) => {
     if (!(await inquiryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await inquiryService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'inquiryId', _id)
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await inquiryService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

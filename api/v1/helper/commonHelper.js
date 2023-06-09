@@ -147,7 +147,7 @@ const deleteUser = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
         if (reference) {
             hasReferences = true;
             return {
-                message: `Cannot delete. Found reference in ${collectionSchema.modelName} collection.`,
+                message: `The ${collectionSchema.modelName} collection is currently utilizing this item, so it cannot be deleted right now.`,
                 status: false
             };
         }

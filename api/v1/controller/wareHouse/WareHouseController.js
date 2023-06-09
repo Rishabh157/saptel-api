@@ -6,6 +6,7 @@ const wareHouseService = require("../../services/WareHouseService");
 const vendorService = require("../../services/VendorService");
 const companyService = require("../../services/CompanyService");
 const dealerService = require("../../services/DealerService");
+const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/WareHouseSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -803,23 +804,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await wareHouseService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isWareHouseExistsInPo = await purchaseOrderService.findCount({
-      wareHouseId: _id,
-      isDeleted: false,
-    });
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'wareHouseId', _id)
 
-    if (isWareHouseExistsInPo) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Warehouse can't be deleted because it is currently used in other services"
-      );
-    }
-    let deleted = await wareHouseService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (deleteRefCheck.status === true) {
+      let deleted = await wareHouseService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

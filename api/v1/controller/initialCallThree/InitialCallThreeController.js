@@ -7,6 +7,7 @@ const initialCallThreeService = require("../../services/InitialCallThreeService"
 const initialCallTwoService = require("../../services/InitialCallTwoService");
 const companyService = require("../../services/CompanyService");
 const mongoose = require("mongoose");
+const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("../../model/InitialCallThreeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -547,22 +548,18 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     // ------find disposition (if use in other module / not)------
-    let isDispositionOneExists = await initialCallThreeService.findCount({
-      dispositionOneId: _id,
-      isDeleted: false,
-    });
-    if (isDispositionOneExists) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Disposition can't be deleted as it is used in other module"
-      );
+
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'dispositionOneId', _id)
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await initialCallThreeService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
-    let deleted = await initialCallThreeService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+
     return res.status(httpStatus.OK).send({
-      message: "Delete Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",
