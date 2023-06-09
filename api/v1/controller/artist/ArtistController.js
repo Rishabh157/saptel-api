@@ -6,7 +6,10 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const { searchKeys } = require("../../model/ArtistSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -324,12 +327,21 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    let deleted = await artistService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "artistId",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await artistService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
+
     return res.status(httpStatus.OK).send({
-      message: "Deleted Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

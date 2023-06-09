@@ -11,7 +11,10 @@ const companyService = require("../../services/CompanyService");
 
 const slotMasterService = require("../../services/SlotMasterService");
 const tapeMasterService = require("../../services/TapeMasterService");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -354,36 +357,22 @@ exports.deleteDocument = async (req, res) => {
     if (!(await channelGroupService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isChannelGroupExistsInChannel =
-      await channelManagementService.findCount({
-        channelGroupId: _id,
-        isDeleted: false,
-      });
-    const isChannelGroupExistsInslot = await slotMasterService.findCount({
-      channelGroup: _id,
-      isDeleted: false,
-    });
-    const isChannelGroupExistsInTape = await tapeMasterService.findCount({
-      channelGroup: _id,
-      isDeleted: false,
-    });
 
-    if (
-      isChannelGroupExistsInChannel ||
-      isChannelGroupExistsInslot ||
-      isChannelGroupExistsInTape
-    ) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Channel Group can't be deleted because it is currently used in other services"
-      );
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "channelGroupId",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await channelGroupService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
-    let deleted = await channelGroupService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

@@ -10,7 +10,10 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/DispositionOneSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -361,35 +364,21 @@ exports.deleteDocument = async (req, res) => {
     }
     // ------find disposition (if use in other module / not)------
 
-    let isDispositionOneExists = await dispositionTwoService.findCount({
-      dispositionOneId: _id,
-      isDeleted: false,
-    });
-    if (isDispositionOneExists) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Disposition can't be deleted as it is used in other module"
-      );
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "dispositionOneId",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await dispositionOneService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
 
-    let isDispositionOneExistsInDispositionThree =
-      await dispositionThreeService.findCount({
-        dispositionOneId: _id,
-        isDeleted: false,
-      });
-    if (isDispositionOneExistsInDispositionThree) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Disposition can't be deleted as it is used in other module"
-      );
-    }
-
-    let deleted = await dispositionOneService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
     return res.status(httpStatus.OK).send({
-      message: "Delete Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

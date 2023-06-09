@@ -14,7 +14,10 @@ const channelCategoryService = require("../../services/ChannelCategoryService");
 const languageService = require("../../services/LanguageService");
 const companyService = require("../../services/CompanyService");
 const slotMasterService = require("../../services/SlotMasterService");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -80,9 +83,9 @@ exports.add = async (req, res) => {
     });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
-        _id: language,
-        isDeleted: false,
-      })
+          _id: language,
+          isDeleted: false,
+        })
       : null;
     if (!isDistrictExists) {
       throw new ApiError(httpStatus.OK, "Invalid District");
@@ -186,9 +189,9 @@ exports.update = async (req, res) => {
     });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
-        _id: language,
-        isDeleted: false,
-      })
+          _id: language,
+          isDeleted: false,
+        })
       : null;
 
     if (!isDistrictExists) {
@@ -855,23 +858,22 @@ exports.deleteDocument = async (req, res) => {
     if (!(await channelMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isChannelExistsInSlot = await slotMasterService.findCount({
-      channelName: _id,
-      isDeleted: false,
-    });
 
-    if (isChannelExistsInSlot) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Channel can't be deleted because it is currently used in other services"
-      );
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "channelId",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await channelMasterService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
-    let deleted = await channelMasterService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",
