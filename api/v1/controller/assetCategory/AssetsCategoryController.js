@@ -6,6 +6,7 @@ const assetCategoryService = require("../../services/AssetCategoryService");
 const { searchKeys } = require("../../model/AssetCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const companyService = require("../../services/CompanyService");
 
 const {
   getSearchQuery,
@@ -46,7 +47,7 @@ exports.add = async (req, res) => {
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: "CREATED",
+        code: null,
         issue: null,
       });
     } else {
@@ -95,11 +96,11 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      return res.status(httpStatus.OK).send({
+      return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
         data: dataUpdated,
         status: true,
-        code: "OK",
+        code: null,
         issue: null,
       });
     } else {
@@ -251,8 +252,6 @@ exports.allFilterPagination = async (req, res) => {
         totalItem: totalData,
         pageSize: limit,
         message: "Data Found",
-        code: "OK",
-        issue: null,
       });
     } else {
       throw new ApiError(httpStatus.OK, `No data Found`);
@@ -286,7 +285,7 @@ exports.get = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: "OK",
+        code: null,
         issue: null,
       });
     }
@@ -316,7 +315,7 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: "OK",
+        code: null,
         issue: null,
       });
     }
@@ -345,7 +344,7 @@ exports.deleteDocument = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: null,
-      code: "OK",
+      code: null,
       issue: null,
     });
   } catch (err) {
@@ -378,7 +377,7 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
-      code: "OK",
+      code: null,
       issue: null,
     });
   } catch (err) {
