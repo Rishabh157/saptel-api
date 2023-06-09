@@ -9,7 +9,10 @@ const { getQuery } = require("../../helper/utils");
 const schemeService = require("../../services/SchemeService");
 const companyService = require("../../services/CompanyService");
 const channelMasterService = require("../../services/ChannelMasterService");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -607,12 +610,21 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    let deleted = await didManagementService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "didNumber",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await didManagementService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",
