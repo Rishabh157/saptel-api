@@ -351,7 +351,7 @@ exports.deleteDocument = async (req, res) => {
 
     return res.status(httpStatus.OK).send({
       message: deleteRefCheck.message,
-      status: true,
+      status: deleteRefCheck.status,
       data: null,
       code: "OK",
       issue: null,
