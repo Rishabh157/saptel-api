@@ -12,12 +12,6 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-
-    batchNo: {
-      type: String,
-      default: "",
-      trim: true,
-    },
     inOutBound: {
       type: String,
       required: false,
