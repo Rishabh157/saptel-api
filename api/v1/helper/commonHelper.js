@@ -164,7 +164,24 @@ const checkIdInCollectionsThenDelete = async (collectionArrToMatch, IdToMatch, I
     };
 }
 
+const checkIdExistOrNot = async (moduleName, IdsToCheck) => {
+    const promises = await Promise.all(IdsToCheck.map(async (id) => {
+        const isExists =
+            IdsToCheck !== null || !IdsToCheck
+                ? await moduleName.findCount({ _id: id, isDeleted: false })
+                : null;
+        if (isExists === 0 || isExists === null || !isExists) {
+            throw new Error(`Invalid ${id}`);
+        }
+    }));
+    return {
+        message: "All ok",
+        status: true
+    };
+}
+
 module.exports = {
     checkIdInCollectionsThenDelete,
+    checkIdExistOrNot,
     collectionArrToMatch
 }
