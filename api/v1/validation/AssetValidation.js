@@ -24,8 +24,8 @@ const update = {
   }),
   body: Joi.object().keys({
     assetName: Joi.string().lowercase().required(),
-    quantity: Joi.string().lowercase().required(),
-    price: Joi.string().lowercase().required(),
+    quantity: Joi.number().required(),
+    price: Joi.number().required(),
     remark: Joi.string().lowercase().required(),
     assetDetails: Joi.array().required(),
     assetCategoryId: Joi.string().custom(commonValidation.objectId).required(),
