@@ -9,7 +9,10 @@ const { searchKeys } = require("../../model/DealersCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const dealerService = require("../../services/DealerService");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -369,23 +372,22 @@ exports.deleteDocument = async (req, res) => {
     if (!(await dealersCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isDealerCatExistsInDealer = await dealerService.findCount({
-      dealersCategory: _id,
-      isDeleted: false,
-    });
 
-    if (isDealerCatExistsInDealer) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Dealer category can't be deleted because it is currently used in other services"
-      );
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "dealerCategoryId",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await dealersCategoryService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
-    let deleted = await dealersCategoryService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

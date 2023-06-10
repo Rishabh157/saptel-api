@@ -6,9 +6,7 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/CompanySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const userService = require("../../services/UserService");
-const adminService = require("../../services/AdminService");
-
+const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -18,6 +16,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+
 
 //add start
 exports.add = async (req, res) => {
@@ -344,27 +343,17 @@ exports.deleteDocument = async (req, res) => {
     if (!(await companyService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isCompanyAssigned = await userService.findCount({
-      companyId: _id,
-      isDeleted: false,
-    });
-    const isCompanyAssignedToAdmin = await adminService.findCount({
-      companyId: _id,
-      isDeleted: false,
-    });
+    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'companyId', _id)
 
-    if (isCompanyAssigned || isCompanyAssignedToAdmin) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Company can't be deleted because it is currently used in other services"
-      );
+    if (deleteRefCheck.status === true) {
+      let deleted = await companyService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
-    let deleted = await companyService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

@@ -8,7 +8,10 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/ChannelCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-
+const {
+  deleteUser,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -351,12 +354,22 @@ exports.deleteDocument = async (req, res) => {
     if (!(await channelCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await channelCategoryService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+
+    const deleteRefCheck = await deleteUser(
+      collectionArrToMatch,
+      "channelCategoryId",
+      _id
+    );
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await channelCategoryService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",
