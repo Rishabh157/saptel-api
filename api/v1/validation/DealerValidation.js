@@ -46,11 +46,11 @@ const create = {
       adharCard: Joi.string().uri().required(),
     }),
     otherDocument: Joi.array().items({
-      documentName: Joi.string().required(),
-      documentFile: Joi.string().uri().required(),
+      documentName: Joi.string(),
+      documentFile: Joi.string().uri(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    openingBalance: Joi.number().allow()
+    openingBalance: Joi.number().allow(),
   }),
 };
 
@@ -99,11 +99,11 @@ const update = {
       adharCard: Joi.string().uri().required(),
     }),
     otherDocument: Joi.array().items({
-      documentName: Joi.string().required(),
-      documentFile: Joi.string().uri().required(),
+      documentName: Joi.string(),
+      documentFile: Joi.string().uri(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    openingBalance: Joi.number().allow()
+    openingBalance: Joi.number().allow(),
   }),
 };
 
