@@ -6,7 +6,10 @@ const purchaseOrderService = require("../../services/PurchaseOrderService");
 const vendorService = require("../../services/VendorService");
 const wareHouseService = require("../../services/WareHouseService");
 const companyService = require("../../services/CompanyService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("../../model/PurchaseOrderSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -103,7 +106,7 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let { poCode, vendorId, wareHouseId, purchaseOrder, companyId } = req.body;
-
+    let idToBeSearch = req.params.id;
     // let idToBeSearch = req.params.id;
     // let dataExist = await purchaseOrderService.isExists(
     //   [{ poCode }],
@@ -145,42 +148,24 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
-    const output = purchaseOrder.map((order) => {
-      return {
-        poCode: req.body.poCode,
-        vendorId: req.body.vendorId,
-        wareHouseId: req.body.wareHouseId,
-        purchaseOrder: {
-          id: order.id,
-          itemId: order.itemId,
-          rate: order.rate,
-          quantity: order.quantity,
-          estReceivingDate: order.estReceivingDate,
+    const dataUpdated = await purchaseOrderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
         },
-        companyId: req.body.companyId,
-      };
-    });
-    const updatedData = [];
-    for (let each in output) {
-      const dataUpdated = await purchaseOrderService.getOneAndUpdate(
-        {
-          _id: output[each].purchaseOrder.id,
-          isDeleted: false,
-        },
-        {
-          $set: {
-            ...output[each],
-          },
-        }
-      );
-      updatedData.push(dataUpdated);
-    }
+      }
+    );
+
     //------------------create data-------------------
 
-    if (updatedData.length) {
+    if (dataUpdated) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
-        data: updatedData,
+        data: dataUpdated,
         status: true,
         code: "OK",
         issue: null,
@@ -844,7 +829,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await purchaseOrderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'purchaseOrderId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "purchaseOrderId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await purchaseOrderService.getOneAndDelete({ _id });
