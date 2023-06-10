@@ -10,6 +10,7 @@ const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const barCodeService = require("../../services/BarCodeService");
 const wareHouseService = require("../../services/WareHouseService");
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -494,12 +495,17 @@ exports.deleteDocument = async (req, res) => {
     if (!(await inventoriesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await inventoriesService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'inventoryId', _id)
+
+    if (deleteRefCheck.status === true) {
+      let deleted = await inventoriesService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
+
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

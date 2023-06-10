@@ -8,6 +8,7 @@ const { searchKeys } = require("../../model/SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const tapeMasterService = require("../../services/TapeMasterService");
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -497,23 +498,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await schemeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isSchemeExistsInTape = await tapeMasterService.findCount({
-      scheme: _id,
-      isDeleted: false,
-    });
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'scheme', _id)
 
-    if (isSchemeExistsInTape) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Scheme can't be deleted because it is currently used in other services"
-      );
-    }
-    let deleted = await schemeService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (deleteRefCheck.status === true) {
+      let deleted = await schemeService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

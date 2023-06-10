@@ -6,7 +6,7 @@ const companyService = require("../../services/CompanyService");
 const { searchKeys } = require("../../model/CompanySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const { deleteUser, collectionArrToMatch } = require("../../helper/commonHelper")
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -343,7 +343,7 @@ exports.deleteDocument = async (req, res) => {
     if (!(await companyService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await deleteUser(collectionArrToMatch, 'companyId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'companyId', _id)
 
     if (deleteRefCheck.status === true) {
       let deleted = await companyService.getOneAndDelete({ _id });

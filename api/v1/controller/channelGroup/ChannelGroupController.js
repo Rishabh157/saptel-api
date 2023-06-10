@@ -12,7 +12,7 @@ const companyService = require("../../services/CompanyService");
 const slotMasterService = require("../../services/SlotMasterService");
 const tapeMasterService = require("../../services/TapeMasterService");
 const {
-  deleteUser,
+  checkIdInCollectionsThenDelete,
   collectionArrToMatch,
 } = require("../../helper/commonHelper");
 const {
@@ -358,7 +358,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await deleteUser(
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
       collectionArrToMatch,
       "channelGroupId",
       _id

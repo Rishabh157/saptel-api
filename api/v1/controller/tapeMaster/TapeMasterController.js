@@ -11,6 +11,7 @@ const companyService = require("../../services/CompanyService");
 const languageService = require("../../services/LanguageService");
 const slotMasterService = require("../../services/SlotMasterService");
 const artistService = require("../../services/ArtistService");
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
   getSearchQuery,
@@ -646,23 +647,16 @@ exports.deleteDocument = async (req, res) => {
     if (!(await tapeMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isTapeExistsInSlot = await slotMasterService.findCount({
-      tapeName: _id,
-      isDeleted: false,
-    });
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'tapeNameId', _id)
 
-    if (isTapeExistsInSlot) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Tape can't be deleted because it is currently used in other services"
-      );
-    }
-    let deleted = await tapeMasterService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (deleteRefCheck.status === true) {
+      let deleted = await tapeMasterService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: deleteRefCheck.message,
       status: true,
       data: null,
       code: "OK",

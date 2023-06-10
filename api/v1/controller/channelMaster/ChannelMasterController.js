@@ -15,7 +15,7 @@ const languageService = require("../../services/LanguageService");
 const companyService = require("../../services/CompanyService");
 const slotMasterService = require("../../services/SlotMasterService");
 const {
-  deleteUser,
+  checkIdInCollectionsThenDelete,
   collectionArrToMatch,
 } = require("../../helper/commonHelper");
 const {
@@ -83,9 +83,9 @@ exports.add = async (req, res) => {
     });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
-          _id: language,
-          isDeleted: false,
-        })
+        _id: language,
+        isDeleted: false,
+      })
       : null;
     if (!isDistrictExists) {
       throw new ApiError(httpStatus.OK, "Invalid District");
@@ -189,9 +189,9 @@ exports.update = async (req, res) => {
     });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
-          _id: language,
-          isDeleted: false,
-        })
+        _id: language,
+        isDeleted: false,
+      })
       : null;
 
     if (!isDistrictExists) {
@@ -859,7 +859,7 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await deleteUser(
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
       collectionArrToMatch,
       "channelId",
       _id

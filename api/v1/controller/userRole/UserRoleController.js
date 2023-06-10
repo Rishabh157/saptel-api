@@ -8,6 +8,7 @@ const { searchKeys } = require("../../model/UserRoleSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const companyService = require("../../services/CompanyService");
+const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {
     getSearchQuery,
@@ -279,13 +280,16 @@ exports.deleteDocument = async (req, res) => {
         if (!(await userRoleService.getOneByMultiField({ _id }))) {
             throw new ApiError(httpStatus.OK, "Data not found.");
         }
+        const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'userRoleId', _id)
 
-        let deleted = await userRoleService.getOneAndDelete({ _id });
-        if (!deleted) {
-            throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+        if (deleteRefCheck.status === true) {
+            let deleted = await userRoleService.getOneAndDelete({ _id });
+            if (!deleted) {
+                throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+            }
         }
         return res.status(httpStatus.OK).send({
-            message: "Successfull.",
+            message: deleteRefCheck.message,
             status: true,
             data: null,
             code: "OK",

@@ -138,7 +138,7 @@ const collectionArrToMatch = [
     ZonalManagerSchema
 ]
 
-const deleteUser = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
+const checkIdInCollectionsThenDelete = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
     // Check for references in each collection
     let hasReferences = false;
 
@@ -147,7 +147,7 @@ const deleteUser = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
         if (reference) {
             hasReferences = true;
             return {
-                message: `Cannot delete. Found reference in ${collectionSchema.modelName} collection.`,
+                message: `This item cannot be deleted right now, because it is currently used in ${collectionSchema.modelName} collection`,
                 status: false
             };
         }
@@ -165,6 +165,6 @@ const deleteUser = async (collectionArrToMatch, IdToMatch, IdToDelete) => {
 }
 
 module.exports = {
-    deleteUser,
+    checkIdInCollectionsThenDelete,
     collectionArrToMatch
 }
