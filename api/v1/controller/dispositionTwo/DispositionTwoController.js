@@ -149,11 +149,8 @@ exports.update = async (req, res) => {
 // =============get Disposition start================
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
-
     //if no default query then pass {}
     let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
     };
     if (req.query && Object.keys(req.query).length) {

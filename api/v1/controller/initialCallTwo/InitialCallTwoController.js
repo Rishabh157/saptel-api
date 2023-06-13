@@ -7,7 +7,10 @@ const initialCallTwoService = require("../../services/InitialCallTwoService");
 const initialCallOneService = require("../../services/InitialCallOneService");
 const initialCallThreeService = require("../../services/InitialCallThreeService");
 const companyService = require("../../services/CompanyService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("../../model/InitialCallTwoSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -152,11 +155,8 @@ exports.update = async (req, res) => {
 // =============get  start================
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
-
     //if no default query then pass {}
     let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
     };
     if (req.query && Object.keys(req.query).length) {
@@ -465,7 +465,11 @@ exports.deleteDocument = async (req, res) => {
     }
     // ------find disposition (if use in other module / not)------
 
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'initialCallTwoId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "initialCallTwoId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await initialCallTwoService.getOneAndDelete({ _id });
@@ -481,7 +485,6 @@ exports.deleteDocument = async (req, res) => {
       code: "OK",
       issue: null,
     });
-
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
