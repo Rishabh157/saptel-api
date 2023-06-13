@@ -71,6 +71,7 @@ const ledgerRoute = require("./LedgerRoute");
 const userRoleRoute = require("./UserRoleRoute");
 const allocationRoute = require("./AllocationRoute");
 const assetLocationRoute = require("./AssetLocationRoute");
+const prepaidOrderRoute = require("./PrepaidOrderRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -364,6 +365,10 @@ const defaultRoutes = [
   {
     path: "/asset-location",
     route: assetLocationRoute,
+  },
+  {
+    path: "/prepaid-order",
+    route: prepaidOrderRoute,
   },
 ];
 orderRoute;

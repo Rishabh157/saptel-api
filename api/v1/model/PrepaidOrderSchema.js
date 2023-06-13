@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const { genderType } = require("../helper/enumUtils");
-const OrderSchema = new mongoose.Schema(
+const PrepaidOrderSchema = new mongoose.Schema(
   {
     didNo: {
       type: String,
@@ -12,7 +12,7 @@ const OrderSchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
-    orderNumber: {
+    prepaidOrderNumber: {
       type: Number,
       required: true,
     },
@@ -199,7 +199,7 @@ const OrderSchema = new mongoose.Schema(
 
 const searchKeys = [
   "didNo",
-  "orderNumber",
+  "prepaidOrderNumber",
   "dealerAssignedLabel",
   "inOutBound",
   "incomingCallerNo",
@@ -235,5 +235,5 @@ const searchKeys = [
   "dispositionLevelTwoId",
   "dispositionLevelThreeId",
 ];
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.model("PrepaidOrder", PrepaidOrderSchema);
 module.exports.searchKeys = [...searchKeys];
