@@ -1,5 +1,5 @@
-const adminService = require("../services/AdminService");
-const userService = require("../services/UserService");
+const adminService = require("../src/admin/AdminService");
+const userService = require("../src/user/UserService");
 const logger = require("../../../config/logger");
 const { errorRes } = require("../../utils/resError");
 const httpStatus = require("http-status");

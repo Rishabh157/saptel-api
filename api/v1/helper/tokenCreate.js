@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../../config/config");
 const logger = require("../../../config/logger");
-const { tokenEnum } = require("../helper/enumUtils");
+const { tokenEnum } = require("./enumUtils");
 
 /**
  *

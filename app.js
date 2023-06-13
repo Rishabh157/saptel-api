@@ -7,7 +7,7 @@ const httpStatus = require("http-status");
 const morgan = require("./config/morgan");
 const config = require("./config/config");
 const logger = require("./config/logger");
-const routes = require("./api/v1/route/version_one");
+const routes = require("./api/v1/Routes");
 const path = require("path");
 const { errorConverter, errorHandler } = require("./middleware/error");
 
