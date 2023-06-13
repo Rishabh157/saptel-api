@@ -7,7 +7,7 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const tapeMasterService = require("./TapeMasterService");
+const tapeMasterService = require("../tapeMaster/TapeMasterService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {

@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const validate = require("../../middleware/validate");
 const inquiryValidation = require("./InquiryValidation");
-const inquiryController = require("../../controller/inquiry/InquiryController");
+const inquiryController = require("./InquiryController");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const wareHouseController = require("../../controller/wareHouse/WareHouseController");
+const wareHouseController = require("./WareHouseController");
 const validate = require("../../middleware/validate");
 const wareHouseValidation = require("./WareHouseValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

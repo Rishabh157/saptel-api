@@ -9,8 +9,8 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./ItemSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const purchaseOrderService = require("./PurchaseOrderService");
-const productService = require("./ProductService");
+const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
+const productService = require("../product/ProductService");
 
 const {
   getSearchQuery,

@@ -7,9 +7,9 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./ProductSubCategorySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const productCategoryService = require("./ProductCategoryService");
-const productService = require("./ProductService");
-const schemeService = require("./SchemeService");
+const productCategoryService = require("../productCategory/ProductCategoryService");
+const productService = require("../product/ProductService");
+const schemeService = require("../scheme/SchemeService");
 
 const {
   getSearchQuery,

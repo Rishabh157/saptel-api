@@ -7,9 +7,9 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./ProductGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const AsrRequest = require("./AsrRequestSchema");
-const productService = require("./ProductService");
-const schemeService = require("./SchemeService");
+const AsrRequest = require("../asrRequest/AsrRequestService");
+const productService = require("../product/ProductService");
+const schemeService = require("../scheme/SchemeService");
 
 const {
   getSearchQuery,

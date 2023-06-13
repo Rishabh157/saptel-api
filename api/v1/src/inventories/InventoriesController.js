@@ -8,8 +8,8 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./InventoriesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const barCodeService = require("./BarCodeService");
-const wareHouseService = require("./WareHouseService");
+const barCodeService = require("../barCode/BarCodeService");
+const wareHouseService = require("../wareHouse/WareHouseService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {

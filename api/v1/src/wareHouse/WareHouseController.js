@@ -3,15 +3,15 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const wareHouseService = require("./WareHouseService");
-const vendorService = require("./VendorService");
+const vendorService = require("../vendor/VendorService");
 const companyService = require("../company/CompanyService");
-const dealerService = require("./DealerService");
+const dealerService = require("../dealer/DealerService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("./WareHouseSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const purchaseOrderService = require("./PurchaseOrderService");
+const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
 
 const {
   getSearchQuery,

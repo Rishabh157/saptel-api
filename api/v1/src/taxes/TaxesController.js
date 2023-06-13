@@ -7,8 +7,8 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./TaxesSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const productSubCategoryService = require("./ProductSubCategoryService");
-const productService = require("./ProductService");
+const productSubCategoryService = require("../productSubCategory/ProductSubCategoryService");
+const productService = require("../product/ProductService");
 
 const {
   getSearchQuery,

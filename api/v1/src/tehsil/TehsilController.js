@@ -4,9 +4,9 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const tehsilService = require("./TehsilService");
 const companyService = require("../company/CompanyService");
-const countryService = require("./CountryService");
-const stateService = require("./StateService");
-const districtService = require("./DistrictService");
+const countryService = require("../country/CountryService");
+const stateService = require("../state/StateService");
+const districtService = require("../district/DistrictService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("./TehsilSchema");

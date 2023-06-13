@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const validate = require('../../middleware/validate')
 const fileManagerValidation = require('./FileManagerValidation')
-const fileManagerController = require('../../controller/fileManager/FileManagerController')
+const fileManagerController = require('./FileManagerController')
 const multerFile = require('../../middleware/multerMiddleware')
 const { authCheckMiddleware } = require('../../middleware/authenticationCheck')
 const { accessModuleCheck } = require('../../middleware/accessModuleCheck')

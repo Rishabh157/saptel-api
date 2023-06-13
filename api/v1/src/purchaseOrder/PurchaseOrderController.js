@@ -3,8 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const purchaseOrderService = require("./PurchaseOrderService");
-const vendorService = require("./VendorService");
-const wareHouseService = require("./WareHouseService");
+const vendorService = require("../vendor/VendorService");
+const wareHouseService = require("../wareHouse/WareHouseService");
 const companyService = require("../company/CompanyService");
 const {
   checkIdInCollectionsThenDelete,

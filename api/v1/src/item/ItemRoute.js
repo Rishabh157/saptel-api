@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const itemController = require("../../controller/item/ItemController");
+const itemController = require("./ItemController");
 const validate = require("../../middleware/validate");
 const itemValidation = require("./ItemValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

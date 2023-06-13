@@ -6,9 +6,9 @@ const slotMasterService = require("./SlotMasterService");
 const { searchKeys } = require("./SlotMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const channelGroupService = require("./ChannelGroupService");
-const tapeMasterService = require("./TapeMasterService");
-const channelMasterService = require("./ChannelMasterService");
+const channelGroupService = require("../channelGroup/ChannelGroupService");
+const tapeMasterService = require("../tapeMaster/TapeMasterService");
+const channelMasterService = require("../channelMaster/ChannelMasterService");
 const companyService = require("../company/CompanyService");
 
 const {

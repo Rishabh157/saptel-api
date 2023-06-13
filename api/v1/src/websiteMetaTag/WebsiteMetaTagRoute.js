@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const websiteMetaTagController = require("../../controller/websiteMetaTag/WebsiteMetaTagController");
+const websiteMetaTagController = require("./WebsiteMetaTagController");
 const websiteMetaTagValidation = require("./WebsiteMetaTagValidation");
 const validate = require("../../middleware/validate");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const validate = require("../../middleware/validate");
 const initialCallTwoValidation = require("./InitialCallTwoValidation");
-const initialCallTwoController = require("../../controller/initialCallTwo/InitialCallTwoController");
+const initialCallTwoController = require("./InitialCallTwoController");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const websiteBlogController = require("../../controller/websiteBlog/WebsiteBlogController");
+const websiteBlogController = require("./WebsiteBlogController");
 const validate = require("../../middleware/validate");
 const websiteBlogValidation = require("./WebsiteBlogValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

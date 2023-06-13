@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const schemeController = require("../../controller/scheme/SchemeController");
+const schemeController = require("./SchemeController");
 const validate = require("../../middleware/validate");
 const schemeValidation = require("./SchemeValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

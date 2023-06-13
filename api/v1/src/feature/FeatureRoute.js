@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const featureController = require("../../controller/feature/FeatureController");
+const featureController = require("./FeatureController");
 const validate = require("../../middleware/validate");
 const featureValidation = require("./FeatureValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

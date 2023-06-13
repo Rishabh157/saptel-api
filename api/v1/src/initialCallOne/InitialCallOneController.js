@@ -3,8 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const initialCallOneService = require("./InitialCallOneService");
-const initialCallTwoService = require("./InitialCallTwoService");
-const initialCallThreeService = require("./InitialCallThreeService");
+const initialCallTwoService = require("../initialCallTwo/InitialCallTwoService");
+const initialCallThreeService = require("../initialCallThree/InitialCallThreeService");
 const companyService = require("../company/CompanyService");
 
 const { searchKeys } = require("./InitialCallOneSchema");

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const taxesController = require("../../controller/taxes/TaxesController");
+const taxesController = require("./TaxesController");
 const validate = require("../../middleware/validate");
 const taxesValidation = require("./TaxesValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

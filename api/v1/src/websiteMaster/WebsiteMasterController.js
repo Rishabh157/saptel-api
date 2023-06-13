@@ -6,8 +6,8 @@ const websiteMasterService = require("./WebsiteMasterService");
 const { searchKeys } = require("./WebsiteMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const websiteBlogSchema = require("./WebsiteBlogSchema");
-const websitePageSchema = require("./WebsitePageSchema");
+const websiteBlogSchema = require("../websiteBlog/WebsiteBlogSchema");
+const websitePageSchema = require("../websitePage/WebsitePageSchema");
 
 const {
   getSearchQuery,

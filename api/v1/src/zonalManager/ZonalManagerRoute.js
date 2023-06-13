@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const zonalManagerController = require("../../controller/zonalManager/ZonalManagerController");
+const zonalManagerController = require("./ZonalManagerController");
 const validate = require("../../middleware/validate");
 const zonalManagerValidation = require("./ZonalManagerValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

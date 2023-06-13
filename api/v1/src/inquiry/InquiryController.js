@@ -5,19 +5,19 @@ const ApiError = require("../../../utils/apiErrorUtils");
 
 // ----service---------
 const inquiryService = require("./InquiryService");
-const countryService = require("./CountryService");
-const stateService = require("./StateService");
-const schemeService = require("./SchemeService");
-const districtService = require("./DistrictService");
-const tehsilService = require("./TehsilService");
-const pincodeService = require("./PincodeService");
-const areaService = require("./AreaService");
+const countryService = require("../country/CountryService");
+const stateService = require("../state/StateService");
+const schemeService = require("../scheme/SchemeService");
+const districtService = require("../district/DistrictService");
+const tehsilService = require("../tehsil/TehsilService");
+const pincodeService = require("../pincode/PincodeService");
+const areaService = require("../area/AreaService");
 // const channelService = require("./ChannelMasterService");
-const dispositionTwoService = require("./DispositionTwoService");
-const dispositionThreeService = require("./DispositionThreeService");
+const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
+const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
 // ----service---------
 const mongoose = require("mongoose");
-const { searchKeys } = require("./OrderSchema");
+const { searchKeys } = require("./InquiruSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")

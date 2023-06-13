@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const tapeMasterController = require("../../controller/tapeMaster/TapeMasterController");
+const tapeMasterController = require("./TapeMasterController");
 const validate = require("../../middleware/validate");
 const tapeMasterValidation = require("./TapeMasterValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

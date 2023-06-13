@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const validate = require("../../middleware/validate");
 const orderValidation = require("./OrderValidation");
-const orderController = require("../../controller/order/OrderController");
+const orderController = require("./OrderController");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,

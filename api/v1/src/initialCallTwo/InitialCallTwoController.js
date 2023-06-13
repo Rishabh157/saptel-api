@@ -4,8 +4,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const initialCallTwoService = require("./InitialCallTwoService");
-const initialCallOneService = require("./InitialCallOneService");
-const initialCallThreeService = require("./InitialCallThreeService");
+const initialCallOneService = require("../initialCallOne/InitialCallOneService");
+const initialCallThreeService = require("../initialCallThree/InitialCallThreeService");
 const companyService = require("../company/CompanyService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 

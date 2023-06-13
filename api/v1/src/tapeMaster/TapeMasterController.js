@@ -6,11 +6,11 @@ const tapeMasterService = require("./TapeMasterService");
 const { searchKeys } = require("./TapeMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const schemeService = require("./SchemeService");
+const schemeService = require("../scheme/SchemeService");
 const companyService = require("../company/CompanyService");
-const languageService = require("./LanguageService");
-const slotMasterService = require("./SlotMasterService");
-const artistService = require("./ArtistService");
+const languageService = require("../language/LanguageService");
+const slotMasterService = require("../slotMaster/SlotMasterService");
+const artistService = require("../artist/ArtistService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {

@@ -7,7 +7,7 @@ const { searchKeys } = require("./WebsitePageSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const companyService = require("../company/CompanyService");
-const websiteMasterService = require("./WebsiteMasterService");
+const websiteMasterService = require("../websiteMaster/WebsiteMasterService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const {

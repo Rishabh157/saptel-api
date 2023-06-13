@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const userRoleController = require("../../controller/userRole/UserRoleController");
+const userRoleController = require("./UserRoleController");
 const validate = require("../../middleware/validate");
 const userRoleValidation = require("./UserRoleValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

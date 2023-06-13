@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const goodReceivedNoteController = require("../../controller/GRN/GRNController");
+const goodReceivedNoteController = require("./GRNController");
 const validate = require("../../middleware/validate");
 const goodReceivedNoteValidation = require("./GRNValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

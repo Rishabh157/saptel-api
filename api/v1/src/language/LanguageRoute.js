@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const languageController = require("../../controller/language/LanguageController");
+const languageController = require("./LanguageController");
 const validate = require("../../middleware/validate");
 const languageValidation = require("./LanguageValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

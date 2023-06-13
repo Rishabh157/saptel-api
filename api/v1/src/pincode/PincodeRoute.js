@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const pincodeController = require("../../controller/pincode/PincodeController");
+const pincodeController = require("./PincodeController");
 const validate = require("../../middleware/validate");
 const pincodeValidation = require("./PincodeValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

@@ -6,7 +6,7 @@ const ApiError = require('../../utils/apiErrorUtils')
 const errorRes = require('../../utils/resError')
 const { promises: Fs } = require('fs')
 const path = require('path')
-const commonValidation = require('./CommonValidation')
+const commonValidation = require('../../helper/CommonValidation')
 const datePattern = /^\d{4}-\d{2}-\d{2}$/
 const {
   documentMimeType,

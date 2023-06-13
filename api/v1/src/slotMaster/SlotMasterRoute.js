@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const slotMasterController = require("../../controller/slotMaster/SlotMasterController");
+const slotMasterController = require("./SlotMasterController");
 const validate = require("../../middleware/validate");
 const slotMasterValidation = require("./SlotMasterValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

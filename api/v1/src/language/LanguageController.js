@@ -8,8 +8,8 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./LanguageSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const productService = require("./ProductService");
-const tapeMasterService = require("./TapeMasterService");
+const productService = require("../product/ProductService");
+const tapeMasterService = require("../tapeMaster/TapeMasterService");
 
 const {
   getSearchQuery,

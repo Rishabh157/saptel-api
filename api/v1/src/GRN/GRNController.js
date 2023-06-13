@@ -8,7 +8,7 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./GRNSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const purchaseOrderService = require("./PurchaseOrderService");
+const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
 
 const {
   getSearchQuery,

@@ -7,7 +7,7 @@ const featureService = require("./FeatureService");
 const { searchKeys } = require("./FeatureSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const accessmoduleService = require("./AccessModuleService");
+const accessmoduleService = require("../accessModule/AccessModuleService");
 const {
   getSearchQuery,
   checkInvalidParams,

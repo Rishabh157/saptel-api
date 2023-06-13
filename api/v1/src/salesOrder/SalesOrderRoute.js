@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const salesOrderController = require("../../controller/salesOrder/SalesOrderController");
+const salesOrderController = require("./SalesOrderController");
 const validate = require("../../middleware/validate");
 const salesOrderValidation = require("./SalesOrderValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const ledgerController = require("../../controller/ledger/LedgerController");
+const ledgerController = require("./LedgerController");
 const validate = require("../../middleware/validate");
 const ledgerValidation = require("./LedgerValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

@@ -4,9 +4,9 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const productService = require("./ProductService");
 const companyService = require("../company/CompanyService");
-const productSubCategoryService = require("./ProductSubCategoryService");
-const productCategoryService = require("./ProductCategoryService");
-const productGroupService = require("./ProductGroupService");
+const productSubCategoryService = require("../productSubCategory/ProductSubCategoryService");
+const productCategoryService = require("../productCategory/ProductCategoryService");
+const productGroupService = require("../productGroup/ProductGroupService");
 const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
 
 const { searchKeys } = require("./ProductSchema");

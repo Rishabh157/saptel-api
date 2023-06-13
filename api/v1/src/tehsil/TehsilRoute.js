@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const tehsilController = require("../../controller/tehsil/TehsilController");
+const tehsilController = require("./TehsilController");
 const validate = require("../../middleware/validate");
 const tehsilValidation = require("./TehsilValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");

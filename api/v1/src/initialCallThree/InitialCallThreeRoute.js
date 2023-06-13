@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const initialCallThreeController = require("../../controller/initialCallThree/InitialCallThreeController");
+const initialCallThreeController = require("./InitialCallThreeController");
 const initialCallThreeValidation = require("./InitialCallThreeValidation");
 const validate = require("../../middleware/validate");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
