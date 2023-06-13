@@ -3,19 +3,19 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 // ----service---------
-const callService = require("../../services/CallService");
-const InquiryService = require("../../services/InquiryService");
-const prepaidOrderService = require("../../services/PrepaidOrderService");
-const orderService = require("../../services/OrderService");
-const countryService = require("../../services/CountryService");
-const stateService = require("../../services/StateService");
-const schemeService = require("../../services/SchemeService");
-const districtService = require("../../services/DistrictService");
-const tehsilService = require("../../services/TehsilService");
-const pincodeService = require("../../services/PincodeService");
-const areaService = require("../../services/AreaService");
-const dispositionTwoService = require("../../services/DispositionTwoService");
-const dispositionThreeService = require("../../services/DispositionThreeService");
+const callService = require("./CallService");
+const InquiryService = require("../inquiry/InquiryService");
+const prepaidOrderService = require("../prepaidOrder/PrepaidOrderService");
+const orderService = require("../order/OrderService");
+const countryService = require("../country/CountryService");
+const stateService = require("../state/StateService");
+const schemeService = require("../scheme/SchemeService");
+const districtService = require("../district/DistrictService");
+const tehsilService = require("../tehsil/TehsilService");
+const pincodeService = require("../pincode/PincodeService");
+const areaService = require("../area/AreaService");
+const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
+const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
 
 const {
   getDealer,

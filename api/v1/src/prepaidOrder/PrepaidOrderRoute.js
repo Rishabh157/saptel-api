@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const validate = require("../../middleware/validate");
-const prepaidOrderValidation = require("../../src/prep");
-const prepaidOrderController = require("../../controller/prepaidOrder/PrepaidOrderController");
+const prepaidOrderValidation = require("./PrepaidOrderValidation");
+const prepaidOrderController = require("./PrepaidOrderController");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
