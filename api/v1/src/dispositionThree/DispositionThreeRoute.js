@@ -7,7 +7,7 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
-  "/company/:companyid",
+  "/",
   accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.get),

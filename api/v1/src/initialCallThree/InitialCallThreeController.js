@@ -7,7 +7,10 @@ const initialCallThreeService = require("./InitialCallThreeService");
 const initialCallTwoService = require("../initialCallTwo/InitialCallTwoService");
 const companyService = require("../company/CompanyService");
 const mongoose = require("mongoose");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("./InitialCallThreeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -175,10 +178,7 @@ exports.get = async (req, res) => {
     let companyId = req.params.companyid;
 
     //if no default query then pass {}
-    let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
-      isDeleted: false,
-    };
+    let matchQuery = { isDeleted: false };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
@@ -549,7 +549,11 @@ exports.deleteDocument = async (req, res) => {
     }
     // ------find disposition (if use in other module / not)------
 
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'dispositionOneId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "dispositionOneId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await initialCallThreeService.getOneAndDelete({ _id });
