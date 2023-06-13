@@ -1,5 +1,5 @@
 const IntialCallTwo = require("./InitialCallTwoSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 // ================getOneBySingleField================
 const getOneBySingleField = async (fieldName, fieldValue) => {

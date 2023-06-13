@@ -1,5 +1,5 @@
 const ChannelMaster = require("./ChannelMasterSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return ChannelMaster.findOne({ [fieldName]: fieldValue, isDeleted: false });

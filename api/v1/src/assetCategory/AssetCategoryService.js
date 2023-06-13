@@ -1,5 +1,5 @@
 const AssetCategory = require("./AssetCategorySchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return AssetCategory.findOne({ [fieldName]: fieldValue, isDeleted: false });

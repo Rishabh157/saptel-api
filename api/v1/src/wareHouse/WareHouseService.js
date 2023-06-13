@@ -1,5 +1,5 @@
 const WareHouse = require('./WareHouseSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

@@ -1,5 +1,5 @@
 const ZonalManagerSchema = require("./ZonalManagerSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**

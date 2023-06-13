@@ -1,5 +1,5 @@
 const assetLocation = require('./AssetLocationSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

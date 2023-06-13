@@ -1,5 +1,5 @@
 const OrderSchema = require("./OrderSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return OrderSchema.findOne({ [fieldName]: fieldValue, isDeleted: false });

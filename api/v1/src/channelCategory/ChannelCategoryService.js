@@ -1,5 +1,5 @@
 const ChannelCategory = require("./ChannelCategorySchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return ChannelCategory.findOne({ [fieldName]: fieldValue, isDeleted: false });

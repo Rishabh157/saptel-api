@@ -1,5 +1,5 @@
 const DidManagement = require("./DidManagementSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return DidManagement.findOne({ [fieldName]: fieldValue, isDeleted: false });

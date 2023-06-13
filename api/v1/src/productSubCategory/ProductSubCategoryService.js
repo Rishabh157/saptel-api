@@ -1,5 +1,5 @@
 const ProductSubCategory = require("./ProductSubCategorySchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**

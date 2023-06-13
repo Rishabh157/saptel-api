@@ -1,6 +1,6 @@
 const httpStatus = require('http-status')
 const OTP = require('./OtpSchema')
-const ApiError = require('../../utils/apiErrorUtils')
+const ApiError = require('../../../utils/apiErrorUtils')
 
 //-------------------------------------------
 /**

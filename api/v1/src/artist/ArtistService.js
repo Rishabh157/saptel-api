@@ -1,5 +1,5 @@
 const Artist = require("./ArtistSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 // ================createNewData==========
 const createNewData = async (bodyData) => {

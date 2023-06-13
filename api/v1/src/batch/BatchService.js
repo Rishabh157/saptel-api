@@ -1,5 +1,5 @@
 const BatchSchema = require("./BatchSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return BatchSchema.findOne({ [fieldName]: fieldValue, isDeleted: false });

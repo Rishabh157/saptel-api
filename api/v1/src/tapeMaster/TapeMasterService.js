@@ -1,5 +1,5 @@
 const TapeMaster = require("./TapeMasterSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return TapeMaster.findOne({ [fieldName]: fieldValue, isDeleted: false });

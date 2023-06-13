@@ -1,5 +1,5 @@
 const CartonBoxBarcode = require("./CartonBoxBarcodeSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return CartonBoxBarcode.findOne({

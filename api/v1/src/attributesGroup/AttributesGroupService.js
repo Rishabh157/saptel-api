@@ -1,5 +1,5 @@
 const AttributesGroup = require('./AttributesGroupSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

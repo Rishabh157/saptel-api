@@ -1,5 +1,5 @@
 const WebsiteMetaTag = require("./WebsiteMetaTagSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return WebsiteMetaTag.findOne({ [fieldName]: fieldValue, isDeleted: false });

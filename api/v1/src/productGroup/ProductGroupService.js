@@ -1,5 +1,5 @@
 const ProductGroup = require('./ProductGroupSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

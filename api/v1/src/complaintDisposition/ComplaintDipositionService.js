@@ -1,5 +1,5 @@
 const ComplaintDisposition = require("./ComplaintDispositionSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 // ================getOneByMultiField================
 const getOneByMultiField = async (matchObj, projectObj) => {

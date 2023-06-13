@@ -1,5 +1,5 @@
 const WebsiteBlog = require("./WebsiteBlogSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return WebsiteBlog.findOne({ [fieldName]: fieldValue, isDeleted: false });

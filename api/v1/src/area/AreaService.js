@@ -1,5 +1,5 @@
 const Area = require('./AreaSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

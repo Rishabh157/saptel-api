@@ -1,5 +1,5 @@
 const GoodReceivedNote = require("./GRNSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return GoodReceivedNote.findOne({

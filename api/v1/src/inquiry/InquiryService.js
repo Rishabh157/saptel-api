@@ -1,5 +1,5 @@
 const InquirySchema = require("./InquiruSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return InquirySchema.findOne({

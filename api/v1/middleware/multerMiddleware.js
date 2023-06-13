@@ -8,7 +8,7 @@ const {
   documentMimeType,
   allMimetype
 } = require('./validation')
-const { allFileEnum } = require('../../helper/enumUtils')
+const { allFileEnum } = require('../helper/enumUtils')
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

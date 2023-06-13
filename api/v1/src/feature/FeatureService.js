@@ -1,5 +1,5 @@
 const Feature = require("./FeatureSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**

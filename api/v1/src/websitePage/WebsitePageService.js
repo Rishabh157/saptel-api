@@ -1,5 +1,5 @@
 const WebsitePage = require("./WebsitePageSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return WebsitePage.findOne({ [fieldName]: fieldValue, isDeleted: false });

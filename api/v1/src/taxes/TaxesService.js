@@ -1,5 +1,5 @@
 const Taxes = require('./TaxesSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

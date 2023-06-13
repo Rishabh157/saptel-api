@@ -1,5 +1,5 @@
 const DeliveryBoy = require("./DeliveryBoySchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return DeliveryBoy.findOne({ [fieldName]: fieldValue, isDeleted: false });

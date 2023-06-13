@@ -1,5 +1,5 @@
 const WebsiteMaster = require("./WebsiteMasterSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return WebsiteMaster.findOne({ [fieldName]: fieldValue, isDeleted: false });

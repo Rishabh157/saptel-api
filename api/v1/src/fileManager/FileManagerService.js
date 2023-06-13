@@ -1,5 +1,5 @@
 const FileManager = require('./FileManagerSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

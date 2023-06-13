@@ -1,5 +1,5 @@
 const InitialCallThree = require("./InitialCallThreeSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return InitialCallThree.findOne({

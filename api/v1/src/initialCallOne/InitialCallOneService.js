@@ -1,5 +1,5 @@
 const InitialCallOne = require("./InitialCallOneSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return InitialCallOne.findOne({ [fieldName]: fieldValue, isDeleted: false });

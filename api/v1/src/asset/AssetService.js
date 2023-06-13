@@ -1,5 +1,5 @@
 const AssetSchema = require("./AssetSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 // ================getOneByMultiField================
 const getOneByMultiField = async (matchObj, projectObj) => {

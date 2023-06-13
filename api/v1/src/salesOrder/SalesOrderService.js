@@ -1,5 +1,5 @@
 const SalesOrder = require("./SalesOrderSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**

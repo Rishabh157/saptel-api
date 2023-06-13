@@ -1,5 +1,5 @@
 const Tehsil = require('./TehsilSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

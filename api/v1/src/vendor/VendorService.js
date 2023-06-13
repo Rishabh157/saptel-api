@@ -1,5 +1,5 @@
 const Vendor = require('./VendorSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

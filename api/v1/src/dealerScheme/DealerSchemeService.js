@@ -1,5 +1,5 @@
 const DealerScheme = require("./DealerSchemeSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return DealerScheme.findOne({ [fieldName]: fieldValue, isDeleted: false });

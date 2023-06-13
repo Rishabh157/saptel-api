@@ -1,5 +1,5 @@
 const ChannelManagement = require("./ChannelManagementSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return ChannelManagement.findOne({

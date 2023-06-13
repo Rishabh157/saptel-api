@@ -1,5 +1,5 @@
 const SlotMaster = require("./SlotMasterSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return SlotMaster.findOne({ [fieldName]: fieldValue, isDeleted: false });

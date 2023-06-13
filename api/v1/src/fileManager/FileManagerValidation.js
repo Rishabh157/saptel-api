@@ -2,8 +2,8 @@ const Joi = require('joi')
 Joi.joiDate = require('@joi/date')(Joi)
 Joi.joiObjectId = require('joi-objectid')(Joi)
 const httpStatus = require('http-status')
-const ApiError = require('../../utils/apiErrorUtils')
-const errorRes = require('../../utils/resError')
+const ApiError = require('../../../utils/apiErrorUtils')
+const errorRes = require('../../../utils/resError')
 const { promises: Fs } = require('fs')
 const path = require('path')
 const commonValidation = require('../../helper/CommonValidation')
@@ -13,8 +13,8 @@ const {
   imageMimetype,
   videoMimetype,
   allMimetype
-} = require('../middleware/validation')
-const logger = require('../../../config/logger')
+} = require('../../middleware/validation')
+const logger = require('../../../../config/logger')
 
 const fileExistCheck = async (req, res, next) => {
   try {

@@ -1,5 +1,5 @@
 const DealerPincode = require("./DealerPincodeSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return DealerPincode.findOne({ [fieldName]: fieldValue, isDeleted: false });

@@ -1,6 +1,6 @@
 const ChannelUpdation = require("./ChannelUpdationSchema");
 const mongoose = require("mongoose");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 // ============createNewData=============
 const createNewData = async (bodyData) => {

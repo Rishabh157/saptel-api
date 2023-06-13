@@ -1,5 +1,5 @@
 const BarCode = require('./BarCodeSchema')
-const { combineObjects } = require('../helper/utils')
+const { combineObjects } = require('../../helper/utils')
 
 //-------------------------------------------
 /**

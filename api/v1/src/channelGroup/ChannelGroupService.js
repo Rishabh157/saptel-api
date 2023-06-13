@@ -1,5 +1,5 @@
 const ChannelGroup = require("./ChannelGroupSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return ChannelGroup.findOne({ [fieldName]: fieldValue, isDeleted: false });

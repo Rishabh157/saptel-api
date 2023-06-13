@@ -1,5 +1,5 @@
 const Inventories = require("./InventoriesSchema");
-const { combineObjects } = require("../helper/utils");
+const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**
