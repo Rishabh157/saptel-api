@@ -10,7 +10,7 @@ const {
 } = require('../middleware/validation')
 const config = require('../../config/config')
 const logger = require('../../config/logger')
-const { allFileEnum } = require('../helper/enumUtils')
+const { allFileEnum } = require('../../helper/enumUtils')
 
 /**
  *
@@ -32,9 +32,8 @@ const uploadFileFunction = async (fileData, fieldName, routeData, fileType) => {
     let path_array = fileData.path.split('.')
     let file_name = `${fieldName}_${fileData.fieldname}${moment(new Date())
       .utcOffset('+05:30')
-      .format('YMMDDHHmmss')}.${
-      path_array[path_array.length - 1]
-    }`.toLowerCase()
+      .format('YMMDDHHmmss')}.${path_array[path_array.length - 1]
+      }`.toLowerCase()
     let result = await uploadFile2S3(
       fileData.path,
       `${config.project}/${routeData}/${fileType}/${file_name}`.toLowerCase(),

@@ -3,7 +3,7 @@ const logger = require('../../../config/logger')
 const httpStatus = require('http-status')
 const ApiError = require('../../utils/apiErrorUtils')
 const { errorRes } = require('../../utils/resError')
-const accessmoduleService = require('../../v1/services/AccessModuleService')
+const accessmoduleService = require('../src/accessModule/AccessModuleService')
 
 exports.accessModuleCheck = async (req, res, next) => {
   try {
