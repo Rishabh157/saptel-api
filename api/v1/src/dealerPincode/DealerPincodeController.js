@@ -66,7 +66,7 @@ exports.add = async (req, res) => {
       })
     );
     if (isValidPincode) {
-      throw new ApiError(httpStatus.OK, "Invalid Pincode");
+      throw new ApiError(httpStatus.OK, "Pincode already exists");
     }
     //------------------create data-------------------
     let dataCreated = await dealerPincodeService.createMany(output);
