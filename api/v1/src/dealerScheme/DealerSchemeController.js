@@ -50,7 +50,7 @@ exports.add = async (req, res) => {
         });
       })
     );
-    if (isSchemeExists.includes(1)) {
+    if (isSchemeExists.includes(0)) {
       throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
 
