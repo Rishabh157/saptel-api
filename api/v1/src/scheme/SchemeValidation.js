@@ -13,6 +13,7 @@ const create = {
     category: Joi.string().custom(commonValidation.objectId).required(),
     subCategory: Joi.string().custom(commonValidation.objectId).required(),
     schemePrice: Joi.number().required(),
+    commission: Joi.number().required(),
     dimension: Joi.object().keys({
       height: Joi.number().required(),
       width: Joi.number().required(),
@@ -52,6 +53,7 @@ const update = {
     category: Joi.string().custom(commonValidation.objectId).required(),
     subCategory: Joi.string().custom(commonValidation.objectId).required(),
     schemePrice: Joi.number().required(),
+    commission: Joi.number().required(),
     dimension: Joi.object().keys({
       height: Joi.number().required(),
       width: Joi.number().required(),

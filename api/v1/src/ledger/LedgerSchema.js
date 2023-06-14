@@ -9,10 +9,29 @@ const LedgerSchema = new mongoose.Schema(
       uppercase: true,
       default: ledgerType.credit,
     },
-    price: { type: Number, required: true, trim: true },
-    remark: { type: String, required: true, trim: true, lowercase: true },
-    companyId: { type: ObjectId, required: true },
-    dealerId: { type: ObjectId, required: true },
+    price: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    remark: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+    },
+    dealerId: {
+      type: ObjectId,
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

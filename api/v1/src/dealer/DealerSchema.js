@@ -203,10 +203,12 @@ const DealerSchema = new mongoose.Schema(
           documentName: {
             type: String,
             trim: true,
+            default: "",
             lowercase: true,
           },
           documentFile: {
             type: String,
+            default: "",
             trim: true,
           },
         },
