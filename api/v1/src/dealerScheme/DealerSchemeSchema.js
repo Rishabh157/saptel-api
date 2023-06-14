@@ -3,7 +3,20 @@ const mongoose = require("mongoose");
 const DealerSchemeSchema = new mongoose.Schema(
   {
     dealerId: { type: ObjectId, required: true, trim: true },
-    schemeId: { type: ObjectId, required: true, trim: true },
+    details: {
+      type: {
+        schemeId: {
+          type: ObjectId,
+          required: true,
+        },
+        pincodes: {
+          type: [String],
+          required: true,
+        },
+      },
+      required: true,
+      trim: true,
+    },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
@@ -19,6 +32,6 @@ const DealerSchemeSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["dealerId", "schemeId", "schemeName", "price"];
+const searchKeys = ["dealerId", "details", "schemeName", "price"];
 module.exports = mongoose.model("DealerScheme", DealerSchemeSchema);
 module.exports.searchKeys = [...searchKeys];

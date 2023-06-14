@@ -1,40 +1,41 @@
-const config = require('../../../config/config')
-const logger = require('../../../config/logger')
-const httpStatus = require('http-status')
-const ApiError = require('../../utils/apiErrorUtils')
-const { errorRes } = require('../../utils/resError')
-const accessmoduleService = require('../src/accessModule/AccessModuleService')
+const config = require("../../../config/config");
+const logger = require("../../../config/logger");
+const httpStatus = require("http-status");
+const ApiError = require("../../utils/apiErrorUtils");
+const { errorRes } = require("../../utils/resError");
+const accessmoduleService = require("../src/accessModule/AccessModuleService");
 
 exports.accessModuleCheck = async (req, res, next) => {
   try {
     /**
      * check token exist in req body
      */
-    let method = req.method
-    let route = req.baseUrl + req.route.path
+    let method = req.method;
+    let route = req.baseUrl + req.route.path;
+    console.log(route, method);
     if (
       !(await accessmoduleService.getOneByMultiField({
         route: route.toLowerCase(),
-        method: method.toLowerCase()
+        method: method.toLowerCase(),
       }))
     ) {
       throw new ApiError(
         httpStatus.OK,
         `Please add '${route}' route and method ${method} to the access module `
-      )
+      );
     }
 
-    next()
+    next();
   } catch (err) {
-    let errData = errorRes(err)
-    logger.info(errData.resData)
-    let { message, status, data, code, issue } = errData.resData
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
     return res.status(200).send({
       message,
       status,
       data,
-      code: 'ACCESS_MODULE_MISSING',
-      issue: 'ACCESS_MODULE_MISSING'
-    })
+      code: "ACCESS_MODULE_MISSING",
+      issue: "ACCESS_MODULE_MISSING",
+    });
   }
-}
+};

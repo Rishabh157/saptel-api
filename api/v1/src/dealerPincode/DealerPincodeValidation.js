@@ -93,6 +93,16 @@ const get = {
 };
 
 /**
+ * get all data of a dealer
+ */
+const getDealerData = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    dealerid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
  * delete a document
  */
 const deleteDocument = {
@@ -116,4 +126,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getDealerData,
 };

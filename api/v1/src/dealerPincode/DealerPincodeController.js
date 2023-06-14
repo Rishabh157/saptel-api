@@ -327,6 +327,45 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+//get all dealer
+exports.getDealerPincode = async (req, res) => {
+  try {
+    let companyId = req.params.companyid;
+    let dealerId = req.params.dealerid;
+
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: companyId,
+      dealerId: dealerId,
+      isDeleted: false,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let dataExist = await dealerPincodeService.findAllWithQuery(matchQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
