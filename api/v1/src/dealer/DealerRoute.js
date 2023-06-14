@@ -74,6 +74,16 @@ router.put(
   dealerController.update
 );
 /**
+ * update autoMapping status
+ */
+router.put(
+  "/automapping-change/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dealerValidation.autoMappingChange),
+  dealerController.changeAutoMapping
+);
+/**
  * update status
  */
 router.put(

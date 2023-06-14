@@ -42,6 +42,23 @@ const DealerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    creditLimit: {
+      type: Number,
+      required: true,
+    },
+    openingBalance: {
+      type: Number,
+      required: true,
+    },
+    autoMapping: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
+    quantityQuotient: {
+      type: Number,
+      required: true,
+    },
     registrationAddress: {
       type: {
         phone: {
@@ -200,11 +217,6 @@ const DealerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    openingBalance: {
-      type: Number,
-      default: 0,
-      trim: true,
-    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -224,6 +236,10 @@ const searchKeys = [
   "firmName",
   "firstName",
   "lastName",
+  "creditLimit",
+  "openingBalance",
+  "autoMapping",
+  "quantityQuotient",
   "dealerCategoryId",
   "email",
   "registrationAddress",
@@ -232,7 +248,6 @@ const searchKeys = [
   "document",
   "otherDocument",
   "companyId",
-  "openingBalance",
 ];
 module.exports = mongoose.model("Dealer", DealerSchema);
 module.exports.searchKeys = [...searchKeys];

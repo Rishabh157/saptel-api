@@ -25,7 +25,7 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { groupName, companyId } = req.body;
+    let { groupName, companyId, dealerSalePrice } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,

@@ -49,7 +49,10 @@ exports.add = async (req, res) => {
       otherDocument,
       password,
       companyId,
+      creditLimit,
       openingBalance,
+      autoMapping,
+      quantityQuotient,
     } = req.body;
     /**
      * check duplicate exist
@@ -125,7 +128,10 @@ exports.update = async (req, res) => {
       otherDocument,
       password,
       companyId,
+      creditLimit,
       openingBalance,
+      autoMapping,
+      quantityQuotient,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -975,6 +981,47 @@ exports.statusChange = async (req, res) => {
       code: "OK",
       issue: null,
     });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.changeAutoMapping = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let dataExist = await dealerService.getOneByMultiField({
+      _id: _id,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, `Dealer not found.`);
+    }
+    let autoMapping = dataExist.autoMapping ? false : true;
+    let approvedStatusChange = await dealerService.getOneAndUpdate(
+      {
+        _id: _id,
+        isDeleted: false,
+      },
+      {
+        $set: { autoMapping },
+      }
+    );
+
+    if (approvedStatusChange) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: approvedStatusChange,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
