@@ -3,10 +3,7 @@ const dealerPincodeController = require("./DealerPincodeController");
 const validate = require("../../middleware/validate");
 const dealerPincodeValidation = require("./DealerPincodeValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
-const {
-  authCheckMiddleware,
-  otpVerifyToken,
-} = require("../../middleware/authenticationCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -18,6 +15,17 @@ router.get(
   authCheckMiddleware,
   validate(dealerPincodeValidation.get),
   dealerPincodeController.get
+);
+
+/**
+ * get all document of a single dealer
+ */
+router.get(
+  "/dealer/:dealerid/company/:companyid/",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dealerPincodeValidation.getDealerData),
+  dealerPincodeController.getDealerPincode
 );
 /**
  * get all dealerPincode pagination filter
