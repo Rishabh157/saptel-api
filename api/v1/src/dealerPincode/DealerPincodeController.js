@@ -28,10 +28,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await dealerPincodeService.isExists([]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -56,6 +53,21 @@ exports.add = async (req, res) => {
         companyId: companyId,
       };
     });
+
+    let isValidPincode = false;
+    await Promise.all(
+      output?.map(async (ele) => {
+        let pincode = ele?.pincode;
+        let dataExist = await dealerPincodeService.isExists([{ pincode }]);
+        if (dataExist.exists && dataExist.existsSummary) {
+          isValidPincode = true;
+          return;
+        }
+      })
+    );
+    if (isValidPincode) {
+      throw new ApiError(httpStatus.OK, "Invalid Pincode");
+    }
     //------------------create data-------------------
     let dataCreated = await dealerPincodeService.createMany(output);
 
