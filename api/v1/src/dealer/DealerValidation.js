@@ -12,6 +12,10 @@ const create = {
     firmName: Joi.string().lowercase().required(),
     firstName: Joi.string().lowercase().required(),
     lastName: Joi.string().lowercase().required(),
+    creditLimit: Joi.number().allow(),
+    openingBalance: Joi.number().allow(),
+    quantityQuotient: Joi.number().allow(),
+    autoMapping: Joi.boolean().required(),
     dealerCategoryId: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
     password: Joi.string().required(),
@@ -50,7 +54,6 @@ const create = {
       documentFile: Joi.string().uri(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    openingBalance: Joi.number().allow(),
   }),
 };
 
@@ -66,6 +69,10 @@ const update = {
     firmName: Joi.string().lowercase().required(),
     firstName: Joi.string().lowercase().required(),
     lastName: Joi.string().lowercase().required(),
+    creditLimit: Joi.number().allow(),
+    openingBalance: Joi.number().allow(),
+    quantityQuotient: Joi.number().allow(),
+    autoMapping: Joi.boolean().required(),
     dealerCategoryId: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
     registrationAddress: Joi.object().keys({
@@ -206,6 +213,14 @@ const changeStatus = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+/**
+ * change status of document
+ */
+const autoMappingChange = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 module.exports = {
   create,
   getAllFilter,
@@ -213,6 +228,7 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  autoMappingChange,
   getDocument,
   loginValid,
   refreshTokenValid,

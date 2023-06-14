@@ -12,6 +12,10 @@ const PrepaidOrderSchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
+    approved: {
+      type: Boolean,
+      default: false,
+    },
     prepaidOrderNumber: {
       type: Number,
       required: true,

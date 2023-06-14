@@ -49,16 +49,18 @@ router.post(
 //   "/:id",
 //   accessModuleCheck,
 //   authCheckMiddleware,
-//   // validate(prepaidOrderValidation.update),
+//   validate(prepaidOrderValidation.update),
 //   prepaidOrderController.update
 // );
 
 //===============update status document===============
-// router.put(
-//   "/status-change/:id",
-//   validate(initialCallOneValidation.changeStatus),
-//   initialCallOneController.statusChange
-// );
+router.put(
+  "/approved-change/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(prepaidOrderValidation.changeApprovedStatus),
+  prepaidOrderController.changeApprovedStatus
+);
 
 //===============delete document===============
 // router.delete(

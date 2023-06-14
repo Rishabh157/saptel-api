@@ -43,6 +43,8 @@ exports.update = async (req, res) => {
     let {
       didNo,
       inOutBound,
+      prepaidOrderNumber,
+      approved,
       incomingCallerNo,
       mobileNo,
       deliveryCharges,
@@ -168,7 +170,7 @@ exports.update = async (req, res) => {
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Orders not found.`);
+      throw new ApiError(httpStatus.OK, `Prepaid Orders not found.`);
     }
 
     let dataUpdated = await prepaidOrderService.getOneAndUpdate(
@@ -1137,3 +1139,46 @@ exports.deleteDocument = async (req, res) => {
   }
 };
 // =============delete end================
+
+// =============changeApprovedStatus start================
+exports.changeApprovedStatus = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let dataExist = await prepaidOrderService.getOneByMultiField({
+      _id: _id,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, `Prepaid Orders not found.`);
+    }
+    let approved = dataExist.approved ? false : true;
+    let approvedStatusChange = await prepaidOrderService.getOneAndUpdate(
+      {
+        _id: _id,
+        isDeleted: false,
+      },
+      {
+        $set: { approved },
+      }
+    );
+
+    if (approvedStatusChange) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: approvedStatusChange,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// =============changeApprovedStatus end================
