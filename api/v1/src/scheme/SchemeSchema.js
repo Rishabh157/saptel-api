@@ -2,17 +2,41 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const SchemeSchema = new mongoose.Schema(
   {
-    schemeCode: { type: String, required: true, trim: true },
-    schemeName: { type: String, required: true, trim: true, lowercase: true },
-    category: { type: ObjectId, required: true, trim: true, lowercase: true },
+    schemeCode: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    schemeName: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    category: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     subCategory: {
       type: ObjectId,
       required: true,
       trim: true,
       lowercase: true,
     },
-    schemePrice: { type: Number, required: true },
-    commission: { type: Number, required: true },
+    schemePrice: {
+      type: Number,
+      required: true,
+    },
+    schemePrice: {
+      type: Number,
+      required: true,
+    },
+    commission: {
+      type: Number,
+      required: true,
+    },
     dimension: {
       type: {
         height: {
@@ -34,11 +58,30 @@ const SchemeSchema = new mongoose.Schema(
       required: true,
     },
 
-    weight: { type: Number, required: true },
-    deliveryCharges: { type: Number, required: true },
-    comboPacking: { type: Boolean, required: true },
-    startDate: { type: String, required: true, trim: true, lowercase: true },
-    endDate: { type: String, required: true, trim: true, lowercase: true },
+    weight: {
+      type: Number,
+      required: true,
+    },
+    deliveryCharges: {
+      type: Number,
+      required: true,
+    },
+    comboPacking: {
+      type: Boolean,
+      required: true,
+    },
+    startDate: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
+    endDate: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     schemeDescription: {
       type: String,
       required: true,
@@ -91,7 +134,11 @@ const SchemeSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -10,6 +10,7 @@ const create = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     prepaidOrderNumber: Joi.number().required(),
+    approved: Joi.boolean().required(),
     inOutBound: Joi.string().allow(""),
     incomingCallerNo: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
@@ -60,6 +61,7 @@ const update = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     prepaidOrderNumber: Joi.number().required(),
+    approved: Joi.boolean().required(),
     inOutBound: Joi.string().allow(""),
     incomingCallerNo: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
@@ -176,7 +178,7 @@ const getById = {
 /**
  * change status of document
  */
-const changeStatus = {
+const changeApprovedStatus = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
@@ -184,8 +186,8 @@ const changeStatus = {
 module.exports = {
   getAllFilter,
   get,
-  // update,
+  update,
   deleteDocument,
-  changeStatus,
+  changeApprovedStatus,
   getById,
 };
