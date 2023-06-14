@@ -24,7 +24,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dealerId, schemeId, companyId } = req.body;
+    let { dealerId, details, companyId } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -42,11 +42,15 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
-    const isSchemeExists = await schemeService.findCount({
-      _id: schemeId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
+    const isSchemeExists = await Promise.all(
+      details?.map(async (ele) => {
+        return await schemeService.findCount({
+          _id: ele.schemeId,
+          isDeleted: false,
+        });
+      })
+    );
+    if (isSchemeExists.includes(1)) {
       throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
 
@@ -55,10 +59,10 @@ exports.add = async (req, res) => {
      */
 
     //------------------create data-------------------
-    const output = schemeId.map((scheme) => {
+    const output = details.map((scheme) => {
       return {
         dealerId: dealerId,
-        schemeId: scheme,
+        details: { schemeId: scheme?.schemeId, pincodes: scheme?.pincodes },
         companyId: companyId,
       };
     });
@@ -90,7 +94,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, schemeId, companyId } = req.body;
+    let { dealerId, details, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -110,11 +114,15 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
-    const isSchemeExists = await schemeService.findCount({
-      _id: schemeId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
+    const isSchemeExists = await Promise.all(
+      details?.map(async (ele) => {
+        return await schemeService.findCount({
+          _id: ele.schemeId,
+          isDeleted: false,
+        });
+      })
+    );
+    if (isSchemeExists.includes(1)) {
       throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
 
@@ -221,7 +229,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["dealerId", "schemeId", "dealerId"];
+    let objectIdFields = ["dealerId", "details.schemeId", "dealerId"];
 
     const filterQuery = getFilterQuery(
       filterBy,
@@ -258,7 +266,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "schemes",
-          localField: "schemeId",
+          localField: "details.schemeId",
           foreignField: "_id",
           as: "scheme_data",
           pipeline: [
