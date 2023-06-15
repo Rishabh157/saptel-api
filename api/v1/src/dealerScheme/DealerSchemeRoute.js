@@ -21,6 +21,17 @@ router.get(
 );
 
 /**
+ * get one document
+ */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dealerSchemeValidation.getDocument),
+  dealerSchemeController.getById
+);
+
+/**
  * get one document (if query) / all documents
  */
 router.get(

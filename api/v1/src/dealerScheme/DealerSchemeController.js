@@ -405,6 +405,72 @@ exports.get = async (req, res) => {
   }
 };
 
+//single view api
+exports.getById = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "scheme_data",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                schemePrice: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          schemeName: {
+            $arrayElemAt: ["$scheme_data.schemeName", 0],
+          },
+          price: {
+            $arrayElemAt: ["$scheme_data.schemePrice", 0],
+          },
+        },
+      },
+      {
+        $unset: ["scheme_data"],
+      },
+    ];
+    let dataExist = await dealerSchemeService.aggregateQuery(additionalQuery);
+    if (!dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // getbydealerSchema api
 exports.getbydealerId = async (req, res) => {
   try {
