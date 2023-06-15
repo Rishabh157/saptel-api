@@ -73,7 +73,7 @@ router.put(
  * delete document
  */
 router.delete(
-  "/:id",
+  "/:id/pincode/:pincode",
   accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.deleteDocument),
