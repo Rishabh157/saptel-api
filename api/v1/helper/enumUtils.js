@@ -129,7 +129,7 @@ const paymentType = Object.freeze({
 const ledgerType = Object.freeze({
   credit: "CREDIT_NOTE_CREATED",
   debit: "DEBIT_NOTE_CREATED",
-  dealerAmountCredited: "DEALER_AMOUNT_CREDItED",
+  dealerAmountCredited: "DEALER_AMOUNT_CREDITED",
 });
 
 const orderType = Object.freeze({
