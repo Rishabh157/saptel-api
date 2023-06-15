@@ -28,12 +28,8 @@ const update = {
   }),
   body: Joi.object().keys({
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
-    details: Joi.array()
-      .items({
-        schemeId: Joi.string().custom(commonValidation.objectId).required(),
-        pincodes: Joi.array().items(Joi.string().required()),
-      })
-      .required(),
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+    pincodes: Joi.array().items(Joi.string().required()),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

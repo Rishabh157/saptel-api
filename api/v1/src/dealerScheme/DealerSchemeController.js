@@ -116,7 +116,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, details, companyId } = req.body;
+    let { dealerId, schemeId, pincodes, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -136,16 +136,12 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
-    const isSchemeExists = await Promise.all(
-      details?.map(async (ele) => {
-        return await schemeService.findCount({
-          _id: ele.schemeId,
-          isDeleted: false,
-        });
-      })
-    );
-    if (isSchemeExists.includes(1)) {
-      throw new ApiError(httpStatus.OK, "Invalid scheme");
+    const isSchemeIdExists = await schemeService.findCount({
+      _id: schemeId,
+      isDeleted: false,
+    });
+    if (!isSchemeIdExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Scheme.");
     }
 
     //------------------Find data-------------------
