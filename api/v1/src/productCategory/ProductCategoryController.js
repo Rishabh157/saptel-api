@@ -363,37 +363,21 @@ exports.deleteDocument = async (req, res) => {
     if (!(await productCategoryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isProductCategoryExistsInSubCate =
-      await productSubCategoryService.findCount({
-        parentCategory: _id,
-        isDeleted: false,
-      });
-    const isProductCategoryExistsInScheme = await schemeService.findCount({
-      subCategory: _id,
-      isDeleted: false,
-    });
-    const isProductCategoryExistsInProduct = await productService.findCount({
-      productSubCategory: _id,
-      isDeleted: false,
-    });
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "productCategoryId",
+      _id
+    );
 
-    if (
-      isProductCategoryExistsInSubCate ||
-      isProductCategoryExistsInScheme ||
-      isProductCategoryExistsInProduct
-    ) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Product category can't be deleted as it is used in other module"
-      );
-    }
-    let deleted = await productCategoryService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (deleteRefCheck.status === true) {
+      let deleted = await productCategoryService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
+      message: deleteRefCheck.message,
+      status: deleteRefCheck.status,
       data: null,
       code: "OK",
       issue: null,

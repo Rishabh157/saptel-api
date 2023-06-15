@@ -130,6 +130,12 @@ const ledgerType = Object.freeze({
   credit: "CREDIT",
   debit: "DEBIT",
 });
+
+const orderType = Object.freeze({
+  prepaid: "PREPAID",
+  postpaid: "POSTPAID",
+  other: "OTHER",
+});
 /**
  * if other the following routes created. please add all actions with their method,
  */
@@ -154,6 +160,7 @@ const reasonNotShowSlot = Object.freeze({
 module.exports = {
   allFileEnum,
   tokenEnum,
+  orderType,
   accountEnum,
   userEnum,
   actionMethodEnum,

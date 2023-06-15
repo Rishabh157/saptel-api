@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { genderType } = require("../../helper/enumUtils");
+const { genderType, orderType } = require("../../helper/enumUtils");
 const OrderSchema = new mongoose.Schema(
   {
     didNo: {
@@ -11,6 +11,16 @@ const OrderSchema = new mongoose.Schema(
     dealerAssignedId: {
       type: ObjectId,
       default: null,
+    },
+    approved: {
+      type: Boolean,
+      required: true,
+    },
+    orderTpye: {
+      type: String,
+      enum: [orderType.postpaid, orderType.prepaid, orderType.other],
+      required: true,
+      trim: true,
     },
     orderNumber: {
       type: Number,

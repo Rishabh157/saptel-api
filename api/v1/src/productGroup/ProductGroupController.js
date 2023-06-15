@@ -7,9 +7,11 @@ const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./ProductGroupSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const AsrRequest = require("../asrRequest/AsrRequestService");
-const productService = require("../product/ProductService");
-const schemeService = require("../scheme/SchemeService");
+
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -356,41 +358,21 @@ exports.deleteDocument = async (req, res) => {
     if (!(await productGroupService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const isProductCategoryExistsInProduct = await productService.findCount({
-      productSubCategory: _id,
-      isDeleted: false,
-    });
-    const isProductCategoryExistsInScheme = await schemeService.findCount({
-      subCategory: _id,
-      isDeleted: false,
-    });
-    const canDeleted = await AsrRequest.find({
-      isDeleted: false,
-      isActive: true,
-      asrDetails: {
-        $elemMatch: {
-          productId: new mongoose.Types.ObjectId(_id),
-        },
-      },
-    });
-    if (
-      canDeleted.length ||
-      isProductCategoryExistsInProduct ||
-      isProductCategoryExistsInScheme
-    ) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Product Group can't be deleted because it is currently used in other services"
-      );
-    }
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "productGroupId",
+      _id
+    );
 
-    let deleted = await productGroupService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (deleteRefCheck.status === true) {
+      let deleted = await productGroupService.getOneAndDelete({ _id });
+      if (!deleted) {
+        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+      }
     }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
+      message: deleteRefCheck.message,
+      status: deleteRefCheck.status,
       data: null,
       code: "OK",
       issue: null,

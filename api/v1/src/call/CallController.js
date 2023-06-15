@@ -28,7 +28,7 @@ const { searchKeys } = require("./CallSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const mongoose = require("mongoose");
-const { applicableCriteria } = require("../../helper/enumUtils");
+const { applicableCriteria, orderType } = require("../../helper/enumUtils");
 
 const {
   getSearchQuery,
@@ -374,25 +374,12 @@ exports.update = async (req, res) => {
     let applicableCriteriaArrayForIsPrepaid = [applicableCriteria.isPrepaid];
 
     // ---------map for order-------
-    let isOrderExist = [applicableCriteria.isOrder];
     let flag = false;
     dispositionThreeData[0]?.applicableCriteria?.map((e) => {
       if (applicableCriteriaArray.includes(e)) {
         flag = true;
       }
     });
-    if (isOrderExist) {
-      const orderNumber = await getOrderNumber();
-      await orderService.createNewData({
-        ...req.body,
-        orderNumber: orderNumber,
-        // dealerAssignedId: dealerId,
-      });
-    }
-    // ---------map for order end-------
-
-    // ---------prepaidOrder -------
-    let isPrepaidOrderExist = [applicableCriteria.isPrepaid];
     let prepaidOrderFlag = false;
     dispositionThreeData[0]?.applicableCriteria?.map((e) => {
       if (applicableCriteriaArrayForIsPrepaid.includes(e)) {
@@ -400,16 +387,18 @@ exports.update = async (req, res) => {
       }
     });
 
-    if (isPrepaidOrderExist) {
-      const prepaidOrderNumber = await getPrepaidOrderNumber();
-      await prepaidOrderService.createNewData({
-        ...req.body,
-        prepaidOrderNumber: prepaidOrderNumber,
-        // dealerAssignedId: dealerId,
-      });
-    }
-
-    // --------prepaidOrder end-------
+    const orderNumber = await getOrderNumber();
+    await orderService.createNewData({
+      ...req.body,
+      orderNumber: orderNumber,
+      approved: flag ? true : prepaidOrderFlag ? false : true,
+      orderTpye: flag
+        ? orderType.postpaid
+        : prepaidOrderFlag
+        ? orderType.prepaid
+        : orderType.other,
+      // dealerAssignedId: dealerId,
+    });
 
     // =============create Inquiry=========
     let isInquiryExist = [applicableCriteria.isInquiry];

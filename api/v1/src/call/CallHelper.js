@@ -25,21 +25,6 @@ exports.getInquiryNumber = async () => {
   return inquiryNumber;
 };
 
-exports.getPrepaidOrderNumber = async () => {
-  let prepaidOrderNumber = 0;
-
-  let lastObject = await prepaidOrderService.aggregateQuery([
-    { $sort: { _id: -1 } },
-    { $limit: 1 },
-  ]);
-  if (lastObject.length) {
-    prepaidOrderNumber = parseInt(lastObject[0].prepaidOrderNumber) + 1;
-  } else {
-    prepaidOrderNumber = 1;
-  }
-  return prepaidOrderNumber;
-};
-
 exports.getOrderNumber = async () => {
   let orderNumber = 0;
 
