@@ -72,7 +72,10 @@ exports.add = async (req, res) => {
       })
     );
     if (isValidPincode) {
-      throw new ApiError(httpStatus.OK, "Pincode already exists");
+      throw new ApiError(
+        httpStatus.OK,
+        "Pincode already exists with this dealer"
+      );
     }
     //------------------create data-------------------
     let dataCreated = await dealerPincodeService.createMany(output);
