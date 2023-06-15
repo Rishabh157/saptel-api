@@ -58,7 +58,13 @@ exports.add = async (req, res) => {
     await Promise.all(
       output?.map(async (ele) => {
         let pincode = ele?.pincode;
-        let dataExist = await dealerPincodeService.isExists([{ pincode }]);
+        let dealerId = ele?.dealerId;
+
+        let dataExist = await dealerPincodeService.isExists(
+          [{ pincode }, { dealerId }],
+          false,
+          true
+        );
         if (dataExist.exists && dataExist.existsSummary) {
           isValidPincode = true;
           return;
