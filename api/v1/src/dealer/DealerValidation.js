@@ -50,8 +50,8 @@ const create = {
       adharCard: Joi.string().uri().required(),
     }),
     otherDocument: Joi.array().items({
-      documentName: Joi.string(),
-      documentFile: Joi.string().uri(),
+      documentName: Joi.string().allow(""),
+      documentFile: Joi.string().uri().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

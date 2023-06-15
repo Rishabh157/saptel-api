@@ -8,7 +8,10 @@ const { searchKeys } = require("./SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const tapeMasterService = require("../tapeMaster/TapeMasterService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -28,6 +31,7 @@ exports.add = async (req, res) => {
       schemeCode,
       schemeName,
       category,
+      commission,
       subCategory,
       schemePrice,
       dimension,
@@ -91,6 +95,7 @@ exports.update = async (req, res) => {
       schemeCode,
       schemeName,
       category,
+      commission,
       subCategory,
       schemePrice,
       dimension,
@@ -498,7 +503,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await schemeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'scheme', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "scheme",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await schemeService.getOneAndDelete({ _id });
