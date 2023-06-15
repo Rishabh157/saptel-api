@@ -12,23 +12,32 @@ const ProductGroupSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    tax: {
-      type: [
-        {
-          taxName: {
-            type: String,
-            required: true,
-            trim: true,
-          },
-
-          taxPercent: {
-            type: Number,
-            required: true,
-          },
-        },
-      ],
-      required: true,
+    gst: {
+      type: Number,
+      required: false,
+      default: 0,
     },
+    cgst: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    sgst: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    igst: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    utgst: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+
     companyId: {
       type: ObjectId,
       required: true,

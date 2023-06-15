@@ -10,11 +10,11 @@ const create = {
   body: Joi.object().keys({
     groupName: Joi.string().lowercase().required(),
     dealerSalePrice: Joi.number().required(),
-    tax: Joi.array().items({
-      taxName: Joi.string().required(),
-      taxPercent: Joi.number().required(),
-    }),
-
+    gst: Joi.number(),
+    cgst: Joi.number(),
+    sgst: Joi.number(),
+    igst: Joi.number(),
+    utgst: Joi.number(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -29,10 +29,11 @@ const update = {
   body: Joi.object().keys({
     groupName: Joi.string().lowercase().required(),
     dealerSalePrice: Joi.number().required(),
-    tax: Joi.array().items({
-      taxName: Joi.string().required(),
-      taxPercent: Joi.number().required(),
-    }),
+    gst: Joi.number(),
+    cgst: Joi.number(),
+    sgst: Joi.number(),
+    igst: Joi.number(),
+    utgst: Joi.number(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };

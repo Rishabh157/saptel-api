@@ -5,6 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const dealerPincodeService = require("./DealerPincodeService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
+// const dealerSchemeService = require("./DealerSchemeService");
 
 const { searchKeys } = require("./DealerPincodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -396,6 +397,23 @@ exports.deleteDocument = async (req, res) => {
     if (!(await dealerPincodeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    // const pincodesToUpdate = await dealerSchemeService.find({
+    //   isDeleted: false,
+    //   isActive: true,
+    //   'details.pincodes': {
+    //     $elemMatch: {
+    //       value: new mongoose.Types.ObjectId(_id),
+    //     },
+    //   },
+    // });
+    // const updateOperations = groupsToUpdate.map((group) => ({
+    //   updateOne: {
+    //     filter: { _id: group._id },
+    //     update: {
+    //       $pull: { attributes: { value: new mongoose.Types.ObjectId(_id) } },
+    //     },
+    //   },
+    // }));
     let deleted = await dealerPincodeService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
