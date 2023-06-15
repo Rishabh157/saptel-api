@@ -9,7 +9,8 @@ const { getQuery } = require("../../helper/utils");
 const mongoose = require("mongoose");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
-
+const { ledgerType } = require("../../helper/enumUtils");
+const { getDealerFromLedger, getBalance } = require("./LedgerHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -45,8 +46,15 @@ exports.add = async (req, res) => {
     if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer.");
     }
+
+    const dealerExitsId = await getDealerFromLedger(dealerId);
+    const balance = await getBalance(dealerExitsId, noteType, price);
+
     //------------------create data-------------------
-    let dataCreated = await ledgerService.createNewData({ ...req.body });
+    let dataCreated = await ledgerService.createNewData({
+      ...req.body,
+      balance: balance,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

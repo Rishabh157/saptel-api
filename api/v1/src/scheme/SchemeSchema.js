@@ -156,6 +156,7 @@ const SchemeSchema = new mongoose.Schema(
 const searchKeys = [
   "schemeCode",
   "schemeName",
+  "commission",
   "category",
   "subCategory",
   "schemePrice",
