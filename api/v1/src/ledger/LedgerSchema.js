@@ -5,11 +5,21 @@ const LedgerSchema = new mongoose.Schema(
   {
     noteType: {
       type: String,
-      enum: [ledgerType.credit, ledgerType.debit],
+      enum: [
+        ledgerType.credit,
+        ledgerType.debit,
+        ledgerType.dealerAmountCredited,
+      ],
       uppercase: true,
-      default: ledgerType.credit,
+      default: ledgerType.dealerAmountCredited,
     },
-    price: {
+
+    creditAmount: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
+    debitAmount: {
       type: Number,
       required: true,
       trim: true,

@@ -127,8 +127,9 @@ const paymentType = Object.freeze({
   debitCard: "DEBITCARD",
 });
 const ledgerType = Object.freeze({
-  credit: "CREDIT",
-  debit: "DEBIT",
+  credit: "CREDIT_NOTE_CREATED",
+  debit: "DEBIT_NOTE_CREATED",
+  dealerAmountCredited: "DEALER_AMOUNT_CREDItED",
 });
 /**
  * if other the following routes created. please add all actions with their method,

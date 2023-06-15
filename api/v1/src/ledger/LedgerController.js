@@ -24,7 +24,8 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { noteType, price, remark, companyId, dealerId } = req.body;
+    let { noteType, creditAmount, debitAmount, remark, companyId, dealerId } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -48,7 +49,7 @@ exports.add = async (req, res) => {
     }
 
     const dealerExitsId = await getDealerFromLedger(dealerId);
-    const balance = await getBalance(dealerExitsId, noteType, price);
+    const balance = await getBalance(dealerExitsId, creditAmount, debitAmount);
 
     //------------------create data-------------------
     let dataCreated = await ledgerService.createNewData({
