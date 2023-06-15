@@ -1,7 +1,6 @@
 const { applicableCriteria } = require("../../helper/enumUtils");
 
 const InquiryService = require("../inquiry/InquiryService");
-const prepaidOrderService = require("../prepaidOrder/PrepaidOrderService");
 const orderService = require("../order/OrderService");
 
 exports.getDealer = async (applicableCriterias) => {
