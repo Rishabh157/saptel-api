@@ -173,7 +173,7 @@ exports.allFilterPagination = async (req, res) => {
       : true;
     let finalAggregateQuery = [];
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [{ isDeleted: false, isActive: true }],
     };
     /**
      * to send only active data on web
@@ -321,6 +321,7 @@ exports.get = async (req, res) => {
     let matchQuery = {
       companyId: companyId,
       isDeleted: false,
+      isActive: true,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
@@ -360,6 +361,7 @@ exports.getDealerPincode = async (req, res) => {
       companyId: companyId,
       dealerId: dealerId,
       isDeleted: false,
+      isActive: true,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
