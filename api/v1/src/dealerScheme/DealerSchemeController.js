@@ -62,10 +62,32 @@ exports.add = async (req, res) => {
     const output = details.map((scheme) => {
       return {
         dealerId: dealerId,
-        details: { schemeId: scheme?.schemeId, pincodes: scheme?.pincodes },
+        schemeId: scheme?.schemeId,
+        pincodes: scheme?.pincodes,
         companyId: companyId,
       };
     });
+    let isValidDealerScheme = false;
+    await Promise.all(
+      output?.map(async (ele) => {
+        let schemeId = ele?.schemeId;
+        let dataExist = await dealerSchemeService.isExists(
+          [{ schemeId }, { dealerId }],
+          false,
+          true
+        );
+        if (dataExist.exists && dataExist.existsSummary) {
+          isValidDealerScheme = true;
+          return;
+        }
+      })
+    );
+    if (isValidDealerScheme) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Scheme already exists with this dealer."
+      );
+    }
     //------------------create data-------------------
 
     let dataCreated = await dealerSchemeService.createMany(output);

@@ -367,6 +367,7 @@ exports.get = async (req, res) => {
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
+      isActive: true,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
@@ -440,6 +441,7 @@ exports.getById = async (req, res) => {
         $match: {
           _id: new mongoose.Types.ObjectId(idToBeSearch),
           isDeleted: false,
+          isActive: true,
         },
       },
       {

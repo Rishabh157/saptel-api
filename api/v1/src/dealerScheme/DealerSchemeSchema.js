@@ -3,21 +3,21 @@ const mongoose = require("mongoose");
 const DealerSchemeSchema = new mongoose.Schema(
   {
     dealerId: { type: ObjectId, required: true, trim: true },
-    details: {
-      type: {
-        schemeId: {
-          type: ObjectId,
-          required: true,
-        },
-        pincodes: {
-          type: [String],
-          required: true,
-        },
-      },
+
+    schemeId: {
+      type: ObjectId,
+      required: true,
+    },
+    pincodes: {
+      type: [String],
+      required: true,
+    },
+
+    companyId: {
+      type: ObjectId,
       required: true,
       trim: true,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
