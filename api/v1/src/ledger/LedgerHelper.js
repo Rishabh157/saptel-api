@@ -12,7 +12,7 @@ exports.getDealerFromLedger = async (dealerId) => {
   return dealerExitsId;
 };
 
-exports.getBalance = async (dealerExitsId, noteType, price) => {
+exports.getBalance = async (dealerExitsId, creditAmount, debitAmount) => {
   let lastObject = await ledgerService.aggregateQuery([
     {
       $match: {
@@ -24,18 +24,12 @@ exports.getBalance = async (dealerExitsId, noteType, price) => {
   ]);
   let updatedBalance = 0;
   if (lastObject.length) {
-    if (noteType === ledgerType.credit) {
-      updatedBalance = parseInt(lastObject[0]?.balance + price);
-    } else if (noteType === ledgerType.debit) {
-      updatedBalance = parseInt(lastObject[0]?.balance - price);
-    }
+    updatedBalance = parseInt(
+      lastObject[0]?.balance + creditAmount - debitAmount
+    );
   } else {
-    if (noteType === ledgerType.credit) {
-      updatedBalance = price;
-    } else if (noteType === ledgerType.debit) {
-      updatedBalance = -price;
-    }
+    updatedBalance = creditAmount - debitAmount;
   }
- 
+
   return updatedBalance;
 };

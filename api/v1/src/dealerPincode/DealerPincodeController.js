@@ -5,7 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const dealerPincodeService = require("./DealerPincodeService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
-// const dealerSchemeService = require("./DealerSchemeService");
+const DealerScheme = require("../dealerScheme/DealerSchemeSchema");
 
 const { searchKeys } = require("./DealerPincodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -21,6 +21,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { isCancel } = require("axios");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -394,26 +395,24 @@ exports.getDealerPincode = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
+    let pincode = req.params.pincode;
+
     if (!(await dealerPincodeService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    // const pincodesToUpdate = await dealerSchemeService.find({
-    //   isDeleted: false,
-    //   isActive: true,
-    //   'details.pincodes': {
-    //     $elemMatch: {
-    //       value: new mongoose.Types.ObjectId(_id),
-    //     },
-    //   },
-    // });
-    // const updateOperations = groupsToUpdate.map((group) => ({
-    //   updateOne: {
-    //     filter: { _id: group._id },
-    //     update: {
-    //       $pull: { attributes: { value: new mongoose.Types.ObjectId(_id) } },
-    //     },
-    //   },
-    // }));
+    const pincodesToUpdate = await DealerScheme.find({
+      pincodes: pincode,
+    });
+    const updateOperations = pincodesToUpdate.map((dealerScheme) => ({
+      updateOne: {
+        filter: { _id: dealerScheme._id },
+        update: {
+          $pull: { pincodes: pincode },
+        },
+      },
+    }));
+    await DealerScheme.bulkWrite(updateOperations);
+
     let deleted = await dealerPincodeService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");

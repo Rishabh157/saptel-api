@@ -288,7 +288,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "schemes",
-          localField: "details.schemeId",
+          localField: "schemeId",
           foreignField: "_id",
           as: "scheme_data",
           pipeline: [

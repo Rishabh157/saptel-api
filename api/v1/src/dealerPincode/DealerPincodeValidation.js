@@ -108,6 +108,7 @@ const getDealerData = {
 const deleteDocument = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
+    pincode: Joi.string(),
   }),
 };
 
