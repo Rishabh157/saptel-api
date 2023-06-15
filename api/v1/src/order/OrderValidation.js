@@ -10,6 +10,8 @@ const create = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     orderNumber: Joi.number().required(),
+    approved: Joi.boolean().allow(""),
+
     inOutBound: Joi.string().allow(""),
     incomingCallerNo: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
