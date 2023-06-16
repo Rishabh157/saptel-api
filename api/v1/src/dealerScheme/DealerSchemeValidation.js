@@ -103,6 +103,16 @@ const getDocument = {
 };
 
 /**
+ * get a document
+ */
+const getDealerScheme = {
+  params: Joi.object().keys({
+    dealerid: Joi.string().custom(commonValidation.objectId),
+    companyid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
  * delete a document
  */
 const deleteDocument = {
@@ -125,6 +135,7 @@ module.exports = {
   get,
   update,
   getDocument,
+  getDealerScheme,
   deleteDocument,
   changeStatus,
 };

@@ -53,6 +53,8 @@ exports.add = async (req, res) => {
       creditLimit,
       openingBalance,
       autoMapping,
+      checkCreditLimit,
+      checkAvailableQuotient,
       quantityQuotient,
     } = req.body;
     /**

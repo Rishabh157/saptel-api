@@ -50,13 +50,23 @@ const DealerSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    quantityQuotient: {
+      type: Number,
+      required: true,
+    },
     autoMapping: {
       type: Boolean,
       default: true,
       required: true,
     },
-    quantityQuotient: {
-      type: Number,
+    checkCreditLimit: {
+      type: Boolean,
+      default: true,
+      required: true,
+    },
+    checkAvailableQuotient: {
+      type: Boolean,
+      default: true,
       required: true,
     },
     registrationAddress: {
@@ -136,36 +146,32 @@ const DealerSchema = new mongoose.Schema(
         {
           name: {
             type: String,
-            required: true,
             trim: true,
             lowercase: true,
           },
 
           department: {
             type: String,
-            required: true,
             trim: true,
             lowercase: true,
           },
           designation: {
             type: String,
-            required: true,
             trim: true,
             lowercase: true,
           },
           email: {
             type: String,
-            required: true,
             trim: true,
             lowercase: true,
           },
           mobileNumber: {
             type: String,
-            required: true,
+            trim: true,
           },
           landLine: {
             type: String,
-            required: true,
+            trim: true,
           },
         },
       ],
@@ -240,8 +246,10 @@ const searchKeys = [
   "lastName",
   "creditLimit",
   "openingBalance",
-  "autoMapping",
   "quantityQuotient",
+  "autoMapping",
+  "checkCreditLimit",
+  "checkAvailableQuotient",
   "dealerCategoryId",
   "email",
   "registrationAddress",
