@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const SalesOrderSchema = new mongoose.Schema(
   {
-    soNumber: { type: Number, required: true },
+    soNumber: { type: String, required: true },
     dealer: { type: ObjectId, required: true, trim: true },
     wareHouse: { type: ObjectId, required: true, trim: true },
     productSalesOrder: {

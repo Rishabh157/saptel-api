@@ -27,6 +27,8 @@ const create = {
       stateId: Joi.string().custom(commonValidation.objectId).required(),
       districtId: Joi.string().custom(commonValidation.objectId).required(),
       pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+      gstNumber: Joi.string().required(),
+      gstCertificate: Joi.string().required(),
     }),
     contactInformation: Joi.array().items({
       name: Joi.string().required(),
@@ -69,6 +71,8 @@ const update = {
       stateId: Joi.string().custom(commonValidation.objectId).required(),
       districtId: Joi.string().custom(commonValidation.objectId).required(),
       pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+      gstNumber: Joi.string().required(),
+      gstCertificate: Joi.string().required(),
     }),
     contactInformation: Joi.array().items({
       name: Joi.string().required(),
@@ -161,6 +165,16 @@ const deleteDocument = {
 };
 
 /**
+ * get all by dealeid
+ */
+const getAllByDealerId = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    dealerid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
  * change status of document
  */
 const changeStatus = {
@@ -176,4 +190,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getAllByDealerId,
 };
