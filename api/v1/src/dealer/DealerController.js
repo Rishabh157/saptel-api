@@ -5,13 +5,14 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const dealerService = require("./DealerService");
 const companyService = require("../company/CompanyService");
 const dealersCategoryService = require("../dealersCategory/DealersCategoryService");
-
+const ledgerService = require("../ledger/LedgerService");
 const { searchKeys } = require("./DealerSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const bcryptjs = require("bcryptjs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { ledgerType } = require("../../helper/enumUtils");
 
 const {
   checkIdInCollectionsThenDelete,
@@ -89,6 +90,18 @@ exports.add = async (req, res) => {
 
     //------------------create data-------------------
     let dataCreated = await dealerService.createNewData({ ...req.body });
+
+    if (dataCreated._id) {
+      let ledgerCreated = await ledgerService.createNewData({
+        noteType: ledgerType.dealerAmountCredited,
+        creditAmount: openingBalance,
+        debitAmount: 0,
+        remark: "Opening Balance",
+        dealerId: dataCreated._id,
+        companyId: companyId,
+        balance: openingBalance,
+      });
+    }
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
