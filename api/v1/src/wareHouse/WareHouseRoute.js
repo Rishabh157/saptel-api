@@ -21,6 +21,16 @@ router.get(
 );
 
 /**
+ * get all warehouse of a dealer
+ */
+router.get(
+  "/company/:companyid/dealer/:dealerid",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(wareHouseValidation.getAllByDealerId),
+  wareHouseController.getAllByDealerId
+);
+/**
  * get one document
  */
 router.get(
