@@ -11,7 +11,12 @@ const SalesOrderSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    wareHouse: {
+    dealerWareHouseId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    companyWareHouseId: {
       type: ObjectId,
       required: true,
       trim: true,
@@ -89,7 +94,11 @@ const SalesOrderSchema = new mongoose.Schema(
       ],
       default: [],
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -107,7 +116,8 @@ const SalesOrderSchema = new mongoose.Schema(
 const searchKeys = [
   "soNumber",
   "dealerId",
-  "wareHouse",
+  "dealerWareHouseId",
+  "companyWareHouseId",
   "productSalesOrder",
   "dealerLabel",
   "warehouseLabel",

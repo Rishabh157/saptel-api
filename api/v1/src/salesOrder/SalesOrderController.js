@@ -34,7 +34,8 @@ exports.add = async (req, res) => {
     let {
       soNumber,
       dealerId,
-      wareHouse,
+      dealerWareHouseId,
+      companyWareHouseId,
       productSalesOrder,
       dhApproved,
       dhApprovedActionBy,
@@ -63,8 +64,9 @@ exports.add = async (req, res) => {
     const output = productSalesOrder.map((po) => {
       return {
         soNumber: soNumber,
-        dealer: dealer,
-        wareHouse: wareHouse,
+        dealerId: dealerId,
+        dealerWareHouseId: dealerWareHouseId,
+        companyWareHouseId: companyWareHouseId,
         productSalesOrder: {
           productGroupId: po.productGroupId,
           rate: po.rate,
@@ -103,7 +105,8 @@ exports.update = async (req, res) => {
     let {
       soNumber,
       dealerId,
-      wareHouse,
+      dealerWareHouseId,
+      companyWareHouseId,
       productSalesOrder,
       dhApproved,
       dhApprovedActionBy,
