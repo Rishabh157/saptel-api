@@ -633,9 +633,6 @@ exports.getDealerScheme = async (req, res) => {
       isDeleted: false,
       isActive: true,
     });
-    if (!getDealerSchemes.length) {
-      throw new ApiError(httpStatus.OK, "Dealer Scheme not found.");
-    }
 
     const DealerScheme = getAllScheme?.filter((obj) => {
       return !getDealerSchemes.some(
