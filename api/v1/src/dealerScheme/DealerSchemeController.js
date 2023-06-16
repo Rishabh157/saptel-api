@@ -610,3 +610,52 @@ exports.statusChange = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+exports.getDealerScheme = async (req, res) => {
+  try {
+    let companyId = req.params.companyid;
+    let dealerIdToBeSearch = req.params.dealerid;
+    //if no default query then pass {}
+    let matchQuery = { companyId: companyId, isDeleted: false, isActive: true };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let getAllScheme = await schemeService.findAllWithQuery(matchQuery);
+
+    if (!getAllScheme.length) {
+      throw new ApiError(httpStatus.OK, "Scheme not found.");
+    }
+
+    let getDealerSchemes = await dealerSchemeService.findAllWithQuery({
+      dealerId: dealerIdToBeSearch,
+      companyId: companyId,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!getDealerSchemes.length) {
+      throw new ApiError(httpStatus.OK, "Dealer Scheme not found.");
+    }
+
+    const DealerScheme = getAllScheme?.filter((obj) => {
+      return !getDealerSchemes.some(
+        (o) => JSON.stringify(o.schemeId) === JSON.stringify(obj._id)
+      );
+    });
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: DealerScheme,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};

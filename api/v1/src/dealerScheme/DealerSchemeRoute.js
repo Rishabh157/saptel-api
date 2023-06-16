@@ -24,6 +24,17 @@ router.get(
  * get one document
  */
 router.get(
+  "/company/:companyid/dealer/:dealerid",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dealerSchemeValidation.getDealerScheme),
+  dealerSchemeController.getDealerScheme
+);
+
+/**
+ * get one document
+ */
+router.get(
   "/:id",
   accessModuleCheck,
   authCheckMiddleware,

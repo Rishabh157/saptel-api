@@ -2,8 +2,11 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const DealerSchemeSchema = new mongoose.Schema(
   {
-    dealerId: { type: ObjectId, required: true, trim: true },
-
+    dealerId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     schemeId: {
       type: ObjectId,
       required: true,
