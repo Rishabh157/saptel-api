@@ -6,7 +6,10 @@ const wareHouseService = require("./WareHouseService");
 const vendorService = require("../vendor/VendorService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("./WareHouseSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -38,14 +41,16 @@ exports.add = async (req, res) => {
       vendorId,
       dealerId,
       companyId,
+      gstNumber,
+      gstCertificate,
     } = req.body;
 
     const isVendorExists =
       vendorId !== null
         ? await vendorService.findCount({
-          _id: vendorId,
-          isDeleted: false,
-        })
+            _id: vendorId,
+            isDeleted: false,
+          })
         : null;
     if (isVendorExists !== null && !isVendorExists) {
       throw new ApiError(httpStatus.OK, "Invalid Vendor");
@@ -54,9 +59,9 @@ exports.add = async (req, res) => {
     const isDealerExists =
       dealerId !== null
         ? await dealerService.findCount({
-          _id: dealerId,
-          isDeleted: false,
-        })
+            _id: dealerId,
+            isDeleted: false,
+          })
         : null;
     if (isDealerExists !== null && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
@@ -118,6 +123,8 @@ exports.update = async (req, res) => {
       vendorId,
       dealerId,
       companyId,
+      gstNumber,
+      gstCertificate,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -125,9 +132,9 @@ exports.update = async (req, res) => {
     const isVendorExists =
       vendorId !== null
         ? await vendorService.findCount({
-          _id: vendorId,
-          isDeleted: false,
-        })
+            _id: vendorId,
+            isDeleted: false,
+          })
         : null;
     if (isVendorExists !== null && !isVendorExists) {
       throw new ApiError(httpStatus.OK, "Invalid Vendor");
@@ -136,9 +143,9 @@ exports.update = async (req, res) => {
     const isDealerExists =
       dealerId !== null
         ? await dealerService.findCount({
-          _id: dealerId,
-          isDeleted: false,
-        })
+            _id: dealerId,
+            isDeleted: false,
+          })
         : null;
     if (isDealerExists !== null && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
@@ -804,7 +811,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await wareHouseService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'wareHouseId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "wareHouseId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await wareHouseService.getOneAndDelete({ _id });

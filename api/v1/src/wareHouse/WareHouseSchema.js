@@ -85,6 +85,16 @@ const WareHouseSchema = new mongoose.Schema(
           required: true,
           trim: true,
         },
+        gstNumber: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        gstCertificate: {
+          type: String,
+          required: true,
+          trim: true,
+        },
       },
       required: true,
     },
