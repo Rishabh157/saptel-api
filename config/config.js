@@ -15,6 +15,7 @@ let {
   JWT_DEALER_SECRET_REFRESH,
   LOCALHOST,
   BASEURL_LOCAL,
+  BASEURL_LIVE,
   JWT_SECRET_OTP,
   JWT_EXPIRATION_MINUTES_OTP,
 } = process.env;
@@ -31,7 +32,7 @@ let envObj = {
   JWT_EXPIRATION_MINUTES,
   LOCALHOST,
   BASEURL_LOCAL,
-
+  BASEURL_LIVE,
   JWT_SECRET_OTP,
   JWT_EXPIRATION_MINUTES_OTP,
 };
@@ -42,6 +43,7 @@ const envVarsSchema = Joi.object().keys({
   MONGODB_URL: Joi.string().required().label("Mongo DB url"),
   LOCALHOST: Joi.string().required().label("localhost url is required"),
   BASEURL_LOCAL: Joi.string().required().label("Base url is url"),
+  BASEURL_LIVE: Joi.string().required().label("Base url Live is url"),
   JWT_SECRET: Joi.string().required().label("JWT secret key"),
   JWT_SECRET_REFRESH: Joi.string().required().label("JWT secret refresh key"),
   JWT_DEALER_SECRET: Joi.string().required().label("JWT dealer secret key"),
