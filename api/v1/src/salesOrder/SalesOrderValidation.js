@@ -17,6 +17,8 @@ const create = {
     accApprovedActionBy: Joi.string().allow(""),
     accApprovedAt: Joi.string().allow(""),
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    dhApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
+    accApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerWareHouseId: Joi.string()
       .custom(commonValidation.objectId)
       .required(),
@@ -64,6 +66,8 @@ const update = {
     accApprovedActionBy: Joi.string().allow(""),
     accApprovedAt: Joi.string().allow(""),
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    dhApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
+    accApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerWareHouseId: Joi.string()
       .custom(commonValidation.objectId)
       .required(),

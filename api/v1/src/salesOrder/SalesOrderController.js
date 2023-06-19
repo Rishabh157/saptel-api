@@ -44,6 +44,8 @@ exports.add = async (req, res) => {
       accApprovedActionBy,
       accApprovedAt,
       companyId,
+      dhApprovedById,
+      accApprovedById,
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -115,6 +117,8 @@ exports.update = async (req, res) => {
       accApprovedActionBy,
       accApprovedAt,
       companyId,
+      dhApprovedById,
+      accApprovedById,
     } = req.body;
 
     let idToBeSearch = req.params.id;

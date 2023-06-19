@@ -21,6 +21,10 @@ const SalesOrderSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    dhApprovedById: {
+      type: ObjectId,
+      default: null,
+    },
     dhApproved: {
       type: Boolean,
       default: null,
@@ -32,6 +36,10 @@ const SalesOrderSchema = new mongoose.Schema(
     dhApprovedAt: {
       type: String,
       default: "",
+    },
+    accApprovedById: {
+      type: ObjectId,
+      default: null,
     },
     accApproved: {
       type: Boolean,
@@ -121,6 +129,8 @@ const searchKeys = [
   "productSalesOrder",
   "dealerLabel",
   "warehouseLabel",
+  "dhApprovedById",
+  "accApprovedById",
 ];
 module.exports = mongoose.model("SalesOrder", SalesOrderSchema);
 module.exports.searchKeys = [...searchKeys];
