@@ -713,7 +713,7 @@ exports.getById = async (req, res) => {
     let additionalQuery = [
       {
         $match: {
-          dealer: new mongoose.Types.ObjectId(idToBeSearch),
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
           isDeleted: false,
         },
       },
@@ -798,7 +798,6 @@ exports.getById = async (req, res) => {
       },
     ];
     let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
-
     if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
