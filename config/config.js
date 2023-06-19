@@ -94,5 +94,5 @@ module.exports = {
   base_url:
     envVars.NODE_ENV === "development"
       ? envVars.BASEURL_LOCAL + ":" + envVars.PORT + "/"
-      : envVars.BASEURL_LIVE,
+      : envVars.BASEURL_LIVE + "/",
 };
