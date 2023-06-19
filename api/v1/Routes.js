@@ -68,6 +68,7 @@ const websiteMetaTagRoute = require("./src/websiteMetaTag/WebsiteMetaTagRoute");
 const inquiryRoute = require("./src/inquiry/InquiryRoute");
 const ZonalManagerRoute = require("./src/zonalManager/ZonalManagerRoute");
 const ledgerRoute = require("./src/ledger/LedgerRoute");
+const orderLedgerRoute = require("./src/orderLedger/OrderLedgerRoute");
 const userRoleRoute = require("./src/user/UserRoute");
 const allocationRoute = require("./src/allocation/AllocationRoute");
 const assetLocationRoute = require("./src/assetLocation/AssetLocationRoute");
@@ -365,7 +366,10 @@ const defaultRoutes = [
     path: "/asset-location",
     route: assetLocationRoute,
   },
- 
+  {
+    path: "/order-ledger",
+    route: orderLedgerRoute,
+  },
 ];
 orderRoute;
 
