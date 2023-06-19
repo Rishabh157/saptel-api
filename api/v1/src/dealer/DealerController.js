@@ -52,9 +52,9 @@ exports.add = async (req, res) => {
       companyId,
       creditLimit,
       openingBalance,
-      autoMapping,
-      checkCreditLimit,
-      checkAvailableQuotient,
+      isAutoMapping,
+      isCheckCreditLimit,
+      isCheckAvailableQuotient,
       quantityQuotient,
     } = req.body;
     /**
@@ -145,8 +145,9 @@ exports.update = async (req, res) => {
       companyId,
       creditLimit,
       openingBalance,
-      autoMapping,
-      quantityQuotient,
+      isAutoMapping,
+      isCheckCreditLimit,
+      isCheckAvailableQuotient,
     } = req.body;
 
     let idToBeSearch = req.params.id;
