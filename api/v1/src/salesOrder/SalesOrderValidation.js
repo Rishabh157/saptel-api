@@ -6,11 +6,23 @@ const commonValidation = require("../../helper/CommonValidation");
 /**
  * create new document
  */
+
 const create = {
   body: Joi.object().keys({
     soNumber: Joi.string().required(),
-    dealer: Joi.string().custom(commonValidation.objectId).required(),
-    wareHouse: Joi.string().custom(commonValidation.objectId).required(),
+    dhApproved: Joi.boolean().allow(null),
+    dhApprovedActionBy: Joi.string().allow(""),
+    dhApprovedAt: Joi.string().allow(""),
+    accApproved: Joi.boolean().allow(null),
+    accApprovedActionBy: Joi.string().allow(""),
+    accApprovedAt: Joi.string().allow(""),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    dealerWareHouseId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    companyWareHouseId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
     productSalesOrder: Joi.array().items({
       productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       rate: Joi.number().required(),
@@ -45,8 +57,19 @@ const update = {
   }),
   body: Joi.object().keys({
     soNumber: Joi.string().required(),
-    dealer: Joi.string().custom(commonValidation.objectId).required(),
-    wareHouse: Joi.string().custom(commonValidation.objectId).required(),
+    dhApproved: Joi.boolean().allow(null),
+    dhApprovedActionBy: Joi.string().allow(""),
+    dhApprovedAt: Joi.string().allow(""),
+    accApproved: Joi.boolean().allow(null),
+    accApprovedActionBy: Joi.string().allow(""),
+    accApprovedAt: Joi.string().allow(""),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    dealerWareHouseId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    companyWareHouseId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
     productSalesOrder: Joi.object().keys({
       productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       rate: Joi.number().required(),

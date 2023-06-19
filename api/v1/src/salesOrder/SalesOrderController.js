@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const salesOrderService = require("./SalesOrderService");
 const companyService = require("../company/CompanyService");
+const ledgerService = require("../ledger/LedgerService");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -12,6 +13,9 @@ const {
 const { searchKeys } = require("./SalesOrderSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
+const { ledgerType } = require("../../helper/enumUtils");
+
+const { getBalance } = require("../ledger/LedgerHelper");
 
 const {
   getSearchQuery,
@@ -27,8 +31,20 @@ const mongoose = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { soNumber, dealer, wareHouse, productSalesOrder, companyId } =
-      req.body;
+    let {
+      soNumber,
+      dealerId,
+      dealerWareHouseId,
+      companyWareHouseId,
+      productSalesOrder,
+      dhApproved,
+      dhApprovedActionBy,
+      dhApprovedAt,
+      accApproved,
+      accApprovedActionBy,
+      accApprovedAt,
+      companyId,
+    } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -48,8 +64,9 @@ exports.add = async (req, res) => {
     const output = productSalesOrder.map((po) => {
       return {
         soNumber: soNumber,
-        dealer: dealer,
-        wareHouse: wareHouse,
+        dealerId: dealerId,
+        dealerWareHouseId: dealerWareHouseId,
+        companyWareHouseId: companyWareHouseId,
         productSalesOrder: {
           productGroupId: po.productGroupId,
           rate: po.rate,
@@ -85,8 +102,20 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { soNumber, dealer, wareHouse, productSalesOrder, companyId } =
-      req.body;
+    let {
+      soNumber,
+      dealerId,
+      dealerWareHouseId,
+      companyWareHouseId,
+      productSalesOrder,
+      dhApproved,
+      dhApprovedActionBy,
+      dhApprovedAt,
+      accApproved,
+      accApprovedActionBy,
+      accApprovedAt,
+      companyId,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -118,6 +147,27 @@ exports.update = async (req, res) => {
       }
     );
 
+    const salesOrderBalance =
+      parseInt(dataUpdated.productSalesOrder.rate) *
+      parseInt(dataUpdated.productSalesOrder.quantity);
+
+    if (dataUpdated.accApproved === true) {
+      const balance = await getBalance(
+        dataUpdated.dealerId,
+        0,
+        salesOrderBalance
+      );
+      //------------------create data-------------------
+      let dataCreated = await ledgerService.createNewData({
+        noteType: ledgerType.debit,
+        creditAmount: 0,
+        debitAmount: parseInt(balance),
+        remark: "By Sales Order",
+        companyId: dataUpdated.companyId,
+        dealerId: dataUpdated.dealerId,
+        balance: balance,
+      });
+    }
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",

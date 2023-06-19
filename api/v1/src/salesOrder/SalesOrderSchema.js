@@ -2,9 +2,49 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const SalesOrderSchema = new mongoose.Schema(
   {
-    soNumber: { type: String, required: true },
-    dealer: { type: ObjectId, required: true, trim: true },
-    wareHouse: { type: ObjectId, required: true, trim: true },
+    soNumber: {
+      type: String,
+      required: true,
+    },
+    dealerId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    dealerWareHouseId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    companyWareHouseId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    dhApproved: {
+      type: Boolean,
+      default: null,
+    },
+    dhApprovedActionBy: {
+      type: String,
+      default: "",
+    },
+    dhApprovedAt: {
+      type: String,
+      default: "",
+    },
+    accApproved: {
+      type: Boolean,
+      default: null,
+    },
+    accApprovedActionBy: {
+      type: String,
+      default: "",
+    },
+    accApprovedAt: {
+      type: String,
+      default: "",
+    },
     productSalesOrder: {
       type: {
         productGroupId: {
@@ -54,7 +94,11 @@ const SalesOrderSchema = new mongoose.Schema(
       ],
       default: [],
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -71,8 +115,9 @@ const SalesOrderSchema = new mongoose.Schema(
 
 const searchKeys = [
   "soNumber",
-  "dealer",
-  "wareHouse",
+  "dealerId",
+  "dealerWareHouseId",
+  "companyWareHouseId",
   "productSalesOrder",
   "dealerLabel",
   "warehouseLabel",
