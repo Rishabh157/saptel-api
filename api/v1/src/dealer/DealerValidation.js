@@ -55,7 +55,12 @@ const create = {
       documentName: Joi.string().allow(""),
       documentFile: Joi.string().uri().allow(""),
     }),
+
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    zonalManagerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    zonalExecutiveId: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
   }),
 };
 
@@ -114,6 +119,10 @@ const update = {
       documentFile: Joi.string().uri().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    zonalManagerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    zonalExecutiveId: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
     openingBalance: Joi.number().allow(),
   }),
 };

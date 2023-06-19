@@ -225,6 +225,14 @@ const DealerSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    zonalManagerId: {
+      type: ObjectId,
+      trim: true,
+    },
+    zonalExecutiveId: {
+      type: ObjectId,
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -258,6 +266,8 @@ const searchKeys = [
   "document",
   "otherDocument",
   "companyId",
+  "zonalManagerId",
+  "zonalExecutiveId",
 ];
 module.exports = mongoose.model("Dealer", DealerSchema);
 module.exports.searchKeys = [...searchKeys];
