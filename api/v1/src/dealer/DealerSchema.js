@@ -54,17 +54,17 @@ const DealerSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    autoMapping: {
+    isAutoMapping: {
       type: Boolean,
       default: true,
       required: true,
     },
-    checkCreditLimit: {
+    isCheckCreditLimit: {
       type: Boolean,
       default: true,
       required: true,
     },
-    checkAvailableQuotient: {
+    isCheckAvailableQuotient: {
       type: Boolean,
       default: true,
       required: true,
@@ -247,9 +247,9 @@ const searchKeys = [
   "creditLimit",
   "openingBalance",
   "quantityQuotient",
-  "autoMapping",
-  "checkCreditLimit",
-  "checkAvailableQuotient",
+  "isAutoMapping",
+  "isCheckCreditLimit",
+  "isCheckAvailableQuotient",
   "dealerCategoryId",
   "email",
   "registrationAddress",
