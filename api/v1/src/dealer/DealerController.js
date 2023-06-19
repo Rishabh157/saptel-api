@@ -56,6 +56,8 @@ exports.add = async (req, res) => {
       isCheckCreditLimit,
       isCheckAvailableQuotient,
       quantityQuotient,
+      zonalManagerId,
+      zonalExecutiveId,
     } = req.body;
     /**
      * check duplicate exist
@@ -148,6 +150,8 @@ exports.update = async (req, res) => {
       isAutoMapping,
       isCheckCreditLimit,
       isCheckAvailableQuotient,
+      zonalManagerId,
+      zonalExecutiveId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
