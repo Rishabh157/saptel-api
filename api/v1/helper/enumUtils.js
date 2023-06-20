@@ -201,7 +201,7 @@ const userRoleType = Object.freeze({
   frontendDeveloper: "FRONTEND_DEVELOPER",
   graphicDesignerWeb: "GRAPHIC_DESIGNER_WEB",
   jrWebDeveloper: "JR_WEB_DEVELOPER",
-  srManagerDigitalSales: "SR_MANAGER_DIGITAL_SALES",
+
   srWebDeveloper: "SR_WEB_DEVELOPER",
   webDeveloper: "WEB_DEVELOPER",
   avpOperations: "AVP_OPERATIONS",
