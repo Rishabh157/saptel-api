@@ -18,6 +18,8 @@ const create = {
     userType: Joi.string(),
     password: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    userDepartment: Joi.string().required(),
+    userRole: Joi.string().required(),
   }),
 };
 
@@ -35,6 +37,8 @@ const update = {
     email: Joi.string().lowercase().required(),
     userType: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    userDepartment: Joi.string().required(),
+    userRole: Joi.string().required(),
   }),
 };
 

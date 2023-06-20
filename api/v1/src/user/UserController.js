@@ -4,7 +4,10 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("./UserService");
 const companyService = require("../company/CompanyService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("./UserSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -35,7 +38,16 @@ const { userEnum } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { firstName, lastName, mobile, email, companyId, password } = req.body;
+    let {
+      firstName,
+      lastName,
+      mobile,
+      email,
+      companyId,
+      password,
+      userDepartment,
+      userRole,
+    } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -75,6 +87,8 @@ exports.add = async (req, res) => {
           mobile: mobile,
           companyId: companyId,
           userType: userEnum.user,
+          userDepartment: userDepartment,
+          userRole: userRole,
         },
         status: true,
         code: "OK",
@@ -96,7 +110,15 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { firstName, lastName, mobile, email, companyId } = req.body;
+    let {
+      firstName,
+      lastName,
+      mobile,
+      email,
+      companyId,
+      userDepartment,
+      userRole,
+    } = req.body;
     if (req.userData.userType !== userEnum.user) {
       throw new ApiError(
         httpStatus.UNAUTHORIZED,
@@ -371,7 +393,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await userService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'userId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "userId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await userService.getOneAndDelete({ _id });
