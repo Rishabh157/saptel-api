@@ -1,7 +1,7 @@
 // model schema starts here
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { userEnum } = require("../../helper/enumUtils");
+const { userEnum, userDepartmentType } = require("../../helper/enumUtils");
 const UserSchema = new mongoose.Schema(
   {
     firstName: {
@@ -32,6 +32,32 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    // userDepartment: {
+    //   type: String,
+    //   enum: [
+    //     userDepartmentType.salesDepartment,
+    //     userDepartmentType.hrDepartment,
+    //     userDepartmentType.distributionDepartment,
+    //     userDepartmentType.financeDepartment,
+    //     userDepartmentType.mediaDepartment,
+    //     userDepartmentType.mediaProductionDepartment,
+    //     userDepartmentType.ITDepartment,
+    //     userDepartmentType.DevelopmentDepartment,
+    //     userDepartmentType.webDepartment,
+    //     userDepartmentType.operationDepartment,
+    //     userDepartmentType.qualityDepartment,
+    //     userDepartmentType.logisticDepartment,
+    //     userDepartmentType.mappingAndMISDepartment,
+    //     userDepartmentType.adminDepartment,
+    //   ],
+    //   uppercase: true,
+    //   required: true,
+    // },
+    // userRole: {
+    //   type: String,
+    //   enum: [],
+    //   required: true,
+    // },
     userType: {
       type: String,
       required: true,

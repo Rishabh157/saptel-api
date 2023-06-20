@@ -126,6 +126,39 @@ const paymentType = Object.freeze({
   creditCard: "CREDITCARD",
   debitCard: "DEBITCARD",
 });
+const userDepartmentType = Object.freeze({
+  salesDepartment: "SALES_DEPARTMENT",
+  hrDepartment: "HR_DEPARTMENT",
+  distributionDepartment: "DISTRIBUTION_DEPARTMENT",
+  financeDepartment: "FINANCE_DEPARTMENT",
+  mediaDepartment: "MEDIA_DEPARTMENT",
+  mediaProductionDepartment: "MEDIA_PRODUCTION_DEPARTMENT",
+  ITDepartment: "IT_DEPARTMENT",
+  DevelopmentDepartment: "DEVELOPMENT_DEPARTMENT",
+  webDepartment: "WEB_DEPARTMENT",
+  operationDepartment: "OPERATION_DEPARTMENT",
+  qualityDepartment: "QUALITY_DEPARTMENT",
+  logisticDepartment: "LOGISTIC_DEPARTMENT",
+  mappingAndMISDepartment: "MAPPING_AND_MIS_DEPARTMENT",
+  adminDepartment: "ADMIN_DEPARTMENT",
+});
+
+// const userRoleType = Object.freeze({
+//   avp: "SALE_AVP",
+//   agmSale: "SALE_AGM_SALES",
+//   managerSalesCenter: "MANAGER_SALES_CENTER",
+//   asstManagerSalesCenter: "ASST_MANAGER_SALES_CENTER",
+//   mediaDepartment: "MEDIA_DEPARTMENT",
+//   mediaProductionDepartment: "MEDIA_PRODUCTION_DEPARTMENT",
+//   ITDepartment: "IT_DEPARTMENT",
+//   DevelopmentDepartment: "DEVELOPMENT_DEPARTMENT",
+//   webDepartment: "WEB_DEPARTMENT",
+//   operationDepartment: "OPERATION_DEPARTMENT",
+//   qualityDepartment: "QUALITY_DEPARTMENT",
+//   logisticDepartment: "LOGISTIC_DEPARTMENT",
+//   mappingAndMISDepartment: "MAPPING_AND_MIS_DEPARTMENT",
+//   adminDepartment: "ADMIN_DEPARTMENT",
+// });
 const ledgerType = Object.freeze({
   credit: "CREDIT_NOTE_CREATED",
   debit: "DEBIT_NOTE_CREATED",
@@ -181,4 +214,5 @@ module.exports = {
   whatsType,
   reasonNotShowSlot,
   ledgerType,
+  userDepartmentType,
 };
