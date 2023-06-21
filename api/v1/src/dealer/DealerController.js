@@ -630,7 +630,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "dealerscategories",
-          localField: "dealerCategory",
+          localField: "dealerCategoryId",
           foreignField: "_id",
           as: "dealerCategory_name",
           pipeline: [{ $project: { dealersCategory: 1 } }],
@@ -639,7 +639,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "countries",
-          localField: "registrationAddress.country",
+          localField: "registrationAddress.countryId",
           foreignField: "_id",
           as: "country_name",
           pipeline: [{ $project: { countryName: 1 } }],
@@ -648,7 +648,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "registrationAddress.state",
+          localField: "registrationAddress.stateId",
           foreignField: "_id",
           as: "state_name",
           pipeline: [{ $project: { stateName: 1 } }],
@@ -657,7 +657,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "registrationAddress.district",
+          localField: "registrationAddress.districtId",
           foreignField: "_id",
           as: "district_name",
           pipeline: [{ $project: { districtName: 1 } }],
@@ -666,7 +666,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "registrationAddress.pincode",
+          localField: "registrationAddress.pincodeId",
           foreignField: "_id",
           as: "pincode_name",
           pipeline: [{ $project: { pincode: 1 } }],
@@ -676,7 +676,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "countries",
-          localField: "billingAddress.country",
+          localField: "billingAddress.countryId",
           foreignField: "_id",
           as: "b_country_name",
           pipeline: [{ $project: { countryName: 1 } }],
@@ -685,7 +685,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "billingAddress.state",
+          localField: "billingAddress.stateId",
           foreignField: "_id",
           as: "b_state_name",
           pipeline: [{ $project: { stateName: 1 } }],
@@ -694,7 +694,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "billingAddress.district",
+          localField: "billingAddress.districtId",
           foreignField: "_id",
           as: "b_district_name",
           pipeline: [{ $project: { districtName: 1 } }],
@@ -703,7 +703,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "billingAddress.pincode",
+          localField: "billingAddress.pincodeId",
           foreignField: "_id",
           as: "b_pincode_name",
           pipeline: [{ $project: { pincode: 1 } }],
@@ -794,7 +794,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "dealerscategories",
-          localField: "dealerCategory",
+          localField: "dealerCategoryId",
           foreignField: "_id",
           as: "dealerCategory_name",
           pipeline: [{ $project: { dealersCategory: 1 } }],
@@ -803,7 +803,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "countries",
-          localField: "registrationAddress.country",
+          localField: "registrationAddress.countryId",
           foreignField: "_id",
           as: "country_name",
           pipeline: [{ $project: { countryName: 1 } }],
@@ -812,7 +812,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "registrationAddress.state",
+          localField: "registrationAddress.stateId",
           foreignField: "_id",
           as: "state_name",
           pipeline: [{ $project: { stateName: 1 } }],
@@ -821,7 +821,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "registrationAddress.district",
+          localField: "registrationAddress.districtId",
           foreignField: "_id",
           as: "district_name",
           pipeline: [{ $project: { districtName: 1 } }],
@@ -830,7 +830,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "registrationAddress.pincode",
+          localField: "registrationAddress.pincodeId",
           foreignField: "_id",
           as: "pincode_name",
           pipeline: [{ $project: { pincode: 1 } }],
@@ -840,7 +840,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "countries",
-          localField: "billingAddress.country",
+          localField: "billingAddress.countryId",
           foreignField: "_id",
           as: "b_country_name",
           pipeline: [{ $project: { countryName: 1 } }],
@@ -849,7 +849,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "billingAddress.state",
+          localField: "billingAddress.stateId",
           foreignField: "_id",
           as: "b_state_name",
           pipeline: [{ $project: { stateName: 1 } }],
@@ -858,7 +858,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "billingAddress.district",
+          localField: "billingAddress.districtId",
           foreignField: "_id",
           as: "b_district_name",
           pipeline: [{ $project: { districtName: 1 } }],
@@ -867,7 +867,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "billingAddress.pincode",
+          localField: "billingAddress.pincodeId",
           foreignField: "_id",
           as: "b_pincode_name",
           pipeline: [{ $project: { pincode: 1 } }],
