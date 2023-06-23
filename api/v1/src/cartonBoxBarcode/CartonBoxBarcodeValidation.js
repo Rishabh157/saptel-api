@@ -90,7 +90,11 @@ const get = {
     })
     .optional(),
 };
-
+const getByboxId = {
+  params: Joi.object().keys({
+    id: Joi.string(),
+  }),
+};
 /**
  * delete a document
  */
@@ -115,4 +119,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getByboxId,
 };

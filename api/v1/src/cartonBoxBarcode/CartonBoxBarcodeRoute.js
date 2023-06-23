@@ -27,7 +27,7 @@ router.get(
   "/get-by-box/:id",
   accessModuleCheck,
   authCheckMiddleware,
-  validate(cartonBoxBarcodeValidation.get),
+  validate(cartonBoxBarcodeValidation.getByboxId),
   cartonBoxBarcodeController.getByBoxId
 );
 /**
