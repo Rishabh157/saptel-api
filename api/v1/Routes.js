@@ -72,6 +72,8 @@ const orderLedgerRoute = require("./src/orderLedger/OrderLedgerRoute");
 const userRoleRoute = require("./src/user/UserRoute");
 const allocationRoute = require("./src/allocation/AllocationRoute");
 const assetLocationRoute = require("./src/assetLocation/AssetLocationRoute");
+const dealerWarehouseRoute = require("./src/dealerWareHouse/DealerWareHouseRoute");
+const vendorWarehouseRoute = require("./src/vendorWareHouse/VendorWareHouseRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -369,6 +371,14 @@ const defaultRoutes = [
   {
     path: "/order-ledger",
     route: orderLedgerRoute,
+  },
+  {
+    path: "/dealer-warehouse",
+    route: dealerWarehouseRoute,
+  },
+  {
+    path: "/vendor-warehouse",
+    route: vendorWarehouseRoute,
   },
 ];
 orderRoute;

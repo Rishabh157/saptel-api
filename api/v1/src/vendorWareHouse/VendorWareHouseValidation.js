@@ -39,6 +39,7 @@ const create = {
       landLine: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    vendorId: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
@@ -81,6 +82,7 @@ const update = {
       landLine: Joi.string().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    vendorId: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
@@ -163,10 +165,10 @@ const deleteDocument = {
 /**
  * get all by dealeid
  */
-const getAllByDealerId = {
+const getAllByVendorId = {
   params: Joi.object().keys({
     companyid: Joi.string().custom(commonValidation.objectId),
-    dealerid: Joi.string().custom(commonValidation.objectId),
+    vendorid: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
@@ -186,5 +188,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
-  getAllByDealerId,
+  getAllByVendorId,
 };

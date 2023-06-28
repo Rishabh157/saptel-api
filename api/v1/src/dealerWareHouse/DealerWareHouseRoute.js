@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const wareHouseController = require("./WareHouseController");
+const wareHouseController = require("./DealerWareHouseController");
 const validate = require("../../middleware/validate");
-const wareHouseValidation = require("./WareHouseValidation");
+const wareHouseValidation = require("./DealerWareHouseValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
@@ -20,6 +20,16 @@ router.get(
   wareHouseController.get
 );
 
+/**
+ * get all warehouse of a dealer
+ */
+router.get(
+  "/company/:companyid/dealer/:dealerid",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(wareHouseValidation.getAllByDealerId),
+  wareHouseController.getAllByDealerId
+);
 /**
  * get one document
  */

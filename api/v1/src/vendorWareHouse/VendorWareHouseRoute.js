@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const wareHouseController = require("./WareHouseController");
+const wareHouseController = require("./VendorWareHouseController");
 const validate = require("../../middleware/validate");
-const wareHouseValidation = require("./WareHouseValidation");
+const wareHouseValidation = require("./VendorWareHouseValidation");
 const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
@@ -21,6 +21,16 @@ router.get(
 );
 
 /**
+ * get all warehouse of a vendor
+ */
+router.get(
+  "/company/:companyid/vendor/:vendorid",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(wareHouseValidation.getAllByVendorId),
+  wareHouseController.getAllByVendorId
+);
+/**
  * get one document
  */
 router.get(
@@ -31,10 +41,10 @@ router.get(
   wareHouseController.getById
 );
 /**
- * get one document for dealer app
+ * get one document for vendor app
  */
 router.get(
-  "/dealer/:id",
+  "/vendor/:id",
   accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.getDocument),
@@ -51,9 +61,9 @@ router.post(
   validate(wareHouseValidation.getAllFilter),
   wareHouseController.allFilterPagination
 );
-// dealer project warehouse
+// vendor project warehouse
 router.post(
-  "/dealer",
+  "/vendor",
   accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.getAllFilter),
@@ -71,10 +81,10 @@ router.post(
   wareHouseController.add
 );
 /**
- * create new document in dealer app
+ * create new document in vendor app
  */
 router.post(
-  "/dealer/add",
+  "/vendor/add",
   accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.create),
@@ -91,10 +101,10 @@ router.put(
   wareHouseController.update
 );
 /**
- * update document for dealer app
+ * update document for vendor app
  */
 router.put(
-  "/dealer/:id",
+  "/vendor/:id",
   accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.update),

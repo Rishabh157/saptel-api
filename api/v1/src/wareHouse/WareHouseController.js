@@ -3,9 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const wareHouseService = require("./WareHouseService");
-const vendorService = require("../vendor/VendorService");
 const companyService = require("../company/CompanyService");
-const dealerService = require("../dealer/DealerService");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -14,7 +12,6 @@ const {
 const { searchKeys } = require("./WareHouseSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
 
 const {
   getSearchQuery,
@@ -38,34 +35,11 @@ exports.add = async (req, res) => {
       registrationAddress,
       billingAddress,
       contactInformation,
-      vendorId,
-      dealerId,
+
       companyId,
       gstNumber,
       gstCertificate,
     } = req.body;
-
-    const isVendorExists =
-      vendorId !== null
-        ? await vendorService.findCount({
-            _id: vendorId,
-            isDeleted: false,
-          })
-        : null;
-    if (isVendorExists !== null && !isVendorExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Vendor");
-    }
-
-    const isDealerExists =
-      dealerId !== null
-        ? await dealerService.findCount({
-            _id: dealerId,
-            isDeleted: false,
-          })
-        : null;
-    if (isDealerExists !== null && !isDealerExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Dealer");
-    }
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -120,36 +94,13 @@ exports.update = async (req, res) => {
       registrationAddress,
       billingAddress,
       contactInformation,
-      vendorId,
-      dealerId,
+
       companyId,
       gstNumber,
       gstCertificate,
     } = req.body;
 
     let idToBeSearch = req.params.id;
-
-    const isVendorExists =
-      vendorId !== null
-        ? await vendorService.findCount({
-            _id: vendorId,
-            isDeleted: false,
-          })
-        : null;
-    if (isVendorExists !== null && !isVendorExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Vendor");
-    }
-
-    const isDealerExists =
-      dealerId !== null
-        ? await dealerService.findCount({
-            _id: dealerId,
-            isDeleted: false,
-          })
-        : null;
-    if (isDealerExists !== null && !isDealerExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Dealer");
-    }
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -262,7 +213,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFileds = ["dealerId", "vendorId", "companyId"];
+    let objectIdFileds = ["companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -643,172 +594,172 @@ exports.get = async (req, res) => {
 };
 
 //get api
-exports.getAllByDealerId = async (req, res) => {
-  try {
-    let companyId = req.params.companyid;
-    let dealerId = req.params.dealerid;
+// exports.getAllByDealerId = async (req, res) => {
+//   try {
+//     let companyId = req.params.companyid;
+//     let dealerId = req.params.dealerid;
 
-    //if no default query then pass {}
-    let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
-      dealerId: new mongoose.Types.ObjectId(dealerId),
-      isDeleted: false,
-    };
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
-    let additionalQuery = [
-      { $match: matchQuery },
-      {
-        $lookup: {
-          from: "countries",
-          localField: "country",
-          foreignField: "_id",
-          as: "warehouse_country_name",
-          pipeline: [{ $project: { countryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "countries",
-          localField: "registrationAddress.countryId",
-          foreignField: "_id",
-          as: "country_name",
-          pipeline: [{ $project: { countryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "states",
-          localField: "registrationAddress.stateId",
-          foreignField: "_id",
-          as: "state_name",
-          pipeline: [{ $project: { stateName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "districts",
-          localField: "registrationAddress.districtId",
-          foreignField: "_id",
-          as: "district_name",
-          pipeline: [{ $project: { districtName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "pincodes",
-          localField: "registrationAddress.pincodeId",
-          foreignField: "_id",
-          as: "pincode_name",
-          pipeline: [{ $project: { pincode: 1 } }],
-        },
-      },
-      // billing section start
-      {
-        $lookup: {
-          from: "countries",
-          localField: "billingAddress.countryId",
-          foreignField: "_id",
-          as: "b_country_name",
-          pipeline: [{ $project: { countryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "states",
-          localField: "billingAddress.stateId",
-          foreignField: "_id",
-          as: "b_state_name",
-          pipeline: [{ $project: { stateName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "districts",
-          localField: "billingAddress.districtId",
-          foreignField: "_id",
-          as: "b_district_name",
-          pipeline: [{ $project: { districtName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "pincodes",
-          localField: "billingAddress.pincodeId",
-          foreignField: "_id",
-          as: "b_pincode_name",
-          pipeline: [{ $project: { pincode: 1 } }],
-        },
-      },
-      {
-        $addFields: {
-          wareHouseCountryName: {
-            $arrayElemAt: ["$warehouse_country_name.countryName", 0],
-          },
-          registrationCountryName: {
-            $arrayElemAt: ["$country_name.countryName", 0],
-          },
-          registrationStateName: {
-            $arrayElemAt: ["$state_name.stateName", 0],
-          },
-          registrationDistrictName: {
-            $arrayElemAt: ["$district_name.districtName", 0],
-          },
-          registrationPincodeName: {
-            $arrayElemAt: ["$pincode_name.pincode", 0],
-          },
-          //billing start
-          billingAddressCountryName: {
-            $arrayElemAt: ["$b_country_name.countryName", 0],
-          },
-          billingAddressStateName: {
-            $arrayElemAt: ["$b_state_name.stateName", 0],
-          },
-          billingAddressDistrictName: {
-            $arrayElemAt: ["$b_district_name.districtName", 0],
-          },
-          billingAddressPincodeName: {
-            $arrayElemAt: ["$b_pincode_name.pincode", 0],
-          },
-        },
-      },
-      {
-        $unset: [
-          "warehouse_country_name",
-          "country_name",
-          "state_name",
-          "district_name",
-          "pincode_name",
-          "b_country_name",
-          "b_state_name",
-          "b_district_name",
-          "b_pincode_name",
-        ],
-      },
-    ];
-    let dataExist = await wareHouseService.aggregateQuery(additionalQuery);
+//     //if no default query then pass {}
+//     let matchQuery = {
+//       companyId: new mongoose.Types.ObjectId(companyId),
+//       dealerId: new mongoose.Types.ObjectId(dealerId),
+//       isDeleted: false,
+//     };
+//     if (req.query && Object.keys(req.query).length) {
+//       matchQuery = getQuery(matchQuery, req.query);
+//     }
+//     let additionalQuery = [
+//       { $match: matchQuery },
+//       {
+//         $lookup: {
+//           from: "countries",
+//           localField: "country",
+//           foreignField: "_id",
+//           as: "warehouse_country_name",
+//           pipeline: [{ $project: { countryName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "countries",
+//           localField: "registrationAddress.countryId",
+//           foreignField: "_id",
+//           as: "country_name",
+//           pipeline: [{ $project: { countryName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "states",
+//           localField: "registrationAddress.stateId",
+//           foreignField: "_id",
+//           as: "state_name",
+//           pipeline: [{ $project: { stateName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "districts",
+//           localField: "registrationAddress.districtId",
+//           foreignField: "_id",
+//           as: "district_name",
+//           pipeline: [{ $project: { districtName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "pincodes",
+//           localField: "registrationAddress.pincodeId",
+//           foreignField: "_id",
+//           as: "pincode_name",
+//           pipeline: [{ $project: { pincode: 1 } }],
+//         },
+//       },
+//       // billing section start
+//       {
+//         $lookup: {
+//           from: "countries",
+//           localField: "billingAddress.countryId",
+//           foreignField: "_id",
+//           as: "b_country_name",
+//           pipeline: [{ $project: { countryName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "states",
+//           localField: "billingAddress.stateId",
+//           foreignField: "_id",
+//           as: "b_state_name",
+//           pipeline: [{ $project: { stateName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "districts",
+//           localField: "billingAddress.districtId",
+//           foreignField: "_id",
+//           as: "b_district_name",
+//           pipeline: [{ $project: { districtName: 1 } }],
+//         },
+//       },
+//       {
+//         $lookup: {
+//           from: "pincodes",
+//           localField: "billingAddress.pincodeId",
+//           foreignField: "_id",
+//           as: "b_pincode_name",
+//           pipeline: [{ $project: { pincode: 1 } }],
+//         },
+//       },
+//       {
+//         $addFields: {
+//           wareHouseCountryName: {
+//             $arrayElemAt: ["$warehouse_country_name.countryName", 0],
+//           },
+//           registrationCountryName: {
+//             $arrayElemAt: ["$country_name.countryName", 0],
+//           },
+//           registrationStateName: {
+//             $arrayElemAt: ["$state_name.stateName", 0],
+//           },
+//           registrationDistrictName: {
+//             $arrayElemAt: ["$district_name.districtName", 0],
+//           },
+//           registrationPincodeName: {
+//             $arrayElemAt: ["$pincode_name.pincode", 0],
+//           },
+//           //billing start
+//           billingAddressCountryName: {
+//             $arrayElemAt: ["$b_country_name.countryName", 0],
+//           },
+//           billingAddressStateName: {
+//             $arrayElemAt: ["$b_state_name.stateName", 0],
+//           },
+//           billingAddressDistrictName: {
+//             $arrayElemAt: ["$b_district_name.districtName", 0],
+//           },
+//           billingAddressPincodeName: {
+//             $arrayElemAt: ["$b_pincode_name.pincode", 0],
+//           },
+//         },
+//       },
+//       {
+//         $unset: [
+//           "warehouse_country_name",
+//           "country_name",
+//           "state_name",
+//           "district_name",
+//           "pincode_name",
+//           "b_country_name",
+//           "b_state_name",
+//           "b_district_name",
+//           "b_pincode_name",
+//         ],
+//       },
+//     ];
+//     let dataExist = await wareHouseService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist,
-        code: "OK",
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//     if (!dataExist || !dataExist.length) {
+//       throw new ApiError(httpStatus.OK, "Data not found.");
+//     } else {
+//       return res.status(httpStatus.OK).send({
+//         message: "Successfull.",
+//         status: true,
+//         data: dataExist,
+//         code: "OK",
+//         issue: null,
+//       });
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 //single view api
 exports.getById = async (req, res) => {

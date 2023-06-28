@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const WareHouseSchema = new mongoose.Schema(
+const VendorWareHouseSchema = new mongoose.Schema(
   {
     wareHouseCode: {
       type: String,
@@ -139,6 +139,7 @@ const WareHouseSchema = new mongoose.Schema(
       required: true,
     },
     companyId: { type: ObjectId, required: true, trim: true },
+    vendorId: { type: ObjectId, required: true },
 
     isDeleted: {
       type: Boolean,
@@ -163,5 +164,5 @@ const searchKeys = [
   "billingAddress",
   "contactInformation",
 ];
-module.exports = mongoose.model("WareHouse", WareHouseSchema);
+module.exports = mongoose.model("VendorWareHouse", VendorWareHouseSchema);
 module.exports.searchKeys = [...searchKeys];
