@@ -43,13 +43,6 @@ const {
 exports.add = async (req, res) => {
   try {
     let {
-      didNo,
-      inOutBound,
-      incomingCallerNo,
-      mobileNo,
-      deliveryCharges,
-      discount,
-      total,
       countryId,
       stateId,
       schemeId,
@@ -57,24 +50,7 @@ exports.add = async (req, res) => {
       tehsilId,
       pincodeId,
       areaId,
-      expectedDeliveryDate,
-      profileDeliveredBy,
-      complaintDetails,
-      complaintNo,
-      agentName,
-      name,
-      age,
-      address,
-      relation,
-      agentDistrictId,
-      landmark,
-      alternateNo1,
-      whatsappNo,
-      gender,
-      prepaid,
-      emailId,
-      channel,
-      remark,
+
       dispositionLevelTwoId,
       dispositionLevelThreeId,
     } = req.body;
@@ -227,13 +203,6 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let {
-      didNo,
-      inOutBound,
-      incomingCallerNo,
-      mobileNo,
-      deliveryCharges,
-      discount,
-      total,
       countryId,
       stateId,
       districtId,
@@ -241,24 +210,8 @@ exports.update = async (req, res) => {
       schemeId,
       pincodeId,
       areaId,
-      expectedDeliveryDate,
-      profileDeliveredBy,
-      complaintDetails,
-      complaintNo,
-      agentName,
-      name,
-      age,
-      address,
-      relation,
-      agentDistrictId,
-      landmark,
-      alternateNo1,
-      whatsappNo,
-      gender,
-      prepaid,
-      emailId,
-      channel,
-      remark,
+      paymentMode,
+
       dispositionLevelTwoId,
       dispositionLevelThreeId,
     } = req.body;
@@ -379,12 +332,7 @@ exports.update = async (req, res) => {
         flag = true;
       }
     });
-    let prepaidOrderFlag = false;
-    dispositionThreeData[0]?.applicableCriteria?.map((e) => {
-      if (applicableCriteriaArrayForIsPrepaid.includes(e)) {
-        prepaidOrderFlag = true;
-      }
-    });
+    let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
 
     const orderNumber = await getOrderNumber();
     await orderService.createNewData({
@@ -706,21 +654,21 @@ exports.allFilterPagination = async (req, res) => {
       //     ],
       //   },
       // },
-      {
-        $lookup: {
-          from: "districts",
-          localField: "agentDistrictId",
-          foreignField: "_id",
-          as: "agentDistrictData",
-          pipeline: [
-            {
-              $project: {
-                districtName: 1,
-              },
-            },
-          ],
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: "districts",
+      //     localField: "agentDistrictId",
+      //     foreignField: "_id",
+      //     as: "agentDistrictData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           districtName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
       {
         $addFields: {
           dispositionLevelTwoLabel: {

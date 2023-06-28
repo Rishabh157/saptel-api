@@ -107,6 +107,11 @@ const genderType = Object.freeze({
   other: "OTHER",
 });
 
+const paymentModeType = Object.freeze({
+  COD: "COD",
+  UPI_ONLINE: "UPI/ONLINE",
+});
+
 const userEnum = Object.freeze({
   user: "USER",
   admin: "ADMIN",
@@ -282,4 +287,5 @@ module.exports = {
   ledgerType,
   userDepartmentType,
   userRoleType,
+  paymentModeType,
 };

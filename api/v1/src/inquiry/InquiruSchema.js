@@ -1,23 +1,23 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { genderType } = require("../../helper/enumUtils");
+const { genderType, paymentModeType } = require("../../helper/enumUtils");
 const InquirySchema = new mongoose.Schema(
   {
+    inquiryNumber: {
+      type: Number,
+      required: true,
+    },
     didNo: {
       type: String,
       required: true,
       trim: true,
     },
-    inquiryNumber: {
-      type: Number,
-      required: true,
-    },
-    inOutBound: {
+    ageGroup: {
       type: String,
       required: false,
       default: "",
     },
-    incomingCallerNo: {
+    alternateNo: {
       type: String,
       required: false,
       default: "",
@@ -27,112 +27,171 @@ const InquirySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    deliveryCharges: {
-      type: Number,
+
+    autoFillingShippingAddress: {
+      type: String,
       required: false,
-      default: 0,
+      default: "",
     },
-    discount: {
-      type: Number,
+    callType: {
+      type: String,
       required: false,
-      default: 0,
+      default: "",
     },
-    total: {
-      type: Number,
+    campaign: {
+      type: String,
       required: false,
-      default: 0,
+      default: "",
     },
+    customerName: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    deliveryTimeAndDate: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
     countryId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     stateId: {
       type: ObjectId,
-      required: true,
-      trim: true,
-    },
-    schemeId: {
-      type: ObjectId,
-      required: true,
       trim: true,
     },
     districtId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     tehsilId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
+    },
+    schemeId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
+    },
+    schemeName: {
+      type: String,
+      trim: true,
+      required: false,
+      default: "",
     },
     pincodeId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
+    },
+    pincodeSecondId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
     },
     areaId: {
       type: ObjectId,
-      required: true,
+      trim: true,
+      default: null,
+    },
+
+    emailId: {
+      type: String,
+      required: false,
+      default: "",
+    },
+
+    flagStatus: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    gender: {
+      type: String,
+      enum: [genderType.male, genderType.female, genderType.other],
       trim: true,
     },
-    expectedDeliveryDate: {
+    houseNumber: {
       type: String,
       required: false,
       default: "",
     },
-    profileDeliveredBy: {
+    incomingCallerNo: {
       type: String,
       required: false,
       default: "",
-    },
-    complaintDetails: {
-      type: String,
-      required: false,
-      default: "",
-    },
-    complaintNo: {
-      type: String,
-      required: false,
-      default: "",
-    },
-    agentName: {
-      type: String,
-      required: false,
-      default: "",
-    },
-    name: {
-      type: String,
-      required: false,
-      default: "",
-    },
-    age: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    address: {
-      type: String,
-      required: false,
-      default: "",
-    },
-    relation: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    agentDistrictId: {
-      type: ObjectId,
-      required: true,
-      trim: true,
     },
     landmark: {
       type: String,
+      required: false,
       default: "",
-      trim: true,
     },
-    alternateNo1: {
+    medicalIssue: {
+      type: [String],
+      required: false,
+      default: [""],
+    },
+
+    orderFor: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    paymentMode: {
+      type: String,
+      enum: [paymentModeType.COD, paymentModeType.UPI_ONLINE, ""],
+      required: false,
+      default: "",
+    },
+
+    productGroupId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
+    },
+
+    reciversName: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    remark: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    shcemeQuantity: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
+    socialMedia: {
+      type: {
+        facebook: {
+          type: String,
+          required: false,
+          default: "",
+        },
+
+        instagram: {
+          type: String,
+          required: false,
+          default: "",
+        },
+      },
+      required: false,
+    },
+    streetNumber: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    typeOfAddress: {
       type: String,
       required: false,
       default: "",
@@ -142,43 +201,33 @@ const InquirySchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-    gender: {
-      type: String,
-      enum: [genderType.male, genderType.female, genderType.other],
-      required: true,
-      trim: true,
-    },
-    prepaid: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
-    emailId: {
-      type: String,
+    price: {
+      type: Number,
       required: false,
-      default: "",
+      default: 0,
     },
-    channel: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    remark: {
-      type: String,
+    deliveryCharges: {
+      type: Number,
       required: false,
-      default: "",
-      lowercase: true,
+      default: 0,
     },
+    totalAmount: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+
     dispositionLevelTwoId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
     dispositionLevelThreeId: {
       type: ObjectId,
-      required: true,
       trim: true,
+      default: null,
     },
+
     isDeleted: {
       type: Boolean,
       default: false,
@@ -195,38 +244,12 @@ const InquirySchema = new mongoose.Schema(
 
 const searchKeys = [
   "didNo",
-  "inquiryNumber",
-  "inOutBound",
-  "incomingCallerNo",
+  "alternateNo",
   "mobileNo",
-  "deliveryCharges",
-  "discount",
-  "total",
-  "countryId",
-  "stateId",
-  "schemeId",
-  "districtId",
-  "tehsilId",
-  "pincodeId",
-  "areaId",
-  "expectedDeliveryDate",
-  "profileDeliveredBy",
-  "complaintDetails",
-  "complaintNo",
-  "agentName",
-  "name",
-  "age",
-  "address",
-  "relation",
-  "agentDistrictId",
-  "landmark",
-  "alternateNo1",
+  "callType",
+  "campaign",
+  "paymentMode",
   "whatsappNo",
-  "gender",
-  "prepaid",
-  "emailId",
-  "channel",
-  "remark",
   "dispositionLevelTwoId",
   "dispositionLevelThreeId",
 ];
