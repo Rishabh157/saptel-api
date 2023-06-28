@@ -339,11 +339,7 @@ exports.update = async (req, res) => {
       ...req.body,
       orderNumber: orderNumber,
       approved: flag ? true : prepaidOrderFlag ? false : true,
-      orderTpye: flag
-        ? orderType.postpaid
-        : prepaidOrderFlag
-        ? orderType.prepaid
-        : orderType.other,
+
       // dealerAssignedId: dealerId,
     });
 

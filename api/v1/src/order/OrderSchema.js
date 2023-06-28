@@ -11,6 +11,11 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    approved: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
     didNo: {
       type: String,
       required: true,
