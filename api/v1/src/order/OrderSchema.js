@@ -11,6 +11,17 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    assignDealerId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
+    },
+    assignWarehouseId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
+    },
+
     approved: {
       type: Boolean,
       required: true,

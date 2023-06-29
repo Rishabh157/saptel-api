@@ -92,6 +92,12 @@ const get = {
     .optional(),
 };
 
+const getByPincode = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    pincode: Joi.string(),
+  }),
+};
 /**
  * get all data of a dealer
  */
@@ -128,4 +134,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDealerData,
+  getByPincode,
 };

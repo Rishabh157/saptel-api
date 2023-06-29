@@ -24,7 +24,7 @@ const create = {
     tehsilId: Joi.string().custom(commonValidation.objectId).allow(null),
     schemeId: Joi.string().custom(commonValidation.objectId).allow(null),
     schemeName: Joi.string().allow(""),
-
+    pincodeName: Joi.string().allow(""),
     pincodeId: Joi.string().custom(commonValidation.objectId).allow(null),
     pincodeSecondId: Joi.string().custom(commonValidation.objectId).allow(null),
     areaId: Joi.string().custom(commonValidation.objectId).allow(null),
@@ -87,6 +87,7 @@ const update = {
     schemeName: Joi.string().allow(""),
 
     pincodeId: Joi.string().custom(commonValidation.objectId).allow(null),
+    pincodeName: Joi.string().allow(""),
     pincodeSecondId: Joi.string().custom(commonValidation.objectId).allow(null),
     areaId: Joi.string().custom(commonValidation.objectId).allow(null),
     emailId: Joi.string().allow(""),

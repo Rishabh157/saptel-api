@@ -61,6 +61,10 @@ const create = {
     dispositionLevelThreeId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    assignDealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    assignWarehouseId: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
   }),
 };
 
@@ -123,6 +127,10 @@ const update = {
       .custom(commonValidation.objectId)
       .allow(null),
     dispositionLevelThreeId: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
+    assignDealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    assignWarehouseId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
   }),

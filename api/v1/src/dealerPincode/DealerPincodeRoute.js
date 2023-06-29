@@ -17,6 +17,14 @@ router.get(
   dealerPincodeController.get
 );
 
+router.get(
+  "/company/:companyid/pincode/:pincode",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(dealerPincodeValidation.getByPincode),
+  dealerPincodeController.getByPincode
+);
+
 /**
  * get all document of a single dealer
  */

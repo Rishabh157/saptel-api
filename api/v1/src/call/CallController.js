@@ -15,12 +15,16 @@ const pincodeService = require("../pincode/PincodeService");
 const areaService = require("../area/AreaService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
+const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 
 const {
   getDealer,
   getInquiryNumber,
   getPrepaidOrderNumber,
   getOrderNumber,
+  isOrder,
+  dealerSurvingPincode,
+  getAssignWarehouse,
 } = require("./CallHelper");
 // ----service---------
 const { searchKeys } = require("./CallSchema");
@@ -209,6 +213,8 @@ exports.update = async (req, res) => {
       tehsilId,
       schemeId,
       pincodeId,
+      pincodeName,
+
       areaId,
       paymentMode,
 
@@ -316,28 +322,24 @@ exports.update = async (req, res) => {
       _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
     });
 
-    let applicableCriteriaArray = [
-      applicableCriteria.isOrder,
-      // applicableCriteria.isPrepaid,
-      // applicableCriteria.isReplacement,
-      // applicableCriteria.isCallBack,
-    ];
-
-    let applicableCriteriaArrayForIsPrepaid = [applicableCriteria.isPrepaid];
-
     // ---------map for order-------
-    let flag = false;
-    dispositionThreeData[0]?.applicableCriteria?.map((e) => {
-      if (applicableCriteriaArray.includes(e)) {
-        flag = true;
-      }
-    });
-    let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
+    let flag = isOrder(dispositionThreeData[0]?.applicableCriteria);
 
+    let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
+    let dealerServingPincodes = await dealerSurvingPincode(pincodeName);
+    let activeDealer = await getDealer(dealerServingPincodes, pincodeId);
+    let assignWarehouseId = null;
+    if (activeDealer === null) {
+      const servingWarehouseAtPincode = await getAssignWarehouse(pincodeId);
+      assignWarehouseId = servingWarehouseAtPincode;
+    }
     const orderNumber = await getOrderNumber();
+
     await orderService.createNewData({
       ...req.body,
       orderNumber: orderNumber,
+      assignDealerId: activeDealer,
+      assignWarehouseId: assignWarehouseId,
       approved: flag ? true : prepaidOrderFlag ? false : true,
 
       // dealerAssignedId: dealerId,

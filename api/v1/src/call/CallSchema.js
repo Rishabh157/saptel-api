@@ -85,6 +85,11 @@ const CallSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    pincodeName: {
+      type: String,
+      required: false,
+      default: "",
+    },
     pincodeSecondId: {
       type: ObjectId,
       trim: true,
