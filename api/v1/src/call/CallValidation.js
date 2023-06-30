@@ -10,6 +10,10 @@ const create = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
+    agentId: Joi.string().custom(commonValidation.objectId),
+    comanyId: Joi.string().custom(commonValidation.objectId),
+    agentName: Joi.string().required(),
+
     mobileNo: Joi.string().required(),
     alternateNo: Joi.string().allow(""),
     autoFillingShippingAddress: Joi.string().allow(""),
@@ -71,6 +75,9 @@ const update = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
+    agentId: Joi.string().custom(commonValidation.objectId),
+    comanyId: Joi.string().custom(commonValidation.objectId),
+    agentName: Joi.string().required(),
     mobileNo: Joi.string().required(),
     alternateNo: Joi.string().allow(""),
     autoFillingShippingAddress: Joi.string().allow(""),

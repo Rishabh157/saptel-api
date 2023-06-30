@@ -214,10 +214,9 @@ exports.update = async (req, res) => {
       schemeId,
       pincodeId,
       pincodeName,
-
       areaId,
       paymentMode,
-
+      companyId,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
     } = req.body;
@@ -326,11 +325,17 @@ exports.update = async (req, res) => {
     let flag = isOrder(dispositionThreeData[0]?.applicableCriteria);
 
     let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
-    let dealerServingPincodes = await dealerSurvingPincode(pincodeName);
+    let dealerServingPincodes = await dealerSurvingPincode(
+      pincodeName,
+      companyId
+    );
     let activeDealer = await getDealer(dealerServingPincodes, pincodeId);
     let assignWarehouseId = null;
     if (activeDealer === null) {
-      const servingWarehouseAtPincode = await getAssignWarehouse(pincodeId);
+      const servingWarehouseAtPincode = await getAssignWarehouse(
+        pincodeId,
+        companyId
+      );
       assignWarehouseId = servingWarehouseAtPincode;
     }
     const orderNumber = await getOrderNumber();

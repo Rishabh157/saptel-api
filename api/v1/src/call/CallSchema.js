@@ -13,6 +13,20 @@ const CallSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    agentId: {
+      type: ObjectId,
+      required: true,
+    },
+    agentName: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    comanyId: {
+      type: ObjectId,
+      required: true,
+    },
+
     alternateNo: {
       type: String,
       required: false,

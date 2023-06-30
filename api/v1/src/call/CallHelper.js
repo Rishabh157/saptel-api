@@ -56,9 +56,10 @@ exports.isOrder = async (applicableCriteria) => {
   return flag;
 };
 
-exports.dealerSurvingPincode = async (pincodeName) => {
+exports.dealerSurvingPincode = async (pincodeName, companyId) => {
   let matchQuery = {
     pincode: pincodeName,
+    companyId: companyId,
     isDeleted: false,
     isActive: true,
   };
@@ -70,9 +71,10 @@ exports.dealerSurvingPincode = async (pincodeName) => {
   return dealerServingInPincode;
 };
 
-exports.getAssignWarehouse = async (pincodeId) => {
+exports.getAssignWarehouse = async (pincodeId, companyId) => {
   let matchQuery = {
     isDeleted: false,
+    companyId: companyId,
     isActive: true,
   };
   matchQuery["registrationAddress.pincodeId"] = new mongoose.Types.ObjectId(
