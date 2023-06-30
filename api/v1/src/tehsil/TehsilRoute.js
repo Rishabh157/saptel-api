@@ -36,7 +36,7 @@ router.get(
  * get all tehsil of a district without token
  */
 router.get(
-  "/get-district-tehsil/inbound:id",
+  "/get-district-tehsil/inbound/:id",
 
   validate(tehsilValidation.get),
   tehsilController.getTehsilByDistrict

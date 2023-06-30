@@ -2,7 +2,7 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const wareHouseService = require("./VendorWareHouseService");
+const VendorwareHouseService = require("./VendorWareHouseService");
 const vendorService = require("../vendor/VendorService");
 const companyService = require("../company/CompanyService");
 const {
@@ -64,7 +64,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await wareHouseService.isExists([
+    let dataExist = await VendorwareHouseService.isExists([
       { wareHouseCode },
       { wareHouseName },
     ]);
@@ -72,7 +72,9 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await wareHouseService.createNewData({ ...req.body });
+    let dataCreated = await VendorwareHouseService.createNewData({
+      ...req.body,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -133,14 +135,14 @@ exports.update = async (req, res) => {
     }
 
     //------------------Find data-------------------
-    let datafound = await wareHouseService.getOneByMultiField({
+    let datafound = await VendorwareHouseService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `WareHouse not found.`);
     }
 
-    let dataUpdated = await wareHouseService.getOneAndUpdate(
+    let dataUpdated = await VendorwareHouseService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -278,7 +280,9 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await wareHouseService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await VendorwareHouseService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -297,7 +301,9 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await wareHouseService.aggregateQuery(finalAggregateQuery);
+    let result = await VendorwareHouseService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -338,7 +344,9 @@ exports.get = async (req, res) => {
     let additionalQuery = aggrigateQuery;
     additionalQuery.unshift({ $match: matchQuery });
 
-    let dataExist = await wareHouseService.aggregateQuery(additionalQuery);
+    let dataExist = await VendorwareHouseService.aggregateQuery(
+      additionalQuery
+    );
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -379,7 +387,9 @@ exports.getAllByVendorId = async (req, res) => {
     let additionalQuery = aggrigateQuery;
     additionalQuery.unshift({ $match: matchQuery });
 
-    let dataExist = await wareHouseService.aggregateQuery(additionalQuery);
+    let dataExist = await VendorwareHouseService.aggregateQuery(
+      additionalQuery
+    );
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -415,7 +425,9 @@ exports.getById = async (req, res) => {
       },
     });
 
-    let dataExist = await wareHouseService.aggregateQuery(additionalQuery);
+    let dataExist = await VendorwareHouseService.aggregateQuery(
+      additionalQuery
+    );
     if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -440,7 +452,7 @@ exports.getById = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await wareHouseService.getOneByMultiField({ _id }))) {
+    if (!(await VendorwareHouseService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     const deleteRefCheck = await checkIdInCollectionsThenDelete(
@@ -450,7 +462,7 @@ exports.deleteDocument = async (req, res) => {
     );
 
     if (deleteRefCheck.status === true) {
-      let deleted = await wareHouseService.getOneAndDelete({ _id });
+      let deleted = await VendorwareHouseService.getOneAndDelete({ _id });
       if (!deleted) {
         throw new ApiError(httpStatus.OK, "Some thing went wrong.");
       }
@@ -475,13 +487,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await wareHouseService.getOneByMultiField({ _id });
+    let dataExist = await VendorwareHouseService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await wareHouseService.getOneAndUpdate(
+    let statusChanged = await VendorwareHouseService.getOneAndUpdate(
       { _id },
       { isActive }
     );
