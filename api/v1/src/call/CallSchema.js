@@ -242,6 +242,21 @@ const CallSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    preffered_delivery_start_time: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    preffered_delivery_end_time: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    preffered_delivery_date: {
+      type: String,
+      required: false,
+      default: "",
+    },
 
     isDeleted: {
       type: Boolean,

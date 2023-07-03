@@ -12,6 +12,19 @@ const InquirySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    agentId: {
+      type: ObjectId,
+      required: true,
+    },
+    agentName: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+    },
     ageGroup: {
       type: String,
       required: false,

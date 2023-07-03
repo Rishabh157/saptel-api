@@ -62,6 +62,9 @@ const create = {
     dispositionLevelThreeId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    preffered_delivery_start_time: Joi.string().allow(""),
+    preffered_delivery_end_time: Joi.string().allow(""),
+    preffered_delivery_date: Joi.string().allow(""),
   }),
 };
 
@@ -127,6 +130,9 @@ const update = {
     dispositionLevelThreeId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    preffered_delivery_start_time: Joi.string().allow(""),
+    preffered_delivery_end_time: Joi.string().allow(""),
+    preffered_delivery_date: Joi.string().allow(""),
   }),
 };
 

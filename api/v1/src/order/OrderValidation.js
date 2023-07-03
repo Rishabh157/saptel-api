@@ -11,7 +11,8 @@ const create = {
     orderNumber: Joi.number().required(),
     approved: Joi.boolean().required(),
     didNo: Joi.string().required(),
-    agentId: Joi.string().custom(commonValidation.objectId),
+    agentId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
@@ -66,6 +67,9 @@ const create = {
     assignWarehouseId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    preffered_delivery_start_time: Joi.string().allow(""),
+    preffered_delivery_end_time: Joi.string().allow(""),
+    preffered_delivery_date: Joi.string().allow(""),
   }),
 };
 
@@ -80,7 +84,8 @@ const update = {
     orderNumber: Joi.number().required(),
     approved: Joi.boolean().required(),
     didNo: Joi.string().required(),
-    agentId: Joi.string().custom(commonValidation.objectId),
+    agentId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
     mobileNo: Joi.string().required(),
@@ -135,6 +140,9 @@ const update = {
     assignWarehouseId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    preffered_delivery_start_time: Joi.string().allow(""),
+    preffered_delivery_end_time: Joi.string().allow(""),
+    preffered_delivery_date: Joi.string().allow(""),
   }),
 };
 

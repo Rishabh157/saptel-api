@@ -27,8 +27,12 @@ const OrderSchema = new mongoose.Schema(
     },
     agentName: {
       type: String,
-      required: true,
       trim: true,
+      required: true,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
     },
 
     approved: {
@@ -255,6 +259,21 @@ const OrderSchema = new mongoose.Schema(
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    preffered_delivery_start_time: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    preffered_delivery_end_time: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    preffered_delivery_date: {
+      type: String,
+      required: false,
+      default: "",
     },
 
     isDeleted: {

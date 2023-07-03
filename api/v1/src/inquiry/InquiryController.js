@@ -17,10 +17,13 @@ const dispositionTwoService = require("../dispositionTwo/DispositionTwoService")
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
 // ----service---------
 const mongoose = require("mongoose");
-const { searchKeys } = require("./InquiruSchema");
+const { searchKeys } = require("./InquirySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -1099,7 +1102,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await inquiryService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'inquiryId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "inquiryId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await inquiryService.getOneAndDelete({ _id });
