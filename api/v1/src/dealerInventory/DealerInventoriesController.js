@@ -2,17 +2,18 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const VendorwareHouseService = require("./VendorWareHouseService");
-const vendorService = require("../vendor/VendorService");
+const dealerInventoriesService = require("./DealerInventoriesService");
 const companyService = require("../company/CompanyService");
+const dealerService = require("../dealer/DealerService");
+const { searchKeys } = require("./DealerInventoriesSchema");
+const { errorRes } = require("../../../utils/resError");
+const { getQuery } = require("../../helper/utils");
+const barCodeService = require("../barCode/BarCodeService");
+const wareHouseService = require("../wareHouse/WareHouseService");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
 } = require("../../helper/commonHelper");
-
-const { searchKeys } = require("./VendorWareHouseSchema");
-const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -23,34 +24,26 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const mongoose = require("mongoose");
-const { aggrigateQuery } = require("./VendorWareHouseHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
   try {
     let {
-      wareHouseCode,
-      wareHouseName,
-      country,
-      email,
-      registrationAddress,
-      billingAddress,
-      contactInformation,
-      vendorId,
-
+      productGroupName,
+      groupBarcodeNumber,
+      barcodeNumber,
       companyId,
-      gstNumber,
-      gstCertificate,
+      wareHouseId,
+      dealerId,
     } = req.body;
 
-    const isVendorExists = await vendorService.findCount({
-      _id: vendorId,
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
       isDeleted: false,
     });
-
-    if (!isVendorExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Vendor");
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 
     const isCompanyExists = await companyService.findCount({
@@ -61,20 +54,48 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
+    const isWarehouseExists = await wareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWarehouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Warehouse");
+    }
     /**
      * check duplicate exist
      */
-    let dataExist = await VendorwareHouseService.isExists([
-      { wareHouseCode },
-      { wareHouseName },
-    ]);
+    let dataExist = await dealerInventoriesService.isExists(
+      [{ groupBarcodeNumber }, { barcodeNumber }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    //------------------create data-------------------
-    let dataCreated = await VendorwareHouseService.createNewData({
-      ...req.body,
+    const output = req.body.productDetail.map((barcode) => {
+      return {
+        productGroupName: productGroupName,
+        groupBarcodeNumber: groupBarcodeNumber,
+        barcodeNumber: barcode?.barcodeNumber,
+        status: barcode?.status,
+        condition: barcode?.condition,
+        companyId: companyId,
+        wareHouseId: wareHouseId,
+        dealerId: dealerId,
+      };
     });
+    req.body.productDetail.map(async (barcode) => {
+      await barCodeService.getOneAndUpdate(
+        {
+          barcodeNumber: barcode?.barcodeNumber,
+        },
+        { $set: { isUsed: true } }
+      );
+    });
+    //------------------create data-------------------
+
+    //------------------create data-------------------
+    let dataCreated = await dealerInventoriesService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -101,29 +122,22 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let {
-      wareHouseCode,
-      wareHouseName,
-      country,
-      email,
-      registrationAddress,
-      billingAddress,
-      contactInformation,
-      vendorId,
-
+      productGroupName,
+      groupBarcodeNumber,
+      barcodeNumber,
       companyId,
-      gstNumber,
-      gstCertificate,
+      wareHouseId,
+      dealerId,
     } = req.body;
 
     let idToBeSearch = req.params.id;
 
-    const isVendorExists = await vendorService.findCount({
-      _id: vendorId,
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
       isDeleted: false,
     });
-
-    if (!isVendorExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Vendor");
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 
     const isCompanyExists = await companyService.findCount({
@@ -133,16 +147,23 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+    const isWarehouseExists = await wareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWarehouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Warehouse");
+    }
 
     //------------------Find data-------------------
-    let datafound = await VendorwareHouseService.getOneByMultiField({
+    let datafound = await dealerInventoriesService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `WareHouse not found.`);
+      throw new ApiError(httpStatus.OK, `Inventories not found.`);
     }
 
-    let dataUpdated = await VendorwareHouseService.getOneAndUpdate(
+    let dataUpdated = await dealerInventoriesService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -237,12 +258,13 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFileds = ["companyId", "vendorId"];
+    let objectIdFields = ["wareHouseId", "companyId", "dealerId"];
+
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
       numberFileds,
-      objectIdFileds
+      objectIdFields
     );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
@@ -272,143 +294,46 @@ exports.allFilterPagination = async (req, res) => {
     let additionalQuery = [
       {
         $lookup: {
-          from: "vendors",
-          localField: "vendorId",
+          from: "warehouses",
+          localField: "wareHouseId",
           foreignField: "_id",
-          as: "vendor_name",
-          pipeline: [{ $project: { companyName: 1 } }],
+          as: "wareHouse_name",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
         },
       },
       {
         $lookup: {
-          from: "countries",
-          localField: "country",
+          from: "dealers",
+          localField: "dealerId",
           foreignField: "_id",
-          as: "warehouse_country_name",
-          pipeline: [{ $project: { countryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "countries",
-          localField: "registrationAddress.countryId",
-          foreignField: "_id",
-          as: "country_name",
-          pipeline: [{ $project: { countryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "states",
-          localField: "registrationAddress.stateId",
-          foreignField: "_id",
-          as: "state_name",
-          pipeline: [{ $project: { stateName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "districts",
-          localField: "registrationAddress.districtId",
-          foreignField: "_id",
-          as: "district_name",
-          pipeline: [{ $project: { districtName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "pincodes",
-          localField: "registrationAddress.pincodeId",
-          foreignField: "_id",
-          as: "pincode_name",
-          pipeline: [{ $project: { pincode: 1 } }],
-        },
-      },
-      // billing section start
-      {
-        $lookup: {
-          from: "countries",
-          localField: "billingAddress.countryId",
-          foreignField: "_id",
-          as: "b_country_name",
-          pipeline: [{ $project: { countryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "states",
-          localField: "billingAddress.stateId",
-          foreignField: "_id",
-          as: "b_state_name",
-          pipeline: [{ $project: { stateName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "districts",
-          localField: "billingAddress.districtId",
-          foreignField: "_id",
-          as: "b_district_name",
-          pipeline: [{ $project: { districtName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "pincodes",
-          localField: "billingAddress.pincodeId",
-          foreignField: "_id",
-          as: "b_pincode_name",
-          pipeline: [{ $project: { pincode: 1 } }],
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+              },
+            },
+          ],
         },
       },
       {
         $addFields: {
-          // VendorName: {
-          //   $arrayElemAt: ["$vendor_name.companyName", 0],
-          // },
-          wareHouseCountryName: {
-            $arrayElemAt: ["$warehouse_country_name.countryName", 0],
+          wareHouseLabel: {
+            $arrayElemAt: ["$wareHouse_name.wareHouseName", 0],
           },
-          registrationCountryName: {
-            $arrayElemAt: ["$country_name.countryName", 0],
-          },
-          registrationStateName: {
-            $arrayElemAt: ["$state_name.stateName", 0],
-          },
-          registrationDistrictName: {
-            $arrayElemAt: ["$district_name.districtName", 0],
-          },
-          registrationPincodeName: {
-            $arrayElemAt: ["$pincode_name.pincode", 0],
-          },
-          //billing start
-          billingAddressCountryName: {
-            $arrayElemAt: ["$b_country_name.countryName", 0],
-          },
-          billingAddressStateName: {
-            $arrayElemAt: ["$b_state_name.stateName", 0],
-          },
-          billingAddressDistrictName: {
-            $arrayElemAt: ["$b_district_name.districtName", 0],
-          },
-          billingAddressPincodeName: {
-            $arrayElemAt: ["$b_pincode_name.pincode", 0],
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_data.firstName", 0],
           },
         },
       },
       {
-        $unset: [
-          "warehouse_country_name",
-          "country_name",
-          "state_name",
-          "district_name",
-          "pincode_name",
-          "b_country_name",
-          "b_state_name",
-          "b_district_name",
-          "b_pincode_name",
-          "vendor_name",
-        ],
+        $unset: ["wareHouse_name", "dealer_data"],
       },
     ];
 
@@ -419,9 +344,20 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-
+    finalAggregateQuery.push({
+      $group: {
+        _id: "$groupBarcodeNumber",
+        // data: { $push: "$$ROOT" },
+        groupBarcodeNumber: { $first: "$groupBarcodeNumber" },
+        productGroupName: { $first: "$productGroupName" },
+        wareHouse: { $first: "$wareHouseLabel" },
+        dealerLabel: { $first: "$dealerLabel" },
+        count: { $sum: 1 },
+        companyId: { $first: "$companyId" },
+      },
+    });
     //-----------------------------------
-    let dataFound = await VendorwareHouseService.aggregateQuery(
+    let dataFound = await dealerInventoriesService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -442,7 +378,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await VendorwareHouseService.aggregateQuery(
+    let result = await dealerInventoriesService.aggregateQuery(
       finalAggregateQuery
     );
     if (result.length) {
@@ -482,53 +418,54 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-    let additionalQuery = aggrigateQuery;
-    additionalQuery.unshift({ $match: matchQuery });
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "wareHouse_name",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          wareHouseLabel: {
+            $arrayElemAt: ["$wareHouse_name.wareHouseName", 0],
+          },
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_data.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["wareHouse_name", "dealer_data"],
+      },
+    ];
 
-    let dataExist = await VendorwareHouseService.aggregateQuery(
-      additionalQuery
-    );
-
-    if (!dataExist || !dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist,
-        code: "OK",
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-//get api
-exports.getAllByVendorId = async (req, res) => {
-  try {
-    let companyId = req.params.companyid;
-    let vendorId = req.params.vendorid;
-
-    //if no default query then pass {}
-    let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
-      vendorId: new mongoose.Types.ObjectId(vendorId),
-      isDeleted: false,
-    };
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
-    let additionalQuery = aggrigateQuery;
-    additionalQuery.unshift({ $match: matchQuery });
-
-    let dataExist = await VendorwareHouseService.aggregateQuery(
+    let dataExist = await dealerInventoriesService.aggregateQuery(
       additionalQuery
     );
 
@@ -558,15 +495,60 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let additionalQuery = aggrigateQuery;
-    additionalQuery.unshift({
-      $match: {
-        _id: new mongoose.Types.ObjectId(idToBeSearch),
-        isDeleted: false,
-      },
-    });
 
-    let dataExist = await VendorwareHouseService.aggregateQuery(
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "wareHouse_name",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          wareHouseLabel: {
+            $arrayElemAt: ["$wareHouse_name.wareHouseName", 0],
+          },
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_data.firstName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["wareHouse_name", "dealer_data"],
+      },
+    ];
+
+    let dataExist = await dealerInventoriesService.aggregateQuery(
       additionalQuery
     );
     if (!dataExist.length) {
@@ -589,25 +571,27 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await VendorwareHouseService.getOneByMultiField({ _id }))) {
+    if (!(await dealerInventoriesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(
-      collectionArrToMatch,
-      "wareHouseId",
-      _id
-    );
+    // const deleteRefCheck = await checkIdInCollectionsThenDelete(
+    //   collectionArrToMatch,
+    //   "inventoryId",
+    //   _id
+    // );
 
     if (deleteRefCheck.status === true) {
-      let deleted = await VendorwareHouseService.getOneAndDelete({ _id });
+      let deleted = await dealerInventoriesService.getOneAndDelete({ _id });
       if (!deleted) {
         throw new ApiError(httpStatus.OK, "Some thing went wrong.");
       }
     }
+
     return res.status(httpStatus.OK).send({
       message: deleteRefCheck.message,
       status: deleteRefCheck.status,
@@ -628,13 +612,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await VendorwareHouseService.getOneByMultiField({ _id });
+    let dataExist = await dealerInventoriesService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await VendorwareHouseService.getOneAndUpdate(
+    let statusChanged = await dealerInventoriesService.getOneAndUpdate(
       { _id },
       { isActive }
     );
