@@ -10,8 +10,8 @@ const create = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
-    agentId: Joi.string().custom(commonValidation.objectId),
-    companyId: Joi.string().custom(commonValidation.objectId),
+    agentId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
 
     mobileNo: Joi.string().required(),
@@ -75,8 +75,8 @@ const update = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
-    agentId: Joi.string().custom(commonValidation.objectId),
-    companyId: Joi.string().custom(commonValidation.objectId),
+    agentId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
     mobileNo: Joi.string().required(),
     alternateNo: Joi.string().allow(""),

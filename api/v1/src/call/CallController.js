@@ -329,8 +329,10 @@ exports.update = async (req, res) => {
     let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
     let dealerServingPincodes = await dealerSurvingPincode(
       pincodeName,
-      companyId
+      companyId,
+      schemeId
     );
+
     let activeDealer = await getDealer(dealerServingPincodes, pincodeId);
     let assignWarehouseId = null;
     if (activeDealer === null) {

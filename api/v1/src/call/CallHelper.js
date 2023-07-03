@@ -6,6 +6,8 @@ const ledgerService = require("../ledger/LedgerService");
 const wareHouseService = require("../wareHouse/WareHouseService");
 const InquiryService = require("../inquiry/InquiryService");
 const orderService = require("../order/OrderService");
+const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
+
 const { default: mongoose } = require("mongoose");
 
 exports.getDealer = async (applicableCriterias) => {
@@ -56,16 +58,17 @@ exports.isOrder = async (applicableCriteria) => {
   return flag;
 };
 
-exports.dealerSurvingPincode = async (pincodeName, companyId) => {
+exports.dealerSurvingPincode = async (pincodeName, companyId, schemeId) => {
   let matchQuery = {
-    pincode: pincodeName,
+    pincodes: pincodeName,
+    schemeId: schemeId,
     companyId: companyId,
     isDeleted: false,
     isActive: true,
   };
   matchQuery = getQuery(matchQuery);
 
-  let dealerServingInPincode = await dealerPincodeService.findAllWithQuery(
+  let dealerServingInPincode = await dealerSchemeService.findAllWithQuery(
     matchQuery
   );
   return dealerServingInPincode;
@@ -98,9 +101,10 @@ exports.getDealer = async (survingDealer) => {
       });
     })
   );
+  const filteredArray = allDealers.filter((value) => value !== null);
 
   const dealerWithBalance = await Promise.all(
-    allDealers?.map(async (ele) => {
+    filteredArray?.map(async (ele) => {
       const updatedEle = JSON.parse(JSON.stringify(ele)); // Create a new object with the properties of ele
       // const updatedEle = JSON.parse(JSON.stringify(ele)); // Create a new object with the properties of ele
 
