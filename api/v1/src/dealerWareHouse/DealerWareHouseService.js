@@ -1,4 +1,4 @@
-const WareHouse = require("./DealerWareHouseSchema");
+const DealerWareHouse = require("./DealerWareHouseSchema");
 const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
@@ -9,7 +9,7 @@ const { combineObjects } = require("../../helper/utils");
  * @returns {Promise<WareHouse>}
  */
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return WareHouse.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return DealerWareHouse.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
 /**
@@ -19,7 +19,7 @@ const getOneBySingleField = async (fieldName, fieldValue) => {
  * @returns {Promise<WareHouse>}
  */
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return WareHouse.findOne(
+  return DealerWareHouse.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
@@ -32,7 +32,7 @@ const getOneByMultiField = async (matchObj, projectObj) => {
  * @returns {Promise<WareHouse>}
  */
 const createNewData = async (bodyData) => {
-  return WareHouse.create({ ...bodyData });
+  return DealerWareHouse.create({ ...bodyData });
 };
 //-------------------------------------------
 /**
@@ -41,7 +41,7 @@ const createNewData = async (bodyData) => {
  * @returns {Promise<WareHouse>}
  */
 const getById = async (id) => {
-  return WareHouse.findById(id);
+  return DealerWareHouse.findById(id);
 };
 //-------------------------------------------
 /**
@@ -51,7 +51,7 @@ const getById = async (id) => {
  * @returns {Promise<WareHouse>}
  */
 const getByIdAndUpdate = async (id, updateBody) => {
-  return WareHouse.findByIdAndUpdate(
+  return DealerWareHouse.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -65,7 +65,7 @@ const getByIdAndUpdate = async (id, updateBody) => {
  * @returns {Promise<WareHouse>}
  */
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return WareHouse.findOneAndUpdate(
+  return DealerWareHouse.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -79,7 +79,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
  * @returns {Promise<WareHouse>}
  */
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return WareHouse.updateOne(
+  return DealerWareHouse.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -92,7 +92,7 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
  * @returns {Promise<WareHouse>}
  */
 const getByIdAndDelete = async (id) => {
-  return WareHouse.findByIdAndDelete(id);
+  return DealerWareHouse.findByIdAndDelete(id);
 };
 //-------------------------------------------
 /**
@@ -101,7 +101,7 @@ const getByIdAndDelete = async (id) => {
  * @returns {Promise<WareHouse>}
  */
 const getOneAndDelete = async (matchObj) => {
-  return WareHouse.findOneAndUpdate(
+  return DealerWareHouse.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -115,7 +115,10 @@ const getOneAndDelete = async (matchObj) => {
  * @returns {Promise<WareHouse>}
  */
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return WareHouse.find({ ...matchObj, isDeleted: false }, { ...projectObj });
+  return DealerWareHouse.find(
+    { ...matchObj, isDeleted: false },
+    { ...projectObj }
+  );
 };
 //-------------------------------------------
 /**
@@ -123,7 +126,7 @@ const findAllWithQuery = async (matchObj, projectObj) => {
  * @returns {Promise<WareHouse>}
  */
 const findAll = async () => {
-  return WareHouse.find();
+  return DealerWareHouse.find();
 };
 //-------------------------------------------
 /**
@@ -132,7 +135,7 @@ const findAll = async () => {
  * @returns {Promise<WareHouse>}
  */
 const aggregateQuery = async (aggregateQueryArray) => {
-  return WareHouse.aggregate(aggregateQueryArray);
+  return DealerWareHouse.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 /**
@@ -141,7 +144,7 @@ const aggregateQuery = async (aggregateQueryArray) => {
  * @returns {Promise<WareHouse>}
  */
 const createMany = async (insertDataArray) => {
-  return WareHouse.insertMany(insertDataArray);
+  return DealerWareHouse.insertMany(insertDataArray);
 };
 //-------------------------------------------
 /**
@@ -150,7 +153,7 @@ const createMany = async (insertDataArray) => {
  * @returns {Promise<WareHouse>}
  */
 const findCount = async (matchObj) => {
-  return WareHouse.find({ ...matchObj, isDeleted: false }).count();
+  return DealerWareHouse.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
 /**

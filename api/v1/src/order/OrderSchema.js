@@ -21,6 +21,15 @@ const OrderSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    agentId: {
+      type: ObjectId,
+      required: true,
+    },
+    agentName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     approved: {
       type: Boolean,

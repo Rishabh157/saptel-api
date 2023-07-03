@@ -13,7 +13,6 @@ const {
 const { searchKeys } = require("./DealerWareHouseSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
 
 const {
   getSearchQuery,
@@ -138,6 +137,7 @@ exports.update = async (req, res) => {
     //------------------Find data-------------------
     let datafound = await dealerWareHouseService.getOneByMultiField({
       _id: idToBeSearch,
+      isDeleted: false,
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `WareHouse not found.`);

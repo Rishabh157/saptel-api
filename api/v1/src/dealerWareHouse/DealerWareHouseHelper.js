@@ -5,7 +5,7 @@ const aggrigateQuery = [
       localField: "dealerId",
       foreignField: "_id",
       as: "dealer_name",
-      pipeline: [{ $project: { firstName: 1 } }],
+      pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
     },
   },
   {
@@ -93,7 +93,11 @@ const aggrigateQuery = [
   {
     $addFields: {
       dealerName: {
-        $arrayElemAt: ["$dealer_name.firstName", 0],
+        concat: [
+          { $arrayElemAt: ["$dealer_name.firstName", 0] },
+          " ",
+          { $arrayElemAt: ["$dealer_name.lastName", 0] },
+        ],
       },
       wareHouseCountryName: {
         $arrayElemAt: ["$warehouse_country_name.countryName", 0],
