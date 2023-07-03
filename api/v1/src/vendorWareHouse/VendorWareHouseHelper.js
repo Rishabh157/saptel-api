@@ -92,9 +92,9 @@ const aggrigateQuery = [
   },
   {
     $addFields: {
-      VendorName: {
-        $arrayElemAt: ["$vendor_name.companyName", 0],
-      },
+      // VendorName: {
+      //   $arrayElemAt: ["$vendor_name.companyName", 0],
+      // },
       wareHouseCountryName: {
         $arrayElemAt: ["$warehouse_country_name.countryName", 0],
       },
