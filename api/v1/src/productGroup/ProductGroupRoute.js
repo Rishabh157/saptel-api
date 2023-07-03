@@ -18,6 +18,14 @@ router.get(
 );
 
 /**
+ * get one document unauth
+ */
+router.get(
+  "/company/:companyid/unauth/all-product-group",
+  validate(productGroupValidation.get),
+  productGroupController.get
+);
+/**
  * get one document
  */
 router.get(
