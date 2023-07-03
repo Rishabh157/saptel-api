@@ -22,7 +22,7 @@ const CallSchema = new mongoose.Schema(
       trim: true,
       required: true,
     },
-    comanyId: {
+    companyId: {
       type: ObjectId,
       required: true,
     },

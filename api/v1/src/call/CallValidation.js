@@ -11,7 +11,7 @@ const create = {
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
     agentId: Joi.string().custom(commonValidation.objectId),
-    comanyId: Joi.string().custom(commonValidation.objectId),
+    companyId: Joi.string().custom(commonValidation.objectId),
     agentName: Joi.string().required(),
 
     mobileNo: Joi.string().required(),
@@ -76,7 +76,7 @@ const update = {
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
     agentId: Joi.string().custom(commonValidation.objectId),
-    comanyId: Joi.string().custom(commonValidation.objectId),
+    companyId: Joi.string().custom(commonValidation.objectId),
     agentName: Joi.string().required(),
     mobileNo: Joi.string().required(),
     alternateNo: Joi.string().allow(""),

@@ -219,6 +219,8 @@ exports.update = async (req, res) => {
       companyId,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
+      agentId,
+      agentName,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -346,6 +348,8 @@ exports.update = async (req, res) => {
       assignDealerId: activeDealer,
       assignWarehouseId: assignWarehouseId,
       approved: flag ? true : prepaidOrderFlag ? false : true,
+      agentId: agentId,
+      agentName: agentName,
 
       // dealerAssignedId: dealerId,
     });
