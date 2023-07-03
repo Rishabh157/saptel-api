@@ -19,7 +19,11 @@ router.get(
 /**
  * get all documents without token for inbound calls
  */
-router.get("/inbound", validate(schemeValidation.get), schemeController.get);
+router.get(
+  "/company/:companyid/product-group/:pgid",
+  validate(schemeValidation.getByProductGroup),
+  schemeController.getByProductGroup
+);
 /**
  * get one document
  */

@@ -147,6 +147,16 @@ const getDocument = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+/**
+ * get by product-group-id
+ */
+const getByProductGroup = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    pgid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 /**
  * delete a document
  */
@@ -172,4 +182,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getByProductGroup,
 };
