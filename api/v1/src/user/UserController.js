@@ -389,9 +389,9 @@ exports.gatAllDistributionUser = async (req, res) => {
       userRole.push("SR_MANAGER_DISTRIBUTION");
       userRole.push("MANAGER_AREA");
     }
-    if (role === "exicutive") {
-      userRole.push("SR_EXICUTIVE_AREA");
-      userRole.push("EXICUTIVE_AREA");
+    if (role === "executive") {
+      userRole.push("SR_EXECUTIVE_AREA");
+      userRole.push("EXECUTIVE_AREA");
     }
     //if no default query then pass {}
     let matchQuery = {

@@ -22,7 +22,7 @@ router.get(
 );
 
 /**
- * get all zonal exicutive of distribution department
+ * get all zonal EXECUTIVE of distribution department
  */
 router.get(
   "/company/:companyid/distribution/:role",
