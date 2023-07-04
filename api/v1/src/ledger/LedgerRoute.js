@@ -32,6 +32,18 @@ router.post(
 );
 
 /**
+ * get all ledger pagination filter dealer app
+ */
+
+router.post(
+  "/dealer/ledger",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(ledgerValidation.getAllFilter),
+  ledgerController.allFilterPagination
+);
+
+/**
  * create new document
  */
 router.post(
