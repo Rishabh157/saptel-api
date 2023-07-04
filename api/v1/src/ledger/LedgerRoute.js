@@ -38,7 +38,7 @@ router.post(
 router.post(
   "/dealer/ledger",
   accessModuleCheck,
-  authCheckMiddleware,
+  authCheckDealerMiddleware,
   validate(ledgerValidation.getAllFilter),
   ledgerController.allFilterPagination
 );
