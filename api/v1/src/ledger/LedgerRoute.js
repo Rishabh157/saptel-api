@@ -6,6 +6,7 @@ const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
+  authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
