@@ -324,9 +324,10 @@ exports.update = async (req, res) => {
     });
 
     // ---------map for order-------
-    let flag = isOrder(dispositionThreeData[0]?.applicableCriteria);
+    let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
 
     let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
+
     let dealerServingPincodes = await dealerSurvingPincode(
       pincodeName,
       companyId,
