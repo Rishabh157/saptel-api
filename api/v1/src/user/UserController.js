@@ -380,6 +380,59 @@ exports.get = async (req, res) => {
   }
 };
 
+exports.gatAllDistributionUser = async (req, res) => {
+  try {
+    let companyId = req.params.companyid;
+    let role = req.params.role;
+    let userRole = [];
+    if (role === "manager") {
+      userRole.push("SR_MANAGER_DISTRIBUTION");
+      userRole.push("MANAGER_AREA");
+    }
+    if (role === "exicutive") {
+      userRole.push("SR_EXICUTIVE_AREA");
+      userRole.push("EXICUTIVE_AREA");
+    }
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: companyId,
+      isDeleted: false,
+      userDepartment: "DISTRIBUTION_DEPARTMENT",
+      userRole: { $in: userRole },
+    };
+    if (req.userData.userType === userEnum.user) {
+      matchQuery["_id"] = req.userData.Id;
+    }
+    if (
+      req.userData.userType !== userEnum.user &&
+      req.query &&
+      Object.keys(req.query).length
+    ) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let dataExist = await userService.findAllWithQuery(matchQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {

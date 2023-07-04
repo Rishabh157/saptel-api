@@ -112,6 +112,15 @@ const deleteDocument = {
 };
 
 /**
+ * get either all data or single document
+ */
+const getAllDistribution = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    role: Joi.string(),
+  }),
+};
+/**
  * change status of document
  */
 const changeStatus = {
@@ -155,4 +164,5 @@ module.exports = {
   changeStatus,
   loginValid,
   verifyOtpValid,
+  getAllDistribution,
 };

@@ -22,6 +22,16 @@ router.get(
 );
 
 /**
+ * get all zonal exicutive of distribution department
+ */
+router.get(
+  "/company/:companyid/distribution/:role",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(userValidation.getAllDistribution),
+  userController.gatAllDistributionUser
+);
+/**
  * get all user pagination filter
  */
 
