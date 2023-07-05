@@ -119,16 +119,12 @@ const CallSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
-    pincodeName: {
+    pincodeLabel: {
       type: String,
       required: false,
       default: "",
     },
-    pincodeSecondId: {
-      type: ObjectId,
-      trim: true,
-      default: null,
-    },
+
     areaId: {
       type: ObjectId,
       trim: true,

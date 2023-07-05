@@ -33,8 +33,8 @@ const create = {
     schemeId: Joi.string().custom(commonValidation.objectId).allow(null),
     schemeName: Joi.string().allow(""),
     pincodeId: Joi.string().custom(commonValidation.objectId).allow(null),
-    pincodeName: Joi.string().allow(""),
-    pincodeSecondId: Joi.string().custom(commonValidation.objectId).allow(null),
+    pincodeLabel: Joi.string().allow(""),
+
     areaId: Joi.string().custom(commonValidation.objectId).allow(null),
     areaLabel: Joi.string().allow(""),
     emailId: Joi.string().allow(""),
@@ -104,8 +104,8 @@ const update = {
     schemeId: Joi.string().custom(commonValidation.objectId).allow(null),
     schemeName: Joi.string().allow(""),
     pincodeId: Joi.string().custom(commonValidation.objectId).allow(null),
-    pincodeName: Joi.string().allow(""),
-    pincodeSecondId: Joi.string().custom(commonValidation.objectId).allow(null),
+    pincodeLabel: Joi.string().allow(""),
+
     areaId: Joi.string().custom(commonValidation.objectId).allow(null),
     areaLabel: Joi.string().allow(""),
     emailId: Joi.string().allow(""),
