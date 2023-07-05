@@ -98,6 +98,17 @@ router.put(
 /**
  * delete document
  */
+router.get(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(userValidation.getById),
+  userController.getById
+);
+
+/**
+ * delete document
+ */
 router.delete(
   "/:id",
   accessModuleCheck,

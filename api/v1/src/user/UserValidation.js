@@ -111,6 +111,12 @@ const deleteDocument = {
   }),
 };
 
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 /**
  * get either all data or single document
  */
@@ -165,4 +171,5 @@ module.exports = {
   loginValid,
   verifyOtpValid,
   getAllDistribution,
+  getById,
 };
