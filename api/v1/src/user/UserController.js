@@ -186,6 +186,84 @@ exports.update = async (req, res) => {
   }
 };
 
+//update start
+exports.updateUser = async (req, res) => {
+  try {
+    let {
+      firstName,
+      lastName,
+      mobile,
+      email,
+      companyId,
+      userDepartment,
+      userRole,
+    } = req.body;
+    // if (req.userData.userType !== userEnum.user) {
+    //   throw new ApiError(
+    //     httpStatus.UNAUTHORIZED,
+    //     `You do not have authority to access this.`
+    //   );
+    // }
+
+    let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    /**
+     * check duplicate exist
+     */
+    let dataExist = await userService.isExists(
+      [{ email }, { mobile }],
+      [idToBeSearch]
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    //------------------Find data-------------------
+    let datafound = await userService.getOneByMultiField({ _id: idToBeSearch });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `User not found.`);
+    }
+
+    let dataUpdated = await userService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {

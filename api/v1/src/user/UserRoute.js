@@ -83,7 +83,13 @@ router.put(
   validate(userValidation.update),
   userController.update
 );
-
+router.put(
+  "/:id",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(userValidation.update),
+  userController.updateUser
+);
 /**
  * update status
  */
