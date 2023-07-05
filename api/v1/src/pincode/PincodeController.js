@@ -8,7 +8,10 @@ const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
 const districtService = require("../district/DistrictService");
 const tehsilService = require("../tehsil/TehsilService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("./PincodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -23,6 +26,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -295,7 +299,81 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsil_name",
+          pipeline: [{ $project: { tehsilName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          CountryLable: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          StateLable: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          DistrictLable: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          PincodeLable: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          tehsilLable: {
+            $arrayElemAt: ["$tehsil_name.tehsilName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "tehsil_name",
+        ],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -360,8 +438,84 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsil_name",
+          pipeline: [{ $project: { tehsilName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          CountryLable: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          StateLable: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          DistrictLable: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          PincodeLable: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          tehsilLable: {
+            $arrayElemAt: ["$tehsil_name.tehsilName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "tehsil_name",
+        ],
+      },
+    ];
 
-    let dataExist = await pincodeService.findAllWithQuery(matchQuery);
+    let dataExist = await pincodeService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -389,10 +543,88 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let dataExist = await pincodeService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsil_name",
+          pipeline: [{ $project: { tehsilName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          CountryLable: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          StateLable: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          DistrictLable: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          PincodeLable: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          tehsilLable: {
+            $arrayElemAt: ["$tehsil_name.tehsilName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "tehsil_name",
+        ],
+      },
+    ];
+    let dataExist = await pincodeService.aggregateQuery(additionalQuery);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -485,7 +717,11 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'pincodeId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "pincodeId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await pincodeService.getOneAndDelete({ _id });
