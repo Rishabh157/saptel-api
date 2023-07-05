@@ -69,19 +69,39 @@ const CallSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    countryLabel: {
+      type: String,
+      required: false,
+      default: "",
+    },
     stateId: {
       type: ObjectId,
       trim: true,
+    },
+    stateLabel: {
+      type: String,
+      required: false,
+      default: "",
     },
     districtId: {
       type: ObjectId,
       trim: true,
       default: null,
     },
+    districtLabel: {
+      type: String,
+      required: false,
+      default: "",
+    },
     tehsilId: {
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    tehsilLabel: {
+      type: String,
+      required: false,
+      default: "",
     },
     schemeId: {
       type: ObjectId,
@@ -113,6 +133,11 @@ const CallSchema = new mongoose.Schema(
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    areaLabel: {
+      type: String,
+      required: false,
+      default: "",
     },
 
     emailId: {
