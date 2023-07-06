@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const deliveryBoyService = require("./DeliveryBoyService");
 const companyService = require("../company/CompanyService");
+const dealerService = require("../dealer/DealerService");
 
 const { searchKeys } = require("./DeliveryBoySchema");
 const { errorRes } = require("../../../utils/resError");
@@ -31,6 +32,14 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 
     /**
@@ -85,6 +94,14 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 
     //------------------Find data-------------------

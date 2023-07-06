@@ -83,7 +83,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { userName, email, mobileNo, password, dealerId, companyId } = req.body;
+    let { userName, email, mobileNo, dealerId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
     let dataExist = await dealerUserService.isExists(

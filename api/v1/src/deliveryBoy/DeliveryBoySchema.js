@@ -6,6 +6,7 @@ const DeliveryBoySchema = new mongoose.Schema(
     mobile: { type: String, required: true, trim: true, lowercase: true },
     password: { type: String, required: true, trim: true, lowercase: true },
     companyId: { type: ObjectId, required: true, trim: true },
+    dealerId: { type: ObjectId, required: true, trim: true },
 
     isDeleted: {
       type: Boolean,

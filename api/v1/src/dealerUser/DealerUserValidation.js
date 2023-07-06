@@ -28,7 +28,6 @@ const update = {
     userName: Joi.string().required(),
     email: Joi.string().required(),
     mobileNo: Joi.string().required(),
-    password: Joi.string().required(),
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
