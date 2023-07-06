@@ -11,8 +11,8 @@ const create = {
     name: Joi.string().required(),
     mobile: Joi.string().required(),
     password: Joi.string().required(),
-    companyId: Joi.string().custom(commonValidation.objectId),
-    dealerId: Joi.string().custom(commonValidation.objectId),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -26,8 +26,8 @@ const update = {
   body: Joi.object().keys({
     name: Joi.string().required(),
     mobile: Joi.string().required(),
-    companyId: Joi.string().custom(commonValidation.objectId),
-    dealerId: Joi.string().custom(commonValidation.objectId),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

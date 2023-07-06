@@ -24,7 +24,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { name, mobile, password, companyId } = req.body;
+    let { name, mobile, password, companyId, dealerId } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
