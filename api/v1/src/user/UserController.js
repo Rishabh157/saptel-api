@@ -41,6 +41,7 @@ exports.add = async (req, res) => {
     let {
       firstName,
       lastName,
+      userName,
       mobile,
       email,
       companyId,
@@ -60,7 +61,11 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await userService.isExists([{ email }, { mobile }]);
+    let dataExist = await userService.isExists([
+      { email },
+      { mobile },
+      { userName },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -192,6 +197,7 @@ exports.updateUser = async (req, res) => {
     let {
       firstName,
       lastName,
+      userName,
       mobile,
       email,
       password,
@@ -220,7 +226,7 @@ exports.updateUser = async (req, res) => {
      * check duplicate exist
      */
     let dataExist = await userService.isExists(
-      [{ email }, { mobile }],
+      [{ email }, { mobile }, { userName }],
       [idToBeSearch]
     );
     if (dataExist.exists && dataExist.existsSummary) {

@@ -1,6 +1,7 @@
 const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const adminService = require("./AdminService");
+const userService = require("../user/UserService");
 const bcryptjs = require("bcryptjs");
 const otpHelper = require("../otp/OtpHelper");
 const { sendMsg91Function } = require("../../helper/msgHelper");
@@ -184,14 +185,19 @@ exports.login = async (req, res) => {
     let deviceId = req.headers["device-id"];
 
     let dataFound = await adminService.getOneByMultiField({ userName });
-    if (!dataFound) {
-      throw new ApiError(httpStatus.OK, `Admin not found.`);
-    }
-    let matched = await bcrypt.compare(password, dataFound.password);
+    let userFound = await userService.getOneByMultiField({ userName });
+    // if (!dataFound) {
+    //   throw new ApiError(httpStatus.OK, `Admin not found.`);
+    // }
+    let matched = await bcrypt.compare(
+      password,
+      dataFound?.password || userFound?.password
+    );
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
     console.log(dataFound);
+    console.log(userFound);
     let {
       _id: userId,
       userType,
@@ -200,16 +206,18 @@ exports.login = async (req, res) => {
       lastName,
       email,
       companyId,
-    } = dataFound;
+    } = dataFound || userFound;
 
-    let token = await tokenCreate(dataFound);
+    let token = await tokenCreate(dataFound?._id ? dataFound : userFound);
     if (!token) {
       throw new ApiError(
         httpStatus.OK,
         "Something went wrong. Please try again later."
       );
     }
-    let refreshToken = await refreshTokenCreate(dataFound);
+    let refreshToken = await refreshTokenCreate(
+      dataFound?._id ? dataFound : userFound
+    );
     if (!refreshToken) {
       throw new ApiError(
         httpStatus.OK,
@@ -684,8 +692,8 @@ exports.view = async (req, res) => {
       userType === userEnum.admin
         ? loggedInUserId
         : req.params && req.params.id && userType === userEnum.superAdmin
-          ? req.params.id
-          : loggedInUserId;
+        ? req.params.id
+        : loggedInUserId;
 
     if (!userId) {
       throw new ApiError(

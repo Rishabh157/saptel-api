@@ -12,25 +12,26 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
     },
     lastName: {
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
+    },
+    userName: {
+      type: String,
+      required: true,
+      trim: true,
     },
     mobile: {
       type: String,
       required: false,
       trim: true,
-      lowercase: true,
     },
     email: {
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
     },
     password: {
       type: String,
@@ -161,7 +162,7 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["firstName", "lastName", "mobile", "email"];
+const searchKeys = ["firstName", "lastName", "mobile", "email", "userName"];
 module.exports = mongoose.model("User", UserSchema);
 module.exports.searchKeys = [...searchKeys];
 

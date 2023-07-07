@@ -8,15 +8,16 @@ const commonValidation = require("../../helper/CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    firstName: Joi.string().lowercase().required(),
-    lastName: Joi.string().lowercase().required(),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    userName: Joi.string().required(),
     mobile: Joi.string()
-      .lowercase()
+
       .custom(commonValidation.indianMobile)
       .required(),
-    email: Joi.string().lowercase().required(),
+    email: Joi.string().required(),
+    password: Joi.string().optional(),
     userType: Joi.string(),
-    password: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
@@ -28,13 +29,14 @@ const create = {
  */
 const update = {
   body: Joi.object().keys({
-    firstName: Joi.string().lowercase(),
-    lastName: Joi.string().lowercase().required(),
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    userName: Joi.string().required(),
     mobile: Joi.string()
-      .lowercase()
+
       .custom(commonValidation.indianMobile)
       .required(),
-    email: Joi.string().lowercase().required(),
+    email: Joi.string().required(),
     password: Joi.string().optional(),
     userType: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
