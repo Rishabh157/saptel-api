@@ -41,7 +41,8 @@ const create = {
     landmark: Joi.string().allow(""),
     medicalIssue: Joi.array().items(Joi.string()).default([]),
 
-    orderFor: Joi.string().allow(""),
+    orderFor: Joi.array().items(Joi.string()).default([]),
+    orderForOther: Joi.string().allow(""),
     paymentMode: Joi.string().allow(""),
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
     reciversName: Joi.string().allow(""),
@@ -113,8 +114,8 @@ const update = {
     incomingCallerNo: Joi.string().allow(""),
     landmark: Joi.string().allow(""),
     medicalIssue: Joi.array().items(Joi.string()).default([]),
-
-    orderFor: Joi.string().allow(""),
+    orderFor: Joi.array().items(Joi.string()).default([]),
+    orderForOther: Joi.string().allow(""),
     paymentMode: Joi.string().allow(""),
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
     reciversName: Joi.string().allow(""),

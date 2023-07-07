@@ -151,6 +151,11 @@ const InquirySchema = new mongoose.Schema(
     },
 
     orderFor: {
+      type: [String],
+      required: false,
+      default: "",
+    },
+    orderForOther: {
       type: String,
       required: false,
       default: "",
