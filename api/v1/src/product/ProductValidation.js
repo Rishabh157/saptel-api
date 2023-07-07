@@ -31,16 +31,16 @@ const create = {
     }),
 
     faq: Joi.array().items({
-      question: Joi.string().required(),
-      answer: Joi.string().required(),
+      question: Joi.string().allow(""),
+      answer: Joi.string().allow(""),
     }),
     video: Joi.array().items({
-      videoName: Joi.string().required(),
-      videoLink: Joi.string().uri().required(),
+      videoName: Joi.string().allow(""),
+      videoLink: Joi.string().uri().allow(""),
     }),
     callScript: Joi.array().items({
-      language: Joi.string().custom(commonValidation.objectId).required(),
-      script: Joi.string().required(),
+      language: Joi.string().custom(commonValidation.objectId).allow(""),
+      script: Joi.string().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -77,16 +77,16 @@ const update = {
     }),
 
     faq: Joi.array().items({
-      question: Joi.string().required(),
-      answer: Joi.string().required(),
+      question: Joi.string().allow(""),
+      answer: Joi.string().allow(""),
     }),
     video: Joi.array().items({
-      videoName: Joi.string().required(),
-      videoLink: Joi.string().uri().required(),
+      videoName: Joi.string().allow(""),
+      videoLink: Joi.string().uri().allow(""),
     }),
     callScript: Joi.array().items({
-      language: Joi.string().custom(commonValidation.objectId).required(),
-      script: Joi.string().required(),
+      language: Joi.string().custom(commonValidation.objectId).allow(""),
+      script: Joi.string().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

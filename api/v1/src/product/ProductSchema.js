@@ -84,14 +84,14 @@ const ProductSchema = new mongoose.Schema(
         {
           question: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
             lowercase: true,
           },
 
           answer: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
             lowercase: true,
           },
@@ -104,14 +104,14 @@ const ProductSchema = new mongoose.Schema(
         {
           videoName: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
             lowercase: true,
           },
 
           videoLink: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
           },
         },
@@ -123,13 +123,13 @@ const ProductSchema = new mongoose.Schema(
         {
           language: {
             type: ObjectId,
-            required: true,
+            required: false,
             trim: true,
           },
 
           script: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
             lowercase: true,
           },
