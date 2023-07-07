@@ -23,6 +23,7 @@ const GoodReceivedNoteSchema = new mongoose.Schema(
 );
 
 const searchKeys = [
+  "itemName",
   "poCode",
   "receivedQuantity ",
   "goodQuantity",

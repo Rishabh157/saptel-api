@@ -368,6 +368,77 @@ exports.get = async (req, res) => {
   }
 };
 
+//get api
+exports.getByPoCode = async (req, res) => {
+  try {
+    let pocode = req.params.pocode;
+
+    //if no default query then pass {}
+    let matchQuery = {
+      poCode: pocode,
+      isDeleted: false,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "items",
+          localField: "itemId",
+          foreignField: "_id",
+          as: "item_name",
+          pipeline: [{ $project: { itemName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          itemName: {
+            $arrayElemAt: ["$item_name.itemName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["item_name"],
+      },
+    ];
+    let dataExist = await goodReceivedNoteService.aggregateQuery(
+      additionalQuery
+    );
+    let recievedQuantity = 0;
+    const recQuntArr = dataExist?.map((ele) => {
+      return ele?.receivedQuantity;
+    });
+    for (let i = 0; i < recQuntArr.length; i++) {
+      recievedQuantity += recQuntArr[i];
+    }
+
+    console.log(recievedQuantity);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        totalRecievedQuantity: recievedQuantity,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}

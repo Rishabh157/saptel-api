@@ -21,6 +21,17 @@ router.get(
 );
 
 /**
+ * get all by po code
+ */
+router.get(
+  "/:pocode",
+  accessModuleCheck,
+  authCheckMiddleware,
+  validate(goodReceivedNoteValidation.getByPoCode),
+  goodReceivedNoteController.getByPoCode
+);
+
+/**
  * get one document (if query) / all documents
  */
 router.get(

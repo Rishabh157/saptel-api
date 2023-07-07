@@ -92,6 +92,11 @@ const get = {
     .optional(),
 };
 
+const getByPoCode = {
+  params: Joi.object().keys({
+    pocode: Joi.string(),
+  }),
+};
 /**
  * delete a document
  */
@@ -126,4 +131,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  getByPoCode,
 };
