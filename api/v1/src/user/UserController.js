@@ -299,11 +299,11 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    if (req.userData.userType === userEnum.user) {
-      matchQuery.$and.push({
-        _id: new mongoose.Types.ObjectId(req.userData.Id),
-      });
-    }
+    // if (req.userData.userType === userEnum.user) {
+    //   matchQuery.$and.push({
+    //     _id: new mongoose.Types.ObjectId(req.userData.Id),
+    //   });
+    // }
 
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,

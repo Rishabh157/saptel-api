@@ -186,9 +186,10 @@ exports.login = async (req, res) => {
 
     let dataFound = await adminService.getOneByMultiField({ userName });
     let userFound = await userService.getOneByMultiField({ userName });
-    // if (!dataFound) {
-    //   throw new ApiError(httpStatus.OK, `Admin not found.`);
-    // }
+
+    if (!dataFound && !userFound) {
+      throw new ApiError(httpStatus.OK, `Admin/User not found.`);
+    }
     let matched = await bcrypt.compare(
       password,
       dataFound?.password || userFound?.password
@@ -196,7 +197,7 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-   
+
     let {
       _id: userId,
       userType,
