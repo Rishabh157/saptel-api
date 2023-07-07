@@ -76,6 +76,7 @@ const dealerWarehouseRoute = require("./src/dealerWareHouse/DealerWareHouseRoute
 const vendorWarehouseRoute = require("./src/vendorWareHouse/VendorWareHouseRoute");
 const DealerInventories = require("./src/dealerInventory/DealerInventoriesRouter");
 const DealerUser = require("./src/dealerUser/DealerUserRoute");
+const VendorLedger = require("./src/vendorLedger/VendorLedgerRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -389,6 +390,11 @@ const defaultRoutes = [
   {
     path: "/dealer-user",
     route: DealerUser,
+  },
+
+  {
+    path: "/vendor-ledger",
+    route: VendorLedger,
   },
 ];
 orderRoute;

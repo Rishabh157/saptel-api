@@ -22,16 +22,13 @@ exports.getBalance = async (dealerExitsId, creditAmount, debitAmount) => {
     { $sort: { _id: -1 } },
     { $limit: 1 },
   ]);
-  console.log(lastObject);
   let updatedBalance = 0;
   if (lastObject.length) {
     updatedBalance = parseInt(
       lastObject[0]?.balance + creditAmount - debitAmount
     );
-    console.log("44444", updatedBalance);
   } else {
     updatedBalance = creditAmount - debitAmount;
-    console.log("33333", updatedBalance);
   }
 
   return updatedBalance;
