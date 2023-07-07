@@ -194,6 +194,7 @@ exports.updateUser = async (req, res) => {
       lastName,
       mobile,
       email,
+      password,
       companyId,
       userDepartment,
       userRole,
@@ -230,6 +231,16 @@ exports.updateUser = async (req, res) => {
     let datafound = await userService.getOneByMultiField({ _id: idToBeSearch });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `User not found.`);
+    }
+    if (password) {
+      let hashedPassword = await bcryptjs.hash(password, 12);
+      if (!hashedPassword) {
+        throw new ApiError(
+          httpStatus.OK,
+          `Something went wrong with the password.`
+        );
+      }
+      req.body.password = hashedPassword;
     }
 
     let dataUpdated = await userService.getOneAndUpdate(

@@ -35,6 +35,7 @@ const update = {
       .custom(commonValidation.indianMobile)
       .required(),
     email: Joi.string().lowercase().required(),
+    password: Joi.string().optional(),
     userType: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     userDepartment: Joi.string().required(),
