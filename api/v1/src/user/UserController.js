@@ -78,6 +78,8 @@ exports.add = async (req, res) => {
       );
     }
     req.body.password = hashedPassword;
+
+    req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
     // let dataToUpload = { ...req.body, password: hashedPassword };
     // console.log(dataToUpload);
     //------------------create data-------------------
@@ -248,7 +250,7 @@ exports.updateUser = async (req, res) => {
       }
       req.body.password = hashedPassword;
     }
-
+    req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
     let dataUpdated = await userService.getOneAndUpdate(
       {
         _id: idToBeSearch,

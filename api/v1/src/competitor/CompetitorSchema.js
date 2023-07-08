@@ -34,6 +34,10 @@ const CompetitorSchema = mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    maskedPhoneNo: {
+      type: String,
+      required: true,
+    },
     schemePrice: {
       type: Number,
       trim: true,

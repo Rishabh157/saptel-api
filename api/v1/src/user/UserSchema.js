@@ -28,6 +28,10 @@ const UserSchema = new mongoose.Schema(
       required: false,
       trim: true,
     },
+    maskedPhoneNo: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,

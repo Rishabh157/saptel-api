@@ -190,6 +190,17 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Dealer not found.`);
     }
 
+    req.body.registrationAddress.maskedPhoneNo =
+      "******" + req.body.registrationAddress.phone.substring(6);
+    req.body.billingAddress.maskedPhoneNo =
+      "******" + req.body.billingAddress.phone.substring(6);
+
+    const updatedContactInformation = contactInformation.map((contact) => {
+      const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
+      return { ...contact, maskedPhoneNo };
+    });
+    req.body.contactInformation = updatedContactInformation;
+
     let dataUpdated = await dealerService.getOneAndUpdate(
       {
         _id: idToBeSearch,

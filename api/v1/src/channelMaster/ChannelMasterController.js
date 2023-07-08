@@ -83,9 +83,9 @@ exports.add = async (req, res) => {
     });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
-        _id: language,
-        isDeleted: false,
-      })
+          _id: language,
+          isDeleted: false,
+        })
       : null;
     if (!isDistrictExists) {
       throw new ApiError(httpStatus.OK, "Invalid District");
@@ -109,6 +109,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Language");
     }
     //------------------create data-------------------
+    req.body.maskedPhoneNo = "******" + req.body.phone.substring(6);
     let dataCreated = await channelMasterService.createNewData({ ...req.body });
 
     if (dataCreated) {
@@ -189,9 +190,9 @@ exports.update = async (req, res) => {
     });
     const isLanguageExists = languageService?.length
       ? await languageService.findCount({
-        _id: language,
-        isDeleted: false,
-      })
+          _id: language,
+          isDeleted: false,
+        })
       : null;
 
     if (!isDistrictExists) {
@@ -215,6 +216,7 @@ exports.update = async (req, res) => {
     if (languageService?.length && !isLanguageExists) {
       throw new ApiError(httpStatus.OK, "Invalid Language");
     }
+    req.body.maskedPhoneNo = "******" + req.body.phone.substring(6);
     let dataUpdated = await channelMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,

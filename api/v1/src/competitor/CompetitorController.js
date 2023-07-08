@@ -56,7 +56,7 @@ exports.add = async (req, res) => {
     if (!isChannelExists) {
       throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
-
+    req.body.maskedPhoneNo = "******" + req.body.whatsappNumber.substring(6);
     let dataCreated = await competitorService.createNewData({
       ...req.body,
     });
@@ -136,7 +136,7 @@ exports.update = async (req, res) => {
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Competitor not found.`);
     }
-
+    req.body.maskedPhoneNo = "******" + req.body.whatsappNumber.substring(6);
     let dataUpdated = await competitorService.getOneAndUpdate(
       {
         _id: idToBeSearch,

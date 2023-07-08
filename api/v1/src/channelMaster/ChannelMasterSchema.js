@@ -22,6 +22,10 @@ const ChannelMasterSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    maskedPhoneNo: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: false,

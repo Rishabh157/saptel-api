@@ -60,6 +60,17 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
+    req.body.registrationAddress.maskedPhoneNo =
+      "******" + req.body.registrationAddress.phone.substring(6);
+    req.body.billingAddress.maskedPhoneNo =
+      "******" + req.body.billingAddress.phone.substring(6);
+
+    const updatedContactInformation = contactInformation.map((contact) => {
+      const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
+      return { ...contact, maskedPhoneNo };
+    });
+    req.body.contactInformation = updatedContactInformation;
+
     let dataCreated = await wareHouseService.createNewData({ ...req.body });
 
     if (dataCreated) {
@@ -117,7 +128,16 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `WareHouse not found.`);
     }
+    req.body.registrationAddress.maskedPhoneNo =
+      "******" + req.body.registrationAddress.phone.substring(6);
+    req.body.billingAddress.maskedPhoneNo =
+      "******" + req.body.billingAddress.phone.substring(6);
 
+    const updatedContactInformation = contactInformation.map((contact) => {
+      const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
+      return { ...contact, maskedPhoneNo };
+    });
+    req.body.contactInformation = updatedContactInformation;
     let dataUpdated = await wareHouseService.getOneAndUpdate(
       {
         _id: idToBeSearch,

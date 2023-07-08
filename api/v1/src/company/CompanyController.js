@@ -6,7 +6,10 @@ const companyService = require("./CompanyService");
 const { searchKeys } = require("./CompanySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -16,7 +19,6 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-
 
 //add start
 exports.add = async (req, res) => {
@@ -38,6 +40,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
+    req.body.maskedPhoneNo = "******" + req.body.phoneNo.substring(6);
     let dataCreated = await companyService.createNewData({ ...req.body });
 
     if (dataCreated) {
@@ -89,7 +92,7 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Company not found.`);
     }
-
+    req.body.maskedPhoneNo = "******" + req.body.phoneNo.substring(6);
     let dataUpdated = await companyService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -343,7 +346,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await companyService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'companyId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "companyId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await companyService.getOneAndDelete({ _id });

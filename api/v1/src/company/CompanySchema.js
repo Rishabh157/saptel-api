@@ -9,6 +9,10 @@ const CompanySchema = new mongoose.Schema(
     gstNo: { type: String, required: false, trim: true },
     address: { type: String, required: true, trim: true, lowercase: true },
     phoneNo: { type: String, required: false, trim: true },
+    maskedPhoneNo: {
+      type: String,
+      required: true,
+    },
     bankDetails: {
       type: [
         {

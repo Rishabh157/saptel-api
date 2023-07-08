@@ -22,6 +22,10 @@ const WareHouseSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        maskedPhoneNo: {
+          type: String,
+          required: true,
+        },
 
         address: {
           type: String,
@@ -55,6 +59,10 @@ const WareHouseSchema = new mongoose.Schema(
     billingAddress: {
       type: {
         phone: {
+          type: String,
+          required: true,
+        },
+        maskedPhoneNo: {
           type: String,
           required: true,
         },
@@ -127,6 +135,10 @@ const WareHouseSchema = new mongoose.Schema(
             lowercase: true,
           },
           mobileNumber: {
+            type: String,
+            required: true,
+          },
+          maskedPhoneNo: {
             type: String,
             required: true,
           },
