@@ -12,7 +12,7 @@ const create = {
     vendorCode: Joi.string().required(),
     companyType: Joi.string().required(),
     ownerShipType: Joi.string().lowercase().required(),
-    websiteAddress: Joi.string().uri().required(),
+    websiteAddress: Joi.string().uri().allow(""),
     registrationAddress: Joi.object().keys({
       phone: Joi.string().required(),
       address: Joi.string().required(),
@@ -40,7 +40,7 @@ const create = {
     document: Joi.object().keys({
       gstNumber: Joi.string().required(),
       gstCertificate: Joi.string().uri().required(),
-      declarationForm: Joi.string().uri().required(),
+      declarationForm: Joi.string().uri().allow(""),
     }),
     bankInformation: Joi.array().items({
       bankName: Joi.string().required(),
@@ -68,7 +68,7 @@ const update = {
     vendorCode: Joi.string().required(),
     companyType: Joi.string().required(),
     ownerShipType: Joi.string().lowercase().required(),
-    websiteAddress: Joi.string().uri().required(),
+    websiteAddress: Joi.string().uri().allow(""),
     registrationAddress: Joi.object().keys({
       phone: Joi.string().required(),
       address: Joi.string().required(),
@@ -96,7 +96,7 @@ const update = {
     document: Joi.object().keys({
       gstNumber: Joi.string().required(),
       gstCertificate: Joi.string().uri().required(),
-      declarationForm: Joi.string().uri().required(),
+      declarationForm: Joi.string().uri().allow(""),
     }),
     bankInformation: Joi.array().items({
       bankName: Joi.string().required(),

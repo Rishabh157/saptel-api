@@ -25,7 +25,7 @@ const VendorSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    websiteAddress: { type: String, required: true, trim: true },
+    websiteAddress: { type: String, required: false, default: "", trim: true },
     registrationAddress: {
       type: {
         phone: {
@@ -165,7 +165,8 @@ const VendorSchema = new mongoose.Schema(
         },
         declarationForm: {
           type: String,
-          required: true,
+          required: false,
+          default: "",
           trim: true,
         },
       },
