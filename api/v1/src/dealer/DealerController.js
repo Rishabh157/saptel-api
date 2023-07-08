@@ -92,6 +92,16 @@ exports.add = async (req, res) => {
     }
     req.body.password = hashedPassword;
 
+    req.body.registrationAddress.maskedPhoneNo =
+      "******" + req.body.registrationAddress.phone.substring(6);
+    req.body.billingAddress.maskedPhoneNo =
+      "******" + req.body.billingAddress.phone.substring(6);
+
+    const updatedContactInformation = contactInformation.map((contact) => {
+      const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
+      return { ...contact, maskedPhoneNo };
+    });
+    req.body.contactInformation = updatedContactInformation;
     //------------------create data-------------------
     let dataCreated = await dealerService.createNewData({ ...req.body });
 

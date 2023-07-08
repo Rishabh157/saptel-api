@@ -75,6 +75,10 @@ const DealerSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        maskedPhoneNo: {
+          type: String,
+          required: true,
+        },
 
         address: {
           type: String,
@@ -108,6 +112,10 @@ const DealerSchema = new mongoose.Schema(
     billingAddress: {
       type: {
         phone: {
+          type: String,
+          required: true,
+        },
+        maskedPhoneNo: {
           type: String,
           required: true,
         },
@@ -168,6 +176,10 @@ const DealerSchema = new mongoose.Schema(
           mobileNumber: {
             type: String,
             trim: true,
+          },
+          maskedPhoneNo: {
+            type: String,
+            required: true,
           },
           landLine: {
             type: String,
