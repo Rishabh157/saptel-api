@@ -215,7 +215,8 @@ const VendorSchema = new mongoose.Schema(
           },
           cancelledCheque: {
             type: String,
-            required: true,
+            required: false,
+            default: "",
           },
         },
       ],
