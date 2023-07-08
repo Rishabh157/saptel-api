@@ -93,9 +93,11 @@ const get = {
 };
 
 const getByPoCode = {
-  params: Joi.object().keys({
-    pocode: Joi.string(),
-  }),
+  query: Joi.object()
+    .keys({
+      pocode: Joi.string().optional(),
+    })
+    .optional(),
 };
 /**
  * delete a document

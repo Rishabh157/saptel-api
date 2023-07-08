@@ -371,16 +371,13 @@ exports.get = async (req, res) => {
 //get api
 exports.getByPoCode = async (req, res) => {
   try {
-    let pocode = req.params.pocode;
+    let pocode = req.query.pocode;
 
-    //if no default query then pass {}
     let matchQuery = {
       poCode: pocode,
       isDeleted: false,
     };
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
+
     let additionalQuery = [
       { $match: matchQuery },
       {

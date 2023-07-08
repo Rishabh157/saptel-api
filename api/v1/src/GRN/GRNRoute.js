@@ -24,7 +24,7 @@ router.get(
  * get all by po code
  */
 router.get(
-  "/:pocode",
+  "/pocode",
   accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.getByPoCode),
