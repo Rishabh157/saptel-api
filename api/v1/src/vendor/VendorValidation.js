@@ -52,7 +52,7 @@ const create = {
       cancelledCheque: Joi.string().uri().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    openingBalance: Joi.number().allow()
+    openingBalance: Joi.number().allow(),
   }),
 };
 
@@ -108,7 +108,7 @@ const update = {
       cancelledCheque: Joi.string().uri().required(),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
-    openingBalance: Joi.number().allow()
+    openingBalance: Joi.number().allow(),
   }),
 };
 

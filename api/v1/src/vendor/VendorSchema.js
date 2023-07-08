@@ -32,6 +32,10 @@ const VendorSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+        maskedPhoneNo: {
+          type: String,
+          required: true,
+        },
 
         address: {
           type: String,
@@ -65,6 +69,10 @@ const VendorSchema = new mongoose.Schema(
     billingAddress: {
       type: {
         phone: {
+          type: String,
+          required: true,
+        },
+        maskedPhoneNo: {
           type: String,
           required: true,
         },
@@ -127,6 +135,10 @@ const VendorSchema = new mongoose.Schema(
             lowercase: true,
           },
           mobileNumber: {
+            type: String,
+            required: true,
+          },
+          maskedPhoneNo: {
             type: String,
             required: true,
           },
@@ -240,7 +252,7 @@ const searchKeys = [
   "contactInformation",
   "document",
   "bankInformation",
-  "openingBalance"
+  "openingBalance",
 ];
 module.exports = mongoose.model("Vendor", VendorSchema);
 module.exports.searchKeys = [...searchKeys];

@@ -8,7 +8,10 @@ const { getQuery } = require("../../helper/utils");
 const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
 const vendorService = require("./VendorService");
 const companyService = require("../company/CompanyService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -36,7 +39,7 @@ exports.add = async (req, res) => {
       document,
       bankInformation,
       companyId,
-      openingBalance
+      openingBalance,
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -58,6 +61,18 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
+
+    req.body.registrationAddress.maskedPhoneNo =
+      "******" + req.body.registrationAddress.phone.substring(6);
+    req.body.billingAddress.maskedPhoneNo =
+      "******" + req.body.billingAddress.phone.substring(6);
+
+    const updatedContactInformation = contactInformation.map((contact) => {
+      const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
+      return { ...contact, maskedPhoneNo };
+    });
+    req.body.contactInformation = updatedContactInformation;
+
     let dataCreated = await vendorService.createNewData({ ...req.body });
 
     if (dataCreated) {
@@ -95,7 +110,7 @@ exports.update = async (req, res) => {
       contactInformation,
       document,
       bankInformation,
-      openingBalance
+      openingBalance,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -107,7 +122,16 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Vendor not found.`);
     }
+    req.body.registrationAddress.maskedPhoneNo =
+      "******" + req.body.registrationAddress.phone.substring(6);
+    req.body.billingAddress.maskedPhoneNo =
+      "******" + req.body.billingAddress.phone.substring(6);
 
+    const updatedContactInformation = contactInformation.map((contact) => {
+      const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
+      return { ...contact, maskedPhoneNo };
+    });
+    req.body.contactInformation = updatedContactInformation;
     let dataUpdated = await vendorService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -714,7 +738,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await vendorService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'vendorId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "vendorId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await vendorService.getOneAndDelete({ _id });

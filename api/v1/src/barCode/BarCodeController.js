@@ -23,8 +23,14 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { productGroupId, barcodeGroupNumber, quantity, lotNumber, companyId } =
-      req.body;
+    let {
+      productGroupId,
+      barcodeGroupNumber,
+      quantity,
+      lotNumber,
+      wareHouseId,
+      companyId,
+    } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -70,6 +76,7 @@ exports.add = async (req, res) => {
         barcodeGroupNumber,
         barcodeNumber: lotNumber + currentBarcode,
         lotNumber,
+        wareHouseId,
         companyId,
       });
     }
@@ -101,7 +108,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { productGroupId, companyId } = req.body;
+    let { productGroupId, wareHouseId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
     // let dataExist = await barCodeService.isExists(
@@ -279,15 +286,34 @@ exports.allFilterPagination = async (req, res) => {
           ],
         },
       },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
 
       {
         $addFields: {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
         },
       },
-      { $unset: ["product_group"] },
+      { $unset: ["product_group", "warehouse_data"] },
     ];
 
     if (additionalQuery.length) {
@@ -448,13 +474,33 @@ exports.allFilterGroupPagination = async (req, res) => {
       },
 
       {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
         },
       },
-      { $unset: ["product_group"] },
+      { $unset: ["product_group", "warehouse_data"] },
     ];
 
     if (additionalQuery.length) {
@@ -545,13 +591,33 @@ exports.get = async (req, res) => {
       },
 
       {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
         },
       },
-      { $unset: ["product_group"] },
+      { $unset: ["product_group", "warehouse_data"] },
     ];
 
     let dataExist = await barCodeService.aggregateQuery(additionalQuery);
@@ -605,13 +671,33 @@ exports.getAllByGroup = async (req, res) => {
       },
 
       {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
         },
       },
-      { $unset: ["product_group"] },
+      { $unset: ["product_group", "warehouse_data"] },
     ];
 
     let dataExist = await barCodeService.aggregateQuery(additionalQuery);
@@ -660,13 +746,33 @@ exports.getById = async (req, res) => {
       },
 
       {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
         },
       },
-      { $unset: ["product_group"] },
+      { $unset: ["product_group", "warehouse_data"] },
     ];
     let dataExist = await barCodeService.aggregateQuery(additionalQuery);
 

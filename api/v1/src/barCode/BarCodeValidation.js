@@ -13,6 +13,7 @@ const create = {
     quantity: Joi.number().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
+    wareHouseId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -29,6 +30,7 @@ const update = {
     barcodeGroupNumber: Joi.string().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
+    wareHouseId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
