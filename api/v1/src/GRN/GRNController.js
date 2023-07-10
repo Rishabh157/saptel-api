@@ -376,9 +376,11 @@ exports.getByPoCode = async (req, res) => {
 
     let matchQuery = {
       poCode: pocode,
-      itemId: itemId,
+      itemId: new mongoose.Types.ObjectId(itemId),
       isDeleted: false,
     };
+
+    console.log(matchQuery);
 
     let additionalQuery = [
       { $match: matchQuery },
