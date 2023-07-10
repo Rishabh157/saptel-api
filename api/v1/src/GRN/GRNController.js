@@ -372,9 +372,11 @@ exports.get = async (req, res) => {
 exports.getByPoCode = async (req, res) => {
   try {
     let pocode = req.query.pocode;
+    let itemId = req.query.itemid;
 
     let matchQuery = {
       poCode: pocode,
+      itemId: itemId,
       isDeleted: false,
     };
 

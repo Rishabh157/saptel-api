@@ -96,6 +96,7 @@ const getByPoCode = {
   query: Joi.object()
     .keys({
       pocode: Joi.string().optional(),
+      itemid: Joi.string().custom(commonValidation.objectId).optional(),
     })
     .optional(),
 };
