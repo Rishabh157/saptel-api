@@ -342,7 +342,7 @@ exports.allFilterPagination = async (req, res) => {
     //----------------------------
 
     /**
-     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     * for lookups, project, addfields, or group in aggregate pipeline form dynamic query in additionalQuery array
      */
     let additionalQuery = [
       {
@@ -364,7 +364,6 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
-        // "tax.taxId": "$tax.taxName",
         $addFields: {
           purchaseOrder: {
             itemName: "",
@@ -432,6 +431,40 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    // Populate receivedQuantity from the goodreceivednotes collection
+    finalAggregateQuery.push({
+      $lookup: {
+        from: "goodreceivednotes",
+        let: { poCode: "$poCode", itemId: "$purchaseOrder.itemId" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$poCode", "$$poCode"] },
+                  { $eq: ["$itemId", "$$itemId"] },
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              receivedQuantity: 1,
+            },
+          },
+        ],
+        as: "grnData",
+      },
+    });
+
+    finalAggregateQuery.push({
+      $addFields: {
+        "purchaseOrder.receivedQuantity": {
+          $arrayElemAt: ["$grnData.receivedQuantity", 0],
+        },
+      },
+    });
+
     let result = await purchaseOrderService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
@@ -457,6 +490,7 @@ exports.allFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //get api
 exports.get = async (req, res) => {
   try {
