@@ -25,7 +25,6 @@ exports.add = async (req, res) => {
     let { mobileNumber, channelNameId, companyId } = req.body;
 
     // -------check duplicate exist--------
-    console.log("yes");
     let dataExist = await competitorService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
@@ -46,7 +45,6 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
     req.body.maskedPhoneNo = "******" + req.body.mobileNumber.substring(6);
-    console.log(req.body);
     let dataCreated = await competitorService.createNewData({
       ...req.body,
     });
@@ -288,8 +286,31 @@ exports.allFilterPagination = async (req, res) => {
     // ------------- //calander filter//---------------------
 
     // ---------for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array---------
-    let additionalQuery = [];
-
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelNameId",
+          foreignField: "_id",
+          as: "channelData",
+          pipeline: [{ $project: { channelName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          channelName: {
+            $cond: {
+              if: { $ne: ["$channelData", []] },
+              then: { $arrayElemAt: ["$channelData.channelName", 0] },
+              else: "",
+            },
+          },
+        },
+      },
+      {
+        $unset: "channelData",
+      },
+    ];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
