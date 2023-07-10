@@ -448,8 +448,9 @@ exports.allFilterPagination = async (req, res) => {
             },
           },
           {
-            $project: {
-              receivedQuantity: 1,
+            $group: {
+              _id: null,
+              totalReceivedQuantity: { $sum: "$receivedQuantity" },
             },
           },
         ],
@@ -460,7 +461,7 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $addFields: {
         "purchaseOrder.receivedQuantity": {
-          $arrayElemAt: ["$grnData.receivedQuantity", 0],
+          $ifNull: [{ $arrayElemAt: ["$grnData.totalReceivedQuantity", 0] }, 0],
         },
       },
     });
@@ -490,6 +491,7 @@ exports.allFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+``;
 
 //get api
 exports.get = async (req, res) => {
