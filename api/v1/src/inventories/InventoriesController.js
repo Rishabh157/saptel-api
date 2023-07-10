@@ -10,7 +10,10 @@ const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 const barCodeService = require("../barCode/BarCodeService");
 const wareHouseService = require("../wareHouse/WareHouseService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -311,7 +314,7 @@ exports.allFilterPagination = async (req, res) => {
         groupBarcodeNumber: { $first: "$groupBarcodeNumber" },
         productGroupName: { $first: "$productGroupName" },
         wareHouse: { $first: "$wareHouseLabel" },
-
+        wareHouseId: { $first: "$wareHouseId" },
         count: { $sum: 1 },
         companyId: { $first: "$companyId" },
       },
@@ -495,7 +498,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await inventoriesService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'inventoryId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "inventoryId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await inventoriesService.getOneAndDelete({ _id });
