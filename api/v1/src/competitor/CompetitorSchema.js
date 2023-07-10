@@ -3,13 +3,12 @@ const mongoose = require("mongoose");
 
 const CompetitorSchema = mongoose.Schema(
   {
-    competitorName: {
+    date: {
       type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
+      required: false,
+      default: "",
     },
-    companyName: {
+    artist: {
       type: String,
       trim: true,
       lowercase: true,
@@ -22,17 +21,14 @@ const CompetitorSchema = mongoose.Schema(
     websiteLink: {
       type: String,
       trim: true,
-      lowercase: true,
     },
-    youtubeLink: {
+    video: {
       type: String,
       trim: true,
-      lowercase: true,
     },
-    whatsappNumber: {
+    mobileNumber: {
       type: String,
       trim: true,
-      lowercase: true,
     },
     maskedPhoneNo: {
       type: String,
@@ -41,7 +37,7 @@ const CompetitorSchema = mongoose.Schema(
     schemePrice: {
       type: Number,
       trim: true,
-      lowercase: true,
+      required: true,
     },
     companyId: {
       type: ObjectId,

@@ -22,22 +22,11 @@ const {
 // ==============add api start==============
 exports.add = async (req, res) => {
   try {
-    let {
-      competitorName,
-      companyName,
-      productName,
-      websiteLink,
-      youtubeLink,
-      whatsappNumber,
-      schemePrice,
-      channelNameId,
-      companyId,
-      startTime,
-      endTime,
-    } = req.body;
+    let { mobileNumber, channelNameId, companyId } = req.body;
 
     // -------check duplicate exist--------
-    let dataExist = await competitorService.isExists([{ competitorName }]);
+    console.log("yes");
+    let dataExist = await competitorService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -56,7 +45,8 @@ exports.add = async (req, res) => {
     if (!isChannelExists) {
       throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
-    req.body.maskedPhoneNo = "******" + req.body.whatsappNumber.substring(6);
+    req.body.maskedPhoneNo = "******" + req.body.mobileNumber.substring(6);
+    console.log(req.body);
     let dataCreated = await competitorService.createNewData({
       ...req.body,
     });
@@ -86,25 +76,10 @@ exports.add = async (req, res) => {
 // ==============upate api start==============
 exports.update = async (req, res) => {
   try {
-    let {
-      competitorName,
-      companyName,
-      productName,
-      websiteLink,
-      youtubeLink,
-      whatsappNumber,
-      schemePrice,
-      channelNameId,
-      companyId,
-      startTime,
-      endTime,
-    } = req.body;
+    let { channelNameId, companyId } = req.body;
     let idToBeSearch = req.params.id;
 
-    let dataExist = await competitorService.isExists(
-      [{ competitorName }],
-      idToBeSearch
-    );
+    let dataExist = await competitorService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -125,9 +100,6 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Channel");
     }
 
-    let dataCreated = await competitorService.createNewData({
-      ...req.body,
-    });
     //------------------Find data-------------------
 
     let dataFound = await competitorService.getOneByMultiField({
@@ -136,7 +108,7 @@ exports.update = async (req, res) => {
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Competitor not found.`);
     }
-    req.body.maskedPhoneNo = "******" + req.body.whatsappNumber.substring(6);
+    req.body.maskedPhoneNo = "******" + req.body.mobileNumber.substring(6);
     let dataUpdated = await competitorService.getOneAndUpdate(
       {
         _id: idToBeSearch,
