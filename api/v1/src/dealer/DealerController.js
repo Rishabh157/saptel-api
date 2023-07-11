@@ -535,7 +535,39 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "zonalManagerId",
+          foreignField: "_id",
+          as: "zonalManager",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "zonalExecutiveId",
+          foreignField: "_id",
+          as: "zonalExecutive",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
         $addFields: {
+          zonalManagerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalManager.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalManager.lastName", 0] },
+            ],
+          },
+          zonalExecutiveLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalExecutive.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalExecutive.lastName", 0] },
+            ],
+          },
           dealersCategoryName: {
             $arrayElemAt: ["$dealerCategory_name.dealersCategory", 0],
           },
@@ -568,6 +600,8 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $unset: [
+          "zonalExecutive",
+          "zonalManager",
           "dealerCategory_name",
           "country_name",
           "state_name",
@@ -731,7 +765,39 @@ exports.get = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "zonalManagerId",
+          foreignField: "_id",
+          as: "zonalManager",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "zonalExecutiveId",
+          foreignField: "_id",
+          as: "zonalExecutive",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
         $addFields: {
+          zonalManagerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalManager.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalManager.lastName", 0] },
+            ],
+          },
+          zonalExecutiveLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalExecutive.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalExecutive.lastName", 0] },
+            ],
+          },
           dealersCategoryName: {
             $arrayElemAt: ["$dealerCategory_name.dealersCategory", 0],
           },
@@ -764,6 +830,8 @@ exports.get = async (req, res) => {
       },
       {
         $unset: [
+          "zonalExecutive",
+          "zonalManager",
           "dealerCategory_name",
           "country_name",
           "state_name",
@@ -895,7 +963,39 @@ exports.getById = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "zonalManagerId",
+          foreignField: "_id",
+          as: "zonalManager",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "zonalExecutiveId",
+          foreignField: "_id",
+          as: "zonalExecutive",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
         $addFields: {
+          zonalManagerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalManager.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalManager.lastName", 0] },
+            ],
+          },
+          zonalExecutiveLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalExecutive.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalExecutive.lastName", 0] },
+            ],
+          },
           dealersCategoryName: {
             $arrayElemAt: ["$dealerCategory_name.dealersCategory", 0],
           },
@@ -928,6 +1028,8 @@ exports.getById = async (req, res) => {
       },
       {
         $unset: [
+          "zonalExecutive",
+          "zonalManager",
           "dealerCategory_name",
           "country_name",
           "state_name",

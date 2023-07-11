@@ -245,6 +245,16 @@ const DealerSchema = new mongoose.Schema(
       type: ObjectId,
       trim: true,
     },
+    ratio: {
+      type: Number,
+      required: false,
+      default: null,
+    },
+    priority: {
+      type: Number,
+      trim: false,
+      default: null,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

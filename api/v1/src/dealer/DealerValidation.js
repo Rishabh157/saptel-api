@@ -61,6 +61,8 @@ const create = {
     zonalExecutiveId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    ratio: Joi.number().allow(null),
+    priority: Joi.number().allow(null),
   }),
 };
 
@@ -124,6 +126,8 @@ const update = {
       .custom(commonValidation.objectId)
       .allow(null),
     openingBalance: Joi.number().allow(),
+    ratio: Joi.number().allow(null),
+    priority: Joi.number().allow(null),
   }),
 };
 
