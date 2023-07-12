@@ -53,17 +53,17 @@ router.put(
  * update all by departmentId
  */
 router.put(
-  "/department/:id",
+  "/user-role/:id",
 
   authCheckMiddleware,
-  validate(userAccessValidation.departmentUpdate),
-  userAccessController.departmentUpdate
+  validate(userAccessValidation.userRoleUpdate),
+  userAccessController.userRoleUpdate
 );
 /**
  * get by id
  */
 router.get(
-  "/:departmentid/userId/:userId",
+  "/:userRoleId/userId/:userId",
 
   authCheckMiddleware,
   validate(userAccessValidation.getById),

@@ -114,7 +114,7 @@ exports.update = async (req, res) => {
 };
 
 //update all by deaprtmentid
-exports.departmentUpdate = async (req, res) => {
+exports.userRoleUpdate = async (req, res) => {
   try {
     // let { userId, departmentId } = req.body;
 

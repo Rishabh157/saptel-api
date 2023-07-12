@@ -83,9 +83,9 @@ const update = {
 };
 
 /**
- * update all by department
+ * update all by userRole
  */
-const departmentUpdate = {
+const userRoleUpdate = {
   params: Joi.object().keys({
     id: Joi.string().required(),
   }),
@@ -222,6 +222,6 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
-  departmentUpdate,
+  userRoleUpdate,
   userExists,
 };
