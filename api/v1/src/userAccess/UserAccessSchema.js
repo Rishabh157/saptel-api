@@ -20,11 +20,7 @@ const UserAccessSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    departmentTitle: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+
     userRoleId: {
       type: String,
       required: true,
@@ -35,11 +31,7 @@ const UserAccessSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    userRoleTitle: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+
     module: {
       type: [
         {
@@ -53,11 +45,7 @@ const UserAccessSchema = new mongoose.Schema(
             required: true,
             trim: true,
           },
-          moduleTitle: {
-            type: String,
-            required: true,
-            trim: true,
-          },
+
           moduleAction: {
             type: [
               {
@@ -76,11 +64,7 @@ const UserAccessSchema = new mongoose.Schema(
                   required: true,
                   trim: true,
                 },
-                actionTitle: {
-                  type: String,
-                  required: true,
-                  trim: true,
-                },
+
                 fields: {
                   type: [
                     {
@@ -94,11 +78,7 @@ const UserAccessSchema = new mongoose.Schema(
                         required: true,
                         trim: true,
                       },
-                      fieldTitle: {
-                        type: String,
-                        required: true,
-                        trim: true,
-                      },
+
                       fieldValue: {
                         type: String,
                         required: true,
@@ -138,13 +118,10 @@ const searchKeys = [
   "userId",
   "departmentId",
   "departmentName",
-  "departmentTitle",
   "userRoleId",
   "userName",
-  "userTitle",
   "moduleId",
   "moduleName",
-  "moduleTitle",
   "moduleAction",
 ];
 module.exports = mongoose.model("UserAccess", UserAccessSchema);

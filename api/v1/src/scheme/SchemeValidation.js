@@ -86,6 +86,7 @@ const update = {
 const getAllFilter = {
   body: Joi.object().keys({
     params: Joi.array().items(Joi.string().required()),
+    allowedFields: Joi.array().items(Joi.string()).default([]),
     searchValue: Joi.string().allow(""),
     dateFilter: Joi.object()
       .keys({
@@ -138,6 +139,9 @@ const get = {
       schemeName: Joi.string().optional(),
     })
     .optional(),
+  body: Joi.object().keys({
+    allowedFields: Joi.array().items(Joi.string()).default([]),
+  }),
 };
 /**
  * get a document
@@ -145,6 +149,9 @@ const get = {
 const getDocument = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    allowedFields: Joi.array().items(Joi.string()).default([]),
   }),
 };
 
@@ -155,6 +162,9 @@ const getByProductGroup = {
   params: Joi.object().keys({
     companyid: Joi.string().custom(commonValidation.objectId),
     pgid: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    allowedFields: Joi.array().items(Joi.string()).default([]),
   }),
 };
 /**

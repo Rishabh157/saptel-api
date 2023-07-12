@@ -19,6 +19,21 @@ exports.getQuery = (defaultQuery, reqQuery = false) => {
   return defaultQuery;
 };
 
+exports.getAllowedField = (allowedFields, result) => {
+  if (allowedFields?.length) {
+    let filteredResult = result.map((item) => {
+      let filteredItem = {};
+      allowedFields.forEach((field) => {
+        filteredItem[field] = item[field];
+      });
+      return filteredItem;
+    });
+    return filteredResult;
+  } else {
+    return result;
+  }
+};
+
 exports.generateRandomPassword = () => {
   const length = 8;
   const characters =

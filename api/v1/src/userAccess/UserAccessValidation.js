@@ -11,26 +11,26 @@ const create = {
     userId: Joi.string().custom(commonValidation.objectId).allow(null),
     departmentId: Joi.string().required(),
     departmentName: Joi.string().required(),
-    departmentTitle: Joi.string().required(),
+
     userRoleId: Joi.string().required(),
     userRoleName: Joi.string().required(),
-    userRoleTitle: Joi.string().required(),
+
     module: Joi.array()
       .items({
         moduleId: Joi.string().required(),
         moduleName: Joi.string().required(),
-        moduleTitle: Joi.string().required(),
+
         moduleAction: Joi.array()
           .items({
             actionUrl: Joi.string().required(),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
-            actionTitle: Joi.string().required(),
+
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
                 fieldName: Joi.string().required(),
-                fieldTitle: Joi.string().required(),
+
                 fieldValue: Joi.string().required(),
               })
               .required(),
@@ -52,26 +52,26 @@ const update = {
     userId: Joi.string().custom(commonValidation.objectId),
     departmentId: Joi.string().required(),
     departmentName: Joi.string().required(),
-    departmentTitle: Joi.string().required(),
+
     userRoleId: Joi.string().required(),
     userRoleName: Joi.string().required(),
-    userRoleTitle: Joi.string().required(),
+
     module: Joi.array()
       .items({
         moduleId: Joi.string().required(),
         moduleName: Joi.string().required(),
-        moduleTitle: Joi.string().required(),
+
         moduleAction: Joi.array()
           .items({
             actionUrl: Joi.string().required(),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
-            actionTitle: Joi.string().required(),
+
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
                 fieldName: Joi.string().required(),
-                fieldTitle: Joi.string().required(),
+
                 fieldValue: Joi.string().required(),
               })
               .required(),
@@ -92,26 +92,26 @@ const departmentUpdate = {
   body: Joi.object().keys({
     departmentId: Joi.string().required(),
     departmentName: Joi.string().required(),
-    departmentTitle: Joi.string().required(),
+
     userRoleId: Joi.string().required(),
     userRoleName: Joi.string().required(),
-    userRoleTitle: Joi.string().required(),
+
     module: Joi.array()
       .items({
         moduleId: Joi.string().required(),
         moduleName: Joi.string().required(),
-        moduleTitle: Joi.string().required(),
+
         moduleAction: Joi.array()
           .items({
             actionUrl: Joi.string().required(),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
-            actionTitle: Joi.string().required(),
+
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
                 fieldName: Joi.string().required(),
-                fieldTitle: Joi.string().required(),
+
                 fieldValue: Joi.string().required(),
               })
               .default([]),
