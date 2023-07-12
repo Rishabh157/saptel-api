@@ -20,13 +20,13 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { userId, departmentId } = req.body;
+    let { userId, userRoleId } = req.body;
     /**
      * check duplicate exist
      */
 
     let dataExist = await userAccessService.isExists(
-      [{ userId }, { departmentId }],
+      [{ userId }, { userRoleId }],
       false,
       true
     );
