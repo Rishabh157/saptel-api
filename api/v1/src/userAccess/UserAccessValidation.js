@@ -205,6 +205,15 @@ const changeStatus = {
   }),
 };
 
+/**
+ * user exists
+ */
+const userExists = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 module.exports = {
   create,
   getAllFilter,
@@ -214,4 +223,5 @@ module.exports = {
   changeStatus,
   getById,
   departmentUpdate,
+  userExists,
 };

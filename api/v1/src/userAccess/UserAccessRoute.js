@@ -81,6 +81,17 @@ router.put(
 );
 
 /**
+ * is user exists
+ */
+router.get(
+  "/user-exists/:id",
+
+  authCheckMiddleware,
+  validate(userAccessValidation.userExists),
+  userAccessController.isUserExists
+);
+
+/**
  * delete document
  */
 router.delete(

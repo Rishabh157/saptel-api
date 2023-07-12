@@ -391,6 +391,32 @@ exports.getById = async (req, res) => {
   }
 };
 
+//get by id
+exports.isUserExists = async (req, res) => {
+  try {
+    let userId = req.params.id;
+
+    let dataExist = await userAccessService.getOneByMultiField({
+      userId: userId,
+      isDeleted: false,
+    });
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: dataExist ? true : false,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
