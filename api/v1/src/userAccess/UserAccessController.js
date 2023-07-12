@@ -312,10 +312,10 @@ exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
     const userId = req.query.userId;
-    const departmentId = req.query.departmentId;
+    const userRoleId = req.query.userRoleId;
 
     let matchQueryUser = { isDeleted: false, userId: userId };
-    let matchQueryDepartment = { isDeleted: false, departmentId: departmentId };
+    let matchQueryDepartment = { isDeleted: false, userRoleId: userRoleId };
     // if (req.query && Object.keys(req.query).length) {
     //   matchQuery = getQuery(matchQuery, req.query);
     // }
@@ -361,11 +361,11 @@ exports.get = async (req, res) => {
 //get by id
 exports.getById = async (req, res) => {
   try {
-    let idToBeSearch = req.params.departmentid;
+    let idToBeSearch = req.params.userRoleId;
     let userId = req.params.userId;
 
     let dataExist = await userAccessService.getOneByMultiField({
-      departmentId: idToBeSearch,
+      userRoleId: idToBeSearch,
       userId: userId,
       isDeleted: false,
     });

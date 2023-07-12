@@ -172,7 +172,7 @@ const get = {
   query: Joi.object()
     .keys({
       userId: Joi.string().custom(commonValidation.objectId).optional(),
-      departmentId: Joi.string().optional(),
+      userRoleId: Joi.string().optional(),
     })
     .optional(),
 };
