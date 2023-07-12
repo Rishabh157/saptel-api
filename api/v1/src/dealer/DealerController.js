@@ -8,7 +8,7 @@ const dealersCategoryService = require("../dealersCategory/DealersCategoryServic
 const ledgerService = require("../ledger/LedgerService");
 const { searchKeys } = require("./DealerSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery, getAllowedField } = require("../../helper/utils");
+const { getQuery } = require("../../helper/utils");
 const bcryptjs = require("bcryptjs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -362,8 +362,6 @@ exports.allFilterPagination = async (req, res) => {
   try {
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
-    let allowedFields = req.body.allowedFields;
-
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
@@ -645,11 +643,9 @@ exports.allFilterPagination = async (req, res) => {
     }
 
     let result = await dealerService.aggregateQuery(finalAggregateQuery);
-    let finalResult = getAllowedField(allowedFields, result);
-
-    if (finalResult.length) {
+    if (result.length) {
       return res.status(200).send({
-        data: finalResult,
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -675,7 +671,6 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     let companyId = req.params.companyid;
-    let allowedFields = req.body.allowedFields;
 
     //if no default query then pass {}
     let matchQuery = {
@@ -850,15 +845,14 @@ exports.get = async (req, res) => {
       },
     ];
     let dataExist = await dealerService.aggregateQuery(additionalQuery);
-    let finalResult = getAllowedField(allowedFields, dataExist);
 
-    if (!finalResult || !finalResult.length) {
+    if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: finalResult,
+        data: dataExist,
         code: "OK",
         issue: null,
       });
@@ -878,7 +872,6 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let allowedFields = req.body.allowedFields;
 
     let additionalQuery = [
       {
@@ -1050,15 +1043,13 @@ exports.getById = async (req, res) => {
       },
     ];
     let dataExist = await dealerService.aggregateQuery(additionalQuery);
-    let finalResult = getAllowedField(allowedFields, dataExist);
-
-    if (!finalResult.length) {
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: finalResult[0],
+        data: dataExist[0],
         code: "OK",
         issue: null,
       });

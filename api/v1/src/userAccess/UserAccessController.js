@@ -314,35 +314,27 @@ exports.get = async (req, res) => {
     const userId = req.query.userId;
     const userRoleId = req.query.userRoleId;
 
-    let matchQueryUser = { isDeleted: false, userId: userId };
-    let matchQueryDepartment = { isDeleted: false, userRoleId: userRoleId };
+    let matchQueryUser = { isDeleted: false };
+    if (userId) {
+      matchQueryUser["userId"] = userId;
+    }
+    if (userRoleId && !matchQueryUser["userId"]) {
+      matchQueryUser["userRoleId"] = userRoleId;
+    }
+    // let matchQueryUserRole = { isDeleted: false, userRoleId: userRoleId };
     // if (req.query && Object.keys(req.query).length) {
     //   matchQuery = getQuery(matchQuery, req.query);
     // }
+    console.log(matchQueryUser);
+    let dataExist = await userAccessService.findAllWithQuery(matchQueryUser);
 
-    let dataExistWithUser = await userAccessService.findAllWithQuery(
-      matchQueryUser
-    );
-    let dataExistWithDepartment = [];
-    if (!dataExistWithUser || !dataExistWithUser.length) {
-      let dataWithDepartment = await userAccessService.findAllWithQuery(
-        matchQueryDepartment
-      );
-      dataExistWithDepartment = dataWithDepartment;
-    }
-
-    if (
-      (!dataExistWithUser && !dataExistWithDepartment) ||
-      (!dataExistWithUser.length && !dataExistWithDepartment.length)
-    ) {
+    if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExistWithUser?.length
-          ? dataExistWithUser
-          : dataExistWithDepartment,
+        data: dataExist,
         userId: userId ? userId : null,
         code: null,
         issue: null,

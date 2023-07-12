@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const { searchKeys } = require("./VendorSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery, getAllowedField } = require("../../helper/utils");
+const { getQuery } = require("../../helper/utils");
 const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
 const vendorService = require("./VendorService");
 const companyService = require("../company/CompanyService");
@@ -171,7 +171,6 @@ exports.allFilterPagination = async (req, res) => {
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
-    let allowedFields = req.body.allowedFields;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
@@ -388,7 +387,6 @@ exports.allFilterPagination = async (req, res) => {
 
     //-----------------------------------
     let dataFound = await vendorService.aggregateQuery(finalAggregateQuery);
-
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -408,10 +406,9 @@ exports.allFilterPagination = async (req, res) => {
     }
 
     let result = await vendorService.aggregateQuery(finalAggregateQuery);
-    let finalResult = getAllowedField(allowedFields, result);
-    if (finalResult.length) {
+    if (result.length) {
       return res.status(200).send({
-        data: finalResult,
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -437,7 +434,6 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     let companyId = req.params.companyid;
-    let allowedFields = req.body.allowedFields;
 
     //if no default query then pass {}
     let matchQuery = {
@@ -565,15 +561,14 @@ exports.get = async (req, res) => {
       },
     ];
     let dataExist = await vendorService.aggregateQuery(additionalQuery);
-    let finalResult = getAllowedField(allowedFields, dataExist);
 
-    if (!finalResult || !finalResult.length) {
+    if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: finalResult,
+        data: dataExist,
         code: "OK",
         issue: null,
       });
@@ -592,7 +587,6 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let allowedFields = req.body.allowedFields;
 
     let additionalQuery = [
       {
@@ -717,15 +711,13 @@ exports.getById = async (req, res) => {
       },
     ];
     let dataExist = await vendorService.aggregateQuery(additionalQuery);
-    let finalResult = getAllowedField(allowedFields, dataExist);
-
-    if (!finalResult.length) {
+    if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: finalResult[0],
+        data: dataExist[0],
         code: "OK",
         issue: null,
       });
