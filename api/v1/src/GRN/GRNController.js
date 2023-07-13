@@ -296,7 +296,7 @@ exports.allFilterPagination = async (req, res) => {
     );
     let allowedFields = getAllowedField(fieldsToDisplay, result);
 
-    if (allowedFields.length) {
+    if (allowedFields?.length) {
       return res.status(200).send({
         data: allowedFields,
         totalPage: totalpages,
@@ -369,7 +369,7 @@ exports.get = async (req, res) => {
     );
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
@@ -507,7 +507,7 @@ exports.getById = async (req, res) => {
     );
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields.length) {
+    if (!allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

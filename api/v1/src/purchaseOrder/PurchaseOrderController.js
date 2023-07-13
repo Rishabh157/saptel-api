@@ -588,7 +588,7 @@ exports.get = async (req, res) => {
     let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
@@ -867,7 +867,7 @@ exports.getById = async (req, res) => {
     let dataExist = await purchaseOrderService.aggregateQuery(additionalQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields.length) {
+    if (!allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

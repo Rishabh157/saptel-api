@@ -423,7 +423,7 @@ exports.allFilterPagination = async (req, res) => {
     let result = await userService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
 
-    if (allowedFields.length) {
+    if (allowedFields?.length) {
       return res.status(httpStatus.OK).send({
         data: allowedFields,
         totalPage: totalpages,
@@ -477,7 +477,7 @@ exports.get = async (req, res) => {
     let dataExist = await userService.findAllWithQuery(matchQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

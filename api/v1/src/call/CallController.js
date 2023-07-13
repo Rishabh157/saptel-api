@@ -648,7 +648,7 @@ exports.get = async (req, res) => {
     let dataExist = await callService.findAllWithQuery(matchQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

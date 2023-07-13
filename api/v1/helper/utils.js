@@ -24,12 +24,12 @@ exports.getFieldsToDisplay = (moduleName, userRoleData, actionName) => {
     (module) => module?.moduleName === moduleName
   );
   let actionDetails = moduleData?.moduleAction?.find(
-    (m) => m.actionName === actionName
+    (m) => m?.actionName === actionName
   );
   let fields = actionDetails?.fields?.map((f) => {
-    return f.fieldValue;
+    return f?.fieldValue;
   });
-  if (fields.length) {
+  if (fields?.length) {
     fields.push("_id");
   }
   return fields;
