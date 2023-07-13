@@ -197,7 +197,6 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-    console.log(userFound);
     let {
       _id: userId,
       userType,
