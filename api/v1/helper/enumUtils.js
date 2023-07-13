@@ -150,9 +150,6 @@ const moduleType = Object.freeze({
   inquiry: "INQUIRY",
   order: "ORDER",
   callerPage: "CALLER_PAGE",
-  user: "USER",
-  user: "USER",
-  user: "USER",
 });
 const userDepartmentType = Object.freeze({
   salesDepartment: "SALES_DEPARTMENT",
