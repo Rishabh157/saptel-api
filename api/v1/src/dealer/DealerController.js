@@ -8,11 +8,20 @@ const dealersCategoryService = require("../dealersCategory/DealersCategoryServic
 const ledgerService = require("../ledger/LedgerService");
 const { searchKeys } = require("./DealerSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const bcryptjs = require("bcryptjs");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { ledgerType } = require("../../helper/enumUtils");
+const {
+  ledgerType,
+  moduleType,
+  actionType,
+} = require("../../helper/enumUtils");
 
 const {
   checkIdInCollectionsThenDelete,
@@ -642,10 +651,19 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, dealerService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.wareHouse,
+      userRoleData,
+      actionType.pagination
+    );
+
     let result = await dealerService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -844,15 +862,23 @@ exports.get = async (req, res) => {
         ],
       },
     ];
-    let dataExist = await dealerService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    let userRoleData = await getUserRoleData(req, dealerService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.wareHouse,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await dealerService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -1042,14 +1068,22 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
+    let userRoleData = await getUserRoleData(req, dealerService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.wareHouse,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await dealerService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

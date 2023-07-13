@@ -20,8 +20,16 @@ const dispositionThreeService = require("../dispositionThree/DispositionThreeSer
 const mongoose = require("mongoose");
 const { searchKeys } = require("./OrderSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -32,6 +40,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // =============update  start================
 exports.update = async (req, res) => {
@@ -432,16 +441,22 @@ exports.get = async (req, res) => {
         ],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, orderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await orderService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -687,16 +702,22 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, orderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await orderService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist[0]) {
+    if (!allowedFields[0]) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -1066,11 +1087,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, orderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -1101,7 +1129,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'orderId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "orderId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await orderService.getOneAndDelete({ _id });

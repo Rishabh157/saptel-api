@@ -19,6 +19,40 @@ exports.getQuery = (defaultQuery, reqQuery = false) => {
   return defaultQuery;
 };
 
+exports.getFieldsToDisplay = (moduleName, userRoleData, actionName) => {
+  let moduleData = userRoleData?.module.find(
+    (module) => module?.moduleName === moduleName
+  );
+  let actionDetails = moduleData?.moduleAction?.find(
+    (m) => m.actionName === actionName
+  );
+  let fields = actionDetails?.fields?.map((f) => {
+    return f.fieldValue;
+  });
+  if (fields.length) {
+    fields.push("_id");
+  }
+  return fields;
+};
+
+exports.getUserRoleData = async (req, service) => {
+  let token = req.headers["x-access-token"];
+  const decoded = jwt.verify(token, config.jwt_secret);
+  let userId = decoded?.Id;
+  let userRoleId = decoded?.userRole;
+
+  let matchQueryUser = { isDeleted: false, userId: userId };
+  let matchQueryUserRole = { isDeleted: false, userRoleId: "SALES-EX" };
+  let dataExistWithUserId = await service.findAllWithQuery(matchQueryUser);
+  let dataExistWithUserRole = await service.findAllWithQuery(
+    matchQueryUserRole
+  );
+
+  return dataExistWithUserId.length
+    ? dataExistWithUserId[0]
+    : dataExistWithUserRole[0];
+};
+
 exports.getAllowedField = (allowedFields, result) => {
   if (allowedFields?.length) {
     let filteredResult = result.map((item) => {
@@ -28,6 +62,7 @@ exports.getAllowedField = (allowedFields, result) => {
       });
       return filteredItem;
     });
+
     return filteredResult;
   } else {
     return result;

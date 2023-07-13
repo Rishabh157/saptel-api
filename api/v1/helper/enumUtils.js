@@ -131,6 +131,29 @@ const paymentType = Object.freeze({
   creditCard: "CREDITCARD",
   debitCard: "DEBITCARD",
 });
+
+const actionType = Object.freeze({
+  pagination: "PAGINATION",
+  listAll: "LIST_ALL",
+  view: "VIEW",
+});
+
+const moduleType = Object.freeze({
+  vendor: "VENDOR",
+  dealer: "DEALER",
+  user: "USER",
+  wareHouse: "WAREHOUSE",
+  saleOrder: "SALE_ORDER",
+  asr: "ASR",
+  purchaseOrder: "PURCHASE_ORDER",
+  grn: "GRN",
+  inquiry: "INQUIRY",
+  order: "ORDER",
+  callerPage: "CALLER_PAGE",
+  user: "USER",
+  user: "USER",
+  user: "USER",
+});
 const userDepartmentType = Object.freeze({
   salesDepartment: "SALES_DEPARTMENT",
   hrDepartment: "HR_DEPARTMENT",
@@ -288,4 +311,6 @@ module.exports = {
   userDepartmentType,
   userRoleType,
   paymentModeType,
+  actionType,
+  moduleType,
 };

@@ -29,9 +29,19 @@ const {
 // ----service---------
 const { searchKeys } = require("./CallSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const mongoose = require("mongoose");
-const { applicableCriteria, orderType } = require("../../helper/enumUtils");
+const {
+  applicableCriteria,
+  orderType,
+  moduleType,
+  actionType,
+} = require("../../helper/enumUtils");
 
 const {
   getSearchQuery,
@@ -588,10 +598,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, callService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.callerPage,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await callService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -621,16 +639,22 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
+    let userRoleData = await getUserRoleData(req, callService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.callerPage,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await callService.findAllWithQuery(matchQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -649,18 +673,25 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
+    let userRoleData = await getUserRoleData(req, callService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.callerPage,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await callService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });

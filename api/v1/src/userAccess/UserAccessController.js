@@ -119,18 +119,18 @@ exports.userRoleUpdate = async (req, res) => {
     // let { userId, departmentId } = req.body;
 
     let idToBeSearch = req.params.id;
-
     //------------------Find data-------------------
     let datafound = await userAccessService.findAllWithQuery({
-      departmentId: idToBeSearch,
+      userRoleId: idToBeSearch,
     });
+    console.log(datafound);
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `UserAccess not found.`);
     }
 
     let dataUpdated = await userAccessService.updateMany(
       {
-        departmentId: idToBeSearch,
+        userRoleId: idToBeSearch,
         isDeleted: false,
       },
       {
@@ -314,7 +314,7 @@ exports.get = async (req, res) => {
     const userId = req.query.userId;
     const userRoleId = req.query.userRoleId;
 
-    let matchQueryUser = { isDeleted: false };
+    let matchQueryUser = {};
     if (userId) {
       matchQueryUser["userId"] = userId;
     }
@@ -326,9 +326,16 @@ exports.get = async (req, res) => {
     //   matchQuery = getQuery(matchQuery, req.query);
     // }
     console.log(matchQueryUser);
-    let dataExist = await userAccessService.findAllWithQuery(matchQueryUser);
+    let dataExist = await userAccessService.getOneByMultiField(
+      { ...matchQueryUser },
+      {
+        "module._id": 0,
+        "module.moduleAction._id": 0,
+        "module.moduleAction.fields._id": 0,
+      }
+    );
 
-    if (!dataExist || !dataExist.length) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

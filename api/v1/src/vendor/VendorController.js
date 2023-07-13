@@ -1,11 +1,16 @@
-const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const { searchKeys } = require("./VendorSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
-const purchaseOrderService = require("../purchaseOrder/PurchaseOrderService");
+const {
+  getQuery,
+  getFieldsToDisplay,
+  getUserRoleData,
+  getAllowedField,
+} = require("../../helper/utils");
+const userAccessService = require("../userAccess/UserAccessService");
+
 const vendorService = require("./VendorService");
 const companyService = require("../company/CompanyService");
 const {
@@ -23,6 +28,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { actionType, moduleType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -169,6 +175,7 @@ exports.update = async (req, res) => {
 exports.allFilterPagination = async (req, res) => {
   try {
     var dateFilter = req.body.dateFilter;
+
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
@@ -405,10 +412,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, userAccessService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.vendor,
+      userRoleData,
+      actionType.pagination
+    );
+
     let result = await vendorService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+    if (allowedFields.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -560,15 +575,23 @@ exports.get = async (req, res) => {
         ],
       },
     ];
-    let dataExist = await vendorService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    let userRoleData = await getUserRoleData(req, userAccessService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.vendor,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await vendorService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -710,14 +733,22 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
+
+    let userRoleData = await getUserRoleData(req, userAccessService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.vendor,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await vendorService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    if (!allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

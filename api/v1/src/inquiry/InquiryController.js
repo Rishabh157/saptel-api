@@ -19,7 +19,12 @@ const dispositionThreeService = require("../dispositionThree/DispositionThreeSer
 const mongoose = require("mongoose");
 const { searchKeys } = require("./InquirySchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -34,6 +39,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // =============update  start================
 exports.update = async (req, res) => {
@@ -435,15 +441,22 @@ exports.get = async (req, res) => {
       },
     ];
 
+    let userRoleData = await getUserRoleData(req, inquiryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.inquiry,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await inquiryService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -689,15 +702,22 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, inquiryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.inquiry,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await inquiryService.aggregateQuery(additionalQuery);
-    if (!dataExist[0]) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields[0]) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -1068,10 +1088,19 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, inquiryService);
+
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.inquiry,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await inquiryService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,

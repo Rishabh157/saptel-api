@@ -12,8 +12,17 @@ const {
 
 const { searchKeys } = require("./SalesOrderSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
-const { ledgerType } = require("../../helper/enumUtils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
+const {
+  ledgerType,
+  moduleType,
+  actionType,
+} = require("../../helper/enumUtils");
 
 const { getBalance } = require("../ledger/LedgerHelper");
 
@@ -450,6 +459,7 @@ exports.allFilterPagination = async (req, res) => {
 
     //-----------------------------------
     let dataFound = await salesOrderService.aggregateQuery(finalAggregateQuery);
+
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -467,11 +477,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, salesOrderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.saleOrder,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await salesOrderService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -588,16 +605,22 @@ exports.get = async (req, res) => {
         ],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, salesOrderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.saleOrder,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -797,14 +820,22 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
+    let userRoleData = await getUserRoleData(req, salesOrderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.saleOrder,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

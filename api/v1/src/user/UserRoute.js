@@ -29,7 +29,7 @@ router.get(
   accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.getAllDistribution),
-  userController.gatAllDistributionUser
+  userController.getAllDistributionUser
 );
 /**
  * get all user pagination filter
