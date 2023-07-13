@@ -197,7 +197,7 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-
+    console.log(userFound);
     let {
       _id: userId,
       userType,
@@ -206,6 +206,7 @@ exports.login = async (req, res) => {
       lastName,
       email,
       companyId,
+      userRole,
     } = dataFound || userFound;
 
     let token = await tokenCreate(dataFound?._id ? dataFound : userFound);
@@ -238,6 +239,7 @@ exports.login = async (req, res) => {
         mobile: mobile,
         userName: userName,
         userType: userType,
+        userRole: userRole ? userRole : "ADMIN",
         companyId: companyId,
       },
       status: true,
