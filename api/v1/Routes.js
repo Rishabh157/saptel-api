@@ -36,7 +36,6 @@ const dealerPincodeRoute = require("./src/dealerPincode/DealerPincodeRoute");
 const deliveryBoyRoute = require("./src/deliveryBoy/DeliveryBoyRoute");
 const didRoute = require("./src/didManagement/DidManagementRoute");
 const channelGroupRoute = require("./src/channelGroup/ChannelGroupRoute");
-const channelManagementRoute = require("./src/channelManagement/ChannelManagementRoute");
 const dispositionOneRoute = require("./src/dispositionOne/DispositionOneRoute");
 const channelCategoryRoute = require("./src/channelCategory/ChannelCategoryRoute");
 const channelMasterRoute = require("./src/channelMaster/ChannelMasterRoute");
@@ -252,10 +251,7 @@ const defaultRoutes = [
     path: "/channel-group",
     route: channelGroupRoute,
   },
-  {
-    path: "/channel-management",
-    route: channelManagementRoute,
-  },
+
   {
     path: "/disposition-one",
     route: dispositionOneRoute,

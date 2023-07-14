@@ -5,10 +5,17 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const websiteBlogService = require("./WebsiteBlogService");
 const { searchKeys } = require("./WebsiteBlogSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const companyService = require("../company/CompanyService");
 const websiteMasterService = require("../websiteMaster/WebsiteMasterService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -20,6 +27,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -301,10 +309,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, websiteBlogService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.websiteBlog,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await websiteBlogService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -362,16 +378,22 @@ exports.get = async (req, res) => {
         $unset: ["websiteData"],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, websiteBlogService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.websiteBlog,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await websiteBlogService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -418,15 +440,23 @@ exports.getById = async (req, res) => {
         $unset: ["websiteData"],
       },
     ];
-    let dataExist = await websiteBlogService.aggregateQuery(additionalQuery);
 
-    if (!dataExist) {
+    let userRoleData = await getUserRoleData(req, websiteBlogService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.websiteBlog,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await websiteBlogService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -448,7 +478,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await websiteBlogService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'websiteBlogId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "websiteBlogId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await websiteBlogService.getOneAndDelete({ _id });

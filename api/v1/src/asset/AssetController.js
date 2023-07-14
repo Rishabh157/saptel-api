@@ -8,7 +8,12 @@ const assetCategoryService = require("../assetCategory/AssetCategoryService");
 const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./AssetSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -20,6 +25,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // ============= add  start  ================
 exports.add = async (req, res) => {
@@ -322,11 +328,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, assetService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.assetRequest,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await assetService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -394,14 +407,22 @@ exports.get = async (req, res) => {
       },
     ];
 
+    let userRoleData = await getUserRoleData(req, assetService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.assetRequest,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await assetService.aggregateQuery(additionalQuery);
-    if (!dataExist || !dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -455,15 +476,23 @@ exports.getById = async (req, res) => {
         $unset: ["assetcategorieData"],
       },
     ];
-    let dataExist = await assetService.aggregateQuery(additionalQuery);
 
-    if (!dataExist) {
+    let userRoleData = await getUserRoleData(req, assetService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.assetRequest,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await assetService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

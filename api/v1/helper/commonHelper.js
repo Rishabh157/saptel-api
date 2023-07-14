@@ -15,7 +15,6 @@ const CartonBoxBarcode = require("../src/cartonBoxBarcode/CartonBoxBarcodeSchema
 const CartonBox = require("../src/cartonBox/CartonBoxSchema");
 const ChannelCategory = require("../src/channelCategory/ChannelCategorySchema");
 const ChannelGroup = require("../src/channelGroup/ChannelGroupSchema");
-const ChannelManagement = require("../src/channelManagement/ChannelManagementSchema");
 const ChannelMaster = require("../src/channelMaster/ChannelMasterSchema");
 const ChannelUpdation = require("../src/channelUpdation/ChannelUpdationSchema");
 const Competitor = require("../src/competitor/CompetitorSchema");
@@ -85,7 +84,6 @@ const collectionArrToMatch = [
   CartonBox,
   ChannelCategory,
   ChannelGroup,
-  ChannelManagement,
   ChannelMaster,
   ChannelUpdation,
   Competitor,

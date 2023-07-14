@@ -5,7 +5,12 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const websiteMasterService = require("./WebsiteMasterService");
 const { searchKeys } = require("./WebsiteMasterSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const websiteBlogSchema = require("../websiteBlog/WebsiteBlogSchema");
 const websitePageSchema = require("../websitePage/WebsitePageSchema");
 
@@ -19,6 +24,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -251,10 +257,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, websiteMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.website,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await websiteMasterService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -289,16 +303,22 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
+    let userRoleData = await getUserRoleData(req, websiteMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.website,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await websiteMasterService.findAllWithQuery(matchQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -317,18 +337,26 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
+
+    let userRoleData = await getUserRoleData(req, websiteMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.website,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await websiteMasterService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });

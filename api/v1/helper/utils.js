@@ -42,7 +42,7 @@ exports.getUserRoleData = async (req, service) => {
   let userRoleId = decoded?.userRole;
 
   let matchQueryUser = { isDeleted: false, userId: userId };
-  let matchQueryUserRole = { isDeleted: false, userRoleId: "SALES-EX" };
+  let matchQueryUserRole = { isDeleted: false, userRoleId: userRoleId };
   let dataExistWithUserId = await service.findAllWithQuery(matchQueryUser);
   let dataExistWithUserRole = await service.findAllWithQuery(
     matchQueryUserRole

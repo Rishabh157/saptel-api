@@ -17,6 +17,7 @@ const {
   getQuery,
   getUserRoleData,
   getFieldsToDisplay,
+  getAllowedField,
 } = require("../../helper/utils");
 
 const {

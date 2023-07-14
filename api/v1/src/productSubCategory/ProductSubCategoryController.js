@@ -6,7 +6,12 @@ const productSubCategoryService = require("./ProductSubCategoryService");
 const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./ProductSubCategorySchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const productCategoryService = require("../productCategory/ProductCategoryService");
 const productService = require("../product/ProductService");
 const schemeService = require("../scheme/SchemeService");
@@ -21,6 +26,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -295,12 +301,21 @@ exports.allFilterPagination = async (req, res) => {
     }
     finalAggregateQuery.push(...additionalQuery);
 
+    let userRoleData = await getUserRoleData(req, productSubCategoryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.productSubCategory,
+      userRoleData,
+      actionType.pagination
+    );
+
     let result = await productSubCategoryService.aggregateQuery(
       finalAggregateQuery
     );
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(httpStatus.OK).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -356,17 +371,25 @@ exports.get = async (req, res) => {
       },
       { $unset: ["product_category", "app_taxes"] },
     ];
+
+    let userRoleData = await getUserRoleData(req, productSubCategoryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.productSubCategory,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await productSubCategoryService.aggregateQuery(
       aggregateQuery
     );
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -412,17 +435,25 @@ exports.getById = async (req, res) => {
       },
       { $unset: ["product_category", "app_taxes"] },
     ];
+
+    let userRoleData = await getUserRoleData(req, productSubCategoryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.productSubCategory,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await productSubCategoryService.aggregateQuery(
       aggregateQuery
     );
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist.length) {
+    if (!allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

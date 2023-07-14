@@ -254,6 +254,7 @@ exports.allFilterPagination = async (req, res) => {
       userRoleData,
       actionType.pagination
     );
+
     let result = await asrRequestService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
 

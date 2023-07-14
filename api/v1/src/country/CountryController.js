@@ -7,7 +7,12 @@ const companyService = require("../company/CompanyService");
 
 const { searchKeys } = require("./CountrySchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -21,6 +26,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -247,10 +253,19 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, countryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.country,
+      userRoleData,
+      actionType.pagination
+    );
+
     let result = await countryService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(httpStatus.OK).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -283,15 +298,22 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
+    let userRoleData = await getUserRoleData(req, countryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.country,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await countryService.findAllWithQuery(matchQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -311,18 +333,26 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
+
+    let userRoleData = await getUserRoleData(req, countryService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.country,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await countryService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });

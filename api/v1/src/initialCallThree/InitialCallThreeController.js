@@ -14,7 +14,12 @@ const {
 
 const { searchKeys } = require("./InitialCallThreeSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -25,6 +30,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // ============= add  start  ================
 exports.add = async (req, res) => {
@@ -232,17 +238,24 @@ exports.get = async (req, res) => {
       },
     ];
 
+    let userRoleData = await getUserRoleData(req, initialCallThreeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.initialCallerThree,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await initialCallThreeService.aggregateQuery(
       additionalQuery
     );
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -315,16 +328,25 @@ exports.getById = async (req, res) => {
         $unset: ["initialcallTwoData", "initialcallOneData"],
       },
     ];
+
+    let userRoleData = await getUserRoleData(req, initialCallThreeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.initialCallerThree,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await initialCallThreeService.aggregateQuery(
       additionalQuery
     );
-    if (!dataExist) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -511,12 +533,20 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, initialCallThreeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.initialCallerThree,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await initialCallThreeService.aggregateQuery(
       finalAggregateQuery
     );
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,

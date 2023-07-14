@@ -5,7 +5,12 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const channelMasterService = require("./ChannelMasterService");
 const { searchKeys } = require("./ChannelMasterSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const districtService = require("../district/DistrictService");
 const channelGroupService = require("../channelGroup/ChannelGroupService");
 const stateService = require("../state/StateService");
@@ -28,6 +33,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -507,11 +513,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, channelMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.channelManagement,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await channelMasterService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -672,15 +685,23 @@ exports.get = async (req, res) => {
         ],
       },
     ];
-    let dataExist = await channelMasterService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    let userRoleData = await getUserRoleData(req, channelMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.channelManagement,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await channelMasterService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -832,14 +853,23 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
+
+    let userRoleData = await getUserRoleData(req, channelMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.channelManagement,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await channelMasterService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

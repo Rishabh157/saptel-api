@@ -8,8 +8,16 @@ const websiteMasterService = require("../websiteMaster/WebsiteMasterService");
 const websitPageService = require("../websitePage/WebsitePageService");
 const { searchKeys } = require("./WebsiteMetaTagSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -21,6 +29,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // ============= add  start  ================
 exports.add = async (req, res) => {
@@ -46,7 +55,7 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
 
-    console.log(isCompanyExists)
+    console.log(isCompanyExists);
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
@@ -347,13 +356,20 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, websiteMetaTagService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.websiteTags,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await websiteMetaTagService.aggregateQuery(
       finalAggregateQuery
     );
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -437,15 +453,23 @@ exports.get = async (req, res) => {
         $unset: ["websiteMasterData", "websitePageData"],
       },
     ];
-    let dataExist = await websiteMetaTagService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    let userRoleData = await getUserRoleData(req, websiteMetaTagService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.websiteTags,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await websiteMetaTagService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -516,15 +540,23 @@ exports.getById = async (req, res) => {
         $unset: ["websiteMasterData", "websitePageData"],
       },
     ];
-    let dataExist = await websiteMetaTagService.aggregateQuery(additionalQuery);
 
-    if (!dataExist) {
+    let userRoleData = await getUserRoleData(req, websiteMetaTagService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.websiteTags,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await websiteMetaTagService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -548,7 +580,11 @@ exports.deleteDocument = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'websiteMetaTagId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "websiteMetaTagId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await websiteMetaTagService.getOneAndDelete({ _id });

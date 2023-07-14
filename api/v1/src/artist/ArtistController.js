@@ -5,7 +5,12 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const { searchKeys } = require("./ArtistSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -19,6 +24,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // ==============add api start==============
 exports.add = async (req, res) => {
@@ -129,15 +135,22 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
+    let userRoleData = await getUserRoleData(req, artistService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.artist,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await artistService.findAllWithQuery(matchQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -157,19 +170,25 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let _id = req.params.id;
-
+    let userRoleData = await getUserRoleData(req, artistService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.artist,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await artistService.getOneByMultiField({
       _id: _id,
       isDeleted: false,
     });
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -289,12 +308,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, artistService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.artist,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await artistService.aggregateQuery(finalAggregateQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
 
-    if (result.length) {
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,

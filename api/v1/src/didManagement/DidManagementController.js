@@ -5,7 +5,12 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const didManagementService = require("./DidManagementService");
 const { searchKeys } = require("./DidManagementSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const schemeService = require("../scheme/SchemeService");
 const companyService = require("../company/CompanyService");
 const channelMasterService = require("../channelMaster/ChannelMasterService");
@@ -23,6 +28,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -408,11 +414,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, didManagementService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.didManagement,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await didManagementService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -497,15 +510,23 @@ exports.get = async (req, res) => {
         $unset: ["channel_data", "scheme_data"],
       },
     ];
-    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    let userRoleData = await getUserRoleData(req, didManagementService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.didManagement,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -581,14 +602,23 @@ exports.getById = async (req, res) => {
         $unset: ["channel_data", "scheme_data"],
       },
     ];
+
+    let userRoleData = await getUserRoleData(req, didManagementService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.didManagement,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await didManagementService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

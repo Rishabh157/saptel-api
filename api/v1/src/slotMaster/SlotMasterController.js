@@ -5,7 +5,12 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const slotMasterService = require("./SlotMasterService");
 const { searchKeys } = require("./SlotMasterSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 const channelGroupService = require("../channelGroup/ChannelGroupService");
 const tapeMasterService = require("../tapeMaster/TapeMasterService");
 const channelMasterService = require("../channelMaster/ChannelMasterService");
@@ -21,6 +26,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -417,11 +423,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, slotMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.slotManagement,
+      userRoleData,
+      actionType.view
+    );
     let result = await slotMasterService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -520,16 +533,22 @@ exports.get = async (req, res) => {
         $unset: ["channel_data", "tape_data", "channelGroup_data"],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, slotMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.slotManagement,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await slotMasterService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -619,16 +638,22 @@ exports.getById = async (req, res) => {
         $unset: ["channel_data", "tape_data", "channelGroup_data"],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, slotMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.slotManagement,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await slotMasterService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

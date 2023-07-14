@@ -7,11 +7,19 @@ const initialCallTwoService = require("./InitialCallTwoService");
 const initialCallOneService = require("../initialCallOne/InitialCallOneService");
 const initialCallThreeService = require("../initialCallThree/InitialCallThreeService");
 const companyService = require("../company/CompanyService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const { searchKeys } = require("./InitialCallTwoSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -22,6 +30,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // ============= add  start  ================
 exports.add = async (req, res) => {
@@ -188,14 +197,23 @@ exports.get = async (req, res) => {
         $unset: ["initialcallOneData"],
       },
     ];
+
+    let userRoleData = await getUserRoleData(req, initialCallTwoService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.initialCallerTwo,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
-    if (!dataExist || !dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -250,14 +268,23 @@ exports.getById = async (req, res) => {
         $unset: ["initialcallOneData"],
       },
     ];
+
+    let userRoleData = await getUserRoleData(req, initialCallTwoService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.initialCallerTwo,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await initialCallTwoService.aggregateQuery(additionalQuery);
-    if (!dataExist) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -423,13 +450,20 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, initialCallTwoService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.initialCallerTwo,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await initialCallTwoService.aggregateQuery(
       finalAggregateQuery
     );
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,

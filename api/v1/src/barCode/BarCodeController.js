@@ -7,7 +7,12 @@ const companyService = require("../company/CompanyService");
 
 const { searchKeys } = require("./BarCodeSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -19,6 +24,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -344,11 +350,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, barCodeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.barcode,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await barCodeService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(httpStatus.OK).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -620,15 +633,22 @@ exports.get = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
+    let userRoleData = await getUserRoleData(req, barCodeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.barcode,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -774,15 +794,23 @@ exports.getById = async (req, res) => {
       },
       { $unset: ["product_group", "warehouse_data"] },
     ];
-    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
 
-    if (!dataExist.length) {
+    let userRoleData = await getUserRoleData(req, barCodeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.barcode,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

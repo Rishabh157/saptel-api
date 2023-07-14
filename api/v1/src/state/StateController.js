@@ -7,8 +7,16 @@ const companyService = require("../company/CompanyService");
 const countryService = require("../country/CountryService");
 const { searchKeys } = require("./StateSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -19,6 +27,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -265,10 +274,19 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
+    let userRoleData = await getUserRoleData(req, stateService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.state,
+      userRoleData,
+      actionType.pagination
+    );
+
     let result = await stateService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(httpStatus.OK).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -300,16 +318,22 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
+    let userRoleData = await getUserRoleData(req, stateService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.state,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await stateService.findAllWithQuery(matchQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist || !dataExist.length) {
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -329,18 +353,25 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
+    let userRoleData = await getUserRoleData(req, stateService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.state,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await stateService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -393,7 +424,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await stateService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'stateId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "stateId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await stateService.getOneAndDelete({ _id });

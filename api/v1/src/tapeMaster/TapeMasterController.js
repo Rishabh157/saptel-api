@@ -5,13 +5,20 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const tapeMasterService = require("./TapeMasterService");
 const { searchKeys } = require("./TapeMasterSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+} = require("../../helper/utils");
 const schemeService = require("../scheme/SchemeService");
 const companyService = require("../company/CompanyService");
 const languageService = require("../language/LanguageService");
 const slotMasterService = require("../slotMaster/SlotMasterService");
 const artistService = require("../artist/ArtistService");
-const { checkIdInCollectionsThenDelete, collectionArrToMatch } = require("../../helper/commonHelper")
+const {
+  checkIdInCollectionsThenDelete,
+  collectionArrToMatch,
+} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -23,6 +30,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -68,9 +76,9 @@ exports.add = async (req, res) => {
 
     const isSchemeExists = schemeId?.length
       ? await schemeService.findCount({
-        _id: schemeId,
-        isDeleted: false,
-      })
+          _id: schemeId,
+          isDeleted: false,
+        })
       : null;
 
     if (schemeId?.length && !isSchemeExists) {
@@ -154,9 +162,9 @@ exports.update = async (req, res) => {
 
     const isSchemeExists = schemeId?.length
       ? await schemeService.findCount({
-        _id: schemeId,
-        isDeleted: false,
-      })
+          _id: schemeId,
+          isDeleted: false,
+        })
       : null;
 
     if (schemeId?.length && !isSchemeExists) {
@@ -386,11 +394,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-
+    let userRoleData = await getUserRoleData(req, tapeMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.tapeManangement,
+      userRoleData,
+      actionType.pagination
+    );
     let result = await tapeMasterService.aggregateQuery(finalAggregateQuery);
-    if (result.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -507,15 +522,23 @@ exports.get = async (req, res) => {
         $unset: ["channel_group_data", "scheme_data", "language_data"],
       },
     ];
-    let dataExist = await tapeMasterService.aggregateQuery(additionalQuery);
 
-    if (!dataExist || !dataExist.length) {
+    let userRoleData = await getUserRoleData(req, tapeMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.tapeManangement,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await tapeMasterService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -617,16 +640,22 @@ exports.getById = async (req, res) => {
         $unset: ["channel_group_data", "scheme_data", "language_data"],
       },
     ];
-
+    let userRoleData = await getUserRoleData(req, tapeMasterService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.tapeManangement,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await tapeMasterService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist[0],
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });
@@ -647,7 +676,11 @@ exports.deleteDocument = async (req, res) => {
     if (!(await tapeMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(collectionArrToMatch, 'tapeNameId', _id)
+    const deleteRefCheck = await checkIdInCollectionsThenDelete(
+      collectionArrToMatch,
+      "tapeNameId",
+      _id
+    );
 
     if (deleteRefCheck.status === true) {
       let deleted = await tapeMasterService.getOneAndDelete({ _id });

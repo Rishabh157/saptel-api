@@ -7,7 +7,11 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const { searchKeys } = require("./CompetitorSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const {
+  getQuery,
+  getUserRoleData,
+  getFieldsToDisplay,
+} = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -18,6 +22,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { moduleType, actionType } = require("../../helper/enumUtils");
 
 // ==============add api start==============
 exports.add = async (req, res) => {
@@ -154,14 +159,23 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+
+    let userRoleData = await getUserRoleData(req, competitorService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.competitor,
+      userRoleData,
+      actionType.listAll
+    );
     let dataExist = await competitorService.findAllWithQuery(matchQuery);
-    if (!dataExist || !dataExist.length) {
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -181,19 +195,25 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let _id = req.params.id;
-
+    let userRoleData = await getUserRoleData(req, competitorService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.competitor,
+      userRoleData,
+      actionType.view
+    );
     let dataExist = await competitorService.getOneByMultiField({
       _id: _id,
       isDeleted: false,
     });
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
@@ -337,11 +357,19 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let result = await competitorService.aggregateQuery(finalAggregateQuery);
 
-    if (result.length) {
+    let userRoleData = await getUserRoleData(req, competitorService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.competitor,
+      userRoleData,
+      actionType.pagination
+    );
+    let result = await competitorService.aggregateQuery(finalAggregateQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
       return res.status(200).send({
-        data: result,
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,
