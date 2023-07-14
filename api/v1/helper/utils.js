@@ -20,7 +20,7 @@ exports.getQuery = (defaultQuery, reqQuery = false) => {
 };
 
 exports.getFieldsToDisplay = (moduleName, userRoleData, actionName) => {
-  let moduleData = userRoleData?.module.find(
+  let moduleData = userRoleData?.module?.find(
     (module) => module?.moduleName === moduleName
   );
   let actionDetails = moduleData?.moduleAction?.find(
@@ -55,9 +55,9 @@ exports.getUserRoleData = async (req, service) => {
 
 exports.getAllowedField = (allowedFields, result) => {
   if (allowedFields?.length) {
-    let filteredResult = result.map((item) => {
+    let filteredResult = result?.map((item) => {
       let filteredItem = {};
-      allowedFields.forEach((field) => {
+      allowedFields?.forEach((field) => {
         filteredItem[field] = item[field];
       });
       return filteredItem;
