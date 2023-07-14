@@ -421,7 +421,7 @@ exports.allFilterPagination = async (req, res) => {
       actionType.pagination
     );
     let result = await didManagementService.aggregateQuery(finalAggregateQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
 
     if (allowedFields?.length) {
       return res.status(200).send({
