@@ -9,6 +9,7 @@ const {
   getQuery,
   getUserRoleData,
   getFieldsToDisplay,
+  getAllowedField,
 } = require("../../helper/utils");
 const schemeService = require("../scheme/SchemeService");
 const companyService = require("../company/CompanyService");
