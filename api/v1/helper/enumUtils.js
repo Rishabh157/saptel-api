@@ -133,7 +133,7 @@ const paymentType = Object.freeze({
 });
 
 const actionType = Object.freeze({
-  pagination: "PAGINATION",
+  pagination: "LIST",
   listAll: "LIST_ALL",
   view: "VIEW",
 });
