@@ -22,7 +22,7 @@ const create = {
 
         moduleAction: Joi.array()
           .items({
-            actionUrl: Joi.string().required(),
+            actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
 
@@ -63,7 +63,7 @@ const update = {
 
         moduleAction: Joi.array()
           .items({
-            actionUrl: Joi.string().required(),
+            actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
 
@@ -103,7 +103,7 @@ const userRoleUpdate = {
 
         moduleAction: Joi.array()
           .items({
-            actionUrl: Joi.string().required(),
+            actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
 

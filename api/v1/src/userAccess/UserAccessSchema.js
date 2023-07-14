@@ -51,7 +51,8 @@ const UserAccessSchema = new mongoose.Schema(
               {
                 actionUrl: {
                   type: String,
-                  required: true,
+                  required: false,
+                  default: "",
                   trim: true,
                 },
                 actionId: {
