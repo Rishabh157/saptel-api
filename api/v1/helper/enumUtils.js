@@ -148,6 +148,7 @@ const moduleType = Object.freeze({
   purchaseOrder: "PURCHASE_ORDER",
   grn: "GRN",
   inquiry: "INQUIRY",
+  callerPage: "CALLER_PAGE",
   order: "ORDER",
   attribute: "ATTRIBUTE",
   attributeGroup: "ATTRIBUTE_GROUP",
