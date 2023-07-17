@@ -43,6 +43,13 @@ const AdminSchema = new mongoose.Schema(
       uppercase: true,
       trim: true,
     },
+
+    userRole: {
+      type: String,
+      default: userEnum.admin,
+      uppercase: true,
+      trim: true,
+    },
     companyId: { type: String, required: true, trim: true },
     isDeleted: {
       type: Boolean,
