@@ -184,16 +184,12 @@ exports.login = async (req, res) => {
     let password = req.body.password;
     let deviceId = req.headers["device-id"];
 
-    let dataFound = await adminService.getOneByMultiField({ userName });
     let userFound = await userService.getOneByMultiField({ userName });
 
-    if (!dataFound && !userFound) {
-      throw new ApiError(httpStatus.OK, `Admin/User not found.`);
+    if (!userFound) {
+      throw new ApiError(httpStatus.OK, `User not found.`);
     }
-    let matched = await bcrypt.compare(
-      password,
-      dataFound?.password || userFound?.password
-    );
+    let matched = await bcrypt.compare(password, userFound?.password);
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
@@ -206,18 +202,16 @@ exports.login = async (req, res) => {
       email,
       companyId,
       userRole,
-    } = dataFound || userFound;
+    } = userFound;
 
-    let token = await tokenCreate(dataFound?._id ? dataFound : userFound);
+    let token = await tokenCreate(userFound);
     if (!token) {
       throw new ApiError(
         httpStatus.OK,
         "Something went wrong. Please try again later."
       );
     }
-    let refreshToken = await refreshTokenCreate(
-      dataFound?._id ? dataFound : userFound
-    );
+    let refreshToken = await refreshTokenCreate(userFound);
     if (!refreshToken) {
       throw new ApiError(
         httpStatus.OK,
@@ -226,25 +220,27 @@ exports.login = async (req, res) => {
     }
 
     await redisClient.set(userId + deviceId, token + "***" + refreshToken);
-
-    return res.status(httpStatus.OK).send({
-      message: `Login successful!`,
-      data: {
-        token: token,
-        refreshToken: refreshToken,
-        userId: userId,
-        fullName: `${firstName} ${lastName}`,
-        email: email,
-        mobile: mobile,
-        userName: userName,
-        userType: userType,
-        userRole: userRole ? userRole : "ADMIN",
-        companyId: companyId,
-      },
-      status: true,
-      code: "OK",
-      issue: null,
-    });
+    const redisValue = await redisClient.get(userId + deviceId);
+    if (redisValue) {
+      return res.status(httpStatus.OK).send({
+        message: `Login successful!`,
+        data: {
+          token: token,
+          refreshToken: refreshToken,
+          userId: userId,
+          fullName: `${firstName} ${lastName}`,
+          email: email,
+          mobile: mobile,
+          userName: userName,
+          userType: userType,
+          userRole: userRole ? userRole : "ADMIN",
+          companyId: companyId,
+        },
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    }
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
