@@ -374,7 +374,7 @@ exports.allFilterPagination = async (req, res) => {
           from: "dealers",
           localField: "dealerId",
           foreignField: "_id",
-          as: "dealerName",
+          as: "dealer_name",
           pipeline: [
             {
               $project: {
@@ -399,7 +399,7 @@ exports.allFilterPagination = async (req, res) => {
           from: "warehouses",
           localField: "dealerWareHouseId",
           foreignField: "_id",
-          as: "dealerWarehouseName",
+          as: "warehouses_name",
           pipeline: [{ $project: { wareHouseName: 1 } }],
         },
       },
@@ -426,15 +426,15 @@ exports.allFilterPagination = async (req, res) => {
       {
         $addFields: {
           dealerLabel: {
-            $arrayElemAt: ["$dealerName.dealerName", 0],
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
           },
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
           },
-          dealerWarehouseLabel: {
-            $arrayElemAt: ["$dealerWarehouseName.wareHouseName", 0],
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productGroupLabel: {
+          "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
@@ -442,9 +442,9 @@ exports.allFilterPagination = async (req, res) => {
 
       {
         $unset: [
-          "dealerName",
+          "dealer_name",
           "companyWarehouseName",
-          "dealerWarehouseName",
+          "warehouses_name",
           "productSalesOrders",
         ],
       },
@@ -530,7 +530,7 @@ exports.get = async (req, res) => {
           from: "dealers",
           localField: "dealerId",
           foreignField: "_id",
-          as: "dealerName",
+          as: "dealer_name",
           pipeline: [
             {
               $project: {
@@ -555,7 +555,7 @@ exports.get = async (req, res) => {
           from: "warehouses",
           localField: "dealerWareHouseId",
           foreignField: "_id",
-          as: "dealerWarehouseName",
+          as: "warehouses_name",
           pipeline: [{ $project: { wareHouseName: 1 } }],
         },
       },
@@ -582,15 +582,15 @@ exports.get = async (req, res) => {
       {
         $addFields: {
           dealerLabel: {
-            $arrayElemAt: ["$dealerName.dealerName", 0],
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
           },
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
           },
-          dealerWarehouseLabel: {
-            $arrayElemAt: ["$dealerWarehouseName.wareHouseName", 0],
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productGroupLabel: {
+          "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
@@ -598,9 +598,9 @@ exports.get = async (req, res) => {
 
       {
         $unset: [
-          "dealerName",
+          "dealer_name",
           "companyWarehouseName",
-          "dealerWarehouseName",
+          "warehouses_name",
           "productSalesOrders",
         ],
       },
@@ -651,7 +651,7 @@ exports.getByDealerId = async (req, res) => {
       {
         $lookup: {
           from: "dealers",
-          localField: "dealer",
+          localField: "dealerId",
           foreignField: "_id",
           as: "dealer_name",
           pipeline: [
@@ -667,7 +667,16 @@ exports.getByDealerId = async (req, res) => {
       {
         $lookup: {
           from: "warehouses",
-          localField: "wareHouse",
+          localField: "companyWareHouseId",
+          foreignField: "_id",
+          as: "companyWarehouseName",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "dealerWareHouseId",
           foreignField: "_id",
           as: "warehouses_name",
           pipeline: [{ $project: { wareHouseName: 1 } }],
@@ -698,6 +707,9 @@ exports.getByDealerId = async (req, res) => {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
           },
+          companyWarehouseLabel: {
+            $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
+          },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
@@ -708,7 +720,12 @@ exports.getByDealerId = async (req, res) => {
       },
 
       {
-        $unset: ["dealer_name", "warehouses_name", "productSalesOrders"],
+        $unset: [
+          "dealer_name",
+          "companyWarehouseName",
+          "warehouses_name",
+          "productSalesOrders",
+        ],
       },
     ];
     let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
@@ -751,7 +768,7 @@ exports.getById = async (req, res) => {
           from: "dealers",
           localField: "dealerId",
           foreignField: "_id",
-          as: "dealerName",
+          as: "dealer_name",
           pipeline: [
             {
               $project: {
@@ -776,7 +793,7 @@ exports.getById = async (req, res) => {
           from: "warehouses",
           localField: "dealerWareHouseId",
           foreignField: "_id",
-          as: "dealerWarehouseName",
+          as: "warehouses_name",
           pipeline: [{ $project: { wareHouseName: 1 } }],
         },
       },
@@ -803,15 +820,15 @@ exports.getById = async (req, res) => {
       {
         $addFields: {
           dealerLabel: {
-            $arrayElemAt: ["$dealerName.dealerName", 0],
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
           },
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
           },
-          dealerWarehouseLabel: {
-            $arrayElemAt: ["$dealerWarehouseName.wareHouseName", 0],
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
-          productGroupLabel: {
+          "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
           },
         },
@@ -819,9 +836,9 @@ exports.getById = async (req, res) => {
 
       {
         $unset: [
-          "dealerName",
+          "dealer_name",
           "companyWarehouseName",
-          "dealerWarehouseName",
+          "warehouses_name",
           "productSalesOrders",
         ],
       },
