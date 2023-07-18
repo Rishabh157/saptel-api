@@ -205,7 +205,7 @@ exports.update = async (req, res) => {
 //update start
 exports.updateLevel = async (req, res) => {
   try {
-    let { approval } = req.body;
+    let { dhApprovedById, accApprovedById } = req.body;
 
     let idToBeSearch = req.params.id;
     // let dataExist = await purchaseOrderService.isExists(
@@ -223,15 +223,6 @@ exports.updateLevel = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Sales order not found.`);
     }
-    if (datafound.approval.length >= 2) {
-      throw new ApiError(httpStatus.OK, `Can't add another`);
-    }
-    const dataToPush = {
-      approvalLevel: approval.approvalLevel,
-      approvalByName: approval.approvalByName,
-      approvalById: approval.approvalById,
-      time: approval.time,
-    };
 
     const dataUpdated = await salesOrderService.getOneAndUpdate(
       {
@@ -240,7 +231,8 @@ exports.updateLevel = async (req, res) => {
       },
       {
         $push: {
-          approval: dataToPush,
+          accApprovedById: accApprovedById,
+          dhApprovedById: dhApprovedById,
         },
       }
     );
@@ -396,6 +388,24 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
+          from: "users",
+          localField: "dhApprovedActionBy",
+          foreignField: "_id",
+          as: "dh_data",
+          pipeline: [{ $project: { userName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "accApprovedActionBy",
+          foreignField: "_id",
+          as: "acc_data",
+          pipeline: [{ $project: { userName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
           from: "warehouses",
           localField: "dealerWareHouseId",
           foreignField: "_id",
@@ -428,6 +438,12 @@ exports.allFilterPagination = async (req, res) => {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
           },
+          dhApprovedActionBy: {
+            $arrayElemAt: ["$dh_data.userName", 0],
+          },
+          accApprovedActionBy: {
+            $arrayElemAt: ["$acc_data.userName", 0],
+          },
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
           },
@@ -442,6 +458,8 @@ exports.allFilterPagination = async (req, res) => {
 
       {
         $unset: [
+          "dh_data",
+          "acc_data",
           "dealer_name",
           "companyWarehouseName",
           "warehouses_name",
@@ -552,6 +570,24 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
+          from: "users",
+          localField: "dhApprovedActionBy",
+          foreignField: "_id",
+          as: "dh_data",
+          pipeline: [{ $project: { userName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "accApprovedActionBy",
+          foreignField: "_id",
+          as: "acc_data",
+          pipeline: [{ $project: { userName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
           from: "warehouses",
           localField: "dealerWareHouseId",
           foreignField: "_id",
@@ -584,6 +620,12 @@ exports.get = async (req, res) => {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
           },
+          dhApprovedActionBy: {
+            $arrayElemAt: ["$dh_data.userName", 0],
+          },
+          accApprovedActionBy: {
+            $arrayElemAt: ["$acc_data.userName", 0],
+          },
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
           },
@@ -598,6 +640,8 @@ exports.get = async (req, res) => {
 
       {
         $unset: [
+          "dh_data",
+          "acc_data",
           "dealer_name",
           "companyWarehouseName",
           "warehouses_name",
