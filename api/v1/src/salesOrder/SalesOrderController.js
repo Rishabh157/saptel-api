@@ -643,6 +643,12 @@ exports.getByDealerId = async (req, res) => {
 
     let additionalQuery = [
       {
+        $match: {
+          dealerId: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
           from: "dealers",
           localField: "dealer",
