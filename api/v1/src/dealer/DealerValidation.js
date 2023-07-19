@@ -197,6 +197,16 @@ const get = {
     })
     .optional(),
 };
+
+/**
+ * pincode wise dealer
+ */
+const getByPincode = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    pincodeid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 /**
  * get a document
  */
@@ -249,4 +259,5 @@ module.exports = {
   getDocument,
   loginValid,
   refreshTokenValid,
+  getByPincode,
 };

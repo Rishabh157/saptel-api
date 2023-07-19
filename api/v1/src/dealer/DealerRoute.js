@@ -18,6 +18,16 @@ router.get(
 );
 
 /**
+ * pincode wise dealer
+ */
+router.get(
+  "/company/:companyid/pincode/:pincodeid",
+  authCheckMiddleware,
+  validate(dealerValidation.getByPincode),
+  dealerController.getByPincode
+);
+
+/**
  * get one document
  */
 router.get(
