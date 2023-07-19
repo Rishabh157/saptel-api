@@ -2,13 +2,11 @@ const router = require("express").Router();
 const assetController = require("./AssetController");
 const assetValidation = require("./AssetValidation");
 const validate = require("../../middleware/validate");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetValidation.get),
   assetController.get
@@ -17,7 +15,6 @@ router.get(
 //===============get document by id===============
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetValidation.getById),
   assetController.getById
@@ -26,7 +23,6 @@ router.get(
 //===============get all pagination filter===============
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetValidation.getAllFilter),
   assetController.allFilterPagination
@@ -35,7 +31,6 @@ router.post(
 //===============create new document===============
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetValidation.create),
   assetController.add
@@ -44,7 +39,6 @@ router.post(
 //===============update document===============
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetValidation.update),
   assetController.update
@@ -60,7 +54,6 @@ router.put(
 //===============delete document===============
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetValidation.deleteDocument),
   assetController.deleteDocument

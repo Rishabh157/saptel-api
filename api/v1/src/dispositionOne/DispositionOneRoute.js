@@ -2,7 +2,6 @@ const router = require("express").Router();
 const dispositionOneController = require("./DispositionOneController");
 const validate = require("../../middleware/validate");
 const dispositionOneValidation = require("./DispositionOneValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.get),
   dispositionOneController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.getAllFilter),
   dispositionOneController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.create),
   dispositionOneController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.update),
   dispositionOneController.update
@@ -68,7 +63,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.getById),
   dispositionOneController.getById
@@ -78,7 +72,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.changeStatus),
   dispositionOneController.statusChange
@@ -88,7 +81,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionOneValidation.deleteDocument),
   dispositionOneController.deleteDocument

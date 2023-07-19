@@ -2,7 +2,6 @@ const router = require("express").Router();
 const ledgerController = require("./VendorLedgerController");
 const validate = require("../../middleware/validate");
 const ledgerValidation = require("./VendorLedgerValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -15,7 +14,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.get),
   ledgerController.get
@@ -26,7 +24,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.getAllFilter),
   ledgerController.allFilterPagination
@@ -38,7 +35,6 @@ router.post(
 
 router.post(
   "/dealer/ledger",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(ledgerValidation.getAllFilter),
   ledgerController.allFilterPagination
@@ -49,7 +45,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.create),
   ledgerController.add
@@ -59,7 +54,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.update),
   ledgerController.update
@@ -70,7 +64,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.getById),
   ledgerController.getById
@@ -80,7 +73,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.changeStatus),
   ledgerController.statusChange
@@ -90,7 +82,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(ledgerValidation.deleteDocument),
   ledgerController.deleteDocument

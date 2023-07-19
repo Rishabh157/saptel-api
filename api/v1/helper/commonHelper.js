@@ -9,7 +9,7 @@ const AssetSchema = require("../src/asset/AssetSchema");
 const AttributesGroup = require("../src/attributesGroup/AttributesGroupSchema");
 const Attributes = require("../src/attributes/AttributesSchema");
 const BarCode = require("../src/barCode/BarCodeSchema");
-const BatchSchema = require("../src/batch/BatchSchema");
+
 const CallSchema = require("../src/call/CallSchema");
 const CartonBoxBarcode = require("../src/cartonBoxBarcode/CartonBoxBarcodeSchema");
 const CartonBox = require("../src/cartonBox/CartonBoxSchema");
@@ -78,7 +78,6 @@ const collectionArrToMatch = [
   AttributesGroup,
   Attributes,
   BarCode,
-  BatchSchema,
   CallSchema,
   CartonBoxBarcode,
   CartonBox,

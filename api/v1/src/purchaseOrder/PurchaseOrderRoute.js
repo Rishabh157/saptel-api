@@ -2,7 +2,6 @@ const router = require("express").Router();
 const purchaseOrderController = require("./PurchaseOrderController");
 const validate = require("../../middleware/validate");
 const purchaseOrderValidation = require("./PurchaseOrderValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.get),
   purchaseOrderController.get
@@ -22,7 +20,6 @@ router.get(
 // get by pocode
 router.get(
   "/get-by-po/:pocode",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.get),
   purchaseOrderController.getByPoCode
@@ -30,7 +27,6 @@ router.get(
 // get by vendor id
 router.get(
   "/get-by-vendor/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.getDocument),
   purchaseOrderController.getByVendorId
@@ -41,7 +37,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.getDocument),
   purchaseOrderController.getById
@@ -52,7 +47,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.getAllFilter),
   purchaseOrderController.allFilterPagination
@@ -63,7 +57,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.create),
   purchaseOrderController.add
@@ -73,7 +66,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.update),
   purchaseOrderController.update
@@ -82,7 +74,6 @@ router.put(
 // update approval status
 router.put(
   "/approval-level/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.updateApproval),
   purchaseOrderController.updateLevel
@@ -92,7 +83,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.changeStatus),
   purchaseOrderController.statusChange
@@ -102,7 +92,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(purchaseOrderValidation.deleteDocument),
   purchaseOrderController.deleteDocument

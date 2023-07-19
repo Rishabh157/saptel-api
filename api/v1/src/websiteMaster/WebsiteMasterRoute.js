@@ -2,7 +2,6 @@ const router = require("express").Router();
 const websiteMasterController = require("./WebsiteMasterController");
 const validate = require("../../middleware/validate");
 const websiteMasterValidation = require("./WebsiteMasterValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.get),
   websiteMasterController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.getAllFilter),
   websiteMasterController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.create),
   websiteMasterController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.update),
   websiteMasterController.update
@@ -56,7 +51,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.getById),
   websiteMasterController.getById
@@ -66,7 +60,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.changeStatus),
   websiteMasterController.statusChange
@@ -76,7 +69,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(websiteMasterValidation.deleteDocument),
   websiteMasterController.deleteDocument

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const wareHouseController = require("./WareHouseController");
 const validate = require("../../middleware/validate");
 const wareHouseValidation = require("./WareHouseValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   authCheckDealerMiddleware,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.get),
   wareHouseController.get
@@ -25,7 +23,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.getDocument),
   wareHouseController.getById
@@ -35,7 +32,6 @@ router.get(
  */
 router.get(
   "/dealer/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.getDocument),
   wareHouseController.getById
@@ -46,7 +42,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.getAllFilter),
   wareHouseController.allFilterPagination
@@ -54,7 +49,6 @@ router.post(
 // dealer project warehouse
 router.post(
   "/dealer",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.getAllFilter),
   wareHouseController.allFilterPagination
@@ -65,7 +59,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.create),
   wareHouseController.add
@@ -75,7 +68,6 @@ router.post(
  */
 router.post(
   "/dealer/add",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.create),
   wareHouseController.add
@@ -85,7 +77,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.update),
   wareHouseController.update
@@ -95,7 +86,6 @@ router.put(
  */
 router.put(
   "/dealer/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(wareHouseValidation.update),
   wareHouseController.update
@@ -105,7 +95,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.changeStatus),
   wareHouseController.statusChange
@@ -115,7 +104,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(wareHouseValidation.deleteDocument),
   wareHouseController.deleteDocument

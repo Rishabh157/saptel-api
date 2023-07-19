@@ -2,7 +2,6 @@ const router = require("express").Router();
 const featureController = require("./FeatureController");
 const validate = require("../../middleware/validate");
 const featureValidation = require("./FeatureValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.get),
   featureController.get
@@ -26,7 +24,6 @@ router.get(
 
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.getDocument),
   featureController.getById
@@ -34,7 +31,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.getAllFilter),
   featureController.allFilterPagination
@@ -45,7 +41,6 @@ router.post(
  */
 router.post(
   "/add",
-  //   accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.create),
   featureController.add
@@ -55,7 +50,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.update),
   featureController.update
@@ -65,7 +59,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.changeStatus),
   featureController.statusChange
@@ -75,7 +68,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(featureValidation.deleteDocument),
   featureController.deleteDocument

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const slotMasterController = require("./SlotMasterController");
 const validate = require("../../middleware/validate");
 const slotMasterValidation = require("./SlotMasterValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.get),
   slotMasterController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.getAllFilter),
   slotMasterController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.create),
   slotMasterController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.update),
   slotMasterController.update
@@ -56,7 +51,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.getById),
   slotMasterController.getById
@@ -66,7 +60,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.changeStatus),
   slotMasterController.statusChange
@@ -76,7 +69,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(slotMasterValidation.deleteDocument),
   slotMasterController.deleteDocument

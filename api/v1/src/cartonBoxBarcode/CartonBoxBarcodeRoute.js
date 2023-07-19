@@ -2,7 +2,6 @@ const router = require("express").Router();
 const cartonBoxBarcodeController = require("./CartonBoxBarcodeController");
 const validate = require("../../middleware/validate");
 const cartonBoxBarcodeValidation = require("./CartonBoxBarcodeValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.get),
   cartonBoxBarcodeController.get
@@ -25,7 +23,6 @@ router.get(
  */
 router.get(
   "/get-by-box/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.getByboxId),
   cartonBoxBarcodeController.getByBoxId
@@ -36,7 +33,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.getAllFilter),
   cartonBoxBarcodeController.allFilterPagination
@@ -47,7 +43,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.create),
   cartonBoxBarcodeController.add
@@ -57,7 +52,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.update),
   cartonBoxBarcodeController.update
@@ -67,7 +61,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.changeStatus),
   cartonBoxBarcodeController.statusChange
@@ -77,7 +70,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(cartonBoxBarcodeValidation.deleteDocument),
   cartonBoxBarcodeController.deleteDocument

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const zonalManagerController = require("./ZonalManagerController");
 const validate = require("../../middleware/validate");
 const zonalManagerValidation = require("./ZonalManagerValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -13,7 +12,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(zonalManagerValidation.getById),
   zonalManagerController.get
@@ -24,7 +22,6 @@ router.get(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(zonalManagerValidation.create),
   zonalManagerController.add
@@ -34,7 +31,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(zonalManagerValidation.update),
   zonalManagerController.update
@@ -46,7 +42,6 @@ router.put(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(zonalManagerValidation.getAllFilter),
   zonalManagerController.allFilterPagination
@@ -57,7 +52,6 @@ router.post(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(zonalManagerValidation.deleteDocument),
   zonalManagerController.deleteDocument
@@ -68,7 +62,6 @@ router.delete(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(zonalManagerValidation.getById),
   zonalManagerController.getById

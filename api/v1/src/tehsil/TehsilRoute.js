@@ -2,7 +2,6 @@ const router = require("express").Router();
 const tehsilController = require("./TehsilController");
 const validate = require("../../middleware/validate");
 const tehsilValidation = require("./TehsilValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.get),
   tehsilController.get
@@ -26,7 +24,6 @@ router.get("/inbound", validate(tehsilValidation.get), tehsilController.get);
  */
 router.get(
   "/get-district-tehsil/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.get),
   tehsilController.getTehsilByDistrict
@@ -46,7 +43,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.getDocument),
   tehsilController.getById
@@ -57,7 +53,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.getAllFilter),
   tehsilController.allFilterPagination
@@ -68,7 +63,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.create),
   tehsilController.add
@@ -78,7 +72,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.update),
   tehsilController.update
@@ -88,7 +81,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.changeStatus),
   tehsilController.statusChange
@@ -98,7 +90,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tehsilValidation.deleteDocument),
   tehsilController.deleteDocument

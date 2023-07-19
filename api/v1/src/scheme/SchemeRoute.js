@@ -2,7 +2,6 @@ const router = require("express").Router();
 const schemeController = require("./SchemeController");
 const validate = require("../../middleware/validate");
 const schemeValidation = require("./SchemeValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.get),
   schemeController.get
@@ -29,7 +27,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.getDocument),
   schemeController.getById
@@ -49,7 +46,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.getAllFilter),
   schemeController.allFilterPagination
@@ -69,7 +65,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.create),
   schemeController.add
@@ -79,7 +74,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.update),
   schemeController.update
@@ -89,7 +83,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.changeStatus),
   schemeController.statusChange
@@ -99,7 +92,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(schemeValidation.deleteDocument),
   schemeController.deleteDocument

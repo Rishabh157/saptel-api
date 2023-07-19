@@ -2,7 +2,6 @@ const router = require("express").Router();
 const channelCategoryController = require("./ChannelCategoryController");
 const validate = require("../../middleware/validate");
 const channelCategoryValidation = require("./ChannelCategoryValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.get),
   channelCategoryController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.getAllFilter),
   channelCategoryController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.create),
   channelCategoryController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.update),
   channelCategoryController.update
@@ -56,7 +51,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.getById),
   channelCategoryController.getById
@@ -66,7 +60,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.changeStatus),
   channelCategoryController.statusChange
@@ -76,7 +69,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelCategoryValidation.deleteDocument),
   channelCategoryController.deleteDocument

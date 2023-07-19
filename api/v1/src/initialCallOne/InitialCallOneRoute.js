@@ -2,7 +2,6 @@ const router = require("express").Router();
 const validate = require("../../middleware/validate");
 const initialCallOneValidation = require("./InitialCallOneValidation");
 const initialCallOneController = require("./InitialCallOneController");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -11,7 +10,6 @@ const {
 //===============get one document (if query) / all document===============
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallOneValidation.get),
   initialCallOneController.get
@@ -20,7 +18,6 @@ router.get(
 //===============get document by id===============
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallOneValidation.getById),
   initialCallOneController.getById
@@ -29,7 +26,6 @@ router.get(
 //===============get all dispositionOne pagination filter===============
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallOneValidation.getAllFilter),
   initialCallOneController.allFilterPagination
@@ -38,7 +34,6 @@ router.post(
 //===============create new document===============
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallOneValidation.create),
   initialCallOneController.add
@@ -47,7 +42,6 @@ router.post(
 //===============update document===============
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallOneValidation.update),
   initialCallOneController.update
@@ -63,7 +57,6 @@ router.put(
 //===============delete document===============
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallOneValidation.deleteDocument),
   initialCallOneController.deleteDocument

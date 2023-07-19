@@ -2,7 +2,6 @@ const router = require("express").Router();
 const salesOrderController = require("./SalesOrderController");
 const validate = require("../../middleware/validate");
 const salesOrderValidation = require("./SalesOrderValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -15,7 +14,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.get),
   salesOrderController.get
@@ -26,7 +24,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.getDocument),
   salesOrderController.getById
@@ -36,7 +33,6 @@ router.get(
  */
 router.get(
   "/get-by-dealer/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.getDocument),
   salesOrderController.getByDealerId
@@ -47,7 +43,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.getAllFilter),
   salesOrderController.allFilterPagination
@@ -56,7 +51,6 @@ router.post(
 // dealer app inventory
 router.post(
   "/list",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(salesOrderValidation.getAllFilter),
   salesOrderController.allFilterPagination
@@ -64,7 +58,6 @@ router.post(
 // update approval status
 router.put(
   "/approval-level/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.updateApproval),
   salesOrderController.updateLevel
@@ -74,7 +67,6 @@ router.put(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.create),
   salesOrderController.add
@@ -84,7 +76,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.update),
   salesOrderController.update
@@ -94,7 +85,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.changeStatus),
   salesOrderController.statusChange
@@ -104,7 +94,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(salesOrderValidation.deleteDocument),
   salesOrderController.deleteDocument

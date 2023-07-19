@@ -2,7 +2,6 @@ const router = require("express").Router();
 const productController = require("./ProductController");
 const validate = require("../../middleware/validate");
 const productValidation = require("./ProductValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.get),
   productController.get
@@ -22,7 +20,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.getDocument),
   productController.getById
@@ -33,7 +30,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.getAllFilter),
   productController.allFilterPagination
@@ -44,7 +40,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.create),
   productController.add
@@ -54,7 +49,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.update),
   productController.update
@@ -64,7 +58,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.changeStatus),
   productController.statusChange
@@ -74,7 +67,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productValidation.deleteDocument),
   productController.deleteDocument

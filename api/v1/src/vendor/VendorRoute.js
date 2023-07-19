@@ -2,7 +2,6 @@ const router = require("express").Router();
 const vendorController = require("./VendorController");
 const validate = require("../../middleware/validate");
 const vendorValidation = require("./VendorValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.get),
   vendorController.get
@@ -21,7 +19,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.getDocument),
   vendorController.getById
@@ -32,7 +29,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.getAllFilter),
   vendorController.allFilterPagination
@@ -43,7 +39,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.create),
   vendorController.add
@@ -53,7 +48,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.update),
   vendorController.update
@@ -63,7 +57,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.changeStatus),
   vendorController.statusChange
@@ -73,7 +66,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(vendorValidation.deleteDocument),
   vendorController.deleteDocument

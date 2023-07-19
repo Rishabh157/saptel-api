@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const channelUpdationController = require("./ChannelUpdationController");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 const validate = require("../../middleware/validate");
 const channelUpdationValidation = require("./ChannelUpdationValidation");
@@ -8,7 +7,6 @@ const channelUpdationValidation = require("./ChannelUpdationValidation");
 //===============get one document (if query) / all document===============
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelUpdationValidation.get),
   channelUpdationController.get
@@ -17,7 +15,6 @@ router.get(
 //===============get all dispositionOne pagination filter===============
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelUpdationValidation.getAllFilter),
   channelUpdationController.getFilterPagination
@@ -26,7 +23,6 @@ router.post(
 //===============create new document===============
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelUpdationValidation.create),
   channelUpdationController.add
@@ -35,7 +31,6 @@ router.post(
 //===============update document===============
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelUpdationValidation.update),
   channelUpdationController.update
@@ -44,7 +39,6 @@ router.put(
 //===============delete document===============
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelUpdationValidation.deleteDocument),
   channelUpdationController.deleteDocument

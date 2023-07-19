@@ -2,7 +2,6 @@ const router = require("express").Router();
 const goodReceivedNoteController = require("./GRNController");
 const validate = require("../../middleware/validate");
 const goodReceivedNoteValidation = require("./GRNValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.get),
   goodReceivedNoteController.get
@@ -25,7 +23,6 @@ router.get(
  */
 router.get(
   "/pocode",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.getByPoCode),
   goodReceivedNoteController.getByPoCode
@@ -36,7 +33,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.getDocument),
   goodReceivedNoteController.getById
@@ -47,7 +43,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.getAllFilter),
   goodReceivedNoteController.allFilterPagination
@@ -58,7 +53,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.create),
   goodReceivedNoteController.add
@@ -68,7 +62,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.update),
   goodReceivedNoteController.update
@@ -78,7 +71,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.changeStatus),
   goodReceivedNoteController.statusChange
@@ -88,7 +80,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(goodReceivedNoteValidation.deleteDocument),
   goodReceivedNoteController.deleteDocument

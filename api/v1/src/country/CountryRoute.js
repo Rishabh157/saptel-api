@@ -2,7 +2,6 @@ const router = require("express").Router();
 const countryController = require("./CountryController");
 const validate = require("../../middleware/validate");
 const countryValidation = require("./CountryValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.get),
   countryController.get
@@ -26,7 +24,6 @@ router.get("/inbound", validate(countryValidation.get), countryController.get);
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.getDocument),
   countryController.getById
@@ -37,7 +34,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.getAllFilter),
   countryController.allFilterPagination
@@ -48,7 +44,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.create),
   countryController.add
@@ -58,7 +53,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.update),
   countryController.update
@@ -68,7 +62,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.changeStatus),
   countryController.statusChange
@@ -78,7 +71,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(countryValidation.deleteDocument),
   countryController.deleteDocument

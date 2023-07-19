@@ -2,7 +2,6 @@ const router = require("express").Router();
 const stateController = require("./StateController");
 const validate = require("../../middleware/validate");
 const stateValidation = require("./StateValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.get),
   stateController.get
@@ -26,7 +24,6 @@ router.get("/inbound", validate(stateValidation.get), stateController.get);
  */
 router.get(
   "/get-country-state/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.get),
   stateController.getStateByCountry
@@ -45,7 +42,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.getDocument),
   stateController.getById
@@ -56,7 +52,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.getAllFilter),
   stateController.allFilterPagination
@@ -67,7 +62,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.create),
   stateController.add
@@ -77,7 +71,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.update),
   stateController.update
@@ -87,7 +80,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.changeStatus),
   stateController.statusChange
@@ -97,7 +89,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(stateValidation.deleteDocument),
   stateController.deleteDocument

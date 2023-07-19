@@ -2,7 +2,6 @@ const router = require("express").Router();
 const deliveryBoyController = require("./DeliveryBoyController");
 const validate = require("../../middleware/validate");
 const deliveryBoyValidation = require("./DeliveryBoyValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckDealerMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.get),
   deliveryBoyController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.getAllFilter),
   deliveryBoyController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.create),
   deliveryBoyController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.update),
   deliveryBoyController.update
@@ -56,7 +51,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.changeStatus),
   deliveryBoyController.statusChange
@@ -66,7 +60,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.deleteDocument),
   deliveryBoyController.deleteDocument

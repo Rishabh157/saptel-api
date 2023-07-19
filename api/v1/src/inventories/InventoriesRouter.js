@@ -2,7 +2,6 @@ const router = require("express").Router();
 const inventoriesController = require("./InventoriesController");
 const validate = require("../../middleware/validate");
 const inventoriesValidation = require("./InventoriesValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -15,7 +14,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.get),
   inventoriesController.get
@@ -26,7 +24,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.getDocument),
   inventoriesController.getById
@@ -37,7 +34,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.getAllFilter),
   inventoriesController.allFilterPagination
@@ -46,7 +42,6 @@ router.post(
 //dealer ap pagination
 router.post(
   "/dealer",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(inventoriesValidation.getAllFilter),
   inventoriesController.allFilterPagination
@@ -57,7 +52,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.create),
   inventoriesController.add
@@ -67,7 +61,6 @@ router.post(
  */
 router.post(
   "/dealer/add",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(inventoriesValidation.create),
   inventoriesController.add
@@ -77,7 +70,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.update),
   inventoriesController.update
@@ -87,7 +79,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.changeStatus),
   inventoriesController.statusChange
@@ -97,7 +88,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(inventoriesValidation.deleteDocument),
   inventoriesController.deleteDocument

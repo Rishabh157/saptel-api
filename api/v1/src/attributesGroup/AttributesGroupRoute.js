@@ -2,7 +2,6 @@ const router = require("express").Router();
 const attributesGroupController = require("./AttributesGroupController");
 const validate = require("../../middleware/validate");
 const attributesGroupValidation = require("./AttributesGroupValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.get),
   attributesGroupController.get
@@ -21,7 +19,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.getDocument),
   attributesGroupController.getById
@@ -32,7 +29,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.getAllFilter),
   attributesGroupController.allFilterPagination
@@ -43,7 +39,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.create),
   attributesGroupController.add
@@ -53,7 +48,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.update),
   attributesGroupController.update
@@ -63,7 +57,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.changeStatus),
   attributesGroupController.statusChange
@@ -73,7 +66,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(attributesGroupValidation.deleteDocument),
   attributesGroupController.deleteDocument

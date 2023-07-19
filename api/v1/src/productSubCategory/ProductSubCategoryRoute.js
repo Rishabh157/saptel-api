@@ -2,7 +2,6 @@ const router = require("express").Router();
 const productSubCategoryController = require("./ProductSubCategoryController");
 const validate = require("../../middleware/validate");
 const productSubCategoryValidation = require("./ProductSubCategoryValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.get),
   productSubCategoryController.get
@@ -22,7 +20,6 @@ router.get(
  */
 router.get(
   "/get-by-parent-category/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.getDocument),
   productSubCategoryController.getByParentCategory
@@ -32,7 +29,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.getDocument),
   productSubCategoryController.getById
@@ -43,7 +39,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.getAllFilter),
   productSubCategoryController.allFilterPagination
@@ -54,7 +49,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.create),
   productSubCategoryController.add
@@ -64,7 +58,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.update),
   productSubCategoryController.update
@@ -74,7 +67,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.changeStatus),
   productSubCategoryController.statusChange
@@ -84,7 +76,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(productSubCategoryValidation.deleteDocument),
   productSubCategoryController.deleteDocument

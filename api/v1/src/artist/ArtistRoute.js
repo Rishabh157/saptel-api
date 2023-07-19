@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const artistController = require("./ArtistController");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 const validate = require("../../middleware/validate");
 const artistValitation = require("./ArtistValidation");
@@ -8,7 +7,7 @@ const artistValitation = require("./ArtistValidation");
 // ===============get new document==============
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(artistValitation.get),
   artistController.get
@@ -18,7 +17,7 @@ router.get(
 // ===============get document By Id document==============
 router.get(
   "/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(artistValitation.getById),
   artistController.getById
@@ -28,7 +27,7 @@ router.get(
 // ===============get all artist by pagination filter document==============
 router.post(
   "/",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(artistValitation.getAllFilter),
   artistController.allFilterPagination
@@ -38,7 +37,7 @@ router.post(
 // ===============create new document==============
 router.post(
   "/add",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(artistValitation.create),
   artistController.add
@@ -48,7 +47,7 @@ router.post(
 // ===============update existing document==============
 router.put(
   "/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(artistValitation.update),
   artistController.update
@@ -58,7 +57,7 @@ router.put(
 // ===============delete document==============
 router.delete(
   "/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(artistValitation.deleteDocument),
   artistController.deleteDocument

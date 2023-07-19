@@ -2,7 +2,6 @@ const router = require("express").Router();
 const districtController = require("./DistrictController");
 const validate = require("../../middleware/validate");
 const districtValidation = require("./DistrictValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.get),
   districtController.get
@@ -30,7 +28,6 @@ router.get(
  */
 router.get(
   "/get-state-district/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.get),
   districtController.getStateDistrict
@@ -50,7 +47,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.getDocument),
   districtController.getById
@@ -61,7 +57,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.getAllFilter),
   districtController.allFilterPagination
@@ -72,7 +67,6 @@ router.post(
  */
 router.post(
   "/add",
-  // accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.create),
   districtController.add
@@ -82,7 +76,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.update),
   districtController.update
@@ -92,7 +85,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.changeStatus),
   districtController.statusChange
@@ -102,7 +94,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(districtValidation.deleteDocument),
   districtController.deleteDocument

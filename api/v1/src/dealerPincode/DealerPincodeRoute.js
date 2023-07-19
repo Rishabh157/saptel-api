@@ -2,7 +2,6 @@ const router = require("express").Router();
 const dealerPincodeController = require("./DealerPincodeController");
 const validate = require("../../middleware/validate");
 const dealerPincodeValidation = require("./DealerPincodeValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.get),
   dealerPincodeController.get
@@ -19,7 +17,6 @@ router.get(
 
 router.get(
   "/company/:companyid/pincode/:pincode",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.getByPincode),
   dealerPincodeController.getByPincode
@@ -30,7 +27,6 @@ router.get(
  */
 router.get(
   "/dealer/:dealerid/company/:companyid/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.getDealerData),
   dealerPincodeController.getDealerPincode
@@ -41,7 +37,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.getAllFilter),
   dealerPincodeController.allFilterPagination
@@ -52,7 +47,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.create),
   dealerPincodeController.add
@@ -62,7 +56,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.update),
   dealerPincodeController.update
@@ -72,7 +65,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.changeStatus),
   dealerPincodeController.statusChange
@@ -82,7 +74,6 @@ router.put(
  */
 router.delete(
   "/:id/pincode/:pincode",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerPincodeValidation.deleteDocument),
   dealerPincodeController.deleteDocument

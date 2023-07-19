@@ -2,7 +2,6 @@ const router = require("express").Router();
 const didManagementController = require("./DidManagementController");
 const validate = require("../../middleware/validate");
 const didManagementValidation = require("./DidManagementValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.getByDidNo),
   didManagementController.get
@@ -26,7 +24,6 @@ router.get(
  */
 router.get(
   "/unauth/:didno",
-  // accessModuleCheck,
   // authCheckMiddleware,
   // validate(didManagementValidation.get),
   didManagementController.getByDidNo
@@ -38,7 +35,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.getAllFilter),
   didManagementController.allFilterPagination
@@ -49,7 +45,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.create),
   didManagementController.add
@@ -59,7 +54,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.update),
   didManagementController.update
@@ -70,7 +64,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.getById),
   didManagementController.getById
@@ -80,7 +73,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.changeStatus),
   didManagementController.statusChange
@@ -90,7 +82,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(didManagementValidation.deleteDocument),
   didManagementController.deleteDocument

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const areaController = require("./AreaController");
 const validate = require("../../middleware/validate");
 const areaValidation = require("./AreaValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,7 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.get),
   areaController.get
@@ -27,7 +26,7 @@ router.get("/inbound", validate(areaValidation.get), areaController.get);
  */
 router.get(
   "/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.getDocument),
   areaController.getById
@@ -47,7 +46,7 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.getAllFilter),
   areaController.allFilterPagination
@@ -58,7 +57,7 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.create),
   areaController.add
@@ -68,7 +67,7 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.update),
   areaController.update
@@ -78,7 +77,7 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.changeStatus),
   areaController.statusChange
@@ -88,7 +87,7 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
+
   authCheckMiddleware,
   validate(areaValidation.deleteDocument),
   areaController.deleteDocument

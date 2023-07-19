@@ -2,7 +2,6 @@ const router = require("express").Router();
 const dealerController = require("./DealerController");
 const validate = require("../../middleware/validate");
 const dealerValidation = require("./DealerValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.get),
   dealerController.get
@@ -32,7 +30,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.getDocument),
   dealerController.getById
@@ -45,19 +42,16 @@ router.get(
  */
 router.post(
   "/login",
-  // accessModuleCheck,
   validate(dealerValidation.loginValid),
   dealerController.login
 );
 router.post(
   "/refresh",
-  // accessModuleCheck,
   validate(dealerValidation.refreshTokenValid),
   dealerController.refreshToken
 );
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.getAllFilter),
   dealerController.allFilterPagination
@@ -68,7 +62,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.create),
   dealerController.add
@@ -78,7 +71,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.update),
   dealerController.update
@@ -88,7 +80,6 @@ router.put(
  */
 router.put(
   "/automapping-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.autoMappingChange),
   dealerController.changeAutoMapping
@@ -98,7 +89,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.changeStatus),
   dealerController.statusChange
@@ -108,7 +98,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerValidation.deleteDocument),
   dealerController.deleteDocument

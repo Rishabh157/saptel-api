@@ -2,7 +2,6 @@ const router = require("express").Router();
 const DealerInventoriesController = require("./DealerInventoriesController");
 const validate = require("../../middleware/validate");
 const DealerInventoriesValidation = require("./DealerInventoriesValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -15,7 +14,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.get),
   DealerInventoriesController.get
@@ -26,7 +24,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.getDocument),
   DealerInventoriesController.getById
@@ -37,7 +34,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.getAllFilter),
   DealerInventoriesController.allFilterPagination
@@ -46,7 +42,6 @@ router.post(
 //dealer ap pagination
 router.post(
   "/dealer",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(DealerInventoriesValidation.getAllFilter),
   DealerInventoriesController.allFilterPagination
@@ -57,7 +52,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.create),
   DealerInventoriesController.add
@@ -67,7 +61,6 @@ router.post(
  */
 router.post(
   "/dealer/add",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(DealerInventoriesValidation.create),
   DealerInventoriesController.add
@@ -77,7 +70,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.update),
   DealerInventoriesController.update
@@ -87,7 +79,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.changeStatus),
   DealerInventoriesController.statusChange
@@ -97,7 +88,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(DealerInventoriesValidation.deleteDocument),
   DealerInventoriesController.deleteDocument

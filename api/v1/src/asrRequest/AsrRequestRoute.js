@@ -2,7 +2,6 @@ const router = require("express").Router();
 const asrRequestController = require("./AsrRequestController");
 const validate = require("../../middleware/validate");
 const asrRequestValidation = require("./AsrRequestValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.get),
   asrRequestController.get
@@ -22,7 +20,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.getDocument),
   asrRequestController.getById
@@ -33,7 +30,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.getAllFilter),
   asrRequestController.allFilterPagination
@@ -44,7 +40,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.create),
   asrRequestController.add
@@ -54,7 +49,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.update),
   asrRequestController.update
@@ -64,7 +58,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.changeStatus),
   asrRequestController.statusChange
@@ -75,7 +68,6 @@ router.put(
  */
 router.put(
   "/completed/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.changeStatus),
   asrRequestController.changeCompleteStatus
@@ -86,7 +78,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(asrRequestValidation.deleteDocument),
   asrRequestController.deleteDocument

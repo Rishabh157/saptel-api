@@ -2,11 +2,7 @@ const router = require("express").Router();
 const channelGroupController = require("./ChannelGroupController");
 const validate = require("../../middleware/validate");
 const channelGroupValidation = require("./ChannelGroupValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
-const {
-  authCheckMiddleware,
-  otpVerifyToken,
-} = require("../../middleware/authenticationCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -14,7 +10,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.get),
   channelGroupController.get
@@ -25,7 +20,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.getAllFilter),
   channelGroupController.allFilterPagination
@@ -36,7 +30,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.create),
   channelGroupController.add
@@ -46,7 +39,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.update),
   channelGroupController.update
@@ -57,7 +49,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.getById),
   channelGroupController.getById
@@ -67,7 +58,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.changeStatus),
   channelGroupController.statusChange
@@ -77,7 +67,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(channelGroupValidation.deleteDocument),
   channelGroupController.deleteDocument

@@ -2,7 +2,6 @@ const router = require("express").Router();
 const dealerUserController = require("./DealerUserController");
 const validate = require("../../middleware/validate");
 const dealerUserValidation = require("./DealerUserValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
@@ -13,7 +12,6 @@ const {
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.get),
   dealerUserController.get
@@ -24,7 +22,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.getAllFilter),
   dealerUserController.allFilterPagination
@@ -35,7 +32,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.create),
   dealerUserController.add
@@ -45,7 +41,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.update),
   dealerUserController.update
@@ -56,7 +51,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.getById),
   dealerUserController.getById
@@ -66,7 +60,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.changeStatus),
   dealerUserController.statusChange
@@ -76,7 +69,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckDealerMiddleware,
   validate(dealerUserValidation.deleteDocument),
   dealerUserController.deleteDocument

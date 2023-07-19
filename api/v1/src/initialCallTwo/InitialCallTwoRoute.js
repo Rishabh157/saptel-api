@@ -2,7 +2,6 @@ const router = require("express").Router();
 const validate = require("../../middleware/validate");
 const initialCallTwoValidation = require("./InitialCallTwoValidation");
 const initialCallTwoController = require("./InitialCallTwoController");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -11,7 +10,6 @@ const {
 //===============get one document (if query) / all document===============
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.get),
   initialCallTwoController.get
@@ -20,7 +18,6 @@ router.get(
 //===============get document by id===============
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.getById),
   initialCallTwoController.getById
@@ -29,7 +26,6 @@ router.get(
 //===============get all document fo initialCallOne  Id===============
 router.get(
   "/get-all/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.getByDispositionOneId),
   initialCallTwoController.getByInitialCallOneId
@@ -38,7 +34,6 @@ router.get(
 //===============get all dispositionOne pagination filter===============
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.getAllFilter),
   initialCallTwoController.allFilterPagination
@@ -47,7 +42,6 @@ router.post(
 //===============create new document===============
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.create),
   initialCallTwoController.add
@@ -56,7 +50,6 @@ router.post(
 //===============update document===============
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.update),
   initialCallTwoController.update
@@ -72,7 +65,6 @@ router.put(
 //===============delete document===============
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallTwoValidation.deleteDocument),
   initialCallTwoController.deleteDocument

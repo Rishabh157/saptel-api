@@ -2,7 +2,6 @@ const router = require("express").Router();
 const dealerSchemeController = require("./DealerSchemeController");
 const validate = require("../../middleware/validate");
 const dealerSchemeValidation = require("./DealerSchemeValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.get),
   dealerSchemeController.get
@@ -25,7 +23,6 @@ router.get(
  */
 router.get(
   "/company/:companyid/dealer/:dealerid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.getDealerScheme),
   dealerSchemeController.getDealerScheme
@@ -36,7 +33,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.getDocument),
   dealerSchemeController.getById
@@ -47,7 +43,6 @@ router.get(
  */
 router.get(
   "/get-all/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   // validate(dealerSchemeValidation.get),
   dealerSchemeController.getbydealerId
@@ -59,7 +54,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.getAllFilter),
   dealerSchemeController.allFilterPagination
@@ -70,7 +64,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.create),
   dealerSchemeController.add
@@ -80,7 +73,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.update),
   dealerSchemeController.update
@@ -90,7 +82,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.changeStatus),
   dealerSchemeController.statusChange
@@ -100,7 +91,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dealerSchemeValidation.deleteDocument),
   dealerSchemeController.deleteDocument

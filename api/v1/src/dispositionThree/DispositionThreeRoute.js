@@ -2,13 +2,11 @@ const router = require("express").Router();
 const dispositionThreeController = require("./DispositionThreeController");
 const dispositionThreeValidation = require("./DispositionThreeValidation");
 const validate = require("../../middleware/validate");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.get),
   dispositionThreeController.get
@@ -17,7 +15,6 @@ router.get(
 //===============get one document (if query) / all document  (without token)===============
 router.get(
   "/unauth/",
-  // accessModuleCheck,
   // authCheckMiddleware,
   validate(dispositionThreeValidation.get),
   dispositionThreeController.get
@@ -26,7 +23,6 @@ router.get(
 //===============get document by id===============
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.getById),
   dispositionThreeController.getById
@@ -34,7 +30,6 @@ router.get(
 //===============get all document fo dispositionTwoId (without token)===============
 router.get(
   "/unauth/get-all/:id",
-  // accessModuleCheck,
   // authCheckMiddleware,
   validate(dispositionThreeValidation.getByDispositionOneId),
   dispositionThreeController.getByDispositionTwoId
@@ -43,7 +38,6 @@ router.get(
 //===============get all document fo dispositionTwo Id===============
 router.get(
   "/get-all/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.getByDispositionOneId),
   dispositionThreeController.getByDispositionTwoId
@@ -52,7 +46,6 @@ router.get(
 //===============get all pagination filter===============
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.getAllFilter),
   dispositionThreeController.getFilterPagination
@@ -61,7 +54,6 @@ router.post(
 //===============create new document===============
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.create),
   dispositionThreeController.add
@@ -70,7 +62,6 @@ router.post(
 //===============update document===============
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.update),
   dispositionThreeController.update
@@ -86,7 +77,6 @@ router.put(
 //===============delete document===============
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(dispositionThreeValidation.deleteDocument),
   dispositionThreeController.deleteDocument

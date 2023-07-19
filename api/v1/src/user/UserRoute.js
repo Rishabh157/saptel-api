@@ -6,7 +6,6 @@ const {
   authCheckMiddleware,
   otpVerifyToken,
 } = require("../../middleware/authenticationCheck");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 
 //-----------------------------------------------------
 
@@ -15,7 +14,6 @@ const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.get),
   userController.get
@@ -26,7 +24,6 @@ router.get(
  */
 router.get(
   "/company/:companyid/distribution/:role",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.getAllDistribution),
   userController.getAllDistributionUser
@@ -37,7 +34,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.getAllFilter),
   userController.allFilterPagination
@@ -46,19 +42,13 @@ router.post(
 /**
  * create new document
  */
-router.post(
-  "/signup",
-  accessModuleCheck,
-  validate(userValidation.create),
-  userController.add
-);
+router.post("/signup", validate(userValidation.create), userController.add);
 
 /**
  * login user via otp
  */
 router.post(
   "/login",
-  accessModuleCheck,
   validate(userValidation.loginValid),
   userController.login
 );
@@ -68,7 +58,6 @@ router.post(
  */
 router.post(
   "/verify-otp",
-  accessModuleCheck,
   otpVerifyToken,
   validate(userValidation.verifyOtpValid),
   userController.verifyOtp
@@ -78,14 +67,12 @@ router.post(
  */
 router.put(
   "/update-profile",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.update),
   userController.update
 );
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.update),
   userController.updateUser
@@ -95,7 +82,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.changeStatus),
   userController.statusChange
@@ -106,7 +92,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.getById),
   userController.getById
@@ -117,7 +102,6 @@ router.get(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(userValidation.deleteDocument),
   userController.deleteDocument

@@ -60,7 +60,6 @@ const websiteBlogRoute = require("./src/websiteBlog/WebsiteBlogRoute");
 const complaintDispositionRoute = require("./src/complaintDisposition/ComplaintDispositionRoute");
 const callRoute = require("./src/call/CallRoute");
 const orderRoute = require("./src/order/OrderRoute");
-const batchRoute = require("./src/batch/BatchRoute");
 const assetCategoryRoute = require("./src/assetCategory/AssetCategoryRoute");
 const assetRoute = require("./src/asset/AssetRoute");
 const websiteMetaTagRoute = require("./src/websiteMetaTag/WebsiteMetaTagRoute");
@@ -328,10 +327,7 @@ const defaultRoutes = [
     path: "/order",
     route: orderRoute,
   },
-  {
-    path: "/batch",
-    route: batchRoute,
-  },
+
   {
     path: "/asset-category",
     route: assetCategoryRoute,

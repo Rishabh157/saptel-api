@@ -2,7 +2,6 @@ const router = require("express").Router();
 const tapeMasterController = require("./TapeMasterController");
 const validate = require("../../middleware/validate");
 const tapeMasterValidation = require("./TapeMasterValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.get),
   tapeMasterController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.getAllFilter),
   tapeMasterController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.create),
   tapeMasterController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.update),
   tapeMasterController.update
@@ -56,7 +51,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.getById),
   tapeMasterController.getById
@@ -66,7 +60,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.changeStatus),
   tapeMasterController.statusChange
@@ -76,7 +69,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(tapeMasterValidation.deleteDocument),
   tapeMasterController.deleteDocument

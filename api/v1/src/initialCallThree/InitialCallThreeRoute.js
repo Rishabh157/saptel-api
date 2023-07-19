@@ -2,13 +2,11 @@ const router = require("express").Router();
 const initialCallThreeController = require("./InitialCallThreeController");
 const initialCallThreeValidation = require("./InitialCallThreeValidation");
 const validate = require("../../middleware/validate");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.get),
   initialCallThreeController.get
@@ -17,7 +15,6 @@ router.get(
 //===============get document by id===============
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.getById),
   initialCallThreeController.getById
@@ -26,7 +23,6 @@ router.get(
 //===============get all document fo initialCallOne  Id===============
 router.get(
   "/get-all/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.getByInitialCallTwoId),
   initialCallThreeController.getByInitialCallTwoId
@@ -35,7 +31,6 @@ router.get(
 //===============get all pagination filter===============
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.getAllFilter),
   initialCallThreeController.allFilterPagination
@@ -44,7 +39,6 @@ router.post(
 //===============create new document===============
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.create),
   initialCallThreeController.add
@@ -53,7 +47,6 @@ router.post(
 //===============update document===============
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.update),
   initialCallThreeController.update
@@ -69,7 +62,6 @@ router.put(
 //===============delete document===============
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(initialCallThreeValidation.deleteDocument),
   initialCallThreeController.deleteDocument

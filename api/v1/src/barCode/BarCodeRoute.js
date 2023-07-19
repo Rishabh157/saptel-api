@@ -2,7 +2,6 @@ const router = require("express").Router();
 const barCodeController = require("./BarCodeController");
 const validate = require("../../middleware/validate");
 const barCodeValidation = require("./BarCodeValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -11,7 +10,6 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  */
 router.get(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.get),
   barCodeController.get
@@ -22,7 +20,6 @@ router.get(
  */
 router.get(
   "/all-by-group/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.getGroupId),
   barCodeController.getAllByGroup
@@ -32,7 +29,6 @@ router.get(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.getDocument),
   barCodeController.getById
@@ -43,7 +39,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.getAllFilter),
   barCodeController.allFilterPagination
@@ -51,7 +46,6 @@ router.post(
 
 router.post(
   "/barcode-group",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.getAllFilter),
   barCodeController.allFilterGroupPagination
@@ -61,7 +55,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.create),
   barCodeController.add
@@ -71,7 +64,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.update),
   barCodeController.update
@@ -81,7 +73,6 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.changeStatus),
   barCodeController.statusChange
@@ -91,7 +82,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(barCodeValidation.deleteDocument),
   barCodeController.deleteDocument

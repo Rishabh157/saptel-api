@@ -2,7 +2,6 @@ const router = require("express").Router();
 const assetCategoryController = require("./AssetsCategoryController");
 const validate = require("../../middleware/validate");
 const assetCategoryValidation = require("./AssetCategoryValidation");
-const { accessModuleCheck } = require("../../middleware/accessModuleCheck");
 const {
   authCheckMiddleware,
   otpVerifyToken,
@@ -14,7 +13,6 @@ const {
  */
 router.get(
   "/company/:companyid",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.get),
   assetCategoryController.get
@@ -25,7 +23,6 @@ router.get(
 
 router.post(
   "/",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.getAllFilter),
   assetCategoryController.allFilterPagination
@@ -36,7 +33,6 @@ router.post(
  */
 router.post(
   "/add",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.create),
   assetCategoryController.add
@@ -46,7 +42,6 @@ router.post(
  */
 router.put(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.update),
   assetCategoryController.update
@@ -57,7 +52,6 @@ router.put(
  */
 router.get(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.getById),
   assetCategoryController.getById
@@ -67,7 +61,6 @@ router.get(
  */
 router.put(
   "/status-change/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.changeStatus),
   assetCategoryController.statusChange
@@ -77,7 +70,6 @@ router.put(
  */
 router.delete(
   "/:id",
-  accessModuleCheck,
   authCheckMiddleware,
   validate(assetCategoryValidation.deleteDocument),
   assetCategoryController.deleteDocument
