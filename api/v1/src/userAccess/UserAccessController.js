@@ -74,10 +74,10 @@ exports.update = async (req, res) => {
     // }
     //------------------Find data-------------------
     let datafound = await userAccessService.getOneByMultiField({
-      _id: idToBeSearch,
+      userId: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `UserAccess not found.`);
+      throw new ApiError(httpStatus.OK, `User not found.`);
     }
 
     let dataUpdated = await userAccessService.getOneAndUpdate(
