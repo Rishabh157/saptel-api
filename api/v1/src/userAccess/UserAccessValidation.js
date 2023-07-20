@@ -25,7 +25,7 @@ const create = {
             actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
-            parentGroup: Joi.array().items(Joi.string()).allow([]),
+            parentGroup: Joi.array().items(Joi.string()).default([]),
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
@@ -66,7 +66,7 @@ const update = {
             actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
-            parentGroup: Joi.array().items(Joi.string()).allow([]),
+            parentGroup: Joi.array().items(Joi.string()).default([]),
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
@@ -106,7 +106,7 @@ const userRoleUpdate = {
             actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
-            parentGroup: Joi.array().items(Joi.string()).allow([]),
+            parentGroup: Joi.array().items(Joi.string()).default([]),
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
