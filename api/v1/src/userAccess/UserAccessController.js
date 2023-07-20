@@ -82,7 +82,7 @@ exports.update = async (req, res) => {
 
     let dataUpdated = await userAccessService.getOneAndUpdate(
       {
-        _id: idToBeSearch,
+        userId: idToBeSearch,
         isDeleted: false,
       },
       {
