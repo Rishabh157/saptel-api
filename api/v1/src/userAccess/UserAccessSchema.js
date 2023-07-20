@@ -66,6 +66,12 @@ const UserAccessSchema = new mongoose.Schema(
                   trim: true,
                 },
 
+                parentGroup: {
+                  type: [String],
+                  required: false,
+                  default: [],
+                },
+
                 fields: {
                   type: [
                     {
