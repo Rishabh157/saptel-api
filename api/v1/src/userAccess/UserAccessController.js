@@ -313,9 +313,12 @@ exports.get = async (req, res) => {
     //if no default query then pass {}
     const userId = req.query.userId;
     const userRoleId = req.query.userRoleId;
-
+    let isUserExists = await userAccessService.getOneByMultiField({
+      userId: userId,
+      isDeleted: false,
+    });
     let matchQueryUser = {};
-    if (userId) {
+    if (userId && isUserExists) {
       matchQueryUser["userId"] = userId;
     }
     if (userRoleId && !matchQueryUser["userId"]) {
@@ -363,24 +366,19 @@ exports.getById = async (req, res) => {
     let idToBeSearch = req.params.userRoleId;
     let userId = req.params.userId;
 
-    let dataExistWithUserId = await userAccessService.getOneByMultiField({
+    let dataExist = await userAccessService.getOneByMultiField({
+      userRoleId: idToBeSearch,
       userId: userId,
       isDeleted: false,
     });
 
-    let dataExistWithUserRole = await userAccessService.getOneByMultiField({
-      userRoleId: idToBeSearch,
-
-      isDeleted: false,
-    });
-
-    if (!dataExistWithUserId || !dataExistWithUserRole) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExistWithUserId ? dataExistWithUserId : dataExistWithUserRole,
+        data: dataExist,
         code: null,
         issue: null,
       });
