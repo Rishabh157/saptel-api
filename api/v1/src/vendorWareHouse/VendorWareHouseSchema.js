@@ -103,36 +103,36 @@ const VendorWareHouseSchema = new mongoose.Schema(
         {
           name: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
-            lowercase: true,
+            default: "",
           },
 
           department: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
-            lowercase: true,
+            default: "",
           },
           designation: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
-            lowercase: true,
+            default: "",
           },
           email: {
             type: String,
-            required: true,
+            required: false,
             trim: true,
-            lowercase: true,
+            default: "",
           },
           mobileNumber: {
             type: String,
-            required: true,
+            required: false,
           },
           landLine: {
             type: String,
-            required: true,
+            required: false,
           },
         },
       ],
