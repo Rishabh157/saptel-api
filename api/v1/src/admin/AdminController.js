@@ -229,6 +229,8 @@ exports.login = async (req, res) => {
           refreshToken: refreshToken,
           userId: userId,
           fullName: `${firstName} ${lastName}`,
+          firstName: firstName,
+          lastName: lastName,
           email: email,
           mobile: mobile,
           userName: userName,

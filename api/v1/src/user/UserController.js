@@ -95,6 +95,8 @@ exports.add = async (req, res) => {
         message: `User added successfull`,
         data: {
           fullName: `${firstName} ${lastName}`,
+          firstName: firstName,
+          lastName: lastName,
           email: email,
           mobile: mobile,
           companyId: companyId,
