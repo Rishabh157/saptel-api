@@ -68,7 +68,7 @@ const UserAccessSchema = new mongoose.Schema(
 
                 parentGroup: {
                   type: [String],
-                  required: false,
+                  required: true,
                   default: [],
                 },
 
