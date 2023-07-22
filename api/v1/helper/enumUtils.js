@@ -161,6 +161,7 @@ const moduleType = Object.freeze({
   cartonBox: "CARTON_BOX",
   company: "COMPANY",
   barcode: "BARCODE",
+  locations: "LOCATIONS",
   country: "COUNTRY",
   state: "STATE",
   district: "DISTRICT",
