@@ -21,7 +21,8 @@ const CompetitorSchema = mongoose.Schema(
     },
     websiteLink: {
       type: String,
-      trim: true,
+      required: false,
+      default: "",
     },
     ytLink: {
       type: String,
@@ -38,8 +39,8 @@ const CompetitorSchema = mongoose.Schema(
     },
     schemePrice: {
       type: Number,
-      trim: true,
-      required: true,
+      required: false,
+      default: 0,
     },
     companyId: {
       type: ObjectId,
