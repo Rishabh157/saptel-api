@@ -1,6 +1,10 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { slotType, slotDaysType, reasonNotShowSlot } = require("../../helper/enumUtils");
+const {
+  slotType,
+  slotDaysType,
+  reasonNotShowSlot,
+} = require("../../helper/enumUtils");
 const SlotMasterSchema = new mongoose.Schema(
   {
     slotName: { type: String, required: true, trim: true, lowercase: true },
@@ -16,12 +20,30 @@ const SlotMasterSchema = new mongoose.Schema(
 
     tapeNameId: { type: ObjectId, required: true },
     channelNameId: { type: ObjectId, required: true },
-
-    slotDate: {
-      type: String,
+    slotPrice: {
+      type: Number,
       required: true,
-      trim: true,
-      lowercase: true,
+      default: 0,
+    },
+    slotContinueStatus: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+
+    slotDay: {
+      type: [String],
+      required: true,
+      enum: [
+        slotDaysType.monday,
+        slotDaysType.tuesday,
+        slotDaysType.wednesday,
+        slotDaysType.thursday,
+        slotDaysType.friday,
+        slotDaysType.saturday,
+        slotDaysType.sunday,
+      ],
+      default: [slotDaysType.monday],
     },
     slotStartTime: {
       type: String,
@@ -95,11 +117,18 @@ const SlotMasterSchema = new mongoose.Schema(
     showOk: {
       type: Boolean,
       required: false,
-      default: true
+      default: true,
     },
     reasonNotShow: {
       type: String,
-      enum: [reasonNotShowSlot.scrollOnNumbers, reasonNotShowSlot.audioWasNotProper, reasonNotShowSlot.disortionInVideo, reasonNotShowSlot.showNotRunFully, reasonNotShowSlot.other, null],
+      enum: [
+        reasonNotShowSlot.scrollOnNumbers,
+        reasonNotShowSlot.audioWasNotProper,
+        reasonNotShowSlot.disortionInVideo,
+        reasonNotShowSlot.showNotRunFully,
+        reasonNotShowSlot.other,
+        null,
+      ],
       uppercase: true,
       default: null,
     },

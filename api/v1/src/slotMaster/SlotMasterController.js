@@ -31,23 +31,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      slotName,
-      channelGroupId,
-      type,
-      tapeNameId,
-      channelNameId,
-      channelTrp,
-      remarks,
-      companyId,
-      channelSlots,
-      run,
-      runStartTime,
-      runEndTime,
-      runRemark,
-      runStatus,
-      runYoutubeLink,
-    } = req.body;
+    let { slotName, channelGroupId, tapeNameId, channelNameId, companyId } =
+      req.body;
 
     const isChannelGroupExists = await channelGroupService.findCount({
       _id: channelGroupId,
@@ -89,31 +74,8 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
-    const output = req.body.channelSlots.map((slot) => {
-      return {
-        slotName: req.body.slotName,
-        channelGroupId: req.body.channelGroupId,
-        tapeNameId: req.body.tapeNameId,
-        channelNameId: req.body.channelNameId,
-        companyId: req.body.companyId,
-        type: req.body.type,
-        channelTrp: req.body.channelTrp,
-        remarks: req.body.remarks,
-        run: req.body.run,
-        runStartTime: req.body.runStartTime,
-        runEndTime: req.body.runEndTime,
-        runRemark: req.body.runRemark,
-        runYoutubeLink: runYoutubeLink,
-        runStatus: runStatus,
-        slotDate: slot.date,
-        slotStartTime: slot.startTime,
-        slotEndTime: slot.endTime,
-        showOk: req.body.showOk,
-        reasonNotShow: req.body.reasonNotShow,
-      };
-    });
     //------------------create data-------------------
-    let dataCreated = await slotMasterService.createMany(output);
+    let dataCreated = await slotMasterService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
