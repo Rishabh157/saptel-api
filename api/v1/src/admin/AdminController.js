@@ -183,9 +183,25 @@ exports.login = async (req, res) => {
     let userName = req.body.userName;
     let password = req.body.password;
     let deviceId = req.headers["device-id"];
-
+    const userIP =
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    const userNewIp = userIP.replace("::ffff:", "");
     let userFound = await userService.getOneByMultiField({ userName });
+    let userAllowedIp = userFound?.allowedIp;
+    let isUserAllowed = false;
+    userAllowedIp?.forEach((ele) => {
+      if (ele === userNewIp) {
+        isUserAllowed = true;
+        return;
+      }
+    });
 
+    if (!isUserAllowed && userAllowedIp[0]?.length) {
+      throw new ApiError(
+        httpStatus.OK,
+        `User not allowed to login, Due to IP restriction.`
+      );
+    }
     if (!userFound) {
       throw new ApiError(httpStatus.OK, `User not found.`);
     }
