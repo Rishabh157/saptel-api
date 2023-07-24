@@ -265,7 +265,14 @@ exports.login = async (req, res) => {
     let { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
+      .send({
+        message,
+        status,
+        data,
+        code,
+        issue,
+        ip: req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+      });
   }
 };
 /*********************************************************************/
