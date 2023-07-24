@@ -151,6 +151,11 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: userEnum.user,
     },
+    allowedIp: {
+      type: [String],
+      required: true,
+      default: [],
+    },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
