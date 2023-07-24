@@ -7,7 +7,7 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     date: Joi.string().optional().allow(""),
-    artist: Joi.string().required(),
+    competitorName: Joi.string().required(),
     productName: Joi.string().lowercase().required(),
     websiteLink: Joi.string().required(),
     video: Joi.string().required(),
@@ -28,7 +28,7 @@ const update = {
   }),
   body: Joi.object().keys({
     date: Joi.string().optional().allow(""),
-    artist: Joi.string().required(),
+    competitorName: Joi.string().required(),
     productName: Joi.string().lowercase().required(),
     websiteLink: Joi.string().required(),
     video: Joi.string().required(),
@@ -50,7 +50,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      artistName: Joi.string().optional(),
+      competitorName: Joi.string().optional(),
     })
     .optional(),
 };

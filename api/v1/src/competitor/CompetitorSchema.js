@@ -8,7 +8,7 @@ const CompetitorSchema = mongoose.Schema(
       required: false,
       default: "",
     },
-    artist: {
+    competitorName: {
       type: String,
       trim: true,
       lowercase: true,
