@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { competitorProductCategory } = require("../../helper/enumUtils");
 
 const CompetitorSchema = mongoose.Schema(
   {
@@ -22,9 +23,10 @@ const CompetitorSchema = mongoose.Schema(
       type: String,
       trim: true,
     },
-    video: {
+    ytLink: {
       type: String,
-      trim: true,
+      required: false,
+      default: "",
     },
     mobileNumber: {
       type: String,
@@ -48,6 +50,25 @@ const CompetitorSchema = mongoose.Schema(
       type: ObjectId,
       required: true,
       trim: true,
+    },
+    languageId: {
+      type: ObjectId,
+      required: true,
+    },
+    image: {
+      type: [String],
+      required: true,
+    },
+    productCategory: {
+      type: String,
+      required: true,
+      enum: [
+        competitorProductCategory.herbal,
+        competitorProductCategory.education,
+        competitorProductCategory.spiritual,
+        competitorProductCategory.other,
+      ],
+      default: [competitorProductCategory.herbal],
     },
     startTime: {
       type: String,

@@ -326,6 +326,13 @@ const reasonNotShowSlot = Object.freeze({
   other: "OTHER",
 });
 
+const competitorProductCategory = Object.freeze({
+  herbal: "HERBAL",
+  education: "EDUCATION",
+  spiritual: "SPIRITUAL",
+  other: "OTHER",
+});
+
 module.exports = {
   allFileEnum,
   tokenEnum,
@@ -354,4 +361,5 @@ module.exports = {
   paymentModeType,
   actionType,
   moduleType,
+  competitorProductCategory,
 };

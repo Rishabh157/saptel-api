@@ -1,5 +1,6 @@
 const competitorService = require("./CompetitorService");
 const companyService = require("../company/CompanyService");
+const languageService = require("../language/LanguageService");
 const ispositionThreeService = require("../dispositionThree/DispositionThreeService");
 const channelMasterService = require("../channelMaster/ChannelMasterService");
 const logger = require("../../../../config/logger");
@@ -28,7 +29,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 // ==============add api start==============
 exports.add = async (req, res) => {
   try {
-    let { mobileNumber, channelNameId, companyId } = req.body;
+    let { mobileNumber, channelNameId, companyId, languageId } = req.body;
 
     // -------check duplicate exist--------
     let dataExist = await competitorService.isExists([]);
@@ -41,6 +42,14 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isLanguageExists = await languageService.findCount({
+      _id: languageId,
+      isDeleted: false,
+    });
+    if (!isLanguageExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Language");
     }
 
     const isChannelExists = await channelMasterService.findCount({
@@ -80,7 +89,7 @@ exports.add = async (req, res) => {
 // ==============upate api start==============
 exports.update = async (req, res) => {
   try {
-    let { channelNameId, companyId } = req.body;
+    let { channelNameId, companyId, languageId } = req.body;
     let idToBeSearch = req.params.id;
 
     let dataExist = await competitorService.isExists([]);
@@ -94,6 +103,14 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isLanguageExists = await languageService.findCount({
+      _id: languageId,
+      isDeleted: false,
+    });
+    if (!isLanguageExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Language");
     }
 
     const isChannelExists = await channelMasterService.findCount({
@@ -318,6 +335,15 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "languages",
+          localField: "languageId",
+          foreignField: "_id",
+          as: "language_data",
+          pipeline: [{ $project: { languageName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           channelName: {
             $cond: {
@@ -326,10 +352,13 @@ exports.allFilterPagination = async (req, res) => {
               else: "",
             },
           },
+          languageLable: {
+            $arrayElemAt: ["$language_data.languageName", 0],
+          },
         },
       },
       {
-        $unset: "channelData",
+        $unset: ["channelData", "language_data"],
       },
     ];
     if (additionalQuery.length) {
