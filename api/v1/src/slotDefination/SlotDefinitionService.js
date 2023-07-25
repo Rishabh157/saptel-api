@@ -1,13 +1,13 @@
-const SlotMaster = require("./SlotDefinitionSchema");
+const SlotDefinition = require("./SlotDefinitionSchema");
 const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return SlotMaster.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return SlotDefinition.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
 
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return SlotMaster.findOne(
+  return SlotDefinition.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
@@ -16,17 +16,17 @@ const getOneByMultiField = async (matchObj, projectObj) => {
 //-------------------------------------------
 
 const createNewData = async (bodyData) => {
-  return SlotMaster.create({ ...bodyData });
+  return SlotDefinition.create({ ...bodyData });
 };
 //-------------------------------------------
 
 const getById = async (id) => {
-  return SlotMaster.findById(id);
+  return SlotDefinition.findById(id);
 };
 //-------------------------------------------
 
 const getByIdAndUpdate = async (id, updateBody) => {
-  return SlotMaster.findByIdAndUpdate(
+  return SlotDefinition.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -35,7 +35,7 @@ const getByIdAndUpdate = async (id, updateBody) => {
 //-------------------------------------------
 
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return SlotMaster.findOneAndUpdate(
+  return SlotDefinition.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -44,7 +44,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return SlotMaster.updateOne(
+  return SlotDefinition.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -53,12 +53,12 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const getByIdAndDelete = async (id) => {
-  return SlotMaster.findByIdAndDelete(id);
+  return SlotDefinition.findByIdAndDelete(id);
 };
 //-------------------------------------------
 
 const getOneAndDelete = async (matchObj) => {
-  return SlotMaster.findOneAndUpdate(
+  return SlotDefinition.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -67,27 +67,30 @@ const getOneAndDelete = async (matchObj) => {
 //-------------------------------------------
 
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return SlotMaster.find({ ...matchObj, isDeleted: false }, { ...projectObj });
+  return SlotDefinition.find(
+    { ...matchObj, isDeleted: false },
+    { ...projectObj }
+  );
 };
 //-------------------------------------------
 
 const findAll = async () => {
-  return SlotMaster.find();
+  return SlotDefinition.find();
 };
 //-------------------------------------------
 
 const aggregateQuery = async (aggregateQueryArray) => {
-  return SlotMaster.aggregate(aggregateQueryArray);
+  return SlotDefinition.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 
 const createMany = async (insertDataArray) => {
-  return SlotMaster.insertMany(insertDataArray);
+  return SlotDefinition.insertMany(insertDataArray);
 };
 //-------------------------------------------
 
 const findCount = async (matchObj) => {
-  return SlotMaster.find({ ...matchObj, isDeleted: false }).count();
+  return SlotDefinition.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
 
