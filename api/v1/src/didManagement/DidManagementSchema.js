@@ -8,6 +8,11 @@ const DidManagementSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    slotId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     schemeId: {
       type: ObjectId,
       required: true,

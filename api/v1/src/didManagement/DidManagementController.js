@@ -12,6 +12,7 @@ const {
   getAllowedField,
 } = require("../../helper/utils");
 const schemeService = require("../scheme/SchemeService");
+const slotDefinitionService = require("../slotDefination/SlotDefinitionService");
 const companyService = require("../company/CompanyService");
 const channelMasterService = require("../channelMaster/ChannelMasterService");
 const {
@@ -33,7 +34,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { didNumber, schemeId, channelId, companyId } = req.body;
+    let { didNumber, schemeId, channelId, companyId, slotId } = req.body;
     /**
      * check duplicate exist
      */
@@ -41,6 +42,11 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    const isSlotIdExists = await slotDefinitionService.findCount({
+      _id: slotId,
+      isDeleted: false,
+    });
     const isSchemeIdExists = await schemeService.findCount({
       _id: schemeId,
       isDeleted: false,
@@ -55,6 +61,10 @@ exports.add = async (req, res) => {
       _id: companyId,
       isDeleted: false,
     });
+
+    if (!isSlotIdExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Slot");
+    }
     if (!isSchemeIdExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme");
     }
@@ -92,7 +102,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { didNumber, schemeId, channelId, companyId } = req.body;
+    let { didNumber, schemeId, channelId, companyId, slotId } = req.body;
 
     let idToBeSearch = req.params.id;
     let dataExist = await didManagementService.isExists(
@@ -106,6 +116,7 @@ exports.update = async (req, res) => {
     let datafound = await didManagementService.getOneByMultiField({
       _id: idToBeSearch,
     });
+
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `DidManagement not found.`);
     }
@@ -117,6 +128,10 @@ exports.update = async (req, res) => {
       _id: channelId,
       isDeleted: false,
     });
+    const isSlotIdExists = await slotDefinitionService.findCount({
+      _id: slotId,
+      isDeleted: false,
+    });
     if (!isChannelExists) {
       throw new ApiError(httpStatus.OK, "Invalid channel");
     }
@@ -125,6 +140,10 @@ exports.update = async (req, res) => {
       _id: companyId,
       isDeleted: false,
     });
+
+    if (!isSlotIdExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Slot");
+    }
     if (!isSchemeIdExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme");
     }
@@ -190,6 +209,21 @@ exports.getByDidNo = async (req, res) => {
       },
       {
         $lookup: {
+          from: "slotmasters",
+          localField: "slotId",
+          foreignField: "_id",
+          as: "slot_data",
+          pipeline: [
+            {
+              $project: {
+                slotName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: "channelmasters",
           localField: "channelId",
           foreignField: "_id",
@@ -208,13 +242,16 @@ exports.getByDidNo = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$scheme_data.schemeName", 0],
           },
+          slotLabel: {
+            $arrayElemAt: ["$slot_data.slotName", 0],
+          },
           channelLabel: {
             $arrayElemAt: ["$channel_data.channelName", 0],
           },
         },
       },
       {
-        $unset: ["channel_data", "scheme_data"],
+        $unset: ["channel_data", "scheme_data", "slot_data"],
       },
     ];
     let dataExist = await didManagementService.aggregateQuery(additionalQuery);
@@ -347,7 +384,21 @@ exports.allFilterPagination = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
-                schemeCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "slotmasters",
+          localField: "slotId",
+          foreignField: "_id",
+          as: "slot_data",
+          pipeline: [
+            {
+              $project: {
+                slotName: 1,
               },
             },
           ],
@@ -373,8 +424,8 @@ exports.allFilterPagination = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$scheme_data.schemeName", 0],
           },
-          schemeCode: {
-            $arrayElemAt: ["$scheme_data.schemeCode", 0],
+          slotLabel: {
+            $arrayElemAt: ["$slot_data.slotName", 0],
           },
           channelLabel: {
             $arrayElemAt: ["$channel_data.channelName", 0],
@@ -382,7 +433,7 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
-        $unset: ["channel_data", "scheme_data"],
+        $unset: ["channel_data", "scheme_data", "slot_data"],
       },
     ];
     if (additionalQuery.length) {
@@ -472,7 +523,21 @@ exports.get = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
-                schemeCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "slotmasters",
+          localField: "slotId",
+          foreignField: "_id",
+          as: "slot_data",
+          pipeline: [
+            {
+              $project: {
+                slotName: 1,
               },
             },
           ],
@@ -498,8 +563,8 @@ exports.get = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$scheme_data.schemeName", 0],
           },
-          schemeCode: {
-            $arrayElemAt: ["$scheme_data.schemeCode", 0],
+          slotLabel: {
+            $arrayElemAt: ["$slot_data.slotName", 0],
           },
           channelLabel: {
             $arrayElemAt: ["$channel_data.channelName", 0],
@@ -507,7 +572,7 @@ exports.get = async (req, res) => {
         },
       },
       {
-        $unset: ["channel_data", "scheme_data"],
+        $unset: ["channel_data", "scheme_data", "slot_data"],
       },
     ];
 
@@ -564,7 +629,21 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
-                schemeCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "slotmasters",
+          localField: "slotId",
+          foreignField: "_id",
+          as: "slot_data",
+          pipeline: [
+            {
+              $project: {
+                slotName: 1,
               },
             },
           ],
@@ -590,8 +669,8 @@ exports.getById = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$scheme_data.schemeName", 0],
           },
-          schemeCode: {
-            $arrayElemAt: ["$scheme_data.schemeCode", 0],
+          slotLabel: {
+            $arrayElemAt: ["$slot_data.slotName", 0],
           },
           channelLabel: {
             $arrayElemAt: ["$channel_data.channelName", 0],
@@ -599,7 +678,7 @@ exports.getById = async (req, res) => {
         },
       },
       {
-        $unset: ["channel_data", "scheme_data"],
+        $unset: ["channel_data", "scheme_data", "slot_data"],
       },
     ];
 
