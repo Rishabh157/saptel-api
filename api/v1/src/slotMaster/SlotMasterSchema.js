@@ -112,7 +112,7 @@ const SlotMasterSchema = new mongoose.Schema(
     runStatus: {
       type: Boolean,
       required: false,
-      default: false,
+      default: null,
     },
     showOk: {
       type: Boolean,
