@@ -20,8 +20,8 @@ const create = {
     slotEndTime: Joi.string().required(),
     slotContinueStatus: Joi.boolean().required(),
     run: Joi.boolean(),
-    runStartTime: Joi.string().allow(""),
-    runEndTime: Joi.string().allow(""),
+    // runStartTime: Joi.string().allow(""),
+    // runEndTime: Joi.string().allow(""),
     runRemark: Joi.string().allow(""),
     runYoutubeLink: Joi.string().allow(""),
     runStatus: Joi.boolean(),
@@ -30,7 +30,7 @@ const create = {
     showOk: Joi.boolean(),
     reasonNotShow: Joi.string().allow(null),
     slotRunImage: Joi.string().allow(""),
-    slotRunVideo: Joi.string().allow(""),
+    // slotRunVideo: Joi.string().allow(""),
   }),
 };
 
@@ -54,8 +54,8 @@ const update = {
     slotEndTime: Joi.string().required(),
     slotContinueStatus: Joi.boolean().required(),
     run: Joi.boolean(),
-    runStartTime: Joi.string().allow(""),
-    runEndTime: Joi.string().allow(""),
+    // runStartTime: Joi.string().allow(""),
+    // runEndTime: Joi.string().allow(""),
     runRemark: Joi.string().allow(""),
     runYoutubeLink: Joi.string().allow(""),
     runStatus: Joi.boolean(),
@@ -64,7 +64,7 @@ const update = {
     showOk: Joi.boolean(),
     reasonNotShow: Joi.string().allow(null),
     slotRunImage: Joi.string().allow(""),
-    slotRunVideo: Joi.string().allow(""),
+    // slotRunVideo: Joi.string().allow(""),
   }),
 };
 
