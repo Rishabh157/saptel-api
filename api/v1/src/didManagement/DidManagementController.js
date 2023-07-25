@@ -209,7 +209,7 @@ exports.getByDidNo = async (req, res) => {
       },
       {
         $lookup: {
-          from: "slotmasters",
+          from: "slotdefinitions",
           localField: "slotId",
           foreignField: "_id",
           as: "slot_data",
@@ -391,7 +391,7 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
-          from: "slotmasters",
+          from: "slotdefinitions",
           localField: "slotId",
           foreignField: "_id",
           as: "slot_data",
@@ -530,7 +530,7 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
-          from: "slotmasters",
+          from: "slotdefinitions",
           localField: "slotId",
           foreignField: "_id",
           as: "slot_data",
@@ -636,7 +636,7 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "slotmasters",
+          from: "slotdefinitions",
           localField: "slotId",
           foreignField: "_id",
           as: "slot_data",
