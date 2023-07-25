@@ -137,6 +137,15 @@ const changeStatus = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+/**
+ * change status of document
+ */
+const pausePlay = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 module.exports = {
   create,
   getAllFilter,
@@ -145,4 +154,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  pausePlay,
 };

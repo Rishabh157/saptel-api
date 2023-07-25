@@ -64,6 +64,16 @@ router.put(
   validate(slotMasterValidation.changeStatus),
   slotMasterController.statusChange
 );
+
+/**
+ * update pause play
+ */
+router.put(
+  "/pause-play/:id",
+  authCheckMiddleware,
+  validate(slotMasterValidation.pausePlay),
+  slotMasterController.pausePlay
+);
 /**
  * delete document
  */
