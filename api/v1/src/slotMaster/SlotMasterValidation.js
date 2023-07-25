@@ -22,6 +22,8 @@ const create = {
     run: Joi.boolean(),
     // runStartTime: Joi.string().allow(""),
     // runEndTime: Joi.string().allow(""),
+    slotRenewal: Joi.string().allow(""),
+
     runRemark: Joi.string().allow(""),
     runYoutubeLink: Joi.string().allow(""),
     runStatus: Joi.boolean().allow(null),
@@ -56,6 +58,8 @@ const update = {
     run: Joi.boolean(),
     // runStartTime: Joi.string().allow(""),
     // runEndTime: Joi.string().allow(""),
+    slotRenewal: Joi.string().allow(""),
+
     runRemark: Joi.string().allow(""),
     runYoutubeLink: Joi.string().allow(""),
     runStatus: Joi.boolean().allow(null),

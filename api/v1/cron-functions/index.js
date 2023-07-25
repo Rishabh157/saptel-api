@@ -33,6 +33,7 @@ exports.addSlotEveryDayFun = async () => {
       remarks: ele.remarks,
       slotPrice: ele.slotPrice,
       slotDay: ele.slotDay,
+      slotRenewal: ele.slotRenewal,
       slotStartTime: ele.slotStartTime,
       slotEndTime: ele.slotEndTime,
       slotContinueStatus: ele.slotContinueStatus,

@@ -72,6 +72,11 @@ const SlotDefinitionSchema = new mongoose.Schema(
       lowercase: true,
       default: "",
     },
+    slotRenewal: {
+      type: String,
+      required: false,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

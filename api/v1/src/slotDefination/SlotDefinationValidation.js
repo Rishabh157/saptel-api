@@ -15,6 +15,7 @@ const create = {
     channelNameId: Joi.string().custom(commonValidation.objectId).required(),
     channelTrp: Joi.string().lowercase().required(),
     slotStartDate: Joi.string().required(),
+    slotRenewal: Joi.string().allow(""),
     slotPrice: Joi.number().required(),
     remarks: Joi.string().lowercase().allow(""),
     slotDay: Joi.array().items(Joi.string()).required(),
@@ -41,6 +42,8 @@ const update = {
     channelNameId: Joi.string().custom(commonValidation.objectId).required(),
     channelTrp: Joi.string().lowercase().required(),
     slotStartDate: Joi.string().required(),
+    slotRenewal: Joi.string().allow(""),
+
     remarks: Joi.string().lowercase().allow(""),
     slotPrice: Joi.number().required(),
     slotDay: Joi.array().items(Joi.string()).required(),

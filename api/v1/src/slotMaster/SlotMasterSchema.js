@@ -109,6 +109,11 @@ const SlotMasterSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    slotRenewal: {
+      type: String,
+      required: false,
+      default: "",
+    },
     runStatus: {
       type: Boolean,
       required: false,
