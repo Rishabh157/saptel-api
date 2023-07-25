@@ -63,7 +63,7 @@ const SlotDefinitionSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    channelTrp: { type: String, required: true, trim: true, lowercase: true },
+    channelTrp: { type: String, required: false, default: "" },
     companyId: { type: ObjectId, required: true, trim: true },
     remarks: {
       type: String,

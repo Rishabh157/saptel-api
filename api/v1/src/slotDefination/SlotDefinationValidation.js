@@ -13,7 +13,7 @@ const create = {
     type: Joi.string().required(),
     tapeNameId: Joi.string().custom(commonValidation.objectId).required(),
     channelNameId: Joi.string().custom(commonValidation.objectId).required(),
-    channelTrp: Joi.string().lowercase().required(),
+    channelTrp: Joi.string().allow(""),
     slotStartDate: Joi.string().required(),
     slotRenewal: Joi.string().allow(""),
     slotPrice: Joi.number().required(),
@@ -40,7 +40,7 @@ const update = {
     type: Joi.string().required(),
     tapeNameId: Joi.string().custom(commonValidation.objectId).required(),
     channelNameId: Joi.string().custom(commonValidation.objectId).required(),
-    channelTrp: Joi.string().lowercase().required(),
+    channelTrp: Joi.string().allow(""),
     slotStartDate: Joi.string().required(),
     slotRenewal: Joi.string().allow(""),
 
