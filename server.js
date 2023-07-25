@@ -6,7 +6,7 @@ const fs = require("fs");
 const port = config.port || 3004;
 const server = http.createServer(app);
 const cron = require("node-cron");
-const { addSlotEveryDayFun } = require("./api/v1/helper/utils");
+const { addSlotEveryDayFun } = require("./api/v1/cron-functions");
 
 // cron for slot add
 cron.schedule("0 12 * * *", async () => {
