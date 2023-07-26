@@ -7,7 +7,6 @@ exports.addSlotEveryDayFun = async () => {
     isDeleted: false,
     slotContinueStatus: true,
   });
-
   const todayDate = moment().format("DD/MM/YYYY");
   const todayDay = moment().format("dddd").toUpperCase();
 
@@ -15,13 +14,14 @@ exports.addSlotEveryDayFun = async () => {
     const slotStartDate = slot?.slotStartDate;
     const slotDay = slot?.slotDay?.map((day) => day.toUpperCase());
 
+    const formattedSlotStartDate = moment(slotStartDate).format("DD/MM/YYYY");
+
     return (
-      moment(slotStartDate, "DD/MM/YYYY").isBefore(
+      moment(formattedSlotStartDate, "DD/MM/YYYY").isBefore(
         moment(todayDate, "DD/MM/YYYY")
       ) && slotDay?.includes(todayDay)
     );
   });
-
   filteredSlots?.forEach(async (ele) => {
     await SlotMaster.createNewData({
       slotName: ele.slotName,
