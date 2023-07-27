@@ -1507,7 +1507,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-// =============all filter pagination api end================
+// =============all filter pagination api end=================
 
 // =============delete start================
 exports.deleteDocument = async (req, res) => {
