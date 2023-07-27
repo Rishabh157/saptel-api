@@ -29,7 +29,7 @@ router.post("/", authCheckMiddleware, orderController.allFilterPagination);
 
 //===============get all pagination filter===============
 router.post(
-  "/dealerid/:dealerId/orders",
+  "/dealer/:dealerId/orders",
   authCheckDealerMiddleware,
   orderController.allFilterDealerOrderPagination
 );
