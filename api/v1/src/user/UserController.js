@@ -558,9 +558,9 @@ exports.getAllDistributionUser = async (req, res) => {
       userDepartment: "DISTRIBUTION_DEPARTMENT",
       userRole: { $in: userRole },
     };
-    if (req.userData.userType === userEnum.user) {
-      matchQuery["_id"] = req.userData.Id;
-    }
+    // if (req.userData.userType === userEnum.user) {
+    //   matchQuery["_id"] = req.userData.Id;
+    // }
     if (
       req.userData.userType !== userEnum.user &&
       req.query &&
@@ -568,9 +568,7 @@ exports.getAllDistributionUser = async (req, res) => {
     ) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-
     let dataExist = await userService.findAllWithQuery(matchQuery);
-
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
