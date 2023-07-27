@@ -5,6 +5,7 @@ const orderController = require("./OrderController");
 const {
   authCheckMiddleware,
   otpVerifyToken,
+  authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
@@ -25,6 +26,13 @@ router.get(
 
 //===============get all pagination filter===============
 router.post("/", authCheckMiddleware, orderController.allFilterPagination);
+
+//===============get all pagination filter===============
+router.post(
+  "/dealerid/:dealerId/orders",
+  authCheckDealerMiddleware,
+  orderController.allFilterDealerOrderPagination
+);
 
 //===============create new document===============
 // router.post(
