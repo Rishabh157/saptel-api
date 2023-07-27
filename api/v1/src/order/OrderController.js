@@ -1134,7 +1134,6 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
-    console.log(dealerId);
     let matchQuery = {
       $and: [
         {
