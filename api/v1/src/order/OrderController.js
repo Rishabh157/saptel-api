@@ -1134,8 +1134,14 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
+    console.log(dealerId);
     let matchQuery = {
-      $and: [{ isDeleted: false, assignDealerId: dealerId }],
+      $and: [
+        {
+          isDeleted: false,
+          assignDealerId: new mongoose.Types.ObjectId(dealerId),
+        },
+      ],
     };
     /**
      * to send only active data on web
@@ -1460,7 +1466,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found`);
+      throw new ApiError(httpStatus.OK, `No data Found here`);
     }
 
     let { limit, page, totalData, skip, totalpages } =
@@ -1476,18 +1482,11 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, orderService);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.order,
-      userRoleData,
-      actionType.pagination
-    );
-    let result = await orderService.aggregateQuery(finalAggregateQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, result);
 
-    if (allowedFields?.length) {
+    let result = await orderService.aggregateQuery(finalAggregateQuery);
+    if (result?.length) {
       return res.status(200).send({
-        data: allowedFields,
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
