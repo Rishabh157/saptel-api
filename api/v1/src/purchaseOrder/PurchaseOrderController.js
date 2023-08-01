@@ -55,7 +55,7 @@ exports.add = async (req, res) => {
       _id: wareHouseId,
       isDeleted: false,
     });
-    if (!isVendorWareHouseExists || !isWareHouseExists) {
+    if (!isVendorWareHouseExists && !isWareHouseExists) {
       throw new ApiError(httpStatus.OK, "Invalid WareHouse");
     }
 
