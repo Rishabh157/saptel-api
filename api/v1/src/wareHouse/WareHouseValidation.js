@@ -10,6 +10,9 @@ const create = {
   body: Joi.object().keys({
     wareHouseCode: Joi.string().lowercase().required(),
     wareHouseName: Joi.string().lowercase().required(),
+    pincodes: Joi.array()
+      .items(Joi.string().custom(commonValidation.objectId))
+      .default([]),
     country: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
     registrationAddress: Joi.object().keys({
@@ -52,6 +55,9 @@ const update = {
   body: Joi.object().keys({
     wareHouseCode: Joi.string().lowercase().required(),
     wareHouseName: Joi.string().lowercase().required(),
+    pincodes: Joi.array()
+      .items(Joi.string().custom(commonValidation.objectId))
+      .default([]),
     country: Joi.string().custom(commonValidation.objectId).required(),
     email: Joi.string().lowercase().required(),
     registrationAddress: Joi.object().keys({
