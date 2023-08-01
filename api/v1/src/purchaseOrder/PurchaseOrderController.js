@@ -5,6 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const purchaseOrderService = require("./PurchaseOrderService");
 const vendorService = require("../vendor/VendorService");
 const wareHouseService = require("../wareHouse/WareHouseService");
+const VendorwareHouseService = require("../vendorWareHouse/VendorWareHouseService");
 const companyService = require("../company/CompanyService");
 const {
   checkIdInCollectionsThenDelete,
@@ -49,7 +50,12 @@ exports.add = async (req, res) => {
       _id: wareHouseId,
       isDeleted: false,
     });
-    if (!isWareHouseExists) {
+
+    const isVendorWareHouseExists = await VendorwareHouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isVendorWareHouseExists || !isWareHouseExists) {
       throw new ApiError(httpStatus.OK, "Invalid WareHouse");
     }
 
