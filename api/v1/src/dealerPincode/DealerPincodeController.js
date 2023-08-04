@@ -88,7 +88,7 @@ exports.add = async (req, res) => {
       );
     }
     //------------------create data-------------------
-    let dataCreated = await dealerPincodeService.createMany(output);
+    let dataCreated = await dealerPincodeService.createMany(transformedData);
 
     //------------------create data-------------------
 
