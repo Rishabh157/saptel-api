@@ -55,10 +55,18 @@ exports.add = async (req, res) => {
         companyId: companyId,
       };
     });
+    const transformedData = output?.flatMap((item) =>
+      item?.pincode?.map((pin) => ({
+        dealerId: item.dealerId,
+        pincode: pin,
+        estTime: item.estTime,
+        companyId: item.companyId,
+      }))
+    );
 
     let isValidPincode = false;
     await Promise.all(
-      output?.map(async (ele) => {
+      transformedData?.map(async (ele) => {
         let pincode = ele?.pincode;
         let dealerId = ele?.dealerId;
 
