@@ -6,6 +6,7 @@ const dealerPincodeService = require("./DealerPincodeService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
 const DealerScheme = require("../dealerScheme/DealerSchemeSchema");
+const DistrictService = require("../district/DistrictService");
 
 const { searchKeys } = require("./DealerPincodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -26,7 +27,7 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dealerId, pincodeDetail, companyId } = req.body;
+    let { dealerId, pincodeDetail, companyId, districtId } = req.body;
     /**
      * check duplicate exist
      */
@@ -47,26 +48,27 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
+    const isDistrictExists = await DistrictService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
+    }
+
     const output = pincodeDetail.map((ele) => {
       return {
         dealerId: dealerId,
+        districtId: districtId,
         pincode: ele?.pincode,
         estTime: ele?.estTime,
         companyId: companyId,
       };
     });
-    const transformedData = output?.flatMap((item) =>
-      item?.pincode?.map((pin) => ({
-        dealerId: item.dealerId,
-        pincode: pin,
-        estTime: item.estTime,
-        companyId: item.companyId,
-      }))
-    );
 
     let isValidPincode = false;
     await Promise.all(
-      transformedData?.map(async (ele) => {
+      output?.map(async (ele) => {
         let pincode = ele?.pincode;
         let dealerId = ele?.dealerId;
 
@@ -88,7 +90,7 @@ exports.add = async (req, res) => {
       );
     }
     //------------------create data-------------------
-    let dataCreated = await dealerPincodeService.createMany(transformedData);
+    let dataCreated = await dealerPincodeService.createMany(output);
 
     //------------------create data-------------------
 
@@ -116,7 +118,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, pincode, estTime, companyId } = req.body;
+    let { dealerId, companyId, districtId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -126,6 +128,22 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isDealerExists = await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+    if (!isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid dealer");
+    }
+
+    const isDistrictExists = await DistrictService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
     }
 
     //------------------Find data-------------------

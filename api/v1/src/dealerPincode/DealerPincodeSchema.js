@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const DealerPincodeSchema = new mongoose.Schema(
   {
     dealerId: { type: ObjectId, required: true, trim: true },
-    pincode: { type: String, required: true },
+    districtId: { type: ObjectId, required: true, trim: true },
+    pincode: { type: [String], required: true },
     estTime: { type: Number, required: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
