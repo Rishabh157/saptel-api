@@ -6,7 +6,6 @@ const dealerPincodeService = require("./DealerPincodeService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
 const DealerScheme = require("../dealerScheme/DealerSchemeSchema");
-const DistrictService = require("../district/DistrictService");
 
 const { searchKeys } = require("./DealerPincodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -27,7 +26,7 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dealerId, pincodeDetail, companyId, districtId } = req.body;
+    let { dealerId, pincodeDetail, companyId } = req.body;
     /**
      * check duplicate exist
      */
@@ -48,18 +47,10 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
-    const isDistrictExists = await DistrictService.findCount({
-      _id: districtId,
-      isDeleted: false,
-    });
-    if (!isDistrictExists) {
-      throw new ApiError(httpStatus.OK, "Invalid District");
-    }
-
     const output = pincodeDetail.map((ele) => {
       return {
         dealerId: dealerId,
-        districtId: districtId,
+        districtId: ele?.districtId,
         pincode: ele?.pincode,
         estTime: ele?.estTime,
         companyId: companyId,
@@ -118,7 +109,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, companyId, districtId } = req.body;
+    let { dealerId, companyId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -136,14 +127,6 @@ exports.update = async (req, res) => {
     });
     if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
-    }
-
-    const isDistrictExists = await DistrictService.findCount({
-      _id: districtId,
-      isDeleted: false,
-    });
-    if (!isDistrictExists) {
-      throw new ApiError(httpStatus.OK, "Invalid District");
     }
 
     //------------------Find data-------------------
