@@ -274,7 +274,7 @@ exports.allFilterPagination = async (req, res) => {
           as: "district_name",
           pipeline: [{ $project: { districtName: 1 } }],
         },
-        billingAddressDistrictName: {
+        districtLabel: {
           $arrayElemAt: ["$district_name.districtName", 0],
         },
       },
@@ -362,7 +362,7 @@ exports.get = async (req, res) => {
           as: "district_name",
           pipeline: [{ $project: { districtName: 1 } }],
         },
-        billingAddressDistrictName: {
+        districtLabel: {
           $arrayElemAt: ["$district_name.districtName", 0],
         },
       },
@@ -416,7 +416,7 @@ exports.getById = async (req, res) => {
       },
       {
         $addFields: {
-          billingAddressDistrictName: {
+          districtLabel: {
             $arrayElemAt: ["$district_name.districtName", 0],
           },
         },
