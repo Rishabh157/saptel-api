@@ -103,6 +103,13 @@ const get = {
     .optional(),
 };
 
+//get by id
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 const getByPincode = {
   params: Joi.object().keys({
     companyid: Joi.string().custom(commonValidation.objectId),
@@ -141,6 +148,7 @@ module.exports = {
   create,
   getAllFilter,
   get,
+  getById,
   update,
   deleteDocument,
   changeStatus,

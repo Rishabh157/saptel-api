@@ -265,7 +265,23 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+        billingAddressDistrictName: {
+          $arrayElemAt: ["$district_name.districtName", 0],
+        },
+      },
+      {
+        $unset: ["district_name"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -336,8 +352,26 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+        billingAddressDistrictName: {
+          $arrayElemAt: ["$district_name.districtName", 0],
+        },
+      },
+      {
+        $unset: ["district_name"],
+      },
+    ];
 
-    let dataExist = await dealerPincodeService.findAllWithQuery(matchQuery);
+    let dataExist = await dealerPincodeService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -346,6 +380,61 @@ exports.get = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//single view api
+exports.getById = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "district_name",
+        },
+      },
+      {
+        $addFields: {
+          billingAddressDistrictName: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["district_name"],
+      },
+    ];
+
+    let dataExist = await dealerPincodeService.aggregateQuery(additionalQuery);
+
+    if (!dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
         code: "OK",
         issue: null,
       });

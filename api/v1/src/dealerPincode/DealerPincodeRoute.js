@@ -15,6 +15,16 @@ router.get(
   dealerPincodeController.get
 );
 
+/**
+ * get by id
+ */
+router.get(
+  "/:id",
+  authCheckMiddleware,
+  validate(dealerPincodeValidation.getById),
+  dealerPincodeController.getById
+);
+
 router.get(
   "/company/:companyid/pincode/:pincode",
   authCheckMiddleware,
