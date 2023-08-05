@@ -272,10 +272,13 @@ exports.allFilterPagination = async (req, res) => {
           localField: "districtId",
           foreignField: "_id",
           as: "district_name",
-          pipeline: [{ $project: { districtName: 1 } }],
         },
-        districtLabel: {
-          $arrayElemAt: ["$district_name.districtName", 0],
+      },
+      {
+        $addFields: {
+          districtLabel: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
         },
       },
       {
@@ -360,10 +363,13 @@ exports.get = async (req, res) => {
           localField: "districtId",
           foreignField: "_id",
           as: "district_name",
-          pipeline: [{ $project: { districtName: 1 } }],
         },
-        districtLabel: {
-          $arrayElemAt: ["$district_name.districtName", 0],
+      },
+      {
+        $addFields: {
+          districtLabel: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
         },
       },
       {
