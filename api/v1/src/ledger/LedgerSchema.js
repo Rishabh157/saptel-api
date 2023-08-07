@@ -13,6 +13,11 @@ const LedgerSchema = new mongoose.Schema(
       uppercase: true,
       default: ledgerType.dealerAmountCredited,
     },
+    taxAmount: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
 
     creditAmount: {
       type: Number,
