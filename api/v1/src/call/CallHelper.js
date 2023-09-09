@@ -47,10 +47,21 @@ exports.getOrderNumber = async () => {
   return orderNumber;
 };
 
-exports.isOrder = async (applicableCriteria) => {
+exports.isOrder = async (applicableCriteriaList) => {
   let applicableCriteriaArray = [applicableCriteria.isOrder];
   let flag = false;
-  applicableCriteria?.map((e) => {
+  applicableCriteriaList?.map((e) => {
+    if (applicableCriteriaArray.includes(e)) {
+      flag = true;
+    }
+  });
+  return flag;
+};
+
+exports.isPrepaid = async (applicableCriteriaList) => {
+  let applicableCriteriaArray = [applicableCriteria.isPrepaid];
+  let flag = false;
+  applicableCriteriaList?.map((e) => {
     if (applicableCriteriaArray.includes(e)) {
       flag = true;
     }

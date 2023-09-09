@@ -71,6 +71,8 @@ const create = {
     preffered_delivery_start_time: Joi.string().allow(""),
     preffered_delivery_end_time: Joi.string().allow(""),
     preffered_delivery_date: Joi.string().allow(""),
+    recordingStartTime: Joi.string().allow(""),
+    recordingEndTime: Joi.string().allow(""),
   }),
 };
 
@@ -144,6 +146,8 @@ const update = {
     preffered_delivery_start_time: Joi.string().allow(""),
     preffered_delivery_end_time: Joi.string().allow(""),
     preffered_delivery_date: Joi.string().allow(""),
+    recordingStartTime: Joi.string().allow(""),
+    recordingEndTime: Joi.string().allow(""),
   }),
 };
 

@@ -15,6 +15,8 @@ const pincodeService = require("../pincode/PincodeService");
 const areaService = require("../area/AreaService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
+const userService = require("../user/UserService");
+
 const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 
 const {
@@ -25,6 +27,7 @@ const {
   isOrder,
   dealerSurvingPincode,
   getAssignWarehouse,
+  isPrepaid,
 } = require("./CallHelper");
 // ----service---------
 const { searchKeys } = require("./CallSchema");
@@ -57,28 +60,27 @@ const {
 exports.add = async (req, res) => {
   try {
     let {
-      countryId,
       stateId,
       schemeId,
       districtId,
       tehsilId,
       pincodeId,
       areaId,
-
+      agentName,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
     } = req.body;
     // ===============check id Exist in DB==========
 
-    const isCounrtyExists =
-      countryId !== null
-        ? await countryService.findCount({
-            _id: countryId,
+    const isUserExists =
+      agentName !== null
+        ? await userService.findCount({
+            userName: agentName,
             isDeleted: false,
           })
         : null;
-    if (countryId !== null && !isCounrtyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Country.");
+    if (agentName !== null && !isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent User Name.");
     }
 
     const isStateExists =
@@ -179,6 +181,12 @@ exports.add = async (req, res) => {
     if (dispositionLevelThreeId !== null && !isDispositionThreeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
     }
+    // getting userId and company id from userName / agentName
+    const userData = await userService.getOneByMultiField({
+      userName: agentName,
+      isDeleted: false,
+    });
+
     // ===============check id Exist in DB end==========
 
     /**
@@ -190,7 +198,11 @@ exports.add = async (req, res) => {
     }
 
     //------------------create data-------------------
-    let dataCreated = await callService.createNewData({ ...req.body });
+    let dataCreated = await callService.createNewData({
+      ...req.body,
+      agentId: userData?._id,
+      companyId: userData?.companyId,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -217,7 +229,6 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let {
-      countryId,
       stateId,
       districtId,
       tehsilId,
@@ -231,6 +242,8 @@ exports.update = async (req, res) => {
       dispositionLevelThreeId,
       agentId,
       agentName,
+      recordingStartTime,
+      recordingEndTime,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -239,12 +252,15 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
-    const isCounrtyExists = await countryService.findCount({
-      _id: countryId,
-      isDeleted: false,
-    });
-    if (!isCounrtyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Country.");
+    const isUserExists =
+      agentName !== null
+        ? await userService.findCount({
+            userName: agentName,
+            isDeleted: false,
+          })
+        : null;
+    if (agentName !== null && !isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent User Name.");
     }
 
     const isStateExists = await stateService.findCount({
@@ -335,8 +351,9 @@ exports.update = async (req, res) => {
 
     // ---------map for order-------
     let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
-
-    let prepaidOrderFlag = paymentMode === "UPI/ONLINE";
+    let prepaidOrderFlag = await isPrepaid(
+      dispositionThreeData[0]?.applicableCriteria
+    );
 
     let dealerServingPincodes = await dealerSurvingPincode(
       pincodeLabel,
@@ -363,26 +380,12 @@ exports.update = async (req, res) => {
       approved: flag ? true : prepaidOrderFlag ? false : true,
       agentId: agentId,
       agentName: agentName,
+      recordingStartTime: recordingStartTime,
+      recordingEndTime: recordingEndTime,
 
       // dealerAssignedId: dealerId,
     });
 
-    // =============create Inquiry=========
-    let isInquiryExist = [applicableCriteria.isInquiry];
-    let existingInquiry = false;
-    dispositionThreeData[0]?.applicableCriteria?.map((e) => {
-      if (isInquiryExist.includes(e)) {
-        existingInquiry = true;
-      }
-    });
-    if (isInquiryExist) {
-      const inquiryNumber = await getInquiryNumber();
-      await InquiryService.createNewData({
-        ...req.body,
-        inquiryNumber: inquiryNumber,
-      });
-    }
-    // =============create Inquiry end=========
     let dataUpdated = await callService.getOneAndUpdate(
       {
         _id: idToBeSearch,

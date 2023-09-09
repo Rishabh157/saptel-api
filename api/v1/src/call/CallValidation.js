@@ -10,8 +10,8 @@ const create = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
-    agentId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    // agentId: Joi.string().custom(commonValidation.objectId).required(),
+    // companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
 
     mobileNo: Joi.string().required(),
@@ -71,6 +71,8 @@ const create = {
     preffered_delivery_start_time: Joi.string().allow(""),
     preffered_delivery_end_time: Joi.string().allow(""),
     preffered_delivery_date: Joi.string().allow(""),
+    recordingStartTime: Joi.string().allow(""),
+    recordingEndTime: Joi.string().allow(""),
   }),
 };
 
@@ -142,6 +144,8 @@ const update = {
     preffered_delivery_start_time: Joi.string().allow(""),
     preffered_delivery_end_time: Joi.string().allow(""),
     preffered_delivery_date: Joi.string().allow(""),
+    recordingStartTime: Joi.string().allow(""),
+    recordingEndTime: Joi.string().allow(""),
   }),
 };
 

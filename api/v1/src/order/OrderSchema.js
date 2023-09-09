@@ -280,7 +280,14 @@ const OrderSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
-
+    recordingStartTime: {
+      type: String,
+      default: "",
+    },
+    recordingEndTime: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,
