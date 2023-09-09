@@ -77,6 +77,7 @@ const DealerUser = require("./src/dealerUser/DealerUserRoute");
 const VendorLedger = require("./src/vendorLedger/VendorLedgerRoute");
 const userAccess = require("./src/userAccess/UserAccessRoute");
 const slotDefinition = require("./src/slotDefination/SlotDefinitionRoute");
+const companyBranchRoute = require("./src/companyBranch/CompanyBranchRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -397,6 +398,10 @@ const defaultRoutes = [
   {
     path: "/slot-definition",
     route: slotDefinition,
+  },
+  {
+    path: "/company-branch",
+    route: companyBranchRoute,
   },
 ];
 orderRoute;

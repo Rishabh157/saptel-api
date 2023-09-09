@@ -194,6 +194,7 @@ const moduleType = Object.freeze({
   websiteBlog: "WEBSITE_BLOG",
   websitePage: "WEBSITE_PAGE",
   websiteTags: "WEBSITE_TAGS",
+  companyBranch: "COMPANY_BRANCH",
 });
 const userDepartmentType = Object.freeze({
   salesDepartment: "SALES_DEPARTMENT",
