@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("./UserService");
 const companyService = require("../company/CompanyService");
+const branchService = require("../companyBranch/CompanyBranchService");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -50,6 +51,7 @@ exports.add = async (req, res) => {
       mobile,
       email,
       companyId,
+      branchId,
       password,
       userDepartment,
       userRole,
@@ -63,6 +65,13 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
+    const isCompanyBranchExists = await branchService.findCount({
+      _id: branchId,
+      isDeleted: false,
+    });
+    if (!isCompanyBranchExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company Branch");
+    }
     /**
      * check duplicate exist
      */
@@ -130,6 +139,7 @@ exports.update = async (req, res) => {
       mobile,
       email,
       companyId,
+      branchId,
       userDepartment,
       userRole,
     } = req.body;
@@ -148,6 +158,13 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isCompanyBranchExists = await branchService.findCount({
+      _id: branchId,
+      isDeleted: false,
+    });
+    if (!isCompanyBranchExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company Branch");
     }
 
     /**
@@ -211,6 +228,7 @@ exports.updateUser = async (req, res) => {
       email,
       password,
       companyId,
+      branchId,
       userDepartment,
       userRole,
     } = req.body;
@@ -229,6 +247,13 @@ exports.updateUser = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isCompanyBranchExists = await branchService.findCount({
+      _id: branchId,
+      isDeleted: false,
+    });
+    if (!isCompanyBranchExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company Branch");
     }
 
     /**
