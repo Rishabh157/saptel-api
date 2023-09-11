@@ -5,7 +5,7 @@ const dealerService = require("../dealer/DealerService");
 const ledgerService = require("../ledger/LedgerService");
 const wareHouseService = require("../wareHouse/WareHouseService");
 const InquiryService = require("../inquiry/InquiryService");
-const orderService = require("../order/OrderService");
+const orderService = require("../orderInquiry/OrderInquiryService");
 const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 
 const { default: mongoose } = require("mongoose");

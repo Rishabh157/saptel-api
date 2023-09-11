@@ -5,10 +5,10 @@ const {
   orderType,
   paymentModeType,
 } = require("../../helper/enumUtils");
-const OrderSchema = new mongoose.Schema(
+const OrderInquiryFlowSchema = new mongoose.Schema(
   {
-    orderNumber: {
-      type: Number,
+    orderId: {
+      type: ObjectId,
       required: true,
     },
     assignDealerId: {
@@ -313,5 +313,5 @@ const searchKeys = [
   "dispositionLevelTwoId",
   "dispositionLevelThreeId",
 ];
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.model("OrderInquiryFlow", OrderInquiryFlowSchema);
 module.exports.searchKeys = [...searchKeys];

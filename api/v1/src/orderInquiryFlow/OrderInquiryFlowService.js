@@ -1,4 +1,4 @@
-const OrderSchema = require("./OrderSchema");
+const OrderSchema = require("./OrderInquiryFlowSchema");
 const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {

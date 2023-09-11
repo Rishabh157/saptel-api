@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 
 // ----service---------
-const orderService = require("./OrderService");
+const orderService = require("./OrderInquiryService");
 // const callService = require("./CallService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
@@ -18,7 +18,7 @@ const dispositionTwoService = require("../dispositionTwo/DispositionTwoService")
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
 // ----service---------
 const mongoose = require("mongoose");
-const { searchKeys } = require("./OrderSchema");
+const { searchKeys } = require("./OrderInquirySchema");
 const { errorRes } = require("../../../utils/resError");
 const {
   getQuery,

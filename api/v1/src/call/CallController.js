@@ -4,9 +4,8 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 // ----service---------
 const callService = require("./CallService");
-const InquiryService = require("../inquiry/InquiryService");
-const orderService = require("../order/OrderService");
-const countryService = require("../country/CountryService");
+const orderService = require("../orderInquiry/OrderInquiryService");
+const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const stateService = require("../state/StateService");
 const schemeService = require("../scheme/SchemeService");
 const districtService = require("../district/DistrictService");
@@ -372,9 +371,23 @@ exports.update = async (req, res) => {
     }
     const orderNumber = await getOrderNumber();
 
-    await orderService.createNewData({
+    const orderInquiry = await orderService.createNewData({
       ...req.body,
       orderNumber: orderNumber,
+      assignDealerId: activeDealer,
+      assignWarehouseId: assignWarehouseId,
+      approved: flag ? true : prepaidOrderFlag ? false : true,
+      agentId: agentId,
+      agentName: agentName,
+      recordingStartTime: recordingStartTime,
+      recordingEndTime: recordingEndTime,
+
+      // dealerAssignedId: dealerId,
+    });
+
+    await orderInquiryFlowService.createNewData({
+      ...req.body,
+      orderId: orderInquiry?._id,
       assignDealerId: activeDealer,
       assignWarehouseId: assignWarehouseId,
       approved: flag ? true : prepaidOrderFlag ? false : true,
@@ -410,6 +423,7 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
+    console.log(err, "err");
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;

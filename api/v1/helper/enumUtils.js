@@ -109,7 +109,7 @@ const genderType = Object.freeze({
 
 const paymentModeType = Object.freeze({
   COD: "COD",
-  UPI_ONLINE: "UPI/ONLINE",
+  UPI_ONLINE: "ONLINE",
 });
 
 const userEnum = Object.freeze({

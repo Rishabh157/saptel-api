@@ -59,7 +59,8 @@ const websitePageRoute = require("./src/websitePage/WebsitePageRoute");
 const websiteBlogRoute = require("./src/websiteBlog/WebsiteBlogRoute");
 const complaintDispositionRoute = require("./src/complaintDisposition/ComplaintDispositionRoute");
 const callRoute = require("./src/call/CallRoute");
-const orderRoute = require("./src/order/OrderRoute");
+const orderInquiryRoute = require("./src/orderInquiry/OrderInquiryRoute");
+const orderInquiryFlowRoute = require("./src/orderInquiryFlow/OrderInquiryFlowRoute");
 const assetCategoryRoute = require("./src/assetCategory/AssetCategoryRoute");
 const assetRoute = require("./src/asset/AssetRoute");
 const websiteMetaTagRoute = require("./src/websiteMetaTag/WebsiteMetaTagRoute");
@@ -326,8 +327,12 @@ const defaultRoutes = [
     route: callRoute,
   },
   {
-    path: "/order",
-    route: orderRoute,
+    path: "/order-inquiry",
+    route: orderInquiryRoute,
+  },
+  {
+    path: "/order-inquiry-flow",
+    route: orderInquiryFlowRoute,
   },
 
   {
@@ -404,7 +409,7 @@ const defaultRoutes = [
     route: companyBranchRoute,
   },
 ];
-orderRoute;
+// orderRoute;
 
 defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);

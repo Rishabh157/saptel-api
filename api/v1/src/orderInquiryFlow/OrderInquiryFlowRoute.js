@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const validate = require("../../middleware/validate");
-const orderValidation = require("./OrderValidation");
-const orderController = require("./OrderController");
+const orderValidation = require("./OrderInquiryFlowValidation");
+const orderController = require("./OrderInquiryFlowController");
 const {
   authCheckMiddleware,
   otpVerifyToken,
