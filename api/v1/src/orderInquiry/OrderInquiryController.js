@@ -5,6 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 
 // ----service---------
 const orderService = require("./OrderInquiryService");
+const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 // const callService = require("./CallService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
@@ -175,6 +176,13 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
+    await orderInquiryFlowService.createNewData({
+      ...req.body,
+      orderId: idToBeSearch,
+      approved: approved,
+      dispositionLevelTwoId,
+      dispositionLevelThreeId,
+    });
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
