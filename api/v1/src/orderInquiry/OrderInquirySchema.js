@@ -7,30 +7,6 @@ const {
   paymentModeType,
 } = require("../../helper/enumUtils");
 
-const CustomIdSchema = new mongoose.Schema({
-  collectionName: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  sequence: {
-    type: Number,
-    default: 0,
-  },
-});
-
-const CustomId = mongoose.model("CustomId", CustomIdSchema);
-
-// Create a function to generate and return the next custom numeric ID
-async function getNextCustomId(collectionName) {
-  const result = await CustomId.findOneAndUpdate(
-    { collectionName },
-    { $inc: { sequence: 1 } },
-    { new: true, upsert: true }
-  );
-
-  return result.sequence;
-}
 const OrderInquirySchema = new mongoose.Schema(
   {
     orderNumber: {
@@ -339,12 +315,6 @@ const searchKeys = [
   "dispositionLevelTwoId",
   "dispositionLevelThreeId",
 ];
-OrderInquirySchema.pre("save", async function (next) {
-  if (!this._id) {
-    this._id = await getNextCustomId("ChannelCategory");
-  }
-  next();
-});
 
 module.exports = mongoose.model("OrderInquiry", OrderInquirySchema);
 module.exports.searchKeys = [...searchKeys];
