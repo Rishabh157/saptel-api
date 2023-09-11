@@ -86,8 +86,8 @@ const update = {
   body: Joi.object().keys({
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
-    agentId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    // agentId: Joi.string().custom(commonValidation.objectId).required(),
+    // companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
     mobileNo: Joi.string().required(),
     alternateNo: Joi.string().allow(""),
