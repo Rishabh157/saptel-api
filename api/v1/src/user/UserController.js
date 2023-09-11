@@ -411,7 +411,33 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "companybranches",
+          localField: "branchId",
+          foreignField: "_id",
+          as: "branch_data",
+          pipeline: [
+            {
+              $project: {
+                branchName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          branchLabel: {
+            $arrayElemAt: ["$branch_data.branchName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["branch_data"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -495,13 +521,42 @@ exports.get = async (req, res) => {
     ) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "companybranches",
+          localField: "branchId",
+          foreignField: "_id",
+          as: "branch_data",
+          pipeline: [
+            {
+              $project: {
+                branchName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          branchLabel: {
+            $arrayElemAt: ["$branch_data.branchName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["branch_data"],
+      },
+    ];
     let userRoleData = await getUserRoleData(req, userService);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.user,
       userRoleData,
       actionType.listAll
     );
-    let dataExist = await userService.findAllWithQuery(matchQuery);
+    let dataExist = await userService.aggregateQuery(additionalQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
     if (!allowedFields || !allowedFields?.length) {
@@ -530,25 +585,55 @@ exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "companybranches",
+          localField: "branchId",
+          foreignField: "_id",
+          as: "branch_data",
+          pipeline: [
+            {
+              $project: {
+                branchName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          branchLabel: {
+            $arrayElemAt: ["$branch_data.branchName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["branch_data"],
+      },
+    ];
     let userRoleData = await getUserRoleData(req, userService);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.user,
       userRoleData,
       actionType.view
     );
-    let dataExist = await userService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
+    let dataExist = await userService.aggregateQuery(additionalQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!dataExist) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: allowedFields,
         code: "OK",
         issue: null,
       });
