@@ -2,11 +2,7 @@ const router = require("express").Router();
 const validate = require("../../middleware/validate");
 const orderValidation = require("./OrderInquiryFlowValidation");
 const orderController = require("./OrderInquiryFlowController");
-const {
-  authCheckMiddleware,
-  otpVerifyToken,
-  authCheckDealerMiddleware,
-} = require("../../middleware/authenticationCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
@@ -28,11 +24,6 @@ router.get(
 router.post("/", authCheckMiddleware, orderController.allFilterPagination);
 
 //===============get all pagination filter===============
-router.post(
-  "/dealer/:dealerId/orders",
-  authCheckDealerMiddleware,
-  orderController.allFilterDealerOrderPagination
-);
 
 //===============create new document===============
 // router.post(
