@@ -8,7 +8,7 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 router.get(
   "/",
   authCheckMiddleware,
-  //   validate(orderValidation.get),
+  validate(orderValidation.get),
   orderController.get
 );
 

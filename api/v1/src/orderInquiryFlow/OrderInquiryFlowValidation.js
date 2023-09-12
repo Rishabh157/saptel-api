@@ -202,7 +202,7 @@ const getAllFilter = {
 const get = {
   query: Joi.object()
     .keys({
-      _id: Joi.string().custom(commonValidation.objectId).optional(),
+      orderId: Joi.string().custom(commonValidation.objectId).optional(),
     })
     .optional(),
 };

@@ -164,6 +164,7 @@ const moduleType = Object.freeze({
   inquiry: "INQUIRY",
   callerPage: "CALLER_PAGE",
   order: "ORDER",
+  order_inquiry_flow: "ORDER_INQUIRY_FLOW",
   attribute: "ATTRIBUTE",
   attributeGroup: "ATTRIBUTE_GROUP",
   productCategory: "PRODUCT_CATEGORY",
