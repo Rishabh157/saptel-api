@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const {
   genderType,
-  orderType,
+  orderStatusEnum,
   paymentModeType,
 } = require("../../helper/enumUtils");
 const OrderInquiryFlowSchema = new mongoose.Schema(
@@ -287,6 +287,23 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     recordingEndTime: {
       type: String,
       default: "",
+    },
+    status: {
+      type: String,
+      enum: [
+        orderStatusEnum.all,
+        orderStatusEnum.fresh,
+        orderStatusEnum.prepaid,
+        orderStatusEnum.delivered,
+        orderStatusEnum.doorCancelled,
+        orderStatusEnum.hold,
+        orderStatusEnum.psc,
+        orderStatusEnum.una,
+        orderStatusEnum.pnd,
+        orderStatusEnum.urgent,
+        orderStatusEnum.nonAction,
+      ],
+      default: orderStatusEnum.fresh,
     },
     isDeleted: {
       type: Boolean,

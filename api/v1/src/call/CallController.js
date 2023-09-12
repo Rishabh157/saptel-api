@@ -243,6 +243,7 @@ exports.update = async (req, res) => {
       agentName,
       recordingStartTime,
       recordingEndTime,
+      status,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -373,6 +374,7 @@ exports.update = async (req, res) => {
 
     const orderInquiry = await orderService.createNewData({
       ...req.body,
+      status: status,
       orderNumber: orderNumber,
       assignDealerId: activeDealer,
       assignWarehouseId: assignWarehouseId,
@@ -387,6 +389,7 @@ exports.update = async (req, res) => {
 
     await orderInquiryFlowService.createNewData({
       ...req.body,
+      status: status,
       orderId: orderInquiry?._id,
       assignDealerId: activeDealer,
       assignWarehouseId: assignWarehouseId,
@@ -406,6 +409,7 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
+          status: status,
           ...req.body,
         },
       }

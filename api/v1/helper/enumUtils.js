@@ -118,6 +118,20 @@ const userEnum = Object.freeze({
   superAdmin: "SUPER_ADMIN",
 });
 
+const orderStatusEnum = Object.freeze({
+  fresh: "FRESH",
+  all: "ALL",
+  prepaid: "PREPAID",
+  delivered: "DELIVERD",
+  doorCancelled: "DOOCANCELLED",
+  hold: "HOLD",
+  psc: "PSC",
+  una: "UNA",
+  pnd: "PND",
+  urgent: "URGENT",
+  nonAction: "NON_ACTION",
+});
+
 const apiAppEnum = Object.freeze({
   web: "web",
   app: "app",
@@ -363,4 +377,5 @@ module.exports = {
   actionType,
   moduleType,
   competitorProductCategory,
+  orderStatusEnum,
 };

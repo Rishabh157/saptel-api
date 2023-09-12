@@ -1,6 +1,11 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { genderType, paymentModeType } = require("../../helper/enumUtils");
+const {
+  genderType,
+  paymentModeType,
+  orderStatusEnum,
+} = require("../../helper/enumUtils");
+
 const CallSchema = new mongoose.Schema(
   {
     didNo: {
@@ -290,6 +295,23 @@ const CallSchema = new mongoose.Schema(
     recordingEndTime: {
       type: String,
       default: "",
+    },
+    status: {
+      type: String,
+      enum: [
+        orderStatusEnum.all,
+        orderStatusEnum.fresh,
+        orderStatusEnum.prepaid,
+        orderStatusEnum.delivered,
+        orderStatusEnum.doorCancelled,
+        orderStatusEnum.hold,
+        orderStatusEnum.psc,
+        orderStatusEnum.una,
+        orderStatusEnum.pnd,
+        orderStatusEnum.urgent,
+        orderStatusEnum.nonAction,
+      ],
+      default: orderStatusEnum.fresh,
     },
 
     isDeleted: {
