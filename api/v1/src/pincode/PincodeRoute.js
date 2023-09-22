@@ -33,9 +33,16 @@ router.get(
  * get all pincodes of a country without token
  */
 router.get(
-  "/get-country-pincode/inbound/:id",
+  "/get-country-pincode/unauth/:id",
   validate(pincodeValidation.get),
   pincodeController.getPincodeByCountry
+);
+
+// all area of a pincode
+router.get(
+  "/get-tehsil-pincode/unauth/:id",
+  validate(pincodeValidation.get),
+  pincodeController.getPincodeByTehsil
 );
 
 /**

@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const wareHouseService = require("./WareHouseService");
 const companyService = require("../company/CompanyService");
+const dealerService = require("../dealer/DealerService");
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -41,7 +42,7 @@ exports.add = async (req, res) => {
       registrationAddress,
       billingAddress,
       contactInformation,
-
+      dealerId,
       companyId,
       gstNumber,
       gstCertificate,
@@ -53,6 +54,17 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isDealerExists =
+      dealerId !== null
+        ? await dealerService.findCount({
+            _id: dealerId,
+            isDeleted: false,
+          })
+        : null;
+    if (dealerId !== null && !isDealerExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer.");
     }
 
     /**

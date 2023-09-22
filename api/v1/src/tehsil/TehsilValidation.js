@@ -90,6 +90,12 @@ const get = {
     })
     .optional(),
 };
+
+const getTehsilByPincode = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 /**
  * get a document
  */
@@ -123,4 +129,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getTehsilByPincode,
 };

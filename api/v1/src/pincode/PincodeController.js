@@ -676,6 +676,37 @@ exports.getById = async (req, res) => {
   }
 };
 
+// get all pincodes by tehsil
+exports.getPincodeByTehsil = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+    let dataExist = await pincodeService.findAllWithQuery({
+      tehsilId: idToBeSearch,
+      isDeleted: false,
+    });
+
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //get all pincode of a country api
 exports.getPincodeByCountry = async (req, res) => {
   try {

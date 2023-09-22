@@ -37,6 +37,24 @@ router.get(
   validate(stateValidation.get),
   stateController.getStateByCountry
 );
+
+/**
+ * get all state by pincode without token
+ */
+router.get(
+  "/get-state-by-pincode/unauth/:id",
+  validate(stateValidation.getStateByPincode),
+  stateController.getStateByPincode
+);
+
+/**
+ * get all state by pincode without token
+ */
+router.get(
+  "/get-all-by-pincode/unauth/:pincode",
+  validate(stateValidation.getallByPincode),
+  stateController.getAllByPincode
+);
 /**
  * get one document
  */

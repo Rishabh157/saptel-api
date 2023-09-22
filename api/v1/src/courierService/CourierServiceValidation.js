@@ -8,13 +8,15 @@ const commonValidation = require("../../helper/CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    area: Joi.string().lowercase().required(),
-    pincodeId: Joi.string().custom(commonValidation.objectId).required(),
-    tehsilId: Joi.string().custom(commonValidation.objectId).required(),
-    districtId: Joi.string().custom(commonValidation.objectId).required(),
-    stateId: Joi.string().custom(commonValidation.objectId).required(),
-    countryId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    pickup_pincode: Joi.number(),
+    delivery_pincode: Joi.number(),
+    weight: Joi.number(),
+    paymentmode: Joi.string().lowercase(),
+    invoicevalue: Joi.number(),
+    length: Joi.number(),
+    width: Joi.number(),
+    height: Joi.number(),
+    weight2: Joi.number(),
   }),
 };
 
@@ -26,13 +28,15 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    area: Joi.string().lowercase().required(),
-    pincodeId: Joi.string().custom(commonValidation.objectId).required(),
-    tehsilId: Joi.string().custom(commonValidation.objectId).required(),
-    districtId: Joi.string().custom(commonValidation.objectId).required(),
-    stateId: Joi.string().custom(commonValidation.objectId).required(),
-    countryId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    pickup_pincode: Joi.number(),
+    delivery_pincode: Joi.number(),
+    weight: Joi.number(),
+    paymentmode: Joi.string().lowercase(),
+    invoicevalue: Joi.number(),
+    length: Joi.number(),
+    width: Joi.number(),
+    height: Joi.number(),
+    weight2: Joi.number(),
   }),
 };
 
@@ -87,34 +91,23 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      area: Joi.string().optional(),
-      pincodeId: Joi.string().optional(),
-      tehsilId: Joi.string().optional(),
-      districtId: Joi.string().optional(),
-      stateId: Joi.string().optional(),
-      countryId: Joi.string().optional(),
     })
     .optional(),
 };
 
 /**
- * get a document
+ * delete a document
  */
-const getDocument = {
+const deleteDocument = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
-const getAreaByPincode = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
 /**
- * delete a document
+ * get by id
  */
-const deleteDocument = {
+const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
@@ -135,6 +128,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getDocument,
-  getAreaByPincode,
+  getById,
 };

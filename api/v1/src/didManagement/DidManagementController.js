@@ -202,6 +202,7 @@ exports.getByDidNo = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
+                productInformation: 1,
               },
             },
           ],
@@ -242,6 +243,10 @@ exports.getByDidNo = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$scheme_data.schemeName", 0],
           },
+          schemeProductGroup: {
+            $arrayElemAt: ["$scheme_data.productInformation", 0],
+          },
+
           slotLabel: {
             $arrayElemAt: ["$slot_data.slotName", 0],
           },

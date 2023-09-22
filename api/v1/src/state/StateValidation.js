@@ -84,6 +84,17 @@ const get = {
     })
     .optional(),
 };
+
+const getStateByPincode = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+const getallByPincode = {
+  params: Joi.object().keys({
+    pincode: Joi.string(),
+  }),
+};
 /**
  * get a document
  */
@@ -117,4 +128,6 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getStateByPincode,
+  getallByPincode,
 };

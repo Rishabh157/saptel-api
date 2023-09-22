@@ -37,10 +37,18 @@ router.get(
  * get all district of a state without token
  */
 router.get(
-  "/get-state-district/inbound/:id",
-
+  "/get-state-district/unauth/:id",
   validate(districtValidation.get),
   districtController.getStateDistrict
+);
+
+/**
+ * get all district by pincode without token
+ */
+router.get(
+  "/get-district-by-pincode/unauth/:id",
+  validate(districtValidation.getDistrictByPincode),
+  districtController.getDistrictByPincode
 );
 /**
  * get one document

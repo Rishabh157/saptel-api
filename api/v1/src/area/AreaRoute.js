@@ -36,7 +36,7 @@ router.get(
  * get all area by pincode without token
  */
 router.get(
-  "/get-area-by-pincode/inbound/:id",
+  "/get-area-by-pincode/unauth/:id",
   validate(areaValidation.getAreaByPincode),
   areaController.getAreaByPincode
 );

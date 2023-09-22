@@ -87,6 +87,11 @@ const get = {
     })
     .optional(),
 };
+const getDistrictByPincode = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 
 /**
  * get a document
@@ -121,4 +126,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getDistrictByPincode,
 };

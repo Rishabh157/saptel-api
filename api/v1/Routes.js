@@ -79,6 +79,7 @@ const VendorLedger = require("./src/vendorLedger/VendorLedgerRoute");
 const userAccess = require("./src/userAccess/UserAccessRoute");
 const slotDefinition = require("./src/slotDefination/SlotDefinitionRoute");
 const companyBranchRoute = require("./src/companyBranch/CompanyBranchRoute");
+const courierServiceRoute = require("./src/courierService/CourierServiceRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -407,6 +408,10 @@ const defaultRoutes = [
   {
     path: "/company-branch",
     route: companyBranchRoute,
+  },
+  {
+    path: "/courier-service",
+    route: courierServiceRoute,
   },
 ];
 // orderRoute;

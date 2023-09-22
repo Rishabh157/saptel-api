@@ -4,6 +4,11 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const stateService = require("./StateService");
 const companyService = require("../company/CompanyService");
+const areaService = require("../area/AreaService");
+const districtService = require("../district/DistrictService");
+const pincodeService = require("../pincode/PincodeService");
+
+const tehsilService = require("../tehsil/TehsilService");
 const countryService = require("../country/CountryService");
 const { searchKeys } = require("./StateSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -376,6 +381,86 @@ exports.getById = async (req, res) => {
         issue: null,
       });
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//get state by pincode
+exports.getStateByPincode = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+    let dataExist = await stateService.findAllWithQuery({
+      pincodeId: idToBeSearch,
+      isDeleted: false,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get all by pincode
+exports.getAllByPincode = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let pincodeToBeSearch = req.params.pincode;
+    let pincodedata = await pincodeService.getOneByMultiField({
+      isDeleted: false,
+      pincode: pincodeToBeSearch,
+    });
+    if (!pincodedata) {
+      throw new ApiError(httpStatus.OK, "Pincode not found");
+    }
+    let StateDataExist = await stateService.findAllWithQuery({
+      _id: pincodedata?.stateId,
+      isDeleted: false,
+    });
+    let tehsilDataExist = await tehsilService.findAllWithQuery({
+      _id: pincodedata?.tehsilId,
+      isDeleted: false,
+    });
+    let districtDataExist = await districtService.findAllWithQuery({
+      _id: pincodedata?.districtId,
+      isDeleted: false,
+    });
+    let areaDataExist = await areaService.findAllWithQuery({
+      pincodeId: pincodedata?._id,
+      isDeleted: false,
+    });
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      stateData: StateDataExist,
+      tehsilData: tehsilDataExist,
+      districtData: districtDataExist,
+      areaData: areaDataExist,
+      pincodeData: pincodedata,
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

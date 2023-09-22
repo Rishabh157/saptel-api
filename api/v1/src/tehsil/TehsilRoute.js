@@ -30,11 +30,18 @@ router.get(
 );
 
 /**
+ * get all tehsil by pincode without token
+ */
+router.get(
+  "/get-tehsil-by-pincode/unauth/:id",
+  validate(tehsilValidation.getTehsilByPincode),
+  tehsilController.getTehsilByPincode
+);
+/**
  * get all tehsil of a district without token
  */
 router.get(
-  "/get-district-tehsil/inbound/:id",
-
+  "/get-district-tehsil/unauth/:id",
   validate(tehsilValidation.get),
   tehsilController.getTehsilByDistrict
 );
