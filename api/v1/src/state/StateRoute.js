@@ -18,7 +18,11 @@ router.get(
 /**
  * get all documents without token
  */
-router.get("/inbound", validate(stateValidation.get), stateController.get);
+router.get(
+  "/unauth-state",
+  validate(stateValidation.get),
+  stateController.getUnauth
+);
 /**
  * get all state's of a country
  */

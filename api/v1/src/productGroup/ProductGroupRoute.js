@@ -21,7 +21,7 @@ router.get(
 router.get(
   "/company/:companyid/unauth/all-product-group",
   validate(productGroupValidation.get),
-  productGroupController.get
+  productGroupController.getUnauth
 );
 /**
  * get one document

@@ -18,6 +18,12 @@ router.post(
   callController.allFilterPagination
 );
 
+router.post(
+  "/unauth-call",
+  validate(callValidation.getAllFilter),
+  callController.allFilterPaginationUnauth
+);
+
 /**
  * create new document
  */

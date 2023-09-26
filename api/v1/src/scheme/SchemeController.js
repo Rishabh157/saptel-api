@@ -503,22 +503,15 @@ exports.getByProductGroup = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, schemeService);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.scheme,
-      userRoleData,
-      actionType.view
-    );
     let dataExist = await schemeService.aggregateQuery(additionalQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields?.length) {
+    if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields,
+        data: dataExist,
         code: "OK",
         issue: null,
       });

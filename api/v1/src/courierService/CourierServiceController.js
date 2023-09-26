@@ -53,10 +53,10 @@ exports.add = async (req, res) => {
 
     if (courierServiceData) {
       return res.status(200).send({
-        message: "",
-        data: courierServiceData.status,
+        message: "rdggfdg",
+        data: courierServiceData,
         status: true,
-        code: courierServiceData?.status_code,
+        code: 200,
         issue: null,
       });
     } else {

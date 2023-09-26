@@ -26,6 +26,9 @@ router.get(
 //===============get all pagination filter===============
 router.post("/", authCheckMiddleware, inquiryController.allFilterPagination);
 
+//===============get all pagination filter===============
+router.post("/unauth-inquiry", inquiryController.allFilterPaginationUnauth);
+
 //===============create new document===============
 // router.post(
 //   "/add",

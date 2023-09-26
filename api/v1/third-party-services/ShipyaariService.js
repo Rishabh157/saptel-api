@@ -2,10 +2,10 @@ const { default: axios } = require("axios");
 const qs = require("qs");
 
 // Shipyaari Auth keys
-const avnkey = "123@123";
-const serviceType = "normal";
-const partner = "123";
-const service = "standard";
+const avnkey = "22140@25394";
+const serviceType = "";
+const partner = "";
+const service = "";
 
 const getEstTimeFromShipYaari = async (data) => {
   try {
@@ -23,6 +23,7 @@ const getEstTimeFromShipYaari = async (data) => {
       formData,
       { headers: HEADER }
     );
+    console.log(response, "response");
     if (response) {
       return response.data;
     }

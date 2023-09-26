@@ -34,7 +34,7 @@ router.post(
 router.post(
   "/get-est-time",
 
-  authCheckMiddleware,
+  // authCheckMiddleware,
   validate(courierServiceValidation.create),
   courierServiceController.add
 );

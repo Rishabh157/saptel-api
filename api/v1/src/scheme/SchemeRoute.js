@@ -36,7 +36,7 @@ router.get(
  * get one document without token
  */
 router.get(
-  "/inbound/:id",
+  "/unauth/:id",
   validate(schemeValidation.getDocument),
   schemeController.getById
 );

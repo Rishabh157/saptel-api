@@ -14,10 +14,10 @@ router.get(
 
 //===============get one document (if query) / all document  (without token)===============
 router.get(
-  "/unauth/",
+  "/unauth-dp2",
   // authCheckMiddleware,
   validate(dispositionTwoValidation.get),
-  dispositionTwoController.get
+  dispositionTwoController.getAuth
 );
 
 //===============get all document fo dispositionTwo Id Wihtout token===============

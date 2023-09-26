@@ -223,6 +223,71 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// =============get Disposition unauth start================
+exports.getAuth = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let matchQuery = {
+      isDeleted: false,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dispositionones",
+          localField: "dispositionOneId",
+          foreignField: "_id",
+          as: "dispositionData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispostionOneLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dispositionData"],
+      },
+    ];
+
+    let dataExist = await dispositionTwoService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // =============update Disposition start end================
 
 // =============get DispositionTwo by Id start================
