@@ -1,6 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const BarCodeSchema = new mongoose.Schema(
+const BarCodeFlowSchema = new mongoose.Schema(
   {
     productGroupId: { type: ObjectId, required: true, trim: true },
     barcodeNumber: { type: String, required: true, trim: true },
@@ -9,6 +9,7 @@ const BarCodeSchema = new mongoose.Schema(
     isUsed: { type: Boolean, default: false },
     wareHouseId: { type: ObjectId, default: null, trim: true },
     dealerId: { type: ObjectId, default: null, trim: true },
+
     status: {
       type: String,
       enum: ["AT_WAREHOUSE", "AT_DEALER_WAREHOUSE", "IN_TRANSIT", "DELIVERED"],
@@ -38,5 +39,5 @@ const searchKeys = [
   "barcodeGroupNumber",
   "lotNumber",
 ];
-module.exports = mongoose.model("BarCode", BarCodeSchema);
+module.exports = mongoose.model("BarCodeFlow", BarCodeFlowSchema);
 module.exports.searchKeys = [...searchKeys];

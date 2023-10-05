@@ -18,6 +18,13 @@ router.get(
   wareHouseController.get
 );
 
+router.get(
+  "/company/:companyid/dealer/:dealerid",
+  authCheckMiddleware,
+  validate(wareHouseValidation.getDocumentByDealerid),
+  wareHouseController.getByDealerId
+);
+
 /**
  * get one document
  */

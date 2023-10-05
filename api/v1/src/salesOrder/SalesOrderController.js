@@ -206,6 +206,9 @@ exports.update = async (req, res) => {
 exports.updateLevel = async (req, res) => {
   try {
     let {
+      dhApprovedAt,
+      accApprovedAt,
+      type,
       dhApprovedById,
       accApprovedById,
       dhApprovedActionBy,
@@ -213,17 +216,23 @@ exports.updateLevel = async (req, res) => {
     } = req.body;
 
     let idToBeSearch = req.params.id;
-    // let dataExist = await purchaseOrderService.isExists(
-    //   [{ poCode }],
-    //   idToBeSearch
-    // );
-    // if (dataExist.exists && dataExist.existsSummary) {
-    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    // }
+
+    let dataToSend = {};
+    if (type === "ACC") {
+      (dataToSend.accApprovedById = accApprovedById),
+        (dataToSend.accApprovedActionBy = accApprovedActionBy),
+        (dataToSend.accApprovedAt = accApprovedAt);
+      dataToSend.accApproved = true;
+    } else {
+      (dataToSend.dhApprovedById = dhApprovedById),
+        (dataToSend.dhApprovedActionBy = dhApprovedActionBy),
+        (dataToSend.dhApprovedAt = dhApprovedAt);
+      dataToSend.dhApproved = true;
+    }
 
     //------------------Find data-------------------
     let datafound = await salesOrderService.getOneByMultiField({
-      _id: idToBeSearch,
+      _id: new mongoose.Types.ObjectId(idToBeSearch),
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Sales order not found.`);
@@ -231,16 +240,11 @@ exports.updateLevel = async (req, res) => {
 
     const dataUpdated = await salesOrderService.getOneAndUpdate(
       {
-        _id: idToBeSearch,
+        _id: new mongoose.Types.ObjectId(idToBeSearch),
         isDeleted: false,
       },
       {
-        $push: {
-          accApprovedById: accApprovedById,
-          dhApprovedById: dhApprovedById,
-          dhApprovedActionBy: dhApprovedActionBy,
-          accApprovedActionBy: accApprovedActionBy,
-        },
+        $set: dataToSend,
       }
     );
 

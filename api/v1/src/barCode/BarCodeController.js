@@ -4,6 +4,9 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const barCodeService = require("./BarCodeService");
 const companyService = require("../company/CompanyService");
+const barcodeFlowService = require("../barCodeFlow/BarCodeFlowService");
+const cartonBoxBarcodeService = require("../cartonBoxBarcode/CartonBoxBarcodeService");
+const WarehouseService = require("../wareHouse/WareHouseService");
 
 const { searchKeys } = require("./BarCodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -36,6 +39,7 @@ exports.add = async (req, res) => {
       lotNumber,
       wareHouseId,
       companyId,
+      status,
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -44,6 +48,14 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isWarehouseExists = await WarehouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWarehouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Warehouse");
     }
 
     /**
@@ -84,12 +96,13 @@ exports.add = async (req, res) => {
         lotNumber,
         wareHouseId,
         companyId,
+        status,
       });
     }
 
     //------------------create data-------------------
     let dataCreated = await barCodeService.createMany(output);
-
+    await barcodeFlowService.createMany(output);
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -132,6 +145,13 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
+    const isWarehouseExists = await WarehouseService.findCount({
+      _id: wareHouseId,
+      isDeleted: false,
+    });
+    if (!isWarehouseExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Warehouse");
+    }
     /**
      * check duplicate exist
      */
@@ -162,6 +182,16 @@ exports.update = async (req, res) => {
         },
       }
     );
+    await barcodeFlowService.createNewData({
+      productGroupId: dataUpdated.productGroupId,
+      barcodeNumber: dataUpdated.barcodeNumber,
+      barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+      lotNumber: dataUpdated.lotNumber,
+      isUsed: dataUpdated.isUsed,
+      wareHouseId: dataUpdated.wareHouseId,
+      status: dataUpdated.status,
+      companyId: dataUpdated.companyId,
+    });
 
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
@@ -745,6 +775,7 @@ exports.getAllByGroup = async (req, res) => {
 //single view api
 exports.getById = async (req, res) => {
   try {
+    console.log("yha");
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
     let additionalQuery = [
@@ -811,6 +842,63 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: allowedFields[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//single view api
+exports.getByBarcode = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+    console.log("inn", barcodeToBeSearch);
+
+    const dataExist = await cartonBoxBarcodeService.findAllWithQuery({
+      barcodeNumber: barcodeToBeSearch,
+      isUsed: false,
+    });
+
+    let promises = [];
+
+    const allBarcodes = await Promise.all(
+      dataExist.map(async (ele) => {
+        const foundBarcode = await barCodeService.getOneByMultiField({
+          barcodeNumber: ele?.itemBarcodeNumber,
+        });
+
+        if (foundBarcode !== null) {
+          promises.push(foundBarcode);
+          return foundBarcode;
+        }
+      })
+    );
+
+    if (allBarcodes.length === 0) {
+      const foundBarcode = await barCodeService.getOneByMultiField({
+        barcodeNumber: barcodeToBeSearch,
+        isUsed: false,
+      });
+      if (foundBarcode !== null) {
+        allBarcodes.push(foundBarcode);
+      }
+    }
+
+    if (allBarcodes.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: allBarcodes,
         code: "OK",
         issue: null,
       });

@@ -102,7 +102,7 @@ const get = {
  */
 const getDocument = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
+    barcode: Joi.string().custom(commonValidation.objectId),
   }),
 };
 

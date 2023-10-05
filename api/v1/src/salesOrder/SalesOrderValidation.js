@@ -42,12 +42,13 @@ const updateApproval = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    approval: Joi.object().keys({
-      approvalLevel: Joi.number().required(),
-      approvalByName: Joi.string().required(),
-      approvalById: Joi.string().required(),
-      time: Joi.string().required(),
-    }),
+    type: Joi.string().required(),
+    dhApprovedAt: Joi.string().allow(""),
+    accApprovedAt: Joi.string().allow(""),
+    dhApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
+    accApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
+    dhApprovedActionBy: Joi.string().allow(""),
+    accApprovedActionBy: Joi.string().allow(""),
   }),
 };
 /**
@@ -65,6 +66,7 @@ const update = {
     accApproved: Joi.boolean().allow(null),
     accApprovedActionBy: Joi.string().allow(""),
     accApprovedAt: Joi.string().allow(""),
+    status: Joi.string().required(),
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
     dhApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
     accApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),

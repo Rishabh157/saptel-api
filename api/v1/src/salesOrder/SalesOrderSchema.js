@@ -73,6 +73,11 @@ const SalesOrderSchema = new mongoose.Schema(
 
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["DISPATCHED", "NOT_DISPATCHED"],
+      default: "NOT_DISPATCHED",
+    },
 
     companyId: {
       type: ObjectId,

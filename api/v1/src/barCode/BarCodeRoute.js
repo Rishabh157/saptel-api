@@ -62,6 +62,15 @@ router.post(
 /**
  * update document
  */
+router.get(
+  "/barcode/:barcode",
+  authCheckMiddleware,
+  validate(barCodeValidation.getBarcode),
+  barCodeController.getByBarcode
+);
+/**
+ * update document
+ */
 router.put(
   "/:id",
   authCheckMiddleware,

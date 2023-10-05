@@ -80,6 +80,7 @@ const findAllWithQuery = async (matchObj, projectObj) => {
 const findAll = async () => {
   return CartonBoxBarcode.find();
 };
+
 //-------------------------------------------
 
 const aggregateQuery = async (aggregateQueryArray) => {

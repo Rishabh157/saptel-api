@@ -159,6 +159,13 @@ const getDocument = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+const getDocumentByDealerid = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    dealerid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 /**
  * delete a document
  */
@@ -195,4 +202,5 @@ module.exports = {
   changeStatus,
   getDocument,
   getAllByDealerId,
+  getDocumentByDealerid,
 };

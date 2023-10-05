@@ -24,7 +24,7 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
+    const {
       cartonBoxId,
       barcodeNumber,
       barcodeGroupNumber,
@@ -33,14 +33,15 @@ exports.add = async (req, res) => {
       companyId,
     } = req.body;
 
-    /**
-     * check duplicate exist
-     */
-    let dataExist = await cartonBoxBarcodeService.isExists([{ barcodeNumber }]);
+    // Check if any duplicate barcodes exist
+    const dataExist = await cartonBoxBarcodeService.isExists([
+      { barcodeNumber },
+    ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
+    // Check if the carton box and company exist
     const isCartonBoxExists = await cartonBoxService.findCount({
       _id: cartonBoxId,
       isDeleted: false,
@@ -57,18 +58,53 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
+    // Generate a new barcode number
     let lastObject = await cartonBoxBarcodeService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
     ]);
+    let newBarcodeNumber;
     if (lastObject.length) {
-      const barcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
-      const paddedBarcodeNumber = barcodeNumber.toString().padStart(6, "0");
-      req.body.barcodeNumber = paddedBarcodeNumber;
+      newBarcodeNumber = parseInt(lastObject[0].barcodeNumber) + 1;
     } else {
-      req.body.barcodeNumber = "000001";
+      newBarcodeNumber = 1;
+    }
+    const paddedBarcodeNumber = newBarcodeNumber.toString().padStart(6, "0");
+    req.body.barcodeNumber = paddedBarcodeNumber;
+
+    // Function to check if item barcodes are already used
+    async function checkBarcodes() {
+      const usedBarcodes = [];
+      await Promise.all(
+        itemBarcodeNumber.map(async (ele) => {
+          console.log(ele, "ele");
+          let barcodeAlreadyExists = await cartonBoxBarcodeService.findCount({
+            itemBarcodeNumber: ele,
+          });
+          console.log(barcodeAlreadyExists, "barcodeAlreadyExists");
+          if (barcodeAlreadyExists) {
+            console.log("pushing");
+            usedBarcodes.push(ele);
+          }
+        })
+      );
+
+      console.log(usedBarcodes, "usedBarcodes");
+
+      if (usedBarcodes.length) {
+        throw new ApiError(
+          httpStatus.OK,
+          `Following barcode's already used in other box: ${usedBarcodes.join(
+            ", "
+          )}`
+        );
+      }
     }
 
+    // Call the function to check item barcodes
+    await checkBarcodes();
+
+    // Create data
     const output = itemBarcodeNumber.map((barcode) => {
       return {
         cartonBoxId: cartonBoxId,
@@ -78,8 +114,8 @@ exports.add = async (req, res) => {
         itemBarcodeNumber: barcode,
       };
     });
-    //------------------create data-------------------
-    let dataCreated = await cartonBoxBarcodeService.createMany(output);
+
+    const dataCreated = await cartonBoxBarcodeService.createMany(output);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

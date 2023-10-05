@@ -1,57 +1,54 @@
-const DealerWareHouse = require("./DealerWareHouseSchema");
+const BarCode = require("./BarCodeFlowSchema");
 const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**
- * Get One WareHouse by single field
+ * Get One BarCode by single field
  * @param {string} fieldName
  * @param {string} fieldValue
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return DealerWareHouse.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return BarCode.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
 /**
- * Get One WareHouse by multiple Fields field
+ * Get One BarCode by multiple Fields field
  * @param {object} matchObj
  * @param {object} projectObj
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return DealerWareHouse.findOne(
-    { ...matchObj, isDeleted: false },
-    { ...projectObj }
-  );
+  return BarCode.findOne({ ...matchObj, isDeleted: false }, { ...projectObj });
 };
 
 //-------------------------------------------
 /**
- * Create WareHouse
+ * Create BarCode
  * @param {object} bodyData
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const createNewData = async (bodyData) => {
-  return DealerWareHouse.create({ ...bodyData });
+  return BarCode.create({ ...bodyData });
 };
 //-------------------------------------------
 /**
- * get by id WareHouse
+ * get by id BarCode
  * @param {ObjectId} id
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getById = async (id) => {
-  return DealerWareHouse.findById(id);
+  return BarCode.findById(id);
 };
 //-------------------------------------------
 /**
- * Update WareHouse by id
+ * Update BarCode by id
  * @param {ObjectId} id
  * @param {Object} updateBody
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getByIdAndUpdate = async (id, updateBody) => {
-  return DealerWareHouse.findByIdAndUpdate(
+  return BarCode.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -62,10 +59,10 @@ const getByIdAndUpdate = async (id, updateBody) => {
  * find One and update
  * @param {object} matchObj
  * @param {Object} updateBody
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return DealerWareHouse.findOneAndUpdate(
+  return BarCode.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -76,10 +73,10 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
  * find One and update
  * @param {object} matchObj
  * @param {Object} updateBody
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return DealerWareHouse.updateOne(
+  return BarCode.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -89,19 +86,19 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
 /**
  * Delete by id
  * @param {ObjectId} id
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getByIdAndDelete = async (id) => {
-  return DealerWareHouse.findByIdAndDelete(id);
+  return BarCode.findByIdAndDelete(id);
 };
 //-------------------------------------------
 /**
  * find one and delete
  * @param {object} matchObj
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const getOneAndDelete = async (matchObj) => {
-  return DealerWareHouse.findOneAndUpdate(
+  return BarCode.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -112,48 +109,45 @@ const getOneAndDelete = async (matchObj) => {
  * find one and delete
  * @param {object} matchObj
  * @param {object} projectObj
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return DealerWareHouse.find(
-    { ...matchObj, isDeleted: false },
-    { ...projectObj }
-  );
+  return BarCode.find({ ...matchObj, isDeleted: false }, { ...projectObj });
 };
 //-------------------------------------------
 /**
  * find one and delete
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const findAll = async () => {
-  return DealerWareHouse.find();
+  return BarCode.find();
 };
 //-------------------------------------------
 /**
  * find one and delete
  * @param {Array} aggregateQueryArray
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const aggregateQuery = async (aggregateQueryArray) => {
-  return DealerWareHouse.aggregate(aggregateQueryArray);
+  return BarCode.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 /**
  * find one and delete
  * @param {Array} insertDataArray
- * @returns {Promise<WareHouse>}
+ * @returns {Promise<BarCode>}
  */
 const createMany = async (insertDataArray) => {
-  return DealerWareHouse.insertMany(insertDataArray);
+  return BarCode.insertMany(insertDataArray);
 };
 //-------------------------------------------
 /**
  * find Count and delete
  * @param {object} matchObj
- * @returns {Promise<WareHouse>}
+ * @returns {Promise <BarCode> }
  */
 const findCount = async (matchObj) => {
-  return DealerWareHouse.find({ ...matchObj, isDeleted: false }).count();
+  return BarCode.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
 /**
@@ -161,7 +155,7 @@ const findCount = async (matchObj) => {
  * @param {Array} filterArray
  * @param {Array} exceptIds
  * @param {Boolean} combined
- * @returns {Promise<WareHouse>}
+ * @returns {Promise <BarCode> }
  */
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
