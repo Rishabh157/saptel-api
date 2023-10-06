@@ -11,7 +11,6 @@ const Attributes = require("../src/attributes/AttributesSchema");
 const BarCode = require("../src/barCode/BarCodeSchema");
 
 const CallSchema = require("../src/call/CallSchema");
-const CartonBoxBarcode = require("../src/cartonBoxBarcode/CartonBoxBarcodeSchema");
 const CartonBox = require("../src/cartonBox/CartonBoxSchema");
 const ChannelCategory = require("../src/channelCategory/ChannelCategorySchema");
 const ChannelGroup = require("../src/channelGroup/ChannelGroupSchema");
@@ -79,7 +78,6 @@ const collectionArrToMatch = [
   Attributes,
   BarCode,
   CallSchema,
-  CartonBoxBarcode,
   CartonBox,
   ChannelCategory,
   ChannelGroup,

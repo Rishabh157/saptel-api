@@ -59,14 +59,35 @@ router.post(
   validate(barCodeValidation.create),
   barCodeController.add
 );
-/**
- * update document
- */
+
 router.get(
   "/barcode/:barcode",
   authCheckMiddleware,
   validate(barCodeValidation.getBarcode),
   barCodeController.getByBarcode
+);
+
+router.get(
+  "/getby-barcode/:barcode",
+  authCheckMiddleware,
+  validate(barCodeValidation.getBarcode),
+  barCodeController.getBarcode
+);
+
+router.post(
+  "/inventory/companyid/:cid/warehouseid/:wid/status/:status",
+  authCheckMiddleware,
+  validate(barCodeValidation.getInventory),
+  barCodeController.getInventory
+);
+/**
+ * update many document for invert inventory
+ */
+router.put(
+  "/inwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.updateInventory),
+  barCodeController.updateInventory
 );
 /**
  * update document
@@ -77,6 +98,7 @@ router.put(
   validate(barCodeValidation.update),
   barCodeController.update
 );
+
 /**
  * update status
  */

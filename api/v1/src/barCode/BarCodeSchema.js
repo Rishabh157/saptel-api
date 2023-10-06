@@ -4,6 +4,8 @@ const BarCodeSchema = new mongoose.Schema(
   {
     productGroupId: { type: ObjectId, required: true, trim: true },
     barcodeNumber: { type: String, required: true, trim: true },
+    outerBoxbarCodeNumber: { type: String, default: null },
+    cartonBoxId: { type: ObjectId, default: null },
     barcodeGroupNumber: { type: String, required: true, trim: true },
     lotNumber: { type: String, required: true, trim: true },
     isUsed: { type: Boolean, default: false },
@@ -11,8 +13,14 @@ const BarCodeSchema = new mongoose.Schema(
     dealerId: { type: ObjectId, default: null, trim: true },
     status: {
       type: String,
-      enum: ["AT_WAREHOUSE", "AT_DEALER_WAREHOUSE", "IN_TRANSIT", "DELIVERED"],
-      required: true,
+      enum: [
+        "AT_WAREHOUSE",
+        "AT_DEALER_WAREHOUSE",
+        "IN_TRANSIT",
+        "DELIVERED",
+        "",
+      ],
+      default: "",
     },
 
     companyId: { type: ObjectId, required: true, trim: true },

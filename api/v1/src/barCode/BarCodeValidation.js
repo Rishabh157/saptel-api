@@ -15,7 +15,7 @@ const create = {
     isUsed: Joi.boolean(),
     wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
-    status: Joi.string().required(),
+    // status: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -30,12 +30,32 @@ const update = {
   body: Joi.object().keys({
     productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     barcodeGroupNumber: Joi.string().required(),
+    cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+    outerBoxbarCodeNumber: Joi.string().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
     wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
     status: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
+const updateInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      // outerBoxbarCodeNumber: Joi.string().required(),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      // status: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
   }),
 };
 
@@ -117,6 +137,52 @@ const getBarcode = {
     barcode: Joi.string(),
   }),
 };
+
+const getInventory = {
+  params: Joi.object().keys({
+    cid: Joi.string(),
+    wid: Joi.string(),
+    status: Joi.string(),
+  }),
+  body: Joi.object().keys({
+    params: Joi.array().items(Joi.string().required()),
+    searchValue: Joi.string().allow(""),
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+    rangeFilterBy: Joi.object()
+      .keys({
+        rangeFilterKey: Joi.string().allow(""),
+        rangeInitial: Joi.string().allow(""),
+        rangeEnd: Joi.string().allow(""),
+      })
+      .default({})
+      .optional(),
+    orderBy: Joi.string().allow(""),
+    orderByValue: Joi.number().valid(1, -1).allow(""),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+    filterBy: Joi.array().items(
+      Joi.object().keys({
+        fieldName: Joi.string().allow(""),
+        value: Joi.alternatives().try(
+          Joi.string().allow(""),
+          Joi.number().allow(""),
+          Joi.boolean().allow(""),
+          Joi.array().items(Joi.string()).default([]),
+          Joi.array().items(Joi.number()).default([]),
+          Joi.array().items(Joi.boolean()).default([]),
+          Joi.array().default([])
+        ),
+      })
+    ),
+    isPaginationRequired: Joi.boolean().default(true).optional(),
+  }),
+};
 /**
  * delete a document
  */
@@ -144,4 +210,6 @@ module.exports = {
   getDocument,
   getGroupId,
   getBarcode,
+  getInventory,
+  updateInventory,
 };

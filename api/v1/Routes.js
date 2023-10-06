@@ -41,7 +41,6 @@ const channelCategoryRoute = require("./src/channelCategory/ChannelCategoryRoute
 const channelMasterRoute = require("./src/channelMaster/ChannelMasterRoute");
 const tapeMasterRoute = require("./src/tapeMaster/TapeMasterRoute");
 const slotMasterRoute = require("./src/slotMaster/SlotMasterRoute");
-const cartonBoxBarcodeRoute = require("./src/cartonBoxBarcode/CartonBoxBarcodeRoute");
 const adminRoute = require("./src/admin/AdminRoute");
 const fileManagerRoute = require("./src/fileManager/FileManagerRoute");
 const artistRoute = require("./src/artist/ArtistRoute");
@@ -214,10 +213,6 @@ const defaultRoutes = [
     path: "/dealer/purchase-order",
     route: salesOrderRoute,
   },
-  {
-    path: "/cartonbox-barcode",
-    route: cartonBoxBarcodeRoute,
-  },
 
   {
     path: "/feature",
@@ -375,7 +370,7 @@ const defaultRoutes = [
     path: "/order-ledger",
     route: orderLedgerRoute,
   },
- 
+
   {
     path: "/vendor-warehouse",
     route: vendorWarehouseRoute,

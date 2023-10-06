@@ -271,6 +271,257 @@ exports.updateLevel = async (req, res) => {
   }
 };
 
+exports.allFilterGroupPagination = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let searchValue = req.body.searchValue;
+    let searchIn = req.body.params;
+    let filterBy = req.body.filterBy;
+    let rangeFilterBy = req.body.rangeFilterBy;
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+    /**
+     * to send only active data on web
+     */
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    //----------------------------
+
+    /**
+     * check search keys valid
+     **/
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+    const rangeQuery = getRangeQuery(rangeFilterBy);
+    if (rangeQuery && rangeQuery.length) {
+      matchQuery.$and.push(...rangeQuery);
+    }
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = [];
+    let numberFileds = [];
+    let objectIdFields = [
+      "dealerWareHouseId",
+      "dealerId",
+      "companyWareHouseId",
+      "companyId",
+    ];
+
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+    //----------------------------
+    //calander filter
+    /**
+     * ToDo : for date filter
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    //calander filter
+    //----------------------------
+
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealer_name",
+          pipeline: [
+            {
+              $project: {
+                dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+              },
+            },
+            // { $project: { lastName: "$lastName" } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "companyWareHouseId",
+          foreignField: "_id",
+          as: "companyWarehouseName",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "dealerWareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [{ $project: { wareHouseName: 1 } }],
+        },
+      },
+      {
+        // "tax.taxId": "$tax.taxName",
+        $addFields: {
+          productSalesOrder: {
+            groupName: "",
+            productGroupId: "$productSalesOrder.productGroupId",
+            quantity: "$productSalesOrder.quantity",
+            rate: "$productSalesOrder.rate",
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productSalesOrders",
+          pipeline: [{ $project: { groupName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          dealerLabel: {
+            $arrayElemAt: ["$dealer_name.dealerName", 0],
+          },
+          companyWarehouseLabel: {
+            $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          "productSalesOrder.groupName": {
+            $arrayElemAt: ["$productSalesOrders.groupName", 0],
+          },
+        },
+      },
+
+      {
+        $unset: [
+          "dealer_name",
+          "companyWarehouseName",
+          "warehouses_name",
+          "productSalesOrders",
+        ],
+      },
+    ];
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+    let groupBySoNumber = {
+      $group: {
+        _id: "$soNumber", // Group by the unique soNumber field
+        dealerName: { $first: "$dealerLabel" },
+        // count: { $sum: 1 }, // Count the documents in each group
+        documents: { $push: "$$ROOT" }, // Store the documents in an array
+      },
+    };
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    finalAggregateQuery.push(groupBySoNumber);
+
+    //-----------------------------------
+    let dataFound = await salesOrderService.aggregateQuery(finalAggregateQuery);
+
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+    let userRoleData = await getUserRoleData(req, salesOrderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.saleOrder,
+      userRoleData,
+      actionType.pagination
+    );
+    let result = await salesOrderService.aggregateQuery(finalAggregateQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
+      return res.status(200).send({
+        data: allowedFields,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {

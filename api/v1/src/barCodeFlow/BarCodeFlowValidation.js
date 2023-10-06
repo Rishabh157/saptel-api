@@ -10,12 +10,15 @@ const create = {
   body: Joi.object().keys({
     productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     barcodeGroupNumber: Joi.string().required(),
+    outerBoxbarCodeNumber: Joi.string().required(),
+    cartonBoxId: Joi.string().custom(commonValidation.objectId).allow(null),
+
     quantity: Joi.number().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
     wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
-    status: Joi.string().required(),
+    status: Joi.string().allow(""),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -30,6 +33,8 @@ const update = {
   body: Joi.object().keys({
     productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     barcodeGroupNumber: Joi.string().required(),
+    outerBoxbarCodeNumber: Joi.string().required(),
+
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
     wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),

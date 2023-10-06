@@ -47,13 +47,13 @@ const create = {
     }),
     document: Joi.object().keys({
       gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().uri().required(),
+      gstCertificate: Joi.string().required(),
       adharCardNumber: Joi.string().required(),
-      adharCard: Joi.string().uri().required(),
+      adharCard: Joi.string().required(),
     }),
     otherDocument: Joi.array().items({
       documentName: Joi.string().allow(""),
-      documentFile: Joi.string().uri().allow(""),
+      documentFile: Joi.string().allow(""),
     }),
 
     companyId: Joi.string().custom(commonValidation.objectId).required(),

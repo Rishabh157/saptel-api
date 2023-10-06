@@ -48,6 +48,13 @@ router.post(
   salesOrderController.allFilterPagination
 );
 
+router.post(
+  "/groupby",
+  authCheckMiddleware,
+  validate(salesOrderValidation.getAllFilter),
+  salesOrderController.allFilterGroupPagination
+);
+
 // dealer app inventory
 router.post(
   "/list",

@@ -55,15 +55,14 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-
     const isDealerExists =
-      dealerId !== null
+      dealerId !== null && dealerId !== undefined
         ? await dealerService.findCount({
             _id: dealerId,
             isDeleted: false,
           })
         : null;
-    if (dealerId !== null && !isDealerExists) {
+    if (dealerId !== null && dealerId !== undefined && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer.");
     }
 
