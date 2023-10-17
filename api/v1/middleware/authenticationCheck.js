@@ -22,6 +22,7 @@ exports.authCheckMiddleware = async (req, res, next) => {
     }
     let token = isTokenExist.data;
     const decoded = jwt.verify(token, config.jwt_secret);
+
     req.userData = decoded;
     if (!req.userData || !req.userData.Id || req.userData.Id === "") {
       throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
@@ -43,15 +44,15 @@ exports.authCheckMiddleware = async (req, res, next) => {
         throw new ApiError(httpStatus.UNAUTHORIZED, redisResponse.message);
       }
     }
-    if (
-      req.userData.userType === userEnum.superAdmin ||
-      req.userData.userType === userEnum.admin
-    ) {
-      let userDetails = await authHelper.checkAdminValid(req.userData);
-      if (!userDetails.status) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
-      }
-    }
+    // if (
+    //   req.userData.userType === userEnum.superAdmin ||
+    //   req.userData.userType === userEnum.admin
+    // ) {
+    //   let userDetails = await authHelper.checkAdminValid(req.userData);
+    //   if (!userDetails.status) {
+    //     throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
+    //   }
+    // }
 
     if (req.userData.userType === userEnum.user) {
       let userDetails = await authHelper.checkUserValid(req.userData);
@@ -118,6 +119,12 @@ exports.authCheckDealerMiddleware = async (req, res, next) => {
     });
   }
 };
+
+exports.getDealerData = async (token) => {
+  const decoded = jwt.verify(token, config.jwt_dealer_secret);
+  return decoded;
+};
+
 exports.otpVerifyToken = async (req, res, next) => {
   try {
     let isTokenExist = authHelper.checkTokenExist(req, res);

@@ -11,6 +11,7 @@ const create = {
     stateName: Joi.string().lowercase().required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    isUnion: Joi.boolean(),
   }),
 };
 
@@ -25,6 +26,7 @@ const update = {
     stateName: Joi.string().lowercase().required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    isUnion: Joi.boolean(),
   }),
 };
 

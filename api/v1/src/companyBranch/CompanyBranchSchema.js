@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const CompanyBranchSchema = new mongoose.Schema(
   {
     branchName: { type: String, required: true, trim: true },
-    company: { type: ObjectId, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -18,6 +18,6 @@ const CompanyBranchSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["branchName", "company"];
+const searchKeys = ["branchName", "companyId"];
 module.exports = mongoose.model("CompanyBranch", CompanyBranchSchema);
 module.exports.searchKeys = [...searchKeys];

@@ -99,6 +99,16 @@ const deleteDocument = {
   }),
 };
 
+// delivery boy login
+const loginValid = {
+  body: Joi.object()
+    .keys({
+      mobile: Joi.string().required(),
+      password: Joi.string().required(),
+    })
+    .required(),
+};
+
 /**
  * change status of document
  */
@@ -114,4 +124,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
+  loginValid,
 };

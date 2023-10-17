@@ -65,4 +65,10 @@ router.delete(
   deliveryBoyController.deleteDocument
 );
 
+router.post(
+  "/login",
+  validate(deliveryBoyValidation.loginValid),
+  deliveryBoyController.login
+);
+
 module.exports = router;

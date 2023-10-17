@@ -73,7 +73,7 @@ exports.add = async (req, res) => {
     req.body.billingAddress.maskedPhoneNo =
       "******" + req.body.billingAddress.phone.substring(6);
 
-    const updatedContactInformation = contactInformation.map((contact) => {
+    const updatedContactInformation = contactInformation?.map((contact) => {
       const maskedPhoneNo = "******" + contact.mobileNumber.slice(-4);
       return { ...contact, maskedPhoneNo };
     });

@@ -5,11 +5,12 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const deliveryBoyService = require("./DeliveryBoyService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
-
+const bcryptjs = require("bcryptjs");
+const { deliveryBoyTokenCreate } = require("../../helper/tokenCreate");
 const { searchKeys } = require("./DeliveryBoySchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
-const bcryptjs = require("bcryptjs");
+const bcrypt = require("bcrypt");
 
 const {
   getSearchQuery,
@@ -381,6 +382,57 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+/**
+ *login
+ */
+exports.login = async (req, res) => {
+  try {
+    let mobile = req.body.mobile;
+    let password = req.body.password;
+
+    let dataFound = await deliveryBoyService.getOneByMultiField({ mobile });
+    if (!dataFound) {
+      throw new ApiError(httpStatus.OK, `User not found.`);
+    }
+    console.log(password, dataFound.password);
+    let matched = await bcrypt.compare(password, dataFound.password);
+    console.log(matched, "matched");
+    if (!matched) {
+      throw new ApiError(httpStatus.OK, `Invalid Password!`);
+    }
+    let { _id: userId, name, companyId } = dataFound;
+
+    let token = await deliveryBoyTokenCreate(dataFound);
+    if (!token) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: `Login successful!`,
+      data: {
+        token: token,
+        userId: userId,
+        mobile: mobile,
+        name: name,
+        companyId: companyId,
+      },
+      status: true,
       code: "OK",
       issue: null,
     });

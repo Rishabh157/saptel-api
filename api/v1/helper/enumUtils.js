@@ -18,6 +18,13 @@ const inventoryCondition = Object.freeze({
   defective: "DEFECTIVE",
 });
 
+const productStatus = Object.freeze({
+  notDispatched: "NOT_DISPATCHED",
+  dispatched: "DISPATCHED",
+  complete: "COMPLETE",
+  none: "",
+});
+
 const tapeType = Object.freeze({
   schemeCode: "SCHEME_CODE",
   promotional: "PROMOTIONAL",
@@ -151,6 +158,10 @@ const actionType = Object.freeze({
   listAll: "LIST_ALL",
   view: "VIEW",
 });
+const approvalType = Object.freeze({
+  first: "FIRST",
+  second: "SECOND",
+});
 
 const moduleType = Object.freeze({
   vendor: "VENDOR",
@@ -158,6 +169,10 @@ const moduleType = Object.freeze({
   user: "USER",
   wareHouse: "WAREHOUSE",
   saleOrder: "SALE_ORDER",
+  rtvOrder: "RTV_ORDER",
+  wtwOrder: "WTW_ORDER",
+  wtsOrder: "WTS_ORDER",
+  wtcOrder: "WTC_ORDER",
   asr: "ASR",
   purchaseOrder: "PURCHASE_ORDER",
   grn: "GRN",
@@ -321,6 +336,19 @@ const orderType = Object.freeze({
   postpaid: "POSTPAID",
   other: "OTHER",
 });
+
+// barcode status type
+const barcodeStatusType = Object.freeze({
+  atWarehouse: "AT_WAREHOUSE",
+  atDealerWarehouse: "AT_DEALER_WAREHOUSE",
+  inTransit: "IN_TRANSIT",
+  delivered: "DELIVERED",
+  rtv: "RTV",
+  wtc: "WTC",
+  wts: "WTS",
+  wtw: "WTW",
+});
+
 /**
  * if other the following routes created. please add all actions with their method,
  */
@@ -379,4 +407,7 @@ module.exports = {
   moduleType,
   competitorProductCategory,
   orderStatusEnum,
+  productStatus,
+  approvalType,
+  barcodeStatusType,
 };

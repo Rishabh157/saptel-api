@@ -78,6 +78,10 @@ const userAccess = require("./src/userAccess/UserAccessRoute");
 const slotDefinition = require("./src/slotDefination/SlotDefinitionRoute");
 const companyBranchRoute = require("./src/companyBranch/CompanyBranchRoute");
 const courierServiceRoute = require("./src/courierService/CourierServiceRoute");
+const rtvMasterServiceRoute = require("./src/rtvMaster/RtvMasterRoute");
+const wtwMasterServiceRoute = require("./src/warehouseToWarehouse/wtwMasterRoute");
+const wtcMasterServiceRoute = require("./src/warehouseToCompany/wtcMasterRoute");
+const wtsMasterServiceRoute = require("./src/warehouseToSample/wtsMasterRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -403,6 +407,22 @@ const defaultRoutes = [
   {
     path: "/courier-service",
     route: courierServiceRoute,
+  },
+  {
+    path: "/rtv-master",
+    route: rtvMasterServiceRoute,
+  },
+  {
+    path: "/wtw-master",
+    route: wtwMasterServiceRoute,
+  },
+  {
+    path: "/wtc-master",
+    route: wtcMasterServiceRoute,
+  },
+  {
+    path: "/wts-master",
+    route: wtsMasterServiceRoute,
   },
 ];
 // orderRoute;

@@ -6,84 +6,56 @@ const commonValidation = require("../../helper/CommonValidation");
 /**
  * create new document
  */
-
 const create = {
   body: Joi.object().keys({
-    soNumber: Joi.string().required(),
-    dhApproved: Joi.boolean().allow(null),
-    dhApprovedActionBy: Joi.string().allow(""),
-    dhApprovedAt: Joi.string().allow(""),
-    accApproved: Joi.boolean().allow(null),
-    accApprovedActionBy: Joi.string().allow(""),
-    accApprovedAt: Joi.string().allow(""),
-    dealerId: Joi.string().custom(commonValidation.objectId).required(),
-    dhApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
-    accApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
-    dealerWareHouseId: Joi.string()
+    rtvNumber: Joi.string(),
+    vendorId: Joi.custom(commonValidation.objectId).required(),
+    warehouseId: Joi.custom(commonValidation.objectId).required(),
+    firstApproved: Joi.boolean().allow(null),
+    firstApprovedActionBy: Joi.string().allow(""),
+    firstApprovedAt: Joi.string().allow(""),
+    secondApproved: Joi.boolean().allow(null),
+    secondApprovedActionBy: Joi.string().allow(""),
+    secondApprovedAt: Joi.string().allow(""),
+    firstApprovedById: Joi.string()
       .custom(commonValidation.objectId)
-      .required(),
-    companyWareHouseId: Joi.string()
+      .allow(null),
+    secondApprovedById: Joi.string()
       .custom(commonValidation.objectId)
-      .required(),
+      .allow(null),
     productSalesOrder: Joi.array().items({
       productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       rate: Joi.number().required(),
       quantity: Joi.number().required(),
     }),
+    remark: Joi.string().lowercase(),
+    status: Joi.string(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
 /**
- * update po approval level
- */
-const updateApproval = {
-  params: Joi.object().keys({
-    sonumber: Joi.required(),
-  }),
-  body: Joi.object().keys({
-    type: Joi.string().required(),
-    dhApprovedAt: Joi.string().allow(""),
-    accApprovedAt: Joi.string().allow(""),
-    dhApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
-    accApprovedById: Joi.string().custom(commonValidation.objectId).allow(null),
-    dhApprovedActionBy: Joi.string().allow(""),
-    accApprovedActionBy: Joi.string().allow(""),
-    accApproved: Joi.boolean(),
-    dhApproved: Joi.boolean(),
-  }),
-};
-/**
  * update existing document
  */
 const update = {
-  // params: Joi.object().keys({
-  //   id: Joi.required().custom(commonValidation.objectId),
-  // }),
   body: Joi.object().keys({
-    soData: Joi.array().items({
+    rtvData: Joi.array().items({
       id: Joi.string().allow(""),
-      soNumber: Joi.string().required(),
-      dhApproved: Joi.boolean().allow(null),
-      dhApprovedActionBy: Joi.string().allow(""),
-      dhApprovedAt: Joi.string().allow(""),
-      accApproved: Joi.boolean().allow(null),
-      accApprovedActionBy: Joi.string().allow(""),
-      accApprovedAt: Joi.string().allow(""),
-      dhApprovedById: Joi.string()
+      rtvNumber: Joi.string(),
+      vendorId: Joi.custom(commonValidation.objectId).required(),
+      warehouseId: Joi.custom(commonValidation.objectId).required(),
+      firstApproved: Joi.boolean().allow(null),
+      firstApprovedActionBy: Joi.string().allow(""),
+      firstApprovedAt: Joi.string().allow(""),
+      secondApproved: Joi.boolean().allow(null),
+      secondApprovedActionBy: Joi.string().allow(""),
+      secondApprovedAt: Joi.string().allow(""),
+      firstApprovedById: Joi.string()
         .custom(commonValidation.objectId)
         .allow(null),
-      accApprovedById: Joi.string()
+      secondApprovedById: Joi.string()
         .custom(commonValidation.objectId)
         .allow(null),
-      // status: Joi.string().required(),
-      dealerId: Joi.string().custom(commonValidation.objectId).required(),
-      dealerWareHouseId: Joi.string()
-        .custom(commonValidation.objectId)
-        .required(),
-      companyWareHouseId: Joi.string()
-        .custom(commonValidation.objectId)
-        .required(),
       productSalesOrder: Joi.object().keys({
         productGroupId: Joi.string()
           .custom(commonValidation.objectId)
@@ -91,8 +63,34 @@ const update = {
         rate: Joi.number().required(),
         quantity: Joi.number().required(),
       }),
+      remark: Joi.string().lowercase(),
+      // status: Joi.string(),
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
+  }),
+};
+
+/**
+ * update rtv approval level
+ */
+const updateApproval = {
+  params: Joi.object().keys({
+    rtvNumber: Joi.required(),
+  }),
+  body: Joi.object().keys({
+    type: Joi.string().required(),
+    firstApprovedAt: Joi.string().allow(""),
+    secondApprovedAt: Joi.string().allow(""),
+    firstApprovedById: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
+    secondApprovedById: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
+    firstApprovedActionBy: Joi.string().allow(""),
+    secondApprovedActionBy: Joi.string().allow(""),
+    secondApproved: Joi.boolean(),
+    firstApproved: Joi.boolean(),
   }),
 };
 
@@ -144,30 +142,37 @@ const getAllFilter = {
  * get either all data or single document
  */
 const get = {
-  params: Joi.object().keys({
-    companyid: Joi.string().custom(commonValidation.objectId),
-  }),
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      soNumber: Joi.string().optional(),
+      rtvNumber: Joi.string().optional(),
     })
     .optional(),
 };
-/**
- * get a document
- */
-const getDocument = {
-  params: Joi.object().keys({
-    sonumber: Joi.string(),
-  }),
-};
+
 /**
  * delete a document
  */
 const deleteDocument = {
   params: Joi.object().keys({
-    sonumber: Joi.string(),
+    rtvnumber: Joi.string(),
+  }),
+};
+
+/**
+ * get by id
+ */
+const getById = {
+  params: Joi.object().keys({
+    rtvnumber: Joi.string(),
+  }),
+};
+
+// update rtv status
+const updateRtvStatus = {
+  params: Joi.object().keys({
+    rtvnumber: Joi.string(),
+    status: Joi.string(),
   }),
 };
 
@@ -179,13 +184,6 @@ const changeStatus = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
-
-const updateSoStatus = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-    status: Joi.string(),
-  }),
-};
 module.exports = {
   create,
   getAllFilter,
@@ -193,7 +191,7 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getDocument,
+  getById,
   updateApproval,
-  updateSoStatus,
+  updateRtvStatus,
 };

@@ -140,8 +140,7 @@ const getFilterQuery = (
             filterValue.forEach((val) => {
               orQuery.push({
                 [fieldName]: {
-                  $regex: `.*${val}.*`,
-                  $options: "i",
+                  $regex: new RegExp(`${val}$`, "i"),
                 },
               });
             });
@@ -155,8 +154,7 @@ const getFilterQuery = (
             ) {
               queryArray.push({
                 [fieldName]: {
-                  $regex: `.*${filterValue}.*`,
-                  $options: "i",
+                  $regex: new RegExp(`^${filterValue}$`, "i"),
                 },
               });
             } else if (

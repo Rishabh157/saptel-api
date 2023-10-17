@@ -13,7 +13,7 @@ const create = {
     quantity: Joi.number().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),
-    wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+    // wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
     // status: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
@@ -56,6 +56,145 @@ const updateInventory = {
       // status: Joi.string().required(),
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
+  }),
+};
+const updateWarehouseInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      cartonBoxId: Joi.string().allow(null),
+      // outerBoxbarCodeNumber: Joi.string().required(),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      // status: Joi.string().required(),
+      toCompanyId: Joi.string().custom(commonValidation.objectId).allow(null),
+      fromCompanyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    wId: Joi.array().items(Joi.string().required()),
+    from: Joi.string().required(),
+  }),
+};
+
+const outwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    soId: Joi.array().items(Joi.string().required()),
+  }),
+};
+
+// rtv
+const rtvOutwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      vendorId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    rtvId: Joi.array().items(Joi.string().required()),
+  }),
+};
+
+// rtv
+const wtwOutwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    wtwId: Joi.array().items(Joi.string().required()),
+  }),
+};
+// wtc
+const wtcOutwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+      toCompanyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    wtcId: Joi.array().items(Joi.string().required()),
+  }),
+};
+
+// wts
+const wtsOutwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    wtsId: Joi.array().items(Joi.string().required()),
+  }),
+};
+const dealerInwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      // outerBoxbarCodeNumber: Joi.string().required(),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    soId: Joi.array().items(Joi.string().required()),
   }),
 };
 
@@ -138,6 +277,13 @@ const getBarcode = {
   }),
 };
 
+const getBarcodeForOutward = {
+  params: Joi.object().keys({
+    barcode: Joi.string(),
+    productgroupid: Joi.string(),
+    status: Joi.string(),
+  }),
+};
 const getInventory = {
   params: Joi.object().keys({
     cid: Joi.string(),
@@ -183,6 +329,52 @@ const getInventory = {
     isPaginationRequired: Joi.boolean().default(true).optional(),
   }),
 };
+
+const getInventoryByStatus = {
+  params: Joi.object().keys({
+    cid: Joi.string(),
+    status: Joi.string(),
+  }),
+  body: Joi.object().keys({
+    params: Joi.array().items(Joi.string().required()),
+    searchValue: Joi.string().allow(""),
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+    rangeFilterBy: Joi.object()
+      .keys({
+        rangeFilterKey: Joi.string().allow(""),
+        rangeInitial: Joi.string().allow(""),
+        rangeEnd: Joi.string().allow(""),
+      })
+      .default({})
+      .optional(),
+    orderBy: Joi.string().allow(""),
+    orderByValue: Joi.number().valid(1, -1).allow(""),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+    filterBy: Joi.array().items(
+      Joi.object().keys({
+        fieldName: Joi.string().allow(""),
+        value: Joi.alternatives().try(
+          Joi.string().allow(""),
+          Joi.number().allow(""),
+          Joi.boolean().allow(""),
+          Joi.array().items(Joi.string()).default([]),
+          Joi.array().items(Joi.number()).default([]),
+          Joi.array().items(Joi.boolean()).default([]),
+          Joi.array().default([])
+        ),
+      })
+    ),
+    isPaginationRequired: Joi.boolean().default(true).optional(),
+  }),
+};
+
 /**
  * delete a document
  */
@@ -212,4 +404,13 @@ module.exports = {
   getBarcode,
   getInventory,
   updateInventory,
+  outwardInventory,
+  getBarcodeForOutward,
+  dealerInwardInventory,
+  rtvOutwardInventory,
+  wtcOutwardInventory,
+  wtsOutwardInventory,
+  wtwOutwardInventory,
+  updateWarehouseInventory,
+  getInventoryByStatus,
 };

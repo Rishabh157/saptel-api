@@ -218,6 +218,7 @@ exports.login = async (req, res) => {
       email,
       companyId,
       userRole,
+      branchId,
     } = userFound;
 
     let token = await tokenCreate(userFound);
@@ -253,6 +254,7 @@ exports.login = async (req, res) => {
           userType: userType,
           userRole: userRole ? userRole : "ADMIN",
           companyId: companyId,
+          branchId: branchId,
         },
         status: true,
         code: "OK",
@@ -263,16 +265,14 @@ exports.login = async (req, res) => {
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({
-        message,
-        status,
-        data,
-        code,
-        issue,
-        ip: req.headers["x-forwarded-for"] || req.connection.remoteAddress,
-      });
+    return res.status(errData.statusCode).send({
+      message,
+      status,
+      data,
+      code,
+      issue,
+      ip: req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+    });
   }
 };
 /*********************************************************************/

@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { barcodeStatusType } = require("../../helper/enumUtils");
 const BarCodeSchema = new mongoose.Schema(
   {
     productGroupId: { type: ObjectId, required: true, trim: true },
@@ -10,14 +11,19 @@ const BarCodeSchema = new mongoose.Schema(
     lotNumber: { type: String, required: true, trim: true },
     isUsed: { type: Boolean, default: false },
     wareHouseId: { type: ObjectId, default: null, trim: true },
+    vendorId: { type: ObjectId, default: null, trim: true },
     dealerId: { type: ObjectId, default: null, trim: true },
     status: {
       type: String,
       enum: [
-        "AT_WAREHOUSE",
-        "AT_DEALER_WAREHOUSE",
-        "IN_TRANSIT",
-        "DELIVERED",
+        barcodeStatusType.atWarehouse,
+        barcodeStatusType.atDealerWarehouse,
+        barcodeStatusType.inTransit,
+        barcodeStatusType.delivered,
+        barcodeStatusType.rtv,
+        barcodeStatusType.wts,
+        barcodeStatusType.wtw,
+        barcodeStatusType.wtc,
         "",
       ],
       default: "",

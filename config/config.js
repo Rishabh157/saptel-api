@@ -11,6 +11,7 @@ let {
   JWT_SECRET,
   JWT_SECRET_REFRESH,
   JWT_EXPIRATION_MINUTES,
+  JWT_DELIVERY_BOY_SECRET,
   JWT_DEALER_SECRET,
   JWT_DEALER_SECRET_REFRESH,
   LOCALHOST,
@@ -30,6 +31,7 @@ let envObj = {
   JWT_DEALER_SECRET,
   JWT_DEALER_SECRET_REFRESH,
   JWT_EXPIRATION_MINUTES,
+  JWT_DELIVERY_BOY_SECRET,
   LOCALHOST,
   BASEURL_LOCAL,
   BASEURL_LIVE,
@@ -47,6 +49,9 @@ const envVarsSchema = Joi.object().keys({
   JWT_SECRET: Joi.string().required().label("JWT secret key"),
   JWT_SECRET_REFRESH: Joi.string().required().label("JWT secret refresh key"),
   JWT_DEALER_SECRET: Joi.string().required().label("JWT dealer secret key"),
+  JWT_DELIVERY_BOY_SECRET: Joi.string()
+    .required()
+    .label("JWT delivery boy  secret key"),
   JWT_DEALER_SECRET_REFRESH: Joi.string()
     .required()
     .label("JWT dealer secret refresh key"),
@@ -86,7 +91,7 @@ module.exports = {
   jwt_dealer_secret: envVars.JWT_DEALER_SECRET,
   jwt_dealer_secret_refresh: envVars.JWT_DEALER_SECRET_REFRESH,
   jwt_expires: envVars.JWT_EXPIRATION_MINUTES,
-
+  jwt_delivery_boy_secret: envVars.JWT_DELIVERY_BOY_SECRET,
   jwt_secret_otp: envVars.JWT_SECRET_OTP,
   jwt_expires_otp: envVars.JWT_EXPIRATION_MINUTES_OTP,
   localhost: envVars.LOCALHOST,

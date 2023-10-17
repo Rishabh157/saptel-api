@@ -55,23 +55,29 @@ exports.add = async (req, res) => {
       password,
       userDepartment,
       userRole,
+      userType,
     } = req.body;
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
+    if (companyId !== null && companyId !== undefined) {
+      const isCompanyExists = await companyService.findCount({
+        _id: companyId,
+        isDeleted: false,
+      });
+      if (!isCompanyExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Company");
+      }
     }
 
-    const isCompanyBranchExists = await branchService.findCount({
-      _id: branchId,
-      isDeleted: false,
-    });
-    if (!isCompanyBranchExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company Branch");
+    if (branchId !== null && companyId !== undefined) {
+      const isCompanyBranchExists = await branchService.findCount({
+        _id: branchId,
+        isDeleted: false,
+      });
+      if (!isCompanyBranchExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Company Branch");
+      }
     }
+
     /**
      * check duplicate exist
      */
@@ -109,7 +115,7 @@ exports.add = async (req, res) => {
           email: email,
           mobile: mobile,
           companyId: companyId,
-          userType: userEnum.user,
+          userType: userType,
           userDepartment: userDepartment,
           userRole: userRole,
         },
@@ -805,6 +811,7 @@ exports.login = async (req, res) => {
       firstName,
       lastName,
       companyId,
+      branchId,
     } = dataFound;
 
     let token = await tokenCreate(dataFound);
@@ -833,6 +840,7 @@ exports.login = async (req, res) => {
         mobile: mobile,
         userType: userType,
         companyId: companyId,
+        branchId: branchId,
       },
       status: true,
       code: "OK",

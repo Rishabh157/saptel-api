@@ -1,173 +1,104 @@
-const SalesOrder = require("./SalesOrderSchema");
+const WtcMaster = require("./wtcMasterSchema");
 const { combineObjects } = require("../../helper/utils");
 
-//-------------------------------------------
-/**
- * Get One SalesOrder by single field
- * @param {string} fieldName
- * @param {string} fieldValue
- * @returns {Promise<SalesOrder>}
- */
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return SalesOrder.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return WtcMaster.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
-/**
- * Get One SalesOrder by multiple Fields field
- * @param {object} matchObj
- * @param {object} projectObj
- * @returns {Promise<SalesOrder>}
- */
+
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return SalesOrder.findOne(
+  return WtcMaster.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
 };
 
-//-------------------------------------------
-/**
- * Create SalesOrder
- * @param {object} bodyData
- * @returns {Promise<SalesOrder>}
- */
-const createNewData = async (bodyData) => {
-  return SalesOrder.create({ ...bodyData });
-};
-//-------------------------------------------
-/**
- * get by id SalesOrder
- * @param {ObjectId} id
- * @returns {Promise<SalesOrder>}
- */
-const getById = async (id) => {
-  return SalesOrder.findById(id);
-};
-//-------------------------------------------
-/**
- * Update SalesOrder by id
- * @param {ObjectId} id
- * @param {Object} updateBody
- * @returns {Promise<SalesOrder>}
- */
-const getByIdAndUpdate = async (id, updateBody) => {
-  return SalesOrder.findByIdAndUpdate(
-    { _id: id },
-    { ...updateBody },
-    { new: true }
-  );
-};
-
 const updateMany = async (matchObj, updateBody) => {
-  return SalesOrder.updateMany(
+  return WtcMaster.updateMany(
     { ...matchObj },
     { ...updateBody },
     { new: true }
   );
 };
+
 //-------------------------------------------
-/**
- * find One and update
- * @param {object} matchObj
- * @param {Object} updateBody
- * @returns {Promise<SalesOrder>}
- */
+
+const createNewData = async (bodyData) => {
+  return WtcMaster.create({ ...bodyData });
+};
+//-------------------------------------------
+
+const getById = async (id) => {
+  return WtcMaster.findById(id);
+};
+//-------------------------------------------
+
+const getByIdAndUpdate = async (id, updateBody) => {
+  return WtcMaster.findByIdAndUpdate(
+    { _id: id },
+    { ...updateBody },
+    { new: true }
+  );
+};
+//-------------------------------------------
+
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return SalesOrder.findOneAndUpdate(
+  return WtcMaster.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
   );
 };
 //-------------------------------------------
-/**
- * find One and update
- * @param {object} matchObj
- * @param {Object} updateBody
- * @returns {Promise<SalesOrder>}
- */
+
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return SalesOrder.updateOne(
+  return WtcMaster.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
   );
 };
 //-------------------------------------------
-/**
- * Delete by id
- * @param {ObjectId} id
- * @returns {Promise<SalesOrder>}
- */
+
 const getByIdAndDelete = async (id) => {
-  return SalesOrder.findByIdAndDelete(id);
+  return WtcMaster.findByIdAndDelete(id);
 };
 //-------------------------------------------
-/**
- * find one and delete
- * @param {object} matchObj
- * @returns {Promise<SalesOrder>}
- */
+
 const getOneAndDelete = async (matchObj) => {
-  return SalesOrder.findOneAndUpdate(
+  return WtcMaster.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
   );
 };
 //-------------------------------------------
-/**
- * find one and delete
- * @param {object} matchObj
- * @param {object} projectObj
- * @returns {Promise<SalesOrder>}
- */
+
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return SalesOrder.find({ ...matchObj, isDeleted: false }, { ...projectObj });
+  return WtcMaster.find({ ...matchObj, isDeleted: false }, { ...projectObj });
 };
 //-------------------------------------------
-/**
- * find one and delete
- * @returns {Promise<SalesOrder>}
- */
+
 const findAll = async () => {
-  return SalesOrder.find();
+  return WtcMaster.find();
 };
 //-------------------------------------------
-/**
- * find one and delete
- * @param {Array} aggregateQueryArray
- * @returns {Promise<SalesOrder>}
- */
+
 const aggregateQuery = async (aggregateQueryArray) => {
-  return SalesOrder.aggregate(aggregateQueryArray);
+  return WtcMaster.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
-/**
- * find one and delete
- * @param {Array} insertDataArray
- * @returns {Promise<SalesOrder>}
- */
+
 const createMany = async (insertDataArray) => {
-  return SalesOrder.insertMany(insertDataArray);
+  return WtcMaster.insertMany(insertDataArray);
 };
 //-------------------------------------------
-/**
- * find Count and delete
- * @param {object} matchObj
- * @returns {Promise<SalesOrder>}
- */
+
 const findCount = async (matchObj) => {
-  return SalesOrder.find({ ...matchObj, isDeleted: false }).count();
+  return WtcMaster.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
-/**
- *
- * @param {Array} filterArray
- * @param {Array} exceptIds
- * @param {Boolean} combined
- * @returns {Promise<SalesOrder>}
- */
+
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
     let combinedObj = await combineObjects(filterArray);

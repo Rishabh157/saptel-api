@@ -15,7 +15,7 @@ const LedgerSchema = new mongoose.Schema(
     },
     taxAmount: {
       type: Number,
-      required: true,
+      default: 0,
       trim: true,
     },
 

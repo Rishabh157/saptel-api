@@ -12,10 +12,17 @@ const {
  * get one document (if query) / all documents
  */
 router.get(
-  "/company/:companyid",
+  "/company/:companyid/warehouse",
   authCheckMiddleware,
   validate(wareHouseValidation.get),
-  wareHouseController.get
+  wareHouseController.getWarehouse
+);
+// warehouse of dealers
+router.get(
+  "/company/:companyid/dealer-warehouse",
+  authCheckMiddleware,
+  validate(wareHouseValidation.get),
+  wareHouseController.getDealerWarehouse
 );
 
 router.get(
@@ -52,6 +59,16 @@ router.post(
   authCheckMiddleware,
   validate(wareHouseValidation.getAllFilter),
   wareHouseController.allFilterPagination
+);
+/**
+ * get all wareHouse pagination filter for warehouse warehouse
+ */
+
+router.post(
+  "/all-warehouse",
+  authCheckMiddleware,
+  validate(wareHouseValidation.getAllFilter),
+  wareHouseController.allFilterPaginationWarehouse
 );
 // dealer project warehouse
 router.post(

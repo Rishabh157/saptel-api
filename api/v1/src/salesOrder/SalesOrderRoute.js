@@ -23,7 +23,7 @@ router.get(
  * get one document
  */
 router.get(
-  "/:id",
+  "/:sonumber",
   authCheckMiddleware,
   validate(salesOrderValidation.getDocument),
   salesOrderController.getById
@@ -57,14 +57,14 @@ router.post(
 
 // dealer app inventory
 router.post(
-  "/list",
+  "/dealer-po",
   authCheckDealerMiddleware,
   validate(salesOrderValidation.getAllFilter),
-  salesOrderController.allFilterPagination
+  salesOrderController.allFilterGroupPaginationForDealer
 );
 // update approval status
 router.put(
-  "/approval-level/:id",
+  "/approval-level/:sonumber",
   authCheckMiddleware,
   validate(salesOrderValidation.updateApproval),
   salesOrderController.updateLevel
@@ -82,7 +82,7 @@ router.post(
  * update document
  */
 router.put(
-  "/:id",
+  "/update-so",
   authCheckMiddleware,
   validate(salesOrderValidation.update),
   salesOrderController.update
@@ -96,11 +96,21 @@ router.put(
   validate(salesOrderValidation.changeStatus),
   salesOrderController.statusChange
 );
+
+/**
+ * update so status
+ */
+router.put(
+  "/update-so/:id/status/:status",
+  authCheckMiddleware,
+  validate(salesOrderValidation.updateSoStatus),
+  salesOrderController.updateSoStatus
+);
 /**
  * delete document
  */
 router.delete(
-  "/:id",
+  "/:sonumber",
   authCheckMiddleware,
   validate(salesOrderValidation.deleteDocument),
   salesOrderController.deleteDocument

@@ -2,7 +2,10 @@ const router = require("express").Router();
 const barCodeController = require("./BarCodeController");
 const validate = require("../../middleware/validate");
 const barCodeValidation = require("./BarCodeValidation");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -61,10 +64,18 @@ router.post(
 );
 
 router.get(
-  "/barcode/:barcode",
+  "/barcode/:barcode/productgroupid/:productgroupid/status/:status",
   authCheckMiddleware,
-  validate(barCodeValidation.getBarcode),
+  validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcode
+);
+
+// barcode scan at dealer warehouse
+router.get(
+  "/dealer/barcode/:barcode/productgroupid/:productgroupid",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.getBarcodeForOutward),
+  barCodeController.getByBarcodeAtDealerWarehouse
 );
 
 router.get(
@@ -80,6 +91,21 @@ router.post(
   validate(barCodeValidation.getInventory),
   barCodeController.getInventory
 );
+
+router.post(
+  "/inventory/companyid/:cid/status/:status",
+  authCheckMiddleware,
+  validate(barCodeValidation.getInventoryByStatus),
+  barCodeController.getInventoryByStatus
+);
+
+// dealer inventory
+router.post(
+  "/dealer/inventory/companyid/:cid/status/:status",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.getInventory),
+  barCodeController.getDealerInventory
+);
 /**
  * update many document for invert inventory
  */
@@ -88,6 +114,68 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.updateInventory),
   barCodeController.updateInventory
+);
+
+/**
+ * update many document for invert inventory of warehouse and other company warehouse
+ */
+router.put(
+  "/warehouse/inwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.updateWarehouseInventory),
+  barCodeController.updateWarehouseInventory
+);
+
+/**
+ * update many document for outward inventory
+ */
+router.put(
+  "/outwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.outwardInventory),
+  barCodeController.outwardInventory
+);
+
+// outward inventory from wtc
+router.put(
+  "/wtc/outwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.wtcOutwardInventory),
+  barCodeController.wtcOutwardInventory
+);
+
+// outward inventory from wts
+router.put(
+  "/wts/outwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.wtsOutwardInventory),
+  barCodeController.wtsOutwardInventory
+);
+
+// outward inventory from rtv
+router.put(
+  "/rtv/outwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.rtvOutwardInventory),
+  barCodeController.rtvOutwardInventory
+);
+
+// outward inventory from wtw
+router.put(
+  "/wtw/outwardinventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.wtwOutwardInventory),
+  barCodeController.wtwOutwardInventory
+);
+
+/**
+ * update many document for dealer inward inventory
+ */
+router.put(
+  "/dealer-inward",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.dealerInwardInventory),
+  barCodeController.dealerInwardInventory
 );
 /**
  * update document

@@ -366,6 +366,7 @@ exports.allFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //get api
 exports.get = async (req, res) => {
   try {

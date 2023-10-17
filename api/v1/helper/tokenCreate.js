@@ -83,6 +83,23 @@ exports.dealerRefreshTokenCreate = async (tokenData) => {
   );
   return token;
 };
+exports.deliveryBoyTokenCreate = async (tokenData) => {
+  var token = await jwt.sign(
+    {
+      Id: tokenData._id,
+      mobile: tokenData.mobile,
+      name: tokenData.name,
+      email: tokenData.email,
+      tokenType: tokenEnum.login,
+    },
+    config.jwt_delivery_boy_secret,
+    {
+      expiresIn: config.jwt_expires,
+    }
+  );
+  return token;
+};
+
 /**
  *
  * @param {object} tokenData

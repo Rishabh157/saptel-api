@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const DeliveryBoySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, lowercase: true },
-    mobile: { type: String, required: true, trim: true, lowercase: true },
-    password: { type: String, required: true, trim: true, lowercase: true },
+    mobile: { type: String, required: true, trim: true },
+    password: { type: String, required: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
     dealerId: { type: ObjectId, required: true, trim: true },
 

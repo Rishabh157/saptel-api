@@ -29,12 +29,12 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { branchName, company } = req.body;
+    let { branchName, companyId } = req.body;
     /**
      * check duplicate exist
      */
     const isCompanyExists = await companyService.findCount({
-      _id: company,
+      _id: companyId,
       isDeleted: false,
     });
     if (!isCompanyExists) {
@@ -71,9 +71,9 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { branchName, company } = req.body;
+    let { branchName, companyId } = req.body;
     const isCompanyExists = await companyService.findCount({
-      _id: company,
+      _id: companyId,
       isDeleted: false,
     });
     if (!isCompanyExists) {
@@ -190,7 +190,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["company"];
+    let objectIdFields = ["companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -226,7 +226,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "companies",
-          localField: "company",
+          localField: "companyId",
           foreignField: "_id",
           as: "company_data",
           pipeline: [
@@ -324,7 +324,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "companies",
-          localField: "company",
+          localField: "companyId",
           foreignField: "_id",
           as: "company_data",
           pipeline: [
@@ -391,7 +391,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "companies",
-          localField: "company",
+          localField: "companyId",
           foreignField: "_id",
           as: "company_data",
           pipeline: [

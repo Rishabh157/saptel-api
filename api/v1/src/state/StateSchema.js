@@ -5,6 +5,10 @@ const StateSchema = new mongoose.Schema(
     stateName: { type: String, required: true, trim: true, lowercase: true },
     countryId: { type: ObjectId, required: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
+    isUnion: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

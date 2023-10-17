@@ -1,55 +1,40 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const SalesOrderSchema = new mongoose.Schema(
+const { productStatus } = require("../../helper/enumUtils");
+const WtcMasterSchema = new mongoose.Schema(
   {
-    soNumber: {
-      type: String,
-      required: true,
-    },
-    dealerId: {
-      type: ObjectId,
-      required: true,
-      trim: true,
-    },
-    dealerWareHouseId: {
-      type: ObjectId,
-      required: true,
-      trim: true,
-    },
-    companyWareHouseId: {
-      type: ObjectId,
-      required: true,
-      trim: true,
-    },
-    dhApprovedById: {
+    wtcNumber: { type: String, required: false, trim: true },
+    fromWarehouseId: { type: ObjectId, required: true },
+    toWarehouseId: { type: ObjectId, required: true },
+    firstApprovedById: {
       type: ObjectId,
       default: null,
     },
-    dhApproved: {
+    firstApproved: {
       type: Boolean,
       default: null,
     },
-    dhApprovedActionBy: {
+    firstApprovedActionBy: {
       type: String,
       default: "",
     },
-    dhApprovedAt: {
+    firstApprovedAt: {
       type: String,
       default: "",
     },
-    accApprovedById: {
+    secondApprovedById: {
       type: ObjectId,
       default: null,
     },
-    accApproved: {
+    secondApproved: {
       type: Boolean,
       default: null,
     },
-    accApprovedActionBy: {
+    secondApprovedActionBy: {
       type: String,
       default: "",
     },
-    accApprovedAt: {
+    secondApprovedAt: {
       type: String,
       default: "",
     },
@@ -75,11 +60,21 @@ const SalesOrderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["DISPATCHED", "NOT_DISPATCHED", "COMPLETE"],
-      default: "NOT_DISPATCHED",
+      enum: [
+        productStatus.notDispatched,
+        productStatus.dispatched,
+        productStatus.complete,
+        productStatus.none,
+      ],
+      default: productStatus.notDispatched,
     },
-
+    remark: { type: String, default: "", trim: true, lowercase: true },
     companyId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
+    toCompanyId: {
       type: ObjectId,
       required: true,
       trim: true,
@@ -99,15 +94,13 @@ const SalesOrderSchema = new mongoose.Schema(
 );
 
 const searchKeys = [
-  "soNumber",
-  "dealerId",
-  "dealerWareHouseId",
-  "companyWareHouseId",
-  "productSalesOrder",
-  "dealerLabel",
-  "warehouseLabel",
-  "dhApprovedById",
-  "accApprovedById",
+  "wtcNumber",
+  "fromWarehouseId",
+  "toWarehouseId",
+  "productGroupId",
+  "remark",
 ];
-module.exports = mongoose.model("SalesOrder", SalesOrderSchema);
+module.exports = mongoose.model("WtcMaster", WtcMasterSchema);
 module.exports.searchKeys = [...searchKeys];
+
+// model schema ends here

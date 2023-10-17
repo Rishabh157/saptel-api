@@ -37,7 +37,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { stateName, countryId, companyId } = req.body;
+    let { stateName, countryId, companyId, isUnion } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -93,7 +93,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { stateName, countryId, companyId } = req.body;
+    let { stateName, countryId, companyId, isUnion } = req.body;
 
     let idToBeSearch = req.params.id;
 

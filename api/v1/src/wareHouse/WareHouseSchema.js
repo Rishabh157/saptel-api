@@ -112,44 +112,43 @@ const WareHouseSchema = new mongoose.Schema(
         {
           name: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
 
           department: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
           designation: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
           email: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
           mobileNumber: {
             type: String,
-            required: true,
+            default: "",
           },
           maskedPhoneNo: {
             type: String,
-            required: true,
+            default: "",
           },
           landLine: {
             type: String,
-            required: true,
+            default: "",
           },
         },
       ],
-      required: true,
     },
     companyId: { type: ObjectId, required: true, trim: true },
     dealerId: { type: ObjectId, default: null },
