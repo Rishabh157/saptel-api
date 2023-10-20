@@ -72,7 +72,7 @@ router.get(
 
 // barcode scan at dealer warehouse
 router.get(
-  "/dealer/barcode/:barcode/productgroupid/:productgroupid",
+  "/dealer/barcode/:barcode/productgroupid/:productgroupid/status/:status",
   authCheckDealerMiddleware,
   validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcodeAtDealerWarehouse
@@ -150,6 +150,22 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.wtsOutwardInventory),
   barCodeController.wtsOutwardInventory
+);
+
+// order dispatch from warehouse
+router.put(
+  "/order-dispatch",
+  authCheckMiddleware,
+  validate(barCodeValidation.orderDispatch),
+  barCodeController.orderDispatch
+);
+
+// order dispatch from dealer warehouse
+router.put(
+  "/dealer/order-dispatch",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.orderDispatch),
+  barCodeController.dealerOrderDispatch
 );
 
 // outward inventory from rtv

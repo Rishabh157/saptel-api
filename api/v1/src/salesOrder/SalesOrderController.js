@@ -311,16 +311,11 @@ exports.updateLevel = async (req, res) => {
               totalTaxAmount += salesOrderBalance;
             } else if (companyState.stateName !== dealerState.stateName) {
               if (dealerState.isUnion) {
-                console.log("union");
                 salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
-                console.log(salesOrderBalance, "salesOrderBalance");
                 totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
-                console.log(totalAmount, "totalAmount");
-                console.log(productGroupData[0].utgst, "data");
                 salesOrderBalance +=
                   (salesOrderBalance * productGroupData[0].utgst) / 100;
                 totalTaxAmount += salesOrderBalance;
-                console.log(totalTaxAmount, totalAmount, "total");
               } else {
                 salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
                 totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);

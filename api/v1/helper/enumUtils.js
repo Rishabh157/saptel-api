@@ -347,6 +347,7 @@ const barcodeStatusType = Object.freeze({
   wtc: "WTC",
   wts: "WTS",
   wtw: "WTW",
+  delivered: "DELIVERED",
 });
 
 /**

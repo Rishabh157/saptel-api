@@ -41,7 +41,11 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { moduleType, actionType } = require("../../helper/enumUtils");
+const {
+  moduleType,
+  actionType,
+  productStatus,
+} = require("../../helper/enumUtils");
 
 // =============update  start================
 exports.update = async (req, res) => {
@@ -741,6 +745,260 @@ exports.getById = async (req, res) => {
 };
 // =============get DispositionTwo by Id  end================
 
+// get by id for dealer
+exports.getByIdForDealer = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+
+    let additionalQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+        ],
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist[0]) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============all filter pagination api start================
 exports.allFilterPagination = async (req, res) => {
   try {
@@ -1273,6 +1531,21 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           ],
         },
       },
+      // {
+      //   $lookup: {
+      //     from: "barcodes",
+      //     localField: "barcodeId",
+      //     foreignField: "_id",
+      //     as: "barcodeData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           barcodeNumber: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
       {
         $lookup: {
           from: "countries",
@@ -1443,6 +1716,9 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
+          // barcodeLabel: {
+          //   $arrayElemAt: ["$barcodeData.barcodeNumber", 0],
+          // },
         },
       },
       {
@@ -1554,3 +1830,37 @@ exports.deleteDocument = async (req, res) => {
   }
 };
 // =============delete end================
+
+// order status change
+
+exports.orderStatusChange = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    if (!(await orderService.getOneByMultiField({ _id }))) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    await orderService.getOneAndUpdate(
+      { _id },
+      { orderStatus: productStatus.complete }
+    );
+    if (!deleted) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: deleteRefCheck.message,
+      status: deleteRefCheck.status,
+      data: null,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};

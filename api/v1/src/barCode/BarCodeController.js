@@ -10,7 +10,8 @@ const WarehouseService = require("../wareHouse/WareHouseService");
 const wtwMasterService = require("../warehouseToWarehouse/wtwMasterService");
 const wtcMasterService = require("../warehouseToCompany/wtcMasterService");
 const wtsMasterService = require("../warehouseToSample/wtsMasterService");
-
+const orderInquiryService = require("../orderInquiry/OrderInquiryService");
+const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const ProductGroupService = require("../productGroup/ProductGroupService");
 const rtvMasterService = require("../rtvMaster/RtvMasterService");
 const { searchKeys } = require("./BarCodeSchema");
@@ -915,18 +916,19 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
   try {
     const barcodeToBeSearch = req.params.barcode;
     const productGroupId = req.params.productgroupid;
-    console.log(barcodeToBeSearch, productGroupId);
+    const status = req.params.status;
+
     let ResponseData = [];
     const dataExist = await barCodeService.findAllWithQuery({
       outerBoxbarCodeNumber: barcodeToBeSearch,
       isUsed: true,
-      status: "IN_TRANSIT",
+      status: status,
       productGroupId: new mongoose.Types.ObjectId(productGroupId),
     });
     if (dataExist.length === 0) {
       const foundBarcode = await barCodeService.getOneByMultiField({
         barcodeNumber: barcodeToBeSearch,
-        status: "IN_TRANSIT",
+        status: status,
         isUsed: true,
         productGroupId: new mongoose.Types.ObjectId(productGroupId),
       });
@@ -2571,6 +2573,290 @@ exports.wtsOutwardInventory = async (req, res) => {
 
     const updatedDataArray = await Promise.all(promises);
 
+    if (updatedDataArray.length > 0) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: null,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// dispatch order from warehouse
+
+exports.orderDispatch = async (req, res) => {
+  try {
+    let { barcodedata, orderId } = req.body;
+    console.log("innn");
+    let barcodeaIds = barcodedata?.map((ele) => {
+      return ele?._id;
+    });
+    const groupedData = barcodedata.reduce((result, item) => {
+      const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
+
+      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
+      if (!result[outerBoxbarCodeNumber]) {
+        // If it doesn't exist, create an array for that key
+        result[outerBoxbarCodeNumber] = [];
+      }
+
+      // Push the current item into the array associated with the outerBoxbarCodeNumber key
+      result[outerBoxbarCodeNumber].push(item);
+
+      return result;
+    }, {});
+
+    // Convert the grouped data into an array of objects (if needed)
+    const groupedArray = Object.keys(groupedData).map((key) => ({
+      outerBoxbarCodeNumber: key,
+      items: groupedData[key],
+    }));
+    const promises = barcodedata?.map(async (ele) => {
+      let allOuterBoxBarcode = await barCodeService.findCount({
+        outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+        isUsed: true,
+      });
+      let foundObj = groupedArray?.find((fele) => {
+        if (fele?.outerBoxbarCodeNumber !== null) {
+          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
+        }
+      });
+
+      if (foundObj?.items?.length !== allOuterBoxBarcode) {
+        await barCodeService.updateMany(
+          {
+            outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+            isUsed: true,
+          },
+          {
+            $set: {
+              outerBoxbarCodeNumber: null,
+            },
+          }
+        );
+        await barcodeFlowService.createNewData({
+          productGroupId: ele.productGroupId,
+          barcodeNumber: ele.barcodeNumber,
+          cartonBoxId: null,
+          barcodeGroupNumber: ele.barcodeGroupNumber,
+          outerBoxbarCodeNumber: null,
+          lotNumber: ele.lotNumber,
+          isUsed: ele.isUsed,
+          wareHouseId: ele.wareHouseId,
+          status: barcodeStatusType.atWarehouse,
+          companyId: ele.companyId,
+        });
+      }
+
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(ele?._id),
+          isUsed: true,
+        },
+        {
+          $set: {
+            status: barcodeStatusType.delivered,
+            wareHouseId: null,
+          },
+        }
+      );
+
+      await barcodeFlowService.createNewData({
+        productGroupId: dataUpdated.productGroupId,
+        barcodeNumber: dataUpdated.barcodeNumber,
+        cartonBoxId: dataUpdated.cartonBoxId,
+        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
+        lotNumber: dataUpdated.lotNumber,
+        isUsed: dataUpdated.isUsed,
+        wareHouseId: dataUpdated.wareHouseId,
+        status: dataUpdated.status,
+        companyId: dataUpdated.companyId,
+      });
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+    let updatedOrder = await orderInquiryService.getOneAndUpdate(
+      {
+        _id: new mongoose.Types.ObjectId(orderId),
+        isDeleted: false,
+      },
+      {
+        $set: {
+          orderStatus: productStatus.complete,
+
+          barcodeId: barcodeaIds,
+        },
+      }
+    );
+    if (updatedOrder) {
+      const { _id, mobileNo, didNo, companyId, agentName, agentId, ...rest } =
+        updatedOrder;
+      await orderInquiryFlowService.createNewData({
+        orderId: updatedOrder._id,
+        mobileNo: updatedOrder.mobileNo,
+        didNo: updatedOrder.didNo,
+        companyId: updatedOrder.companyId,
+        agentName: updatedOrder.agentName,
+        agentId: updatedOrder.agentId,
+        ...rest,
+      });
+    }
+    if (updatedDataArray.length > 0) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: null,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// dealer order dispatch
+
+exports.dealerOrderDispatch = async (req, res) => {
+  try {
+    let { barcodedata, orderId } = req.body;
+    console.log("innn");
+    let barcodeaIds = barcodedata?.map((ele) => {
+      return ele?._id;
+    });
+    const groupedData = barcodedata.reduce((result, item) => {
+      const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
+
+      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
+      if (!result[outerBoxbarCodeNumber]) {
+        // If it doesn't exist, create an array for that key
+        result[outerBoxbarCodeNumber] = [];
+      }
+
+      // Push the current item into the array associated with the outerBoxbarCodeNumber key
+      result[outerBoxbarCodeNumber].push(item);
+
+      return result;
+    }, {});
+
+    // Convert the grouped data into an array of objects (if needed)
+    const groupedArray = Object.keys(groupedData).map((key) => ({
+      outerBoxbarCodeNumber: key,
+      items: groupedData[key],
+    }));
+    const promises = barcodedata?.map(async (ele) => {
+      let allOuterBoxBarcode = await barCodeService.findCount({
+        outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+        isUsed: true,
+      });
+      let foundObj = groupedArray?.find((fele) => {
+        if (fele?.outerBoxbarCodeNumber !== null) {
+          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
+        }
+      });
+
+      if (foundObj?.items?.length !== allOuterBoxBarcode) {
+        await barCodeService.updateMany(
+          {
+            outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+            isUsed: true,
+          },
+          {
+            $set: {
+              outerBoxbarCodeNumber: null,
+            },
+          }
+        );
+        await barcodeFlowService.createNewData({
+          productGroupId: ele.productGroupId,
+          barcodeNumber: ele.barcodeNumber,
+          cartonBoxId: null,
+          barcodeGroupNumber: ele.barcodeGroupNumber,
+          outerBoxbarCodeNumber: null,
+          lotNumber: ele.lotNumber,
+          isUsed: ele.isUsed,
+          wareHouseId: ele.wareHouseId,
+          status: barcodeStatusType.atWarehouse,
+          companyId: ele.companyId,
+        });
+      }
+
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(ele?._id),
+          isUsed: true,
+        },
+        {
+          $set: {
+            status: barcodeStatusType.inTransit,
+            wareHouseId: null,
+          },
+        }
+      );
+
+      await barcodeFlowService.createNewData({
+        productGroupId: dataUpdated.productGroupId,
+        barcodeNumber: dataUpdated.barcodeNumber,
+        cartonBoxId: dataUpdated.cartonBoxId,
+        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
+        lotNumber: dataUpdated.lotNumber,
+        isUsed: dataUpdated.isUsed,
+        wareHouseId: dataUpdated.wareHouseId,
+        status: dataUpdated.status,
+        companyId: dataUpdated.companyId,
+      });
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+    let updatedOrder = await orderInquiryService.getOneAndUpdate(
+      {
+        _id: new mongoose.Types.ObjectId(orderId),
+        isDeleted: false,
+      },
+      {
+        $set: {
+          orderStatus: productStatus.dispatched,
+
+          barcodeId: barcodeaIds,
+        },
+      }
+    );
+    if (updatedOrder) {
+      const { _id, mobileNo, didNo, companyId, agentName, agentId, ...rest } =
+        updatedOrder;
+      await orderInquiryFlowService.createNewData({
+        orderId: updatedOrder._id,
+        mobileNo: updatedOrder.mobileNo,
+        didNo: updatedOrder.didNo,
+        companyId: updatedOrder.companyId,
+        agentName: updatedOrder.agentName,
+        agentId: updatedOrder.agentId,
+        ...rest,
+      });
+    }
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",

@@ -24,6 +24,14 @@ router.get(
   orderController.getById
 );
 
+//===============get document by id for dealer===============
+router.get(
+  "/dealer/:id",
+  authCheckDealerMiddleware,
+  //   validate(orderValidation),
+  orderController.getByIdForDealer
+);
+
 //===============get all pagination filter===============
 router.post("/", authCheckMiddleware, orderController.allFilterPagination);
 
@@ -56,6 +64,14 @@ router.put(
 //   validate(initialCallOneValidation.changeStatus),
 //   initialCallOneController.statusChange
 // );
+
+//===============change order status document===============
+router.delete(
+  "/change-order-status/:id",
+  authCheckMiddleware,
+  validate(orderValidation.orderStatusChange),
+  orderController.orderStatusChange
+);
 
 //===============delete document===============
 router.delete(

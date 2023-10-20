@@ -85,6 +85,8 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
+    barcodeId: Joi.string().custom(commonValidation.objectId).allow(null),
+    orderStatus: Joi.string().required(),
     orderNumber: Joi.number().required(),
     approved: Joi.boolean().required(),
     didNo: Joi.string().required(),
@@ -218,6 +220,15 @@ const deleteDocument = {
 };
 
 /**
+ * change order status a document
+ */
+const orderStatusChange = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
  * get by id
  */
 const getById = {
@@ -241,4 +252,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  orderStatusChange,
 };

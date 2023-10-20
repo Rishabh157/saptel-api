@@ -5,6 +5,7 @@ const {
   genderType,
   orderStatusEnum,
   paymentModeType,
+  productStatus,
 } = require("../../helper/enumUtils");
 
 const OrderInquirySchema = new mongoose.Schema(
@@ -12,6 +13,19 @@ const OrderInquirySchema = new mongoose.Schema(
     orderNumber: {
       type: Number,
       required: true,
+    },
+    barcodeId: {
+      type: [ObjectId],
+      default: [],
+    },
+    orderStatus: {
+      type: String,
+      enum: [
+        productStatus.dispatched,
+        productStatus.notDispatched,
+        productStatus.complete,
+      ],
+      default: productStatus.notDispatched,
     },
     assignDealerId: {
       type: ObjectId,

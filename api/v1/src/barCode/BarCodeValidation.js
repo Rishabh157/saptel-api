@@ -179,6 +179,26 @@ const wtsOutwardInventory = {
     wtsId: Joi.array().items(Joi.string().required()),
   }),
 };
+
+const orderDispatch = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      // outerBoxbarCodeNumber: Joi.string().required(),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    orderId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 const dealerInwardInventory = {
   body: Joi.object().keys({
     barcodedata: Joi.array().items({
@@ -413,4 +433,5 @@ module.exports = {
   wtwOutwardInventory,
   updateWarehouseInventory,
   getInventoryByStatus,
+  orderDispatch,
 };
