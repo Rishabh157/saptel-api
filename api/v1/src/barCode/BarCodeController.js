@@ -964,14 +964,59 @@ exports.getBarcode = async (req, res) => {
   try {
     const barcodeToBeSearch = req.params.barcode;
     console.log("inn", barcodeToBeSearch);
+    let additionalQuery = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
 
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
     let barcode = [];
-    const foundBarcode = await barCodeService.getOneByMultiField({
-      barcodeNumber: barcodeToBeSearch,
-      isUsed: false,
-    });
+    const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
     if (foundBarcode !== null) {
-      barcode.push(foundBarcode);
+      barcode.push(foundBarcode[0]);
     }
 
     if (barcode.length === 0) {
