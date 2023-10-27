@@ -401,6 +401,19 @@ exports.get = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -435,6 +448,9 @@ exports.get = async (req, res) => {
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
         },
       },
       {
@@ -450,6 +466,7 @@ exports.get = async (req, res) => {
           "areaData",
           // "channelData",
           "agentDistrictData",
+          "product_group",
         ],
       },
     ];
@@ -662,6 +679,19 @@ exports.getById = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -696,6 +726,9 @@ exports.getById = async (req, res) => {
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
         },
       },
       {
@@ -711,6 +744,7 @@ exports.getById = async (req, res) => {
           "areaData",
           // "channelData",
           "agentDistrictData",
+          "product_group",
         ],
       },
     ];
@@ -923,6 +957,19 @@ exports.getByIdForDealer = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -954,6 +1001,9 @@ exports.getByIdForDealer = async (req, res) => {
           // channelLabel: {
           //   $arrayElemAt: ["$channelData.channelName", 0],
           // },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
@@ -972,6 +1022,7 @@ exports.getByIdForDealer = async (req, res) => {
           "areaData",
           // "channelData",
           "agentDistrictData",
+          "product_group",
         ],
       },
     ];
@@ -1119,6 +1170,18 @@ exports.allFilterPagination = async (req, res) => {
                 dispositionName: 1,
               },
             },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
           ],
         },
       },
@@ -1307,6 +1370,9 @@ exports.allFilterPagination = async (req, res) => {
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
         },
       },
       {
@@ -1322,6 +1388,7 @@ exports.allFilterPagination = async (req, res) => {
           "areaData",
           "channelData",
           "agentDistrictData",
+          "product_group",
         ],
       },
     ];
@@ -1516,6 +1583,19 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           ],
         },
       },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
       {
         $lookup: {
           from: "dispositionthrees",
@@ -1716,6 +1796,9 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
           // barcodeLabel: {
           //   $arrayElemAt: ["$barcodeData.barcodeNumber", 0],
           // },
@@ -1734,6 +1817,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           "areaData",
           "channelData",
           "agentDistrictData",
+          "product_group",
         ],
       },
     ];

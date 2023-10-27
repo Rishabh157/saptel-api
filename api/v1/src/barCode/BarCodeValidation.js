@@ -300,6 +300,7 @@ const getBarcode = {
 const getBarcodeForOutward = {
   params: Joi.object().keys({
     barcode: Joi.string(),
+    cid: Joi.string(),
     productgroupid: Joi.string(),
     status: Joi.string(),
   }),

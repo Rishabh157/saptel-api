@@ -867,26 +867,124 @@ exports.getByBarcode = async (req, res) => {
     const barcodeToBeSearch = req.params.barcode;
     const productGroupId = req.params.productgroupid;
     const status = req.params.status;
-    console.log(barcodeToBeSearch, productGroupId);
+    const cid = req.params.cid;
+    let additionalQueryForAll = [
+      {
+        $match: {
+          outerBoxbarCodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: status,
+          productGroupId: new mongoose.Types.ObjectId(productGroupId),
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
+    let additionalQueryForOne = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: status,
+          productGroupId: new mongoose.Types.ObjectId(productGroupId),
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
     let ResponseData = [];
-    const dataExist = await barCodeService.findAllWithQuery({
-      outerBoxbarCodeNumber: barcodeToBeSearch,
-      isUsed: true,
-      status: status,
-      productGroupId: new mongoose.Types.ObjectId(productGroupId),
-    });
+    const dataExist = await barCodeService.aggregateQuery(
+      additionalQueryForAll
+    );
     if (dataExist.length === 0) {
-      const foundBarcode = await barCodeService.getOneByMultiField({
-        barcodeNumber: barcodeToBeSearch,
-        isUsed: true,
-        status: status,
-        productGroupId: new mongoose.Types.ObjectId(productGroupId),
-      });
-      if (foundBarcode !== null) {
-        ResponseData.push(foundBarcode);
+      const foundBarcode = await barCodeService.aggregateQuery(
+        additionalQueryForOne
+      );
+      if (foundBarcode[0] !== null && foundBarcode[0] !== undefined) {
+        ResponseData.push(foundBarcode[0]);
       }
     } else {
-      ResponseData = dataExist;
+      ResponseData = dataExist[0];
     }
 
     if (ResponseData.length === 0) {
@@ -917,26 +1015,124 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
     const barcodeToBeSearch = req.params.barcode;
     const productGroupId = req.params.productgroupid;
     const status = req.params.status;
+    const cid = req.params.cid;
+    let additionalQueryForAll = [
+      {
+        $match: {
+          outerBoxbarCodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: status,
+          productGroupId: new mongoose.Types.ObjectId(productGroupId),
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
 
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
+    let additionalQueryForOne = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: status,
+          productGroupId: new mongoose.Types.ObjectId(productGroupId),
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
     let ResponseData = [];
-    const dataExist = await barCodeService.findAllWithQuery({
-      outerBoxbarCodeNumber: barcodeToBeSearch,
-      isUsed: true,
-      status: status,
-      productGroupId: new mongoose.Types.ObjectId(productGroupId),
-    });
+    const dataExist = await barCodeService.aggregateQuery(
+      additionalQueryForAll
+    );
     if (dataExist.length === 0) {
-      const foundBarcode = await barCodeService.getOneByMultiField({
-        barcodeNumber: barcodeToBeSearch,
-        status: status,
-        isUsed: true,
-        productGroupId: new mongoose.Types.ObjectId(productGroupId),
-      });
-      if (foundBarcode !== null) {
-        ResponseData.push(foundBarcode);
+      const foundBarcode = await barCodeService.aggregateQuery(
+        additionalQueryForOne
+      );
+      if (foundBarcode[0] !== null && foundBarcode[0] !== undefined) {
+        ResponseData.push(foundBarcode[0]);
       }
     } else {
-      ResponseData = dataExist;
+      ResponseData = dataExist[0];
     }
 
     if (ResponseData.length === 0) {

@@ -189,6 +189,18 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
+          from: "companies",
+          localField: "companyId",
+          foreignField: "_id",
+          as: "company_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { companyName: 1 } },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: "warehouses",
           localField: "wareHouseId",
           foreignField: "_id",
@@ -212,9 +224,12 @@ exports.allFilterPagination = async (req, res) => {
           wareHouseLabel: {
             $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
           },
+          companyLabel: {
+            $arrayElemAt: ["$company_data.companyName", 0],
+          },
         },
       },
-      { $unset: ["product_group", "warehouse_data"] },
+      { $unset: ["product_group", "warehouse_data", "company_data"] },
     ];
 
     if (additionalQuery.length) {
@@ -241,6 +256,15 @@ exports.allFilterPagination = async (req, res) => {
         dataFound.length,
         req.body.isPaginationRequired
       );
+
+    finalAggregateQuery.push({
+      $group: {
+        _id: "$barcodeNumber", // Group by barcodeNumber
+        barcodeNumber: { $first: "$barcodeNumber" },
+        productGroupLabel: { $first: "$productGroupLabel" },
+        data: { $push: "$$ROOT" }, // Store grouped documents in an array called "data"
+      },
+    });
 
     finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
     if (isPaginationRequired) {

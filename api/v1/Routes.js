@@ -13,6 +13,7 @@ const productRoute = require("./src/product/ProductRoute");
 const languageRoute = require("./src/language/LanguageRoute");
 const cartonBoxRoute = require("./src/cartonBox/CartonBoxRoute");
 const barCodeRoute = require("./src/barCode/BarCodeRoute");
+const barCodeFlowRoute = require("./src/barCodeFlow/BarCodeFlowRoute");
 const asrRequestRoute = require("./src/asrRequest/AsrRequestRoute");
 const grnRoute = require("./src/GRN/GRNRoute");
 const schemeRoute = require("./src/scheme/SchemeRoute");
@@ -184,6 +185,10 @@ const defaultRoutes = [
   {
     path: "/bar-code",
     route: barCodeRoute,
+  },
+  {
+    path: "/barcode-flow",
+    route: barCodeFlowRoute,
   },
   {
     path: "/dealers-category",

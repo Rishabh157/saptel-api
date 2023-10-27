@@ -64,7 +64,7 @@ router.post(
 );
 
 router.get(
-  "/barcode/:barcode/productgroupid/:productgroupid/status/:status",
+  "/companyid/:cid/productgroupid/:productgroupid/barcode/:barcode/status/:status",
   authCheckMiddleware,
   validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcode
@@ -72,7 +72,7 @@ router.get(
 
 // barcode scan at dealer warehouse
 router.get(
-  "/dealer/barcode/:barcode/productgroupid/:productgroupid/status/:status",
+  "/dealer/companyid/:cid/productgroupid/:productgroupid/barcode/:barcode/status/:status",
   authCheckDealerMiddleware,
   validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcodeAtDealerWarehouse
