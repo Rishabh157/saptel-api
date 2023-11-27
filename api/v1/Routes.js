@@ -83,6 +83,7 @@ const rtvMasterServiceRoute = require("./src/rtvMaster/RtvMasterRoute");
 const wtwMasterServiceRoute = require("./src/warehouseToWarehouse/wtwMasterRoute");
 const wtcMasterServiceRoute = require("./src/warehouseToCompany/wtcMasterRoute");
 const wtsMasterServiceRoute = require("./src/warehouseToSample/wtsMasterRoute");
+const dtwMasterServiceRoute = require("./src/dealerToWarehouse/dtwMasterRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -428,6 +429,10 @@ const defaultRoutes = [
   {
     path: "/wts-master",
     route: wtsMasterServiceRoute,
+  },
+  {
+    path: "/dtw-master",
+    route: dtwMasterServiceRoute,
   },
 ];
 // orderRoute;

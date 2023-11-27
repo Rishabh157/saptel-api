@@ -57,7 +57,7 @@ exports.add = async (req, res) => {
       userRole,
       userType,
     } = req.body;
-
+    console.log("innn");
     if (companyId !== null && companyId !== undefined) {
       const isCompanyExists = await companyService.findCount({
         _id: companyId,
@@ -78,6 +78,7 @@ exports.add = async (req, res) => {
       }
     }
 
+    console.log("here");
     /**
      * check duplicate exist
      */
@@ -103,6 +104,7 @@ exports.add = async (req, res) => {
     // let dataToUpload = { ...req.body, password: hashedPassword };
     // console.log(dataToUpload);
     //------------------create data-------------------
+    console.log("creating new data");
     let dataCreated = await userService.createNewData({ ...req.body });
 
     if (dataCreated) {

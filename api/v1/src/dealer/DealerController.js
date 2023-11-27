@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dealerService = require("./DealerService");
+const warehouseService = require("../wareHouse/WareHouseService");
 const companyService = require("../company/CompanyService");
 const dealersCategoryService = require("../dealersCategory/DealersCategoryService");
 const ledgerService = require("../ledger/LedgerService");
@@ -268,6 +269,11 @@ exports.login = async (req, res) => {
       companyId,
     } = dataFound;
 
+    let dealerWarehouse = await warehouseService.getOneByMultiField({
+      isDeleted: false,
+      dealerId: dealerId,
+    });
+
     let token = await dealerTokenCreate(dataFound);
     if (!token) {
       throw new ApiError(
@@ -294,6 +300,7 @@ exports.login = async (req, res) => {
         fullName: `${firstName} ${lastName}`,
         email: email,
         companyId: companyId,
+        warehouseId: dealerWarehouse?._id ? dealerWarehouse?._id : null,
       },
       status: true,
       code: "OK",

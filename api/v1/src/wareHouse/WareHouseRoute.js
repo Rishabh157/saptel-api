@@ -17,6 +17,13 @@ router.get(
   validate(wareHouseValidation.get),
   wareHouseController.getWarehouse
 );
+
+router.get(
+  "/dealer/company/:companyid/warehouse",
+  authCheckDealerMiddleware,
+  validate(wareHouseValidation.get),
+  wareHouseController.getWarehouseFromDealer
+);
 // warehouse of dealers
 router.get(
   "/company/:companyid/dealer-warehouse",

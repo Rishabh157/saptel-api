@@ -158,8 +158,8 @@ const UserSchema = new mongoose.Schema(
       required: true,
       default: [],
     },
-    companyId: { type: ObjectId, required: true, trim: true },
-    branchId: { type: ObjectId, required: true, trim: true },
+    companyId: { type: ObjectId, default: null },
+    branchId: { type: ObjectId, default: null },
 
     isDeleted: {
       type: Boolean,

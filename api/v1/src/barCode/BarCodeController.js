@@ -10,6 +10,8 @@ const WarehouseService = require("../wareHouse/WareHouseService");
 const wtwMasterService = require("../warehouseToWarehouse/wtwMasterService");
 const wtcMasterService = require("../warehouseToCompany/wtcMasterService");
 const wtsMasterService = require("../warehouseToSample/wtsMasterService");
+const dtwMasterService = require("../dealerToWarehouse/dtwMasterService");
+
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const ProductGroupService = require("../productGroup/ProductGroupService");
@@ -2161,6 +2163,20 @@ exports.updateWarehouseInventory = async (req, res) => {
             }
           );
         });
+      } else if (from === barcodeStatusType.dtw) {
+        wId?.forEach(async (dtwid) => {
+          await dtwMasterService.getOneAndUpdate(
+            {
+              _id: new mongoose.Types.ObjectId(dtwid),
+              isDeleted: false,
+            },
+            {
+              $set: {
+                status: productStatus.complete,
+              },
+            }
+          );
+        });
       }
 
       await barcodeFlowService.createNewData({
@@ -2258,7 +2274,7 @@ exports.outwardInventory = async (req, res) => {
           lotNumber: ele.lotNumber,
           isUsed: ele.isUsed,
           wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.atWarehouse,
+          status: barcodeStatusType.inTransit,
           companyId: ele.companyId,
         });
       }
@@ -2385,7 +2401,7 @@ exports.rtvOutwardInventory = async (req, res) => {
           lotNumber: ele.lotNumber,
           isUsed: ele.isUsed,
           wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.atWarehouse,
+          status: barcodeStatusType.inTransit,
           companyId: ele.companyId,
         });
       }
@@ -2513,7 +2529,7 @@ exports.wtwOutwardInventory = async (req, res) => {
           lotNumber: ele.lotNumber,
           isUsed: ele.isUsed,
           wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.atWarehouse,
+          status: barcodeStatusType.inTransit,
           companyId: ele.companyId,
         });
       }
@@ -2580,6 +2596,134 @@ exports.wtwOutwardInventory = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+//dtw outward
+
+exports.dtwOutwardInventory = async (req, res) => {
+  try {
+    let { barcodedata, dtwId } = req.body;
+    const groupedData = barcodedata.reduce((result, item) => {
+      const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
+
+      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
+      if (!result[outerBoxbarCodeNumber]) {
+        // If it doesn't exist, create an array for that key
+        result[outerBoxbarCodeNumber] = [];
+      }
+
+      // Push the current item into the array associated with the outerBoxbarCodeNumber key
+      result[outerBoxbarCodeNumber].push(item);
+
+      return result;
+    }, {});
+
+    // Convert the grouped data into an array of objects (if needed)
+    const groupedArray = Object.keys(groupedData).map((key) => ({
+      outerBoxbarCodeNumber: key,
+      items: groupedData[key],
+    }));
+    const promises = barcodedata?.map(async (ele) => {
+      let allOuterBoxBarcode = await barCodeService.findCount({
+        outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+        isUsed: true,
+      });
+      let foundObj = groupedArray?.find((fele) => {
+        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
+        if (fele?.outerBoxbarCodeNumber !== null) {
+          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
+        }
+      });
+      console.log(foundObj, "foundObj");
+
+      if (foundObj?.items?.length !== allOuterBoxBarcode) {
+        await barCodeService.updateMany(
+          {
+            outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+            isUsed: true,
+          },
+          {
+            $set: {
+              outerBoxbarCodeNumber: null,
+            },
+          }
+        );
+        await barcodeFlowService.createNewData({
+          productGroupId: ele.productGroupId,
+          barcodeNumber: ele.barcodeNumber,
+          cartonBoxId: null,
+          barcodeGroupNumber: ele.barcodeGroupNumber,
+          outerBoxbarCodeNumber: null,
+          lotNumber: ele.lotNumber,
+          isUsed: ele.isUsed,
+          wareHouseId: ele.wareHouseId,
+          status: barcodeStatusType.inTransit,
+          companyId: ele.companyId,
+        });
+      }
+
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(ele?._id),
+          isUsed: true,
+        },
+        {
+          $set: {
+            status: barcodeStatusType.dtw,
+            wareHouseId: ele.wareHouseId,
+          },
+        }
+      );
+      dtwId?.forEach(async (dtwid) => {
+        await dtwMasterService.getOneAndUpdate(
+          {
+            _id: new mongoose.Types.ObjectId(dtwid),
+            isDeleted: false,
+          },
+          {
+            $set: {
+              status: productStatus.dispatched,
+            },
+          }
+        );
+      });
+      await barcodeFlowService.createNewData({
+        productGroupId: dataUpdated.productGroupId,
+        barcodeNumber: dataUpdated.barcodeNumber,
+        cartonBoxId: dataUpdated.cartonBoxId,
+        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
+        lotNumber: dataUpdated.lotNumber,
+        isUsed: dataUpdated.isUsed,
+        wareHouseId: dataUpdated.wareHouseId,
+        status: dataUpdated.status,
+        companyId: dataUpdated.companyId,
+      });
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+
+    if (updatedDataArray.length > 0) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: null,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // wtc outward
 
 exports.wtcOutwardInventory = async (req, res) => {
@@ -2639,7 +2783,7 @@ exports.wtcOutwardInventory = async (req, res) => {
           lotNumber: ele.lotNumber,
           isUsed: ele.isUsed,
           wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.atWarehouse,
+          status: barcodeStatusType.inTransit,
           companyId: ele.companyId,
         });
       }
@@ -2767,7 +2911,7 @@ exports.wtsOutwardInventory = async (req, res) => {
           lotNumber: ele.lotNumber,
           isUsed: ele.isUsed,
           wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.atWarehouse,
+          status: barcodeStatusType.inTransit,
           companyId: ele.companyId,
         });
       }

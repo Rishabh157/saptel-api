@@ -327,19 +327,25 @@ exports.updateLevel = async (req, res) => {
           }
 
           // This code will execute after the loop is completed
-
+          console.log(
+            salesOrderBalance,
+            totalAmount,
+            totalTaxAmount,
+            "---------------------"
+          );
           if (soData[0].accApproved === true) {
             const balance = await getBalance(
               soData[0].dealerId,
               0,
               parseInt(totalTaxAmount)
             );
+            console.log(balance, "balance");
             //------------------create data-------------------
             let dataCreated = await ledgerService.createNewData({
               noteType: ledgerType.debit,
               taxAmount: parseInt(totalTaxAmount - totalAmount),
               creditAmount: 0,
-              debitAmount: parseInt(salesOrderBalance),
+              debitAmount: parseInt(totalTaxAmount),
               remark: "By Sales Order",
               companyId: soData[0].companyId,
               dealerId: soData[0].dealerId,
@@ -549,11 +555,36 @@ exports.allFilterGroupPagination = async (req, res) => {
       },
 
       {
+        $lookup: {
+          from: "warehouses", // Reference your message collection
+          localField: "dealerWareHouseId", // Match the ticketId field
+          foreignField: "_id", // With the ticketId field in the message collection
+          as: "warehouseData",
+        },
+      },
+      {
+        $lookup: {
+          from: "states", // Reference your message collection
+          localField: "warehouseData.registrationAddress.stateId", // Match the ticketId field
+          foreignField: "_id", // With the ticketId field in the message collection
+          as: "stateData",
+        },
+      },
+      {
+        $addFields: {
+          warehouseStateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+        },
+      },
+      {
         $unset: [
           "dealer_name",
           "companyWarehouseName",
           "warehouses_name",
           "productSalesOrders",
+          "warehouseData",
+          "stateData",
         ],
       },
     ];

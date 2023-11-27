@@ -184,6 +184,14 @@ router.put(
   barCodeController.wtwOutwardInventory
 );
 
+// outward inventory from dtw
+router.put(
+  "/dealer/dtw/outwardinventory",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.dtwOutwardInventory),
+  barCodeController.dtwOutwardInventory
+);
+
 /**
  * update many document for dealer inward inventory
  */

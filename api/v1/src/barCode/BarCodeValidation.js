@@ -75,7 +75,7 @@ const updateWarehouseInventory = {
       toCompanyId: Joi.string().custom(commonValidation.objectId).allow(null),
       fromCompanyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
-    wId: Joi.array().items(Joi.string().required()),
+    wId: Joi.array().items(Joi.string().required()).required(),
     from: Joi.string().required(),
   }),
 };
@@ -139,6 +139,27 @@ const wtwOutwardInventory = {
     wtwId: Joi.array().items(Joi.string().required()),
   }),
 };
+
+//dtw
+const dtwOutwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    dtwId: Joi.array().items(Joi.string().required()),
+  }),
+};
+
 // wtc
 const wtcOutwardInventory = {
   body: Joi.object().keys({
@@ -435,4 +456,5 @@ module.exports = {
   updateWarehouseInventory,
   getInventoryByStatus,
   orderDispatch,
+  dtwOutwardInventory,
 };

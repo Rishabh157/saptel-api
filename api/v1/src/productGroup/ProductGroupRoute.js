@@ -2,7 +2,10 @@ const router = require("express").Router();
 const productGroupController = require("./ProductGroupController");
 const validate = require("../../middleware/validate");
 const productGroupValidation = require("./ProductGroupValidation");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -13,6 +16,13 @@ router.get(
   authCheckMiddleware,
   validate(productGroupValidation.get),
   productGroupController.get
+);
+
+router.get(
+  "/dealer/company/:companyid",
+  authCheckDealerMiddleware,
+  validate(productGroupValidation.get),
+  productGroupController.getForDealer
 );
 
 /**

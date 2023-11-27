@@ -112,9 +112,9 @@ const update = {
     }),
     document: Joi.object().keys({
       gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().uri().required(),
+      gstCertificate: Joi.string().required(),
       adharCardNumber: Joi.string().required(),
-      adharCard: Joi.string().uri().required(),
+      adharCard: Joi.string().required(),
     }),
     otherDocument: Joi.array().items({
       documentName: Joi.string().allow(""),

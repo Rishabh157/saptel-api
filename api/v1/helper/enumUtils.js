@@ -171,8 +171,10 @@ const moduleType = Object.freeze({
   saleOrder: "SALE_ORDER",
   rtvOrder: "RTV_ORDER",
   wtwOrder: "WTW_ORDER",
+  dtwOrder: "DTW_ORDER",
   wtsOrder: "WTS_ORDER",
   wtcOrder: "WTC_ORDER",
+  dtwOrder: "DTW_ORDER",
   asr: "ASR",
   purchaseOrder: "PURCHASE_ORDER",
   grn: "GRN",
@@ -347,6 +349,7 @@ const barcodeStatusType = Object.freeze({
   wtc: "WTC",
   wts: "WTS",
   wtw: "WTW",
+  dtw: "DTW",
   delivered: "DELIVERED",
 });
 
