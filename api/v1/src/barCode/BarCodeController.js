@@ -870,6 +870,7 @@ exports.getByBarcode = async (req, res) => {
     const productGroupId = req.params.productgroupid;
     const status = req.params.status;
     const cid = req.params.cid;
+    console.log(barcodeToBeSearch, status, productGroupId, cid);
     let additionalQueryForAll = [
       {
         $match: {
@@ -978,6 +979,7 @@ exports.getByBarcode = async (req, res) => {
     const dataExist = await barCodeService.aggregateQuery(
       additionalQueryForAll
     );
+    console.log(dataExist, "dataExist");
     if (dataExist.length === 0) {
       const foundBarcode = await barCodeService.aggregateQuery(
         additionalQueryForOne
@@ -986,7 +988,7 @@ exports.getByBarcode = async (req, res) => {
         ResponseData.push(foundBarcode[0]);
       }
     } else {
-      ResponseData = dataExist[0];
+      ResponseData = dataExist;
     }
 
     if (ResponseData.length === 0) {
