@@ -68,26 +68,16 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
 
-    /**
-     * check duplicate exist
-     */
-    // let dataExist = await salesOrderService.isExists([{ soNumber }]);
-    // if (dataExist.exists && dataExist.existsSummary) {
-    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    // }
     let lastObject = await salesOrderService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
     ]);
-    console.log(lastObject, "lastObject");
     let currentNumber = 0;
-    console.log(parseInt(lastObject[0]?.soNumber), "jkgggbdfjkgbjkdfgb");
     if (!lastObject.length) {
       currentNumber = 1;
     } else {
       currentNumber = parseInt(lastObject[0]?.soNumber) + 1;
     }
-    console.log(currentNumber, "currentNumber");
     const output = productSalesOrder.map((po) => {
       return {
         soNumber: currentNumber,
