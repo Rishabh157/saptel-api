@@ -9,7 +9,7 @@ const commonValidation = require("../../helper/CommonValidation");
 
 const create = {
   body: Joi.object().keys({
-    soNumber: Joi.string().required(),
+    // soNumber: Joi.string().required(),
     dhApproved: Joi.boolean().allow(null),
     dhApprovedActionBy: Joi.string().allow(""),
     dhApprovedAt: Joi.string().allow(""),

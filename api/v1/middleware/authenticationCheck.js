@@ -13,6 +13,7 @@ exports.authCheckMiddleware = async (req, res, next) => {
     /**
      * check token exist in req body
      */
+
     let isTokenExist = authHelper.checkTokenExist(req, res);
 
     if (!isTokenExist || !isTokenExist.status) {
@@ -30,7 +31,9 @@ exports.authCheckMiddleware = async (req, res, next) => {
     if (req.userData.tokenType !== "LOGIN") {
       throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);
     }
+
     const deviceIdCheck = authHelper.checkDeviceId(req, res);
+
     if (!deviceIdCheck.status) {
       throw new ApiError(httpStatus.UNAUTHORIZED, deviceIdCheck.message);
     }
@@ -40,6 +43,7 @@ exports.authCheckMiddleware = async (req, res, next) => {
         deviceIdCheck.deviceId,
         token
       );
+
       if (!redisResponse.status) {
         throw new ApiError(httpStatus.UNAUTHORIZED, redisResponse.message);
       }
@@ -56,6 +60,7 @@ exports.authCheckMiddleware = async (req, res, next) => {
 
     if (req.userData.userType === userEnum.user) {
       let userDetails = await authHelper.checkUserValid(req.userData);
+
       if (!userDetails.status) {
         throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
       }

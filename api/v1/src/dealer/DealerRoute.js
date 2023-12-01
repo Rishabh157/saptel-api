@@ -3,6 +3,7 @@ const dealerController = require("./DealerController");
 const validate = require("../../middleware/validate");
 const dealerValidation = require("./DealerValidation");
 const {
+  authCheckMiddleware,
   authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
@@ -10,10 +11,9 @@ const {
 /**
  * get one document (if query) / all documents
  */
-
 router.get(
   "/company/:companyid",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.get),
   dealerController.get
 );
@@ -23,7 +23,7 @@ router.get(
  */
 router.get(
   "/company/:companyid/pincode/:pincodeid",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.getByPincode),
   dealerController.getByPincode
 );
@@ -33,7 +33,7 @@ router.get(
  */
 router.get(
   "/:id",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.getDocument),
   dealerController.getById
 );
@@ -55,7 +55,7 @@ router.post(
 );
 router.post(
   "/",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.getAllFilter),
   dealerController.allFilterPagination
 );
@@ -65,25 +65,16 @@ router.post(
  */
 router.post(
   "/add",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.create),
   dealerController.add
-);
-
-// changepassword
-
-router.put(
-  "/change-password",
-  authCheckDealerMiddleware,
-  validate(dealerValidation.changePasswordValid),
-  dealerController.changePassword
 );
 /**
  * update document
  */
 router.put(
   "/:id",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.update),
   dealerController.update
 );
@@ -92,7 +83,7 @@ router.put(
  */
 router.put(
   "/automapping-change/:id",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.autoMappingChange),
   dealerController.changeAutoMapping
 );
@@ -101,19 +92,25 @@ router.put(
  */
 router.put(
   "/status-change/:id",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.changeStatus),
   dealerController.statusChange
 );
-
 /**
  * delete document
  */
 router.delete(
   "/:id",
-  authCheckDealerMiddleware,
+  authCheckMiddleware,
   validate(dealerValidation.deleteDocument),
   dealerController.deleteDocument
+);
+
+router.put(
+  "/dealer/change-password",
+  authCheckDealerMiddleware,
+  validate(dealerValidation.changePasswordValid),
+  dealerController.changePassword
 );
 
 module.exports = router;

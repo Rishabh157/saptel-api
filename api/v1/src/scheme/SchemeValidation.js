@@ -33,8 +33,8 @@ const create = {
       pop: Joi.number().required(),
     }),
     faq: Joi.array().items({
-      question: Joi.string().required(),
-      answer: Joi.string().required(),
+      question: Joi.string().allow(""),
+      answer: Joi.string().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
@@ -73,8 +73,8 @@ const update = {
       pop: Joi.number().required(),
     }),
     faq: Joi.array().items({
-      question: Joi.string().required(),
-      answer: Joi.string().required(),
+      question: Joi.string().allow(""),
+      answer: Joi.string().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),

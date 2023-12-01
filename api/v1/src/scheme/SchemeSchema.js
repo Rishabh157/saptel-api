@@ -119,14 +119,14 @@ const SchemeSchema = new mongoose.Schema(
         {
           question: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
 
           answer: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
