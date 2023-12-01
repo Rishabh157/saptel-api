@@ -248,6 +248,16 @@ const autoMappingChange = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+const changePasswordValid = {
+  body: Joi.object()
+    .keys({
+      currentPassword: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      dealerEmail: Joi.string().required(),
+    })
+    .required(),
+};
 module.exports = {
   create,
   getAllFilter,
@@ -260,4 +270,5 @@ module.exports = {
   loginValid,
   refreshTokenValid,
   getByPincode,
+  changePasswordValid,
 };

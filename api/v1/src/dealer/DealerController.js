@@ -249,8 +249,9 @@ exports.login = async (req, res) => {
   try {
     let reqEmail = req.body.email;
     let password = req.body.password;
-
+    console.log(reqEmail);
     let dataFound = await dealerService.getOneByMultiField({ email: reqEmail });
+    console.log(dataFound);
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Dealer not found.`);
     }
@@ -1415,6 +1416,91 @@ exports.changeAutoMapping = async (req, res) => {
     } else {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const token = req.headers["x-access-token"];
+    const { currentPassword, newPassword, dealerEmail } = req.body;
+    const decoded = await jwt.verify(token, config.jwt_dealer_secret);
+    if (decoded.email !== dealerEmail) {
+      throw new ApiError(httpStatus.OK, `Invalid Token`);
+    }
+    const dealer = await dealerService.getOneByMultiField({
+      email: dealerEmail,
+      isDeleted: false,
+    }); // assuming you're using Passport.js or similar for authentication
+
+    let {
+      _id: dealerId,
+      // dealerType,
+      firmName,
+      firstName,
+      lastName,
+      dealerCode,
+      email,
+      companyId,
+    } = dealer;
+
+    let dealerWarehouse = await warehouseService.getOneByMultiField({
+      isDeleted: false,
+      dealerId: dealerId,
+    });
+    // Check if the current password matches the dealer's password
+    const isMatch = await bcrypt.compare(currentPassword, dealer.password);
+    if (!isMatch) {
+      throw new ApiError(httpStatus.OK, `Current password not matched`);
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the dealer's password in the database
+    dealer.password = hashedPassword;
+    await dealer.save();
+
+    let newToken = await dealerTokenCreate(dealer);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await dealerRefreshTokenCreate(dealer);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: `Password change successful!`,
+      data: {
+        token: token,
+        refreshToken: newRefreshToken,
+        userId: dealerId,
+        firmName: firmName,
+        dealerCode: dealerCode,
+        fullName: `${firstName} ${lastName}`,
+        email: email,
+        companyId: companyId,
+        warehouseId: dealerWarehouse?._id ? dealerWarehouse?._id : null,
+      },
+      status: true,
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
