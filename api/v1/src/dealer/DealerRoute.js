@@ -18,6 +18,13 @@ router.get(
   dealerController.get
 );
 
+router.put(
+  "/change-password",
+  authCheckDealerMiddleware,
+  validate(dealerValidation.changePasswordValid),
+  dealerController.changePassword
+);
+
 /**
  * pincode wise dealer
  */
@@ -104,13 +111,6 @@ router.delete(
   authCheckMiddleware,
   validate(dealerValidation.deleteDocument),
   dealerController.deleteDocument
-);
-
-router.put(
-  "/dealer/change-password",
-  authCheckDealerMiddleware,
-  validate(dealerValidation.changePasswordValid),
-  dealerController.changePassword
 );
 
 module.exports = router;

@@ -134,6 +134,16 @@ const getAllDistribution = {
   }),
 };
 /**
+ * refresh token
+ */
+const refreshTokenValid = {
+  body: Joi.object()
+    .keys({
+      refreshToken: Joi.string().required(),
+    })
+    .required(),
+};
+/**
  * change status of document
  */
 const changeStatus = {
@@ -148,8 +158,21 @@ const changeStatus = {
 const loginValid = {
   body: Joi.object()
     .keys({
-      email: Joi.string().email().required(),
+      userName: Joi.string().required(),
       password: Joi.string().required(),
+    })
+    .required(),
+};
+
+/**
+ * changePassword
+ */
+const changePasswordValid = {
+  body: Joi.object()
+    .keys({
+      currentPassword: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      userId: Joi.string().custom(commonValidation.objectId).required(),
     })
     .required(),
 };
@@ -179,4 +202,6 @@ module.exports = {
   verifyOtpValid,
   getAllDistribution,
   getById,
+  refreshTokenValid,
+  changePasswordValid,
 };

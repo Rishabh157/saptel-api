@@ -46,17 +46,21 @@ exports.add = async (req, res) => {
     if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
-
-    const output = pincodeDetail.map((ele) => {
-      return {
-        dealerId: dealerId,
-        districtId: ele?.districtId,
-        pincode: ele?.pincode,
-        estTime: ele?.estTime,
-        companyId: companyId,
-      };
+    let output = [];
+    pincodeDetail.map((ele) => {
+      ele?.pincode?.map((pin) => {
+        output = [
+          ...output,
+          {
+            dealerId: dealerId,
+            districtId: ele?.districtId,
+            pincode: pin,
+            estTime: ele?.estTime,
+            companyId: companyId,
+          },
+        ];
+      });
     });
-
     let isValidPincode = false;
     await Promise.all(
       output?.map(async (ele) => {

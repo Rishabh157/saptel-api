@@ -12,7 +12,7 @@ const {
  * get one document (if query) / all documents
  */
 router.get(
-  "/company/:companyid",
+  "/",
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.get),
   deliveryBoyController.get

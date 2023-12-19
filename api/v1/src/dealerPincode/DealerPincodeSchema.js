@@ -4,7 +4,7 @@ const DealerPincodeSchema = new mongoose.Schema(
   {
     dealerId: { type: ObjectId, required: true, trim: true },
     districtId: { type: ObjectId, required: true, trim: true },
-    pincode: { type: [String], required: true },
+    pincode: { type: String, required: true },
     estTime: { type: Number, required: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {

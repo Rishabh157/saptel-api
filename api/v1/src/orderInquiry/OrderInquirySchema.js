@@ -286,6 +286,10 @@ const OrderInquirySchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    delivery_boy_id: {
+      type: ObjectId,
+      default: null,
+    },
     preffered_delivery_end_time: {
       type: String,
       required: false,

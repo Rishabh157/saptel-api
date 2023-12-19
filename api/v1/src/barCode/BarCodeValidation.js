@@ -217,6 +217,7 @@ const orderDispatch = {
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
     orderId: Joi.string().custom(commonValidation.objectId).required(),
+    deliveryBoyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

@@ -45,6 +45,14 @@ router.get(
   pincodeController.getPincodeByTehsil
 );
 
+// all area of a pincode
+router.get(
+  "/get-tehsil-pincode/:id",
+  authCheckMiddleware,
+  validate(pincodeValidation.get),
+  pincodeController.getPincodeByTehsil
+);
+
 /**
  * get all pincodes of a district
  */

@@ -304,10 +304,11 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
+    console.log(req.userData, "req.userData");
 
+    let dealerId = req?.userData?.Id;
     //if no default query then pass {}
-    let matchQuery = { companyId: companyId, isDeleted: false };
+    let matchQuery = { isDeleted: false, dealerId };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

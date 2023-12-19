@@ -71,6 +71,15 @@ router.put(
   validate(userValidation.update),
   userController.update
 );
+/**
+ * change password
+ */
+router.put(
+  "/change-password",
+  authCheckMiddleware,
+  validate(userValidation.changePasswordValid),
+  userController.changePassword
+);
 router.put(
   "/:id",
   authCheckMiddleware,
@@ -88,6 +97,15 @@ router.put(
 );
 
 /**
+ * logout
+ */
+router.post(
+  "/logout",
+  // accessModuleCheck,
+  authCheckMiddleware,
+  userController.logout
+);
+/**
  * delete document
  */
 router.get(
@@ -95,6 +113,13 @@ router.get(
   authCheckMiddleware,
   validate(userValidation.getById),
   userController.getById
+);
+
+//refresh
+router.post(
+  "/refresh-token",
+  validate(userValidation.refreshTokenValid),
+  userController.refreshToken
 );
 
 /**

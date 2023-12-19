@@ -88,7 +88,7 @@ exports.authCheckDealerMiddleware = async (req, res, next) => {
      */
 
     let isTokenExist = authHelper.checkTokenExist(req, res);
-
+    console.log(isTokenExist, "isTokenExist");
     if (!isTokenExist || !isTokenExist.status) {
       return res.status(isTokenExist.statusCode).send({
         ...isTokenExist.data,
@@ -96,8 +96,9 @@ exports.authCheckDealerMiddleware = async (req, res, next) => {
     }
 
     let token = isTokenExist.data;
+    console.log(token, "token");
     const decoded = jwt.verify(token, config.jwt_dealer_secret);
-
+    console.log(decoded, "decoded");
     req.userData = decoded;
     if (!req.userData || !req.userData.Id || req.userData.Id === "") {
       throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);

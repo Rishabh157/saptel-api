@@ -1336,6 +1336,21 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
+          foreignField: "_id",
+          as: "deleivery_by_data",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -1373,6 +1388,9 @@ exports.allFilterPagination = async (req, res) => {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
         },
       },
       {
@@ -1389,6 +1407,7 @@ exports.allFilterPagination = async (req, res) => {
           "channelData",
           "agentDistrictData",
           "product_group",
+          "deleivery_by_data",
         ],
       },
     ];
@@ -1762,6 +1781,21 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
+          foreignField: "_id",
+          as: "deleivery_by_data",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -1799,9 +1833,9 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
-          // barcodeLabel: {
-          //   $arrayElemAt: ["$barcodeData.barcodeNumber", 0],
-          // },
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
         },
       },
       {
@@ -1818,6 +1852,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           "channelData",
           "agentDistrictData",
           "product_group",
+          "deleivery_by_data",
         ],
       },
     ];

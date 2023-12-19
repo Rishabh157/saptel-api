@@ -3127,7 +3127,7 @@ exports.orderDispatch = async (req, res) => {
 
 exports.dealerOrderDispatch = async (req, res) => {
   try {
-    let { barcodedata, orderId } = req.body;
+    let { barcodedata, orderId, deliveryBoyId } = req.body;
     console.log("innn");
     let barcodeaIds = barcodedata?.map((ele) => {
       return ele?._id;
@@ -3226,7 +3226,7 @@ exports.dealerOrderDispatch = async (req, res) => {
       {
         $set: {
           orderStatus: productStatus.dispatched,
-
+          delivery_boy_id: deliveryBoyId,
           barcodeId: barcodeaIds,
         },
       }

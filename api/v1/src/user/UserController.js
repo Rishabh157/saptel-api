@@ -5,6 +5,8 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("./UserService");
 const companyService = require("../company/CompanyService");
 const branchService = require("../companyBranch/CompanyBranchService");
+const jwt = require("jsonwebtoken");
+
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -17,6 +19,7 @@ const {
   getUserRoleData,
   getFieldsToDisplay,
   getAllowedField,
+  logOut,
 } = require("../../helper/utils");
 const bcryptjs = require("bcryptjs");
 const otpHelper = require("../otp/OtpHelper");
@@ -40,6 +43,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { userEnum, moduleType, actionType } = require("../../helper/enumUtils");
+const redisClient = require("../../../../database/redis");
 
 //add start
 exports.add = async (req, res) => {
@@ -794,36 +798,55 @@ exports.statusChange = async (req, res) => {
  */
 exports.login = async (req, res) => {
   try {
-    let email = req.body.email;
+    let userName = req.body.userName;
     let password = req.body.password;
+    let deviceId = req.headers["device-id"];
+    const userIP =
+      req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    const userNewIp = userIP.replace("::ffff:", "");
+    let userFound = await userService.getOneByMultiField({ userName });
+    let userAllowedIp = userFound?.allowedIp;
+    let isUserAllowed = false;
+    userAllowedIp?.forEach((ele) => {
+      if (ele === userNewIp) {
+        isUserAllowed = true;
+        return;
+      }
+    });
 
-    let dataFound = await userService.getOneByMultiField({ email });
-    if (!dataFound) {
+    if (!isUserAllowed && userAllowedIp[0]?.length) {
+      throw new ApiError(
+        httpStatus.OK,
+        `User not allowed to login, Due to IP restriction.`
+      );
+    }
+    if (!userFound) {
       throw new ApiError(httpStatus.OK, `User not found.`);
     }
-
-    let matched = await bcrypt.compare(password, dataFound.password);
+    let matched = await bcrypt.compare(password, userFound?.password);
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
     let {
       _id: userId,
       userType,
-      mobile,
       firstName,
+      mobile,
       lastName,
+      email,
       companyId,
+      userRole,
       branchId,
-    } = dataFound;
+    } = userFound;
 
-    let token = await tokenCreate(dataFound);
+    let token = await tokenCreate(userFound);
     if (!token) {
       throw new ApiError(
         httpStatus.OK,
         "Something went wrong. Please try again later."
       );
     }
-    let refreshToken = await refreshTokenCreate(dataFound);
+    let refreshToken = await refreshTokenCreate(userFound);
     if (!refreshToken) {
       throw new ApiError(
         httpStatus.OK,
@@ -831,30 +854,43 @@ exports.login = async (req, res) => {
       );
     }
 
-    return res.status(httpStatus.OK).send({
-      message: `Login successful!`,
-      data: {
-        token: token,
-        refreshToken: refreshToken,
-        userId: userId,
-        fullName: `${firstName} ${lastName}`,
-        email: email,
-        mobile: mobile,
-        userType: userType,
-        companyId: companyId,
-        branchId: branchId,
-      },
-      status: true,
-      code: "OK",
-      issue: null,
-    });
+    await redisClient.set(userId + deviceId, token + "***" + refreshToken);
+    const redisValue = await redisClient.get(userId + deviceId);
+    if (redisValue) {
+      return res.status(httpStatus.OK).send({
+        message: `Login successful!`,
+        data: {
+          token: token,
+          refreshToken: refreshToken,
+          userId: userId,
+          fullName: `${firstName} ${lastName}`,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          mobile: mobile,
+          userName: userName,
+          userType: userType,
+          userRole: userRole ? userRole : "ADMIN",
+          companyId: companyId,
+          branchId: branchId,
+        },
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    }
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
+    return res.status(errData.statusCode).send({
+      message,
+      status,
+      data,
+      code,
+      issue,
+      ip: req.headers["x-forwarded-for"] || req.connection.remoteAddress,
+    });
   }
 };
 
@@ -905,4 +941,168 @@ exports.verifyOtp = async (req, res) => {
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });
   }
+};
+
+// refresh
+exports.refreshToken = async (req, res) => {
+  try {
+    let refreshTokenValue = req.body.refreshToken;
+    let deviceId = req.headers["device-id"];
+
+    const decoded = await jwt.verify(
+      refreshTokenValue,
+      config.jwt_secret_refresh
+    );
+    if (!decoded) {
+      throw new ApiError(httpStatus.OK, `Invalid refreshToken`);
+    }
+    const tokenKey = `${decoded.Id}*`;
+    // const allKeys = await redisClient.keys();
+    // console.log(allKeys, "redisClient.keys");
+    const allRedisValue = await redisClient.keys(tokenKey);
+    if (!allRedisValue.length) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Invalid token User not found."
+      );
+    }
+    let userData = await userService.getOneByMultiField({
+      _id: decoded.Id,
+      isDeleted: false,
+    });
+    if (!userData) {
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Invalid token User not found."
+      );
+    }
+
+    let newToken = await tokenCreate(userData);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await refreshTokenCreate(userData);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    await redisClient.set(
+      decoded.Id + deviceId,
+      newToken + "***" + newRefreshToken
+    );
+
+    return res.status(httpStatus.OK).send({
+      message: `successfull!`,
+      data: {
+        token: newToken,
+        refreshToken: newRefreshToken,
+      },
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const deviceId = req.headers["device-id"];
+    const token = req.headers["x-access-token"];
+    const { currentPassword, newPassword, userId } = req.body;
+    console.log(
+      currentPassword,
+      newPassword,
+      userId,
+      " currentPassword, newPassword, userId"
+    );
+    const decoded = await jwt.verify(token, config.jwt_secret);
+    if (decoded.Id !== userId) {
+      throw new ApiError(httpStatus.OK, `Invalid Token`);
+    }
+    const user = await userService.getOneByMultiField({
+      _id: userId,
+      isDeleted: false,
+    }); // assuming you're using Passport.js or similar for authentication
+    let { _id, userType, firstName, mobile, lastName, email, userName } = user;
+    // Check if the current password matches the user's password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw new ApiError(httpStatus.OK, `Current password not matched`);
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password in the database
+    user.password = hashedPassword;
+    await user.save();
+    await logOut(req, true);
+    let newToken = await tokenCreate(user);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await refreshTokenCreate(user);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    await redisClient.set(
+      userId + deviceId,
+      newToken + "***" + newRefreshToken
+    );
+    const allRedisValue = await redisClient.keys(`${userId}*`);
+    return res.status(httpStatus.OK).send({
+      message: `Password change successful!`,
+      data: {
+        token: newToken,
+        refreshToken: newRefreshToken,
+        fullName: `${firstName} ${lastName}`,
+        email: email,
+        mobile: mobile,
+        userName: userName,
+      },
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.logout = async (req, res) => {
+  logOut(req, req.body.logoutAll);
+  return res.status(httpStatus.OK).send({
+    message: `Logout successfull!`,
+    data: [],
+    status: true,
+    code: "OK",
+    issue: null,
+  });
 };
