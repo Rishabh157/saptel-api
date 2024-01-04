@@ -819,7 +819,7 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-    console.log(isUserAllowed);
+    console.log(isUserAllowed, userAllowedIp?.[0], userAllowedIp, "hehe");
     if (!isUserAllowed && userAllowedIp?.[0]?.length) {
       throw new ApiError(
         httpStatus.OK,
