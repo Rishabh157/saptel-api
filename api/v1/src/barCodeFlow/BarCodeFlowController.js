@@ -249,13 +249,12 @@ exports.allFilterPagination = async (req, res) => {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
+    let { limit, totalData, skip } = await getLimitAndTotalCount(
+      req.body.limit,
+      req.body.page,
+      dataFound.length,
+      req.body.isPaginationRequired
+    );
 
     finalAggregateQuery.push({
       $group: {
@@ -265,6 +264,19 @@ exports.allFilterPagination = async (req, res) => {
         data: { $push: "$$ROOT" }, // Store grouped documents in an array called "data"
       },
     });
+    let groupResult = await barCodeFlowService.aggregateQuery(
+      finalAggregateQuery
+    );
+    let {
+      totalData: groupTotalData,
+      page,
+      totalpages,
+    } = await getLimitAndTotalCount(
+      req.body.limit,
+      req.body.page,
+      groupResult.length,
+      req.body.isPaginationRequired
+    );
 
     finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
     if (isPaginationRequired) {
@@ -286,7 +298,7 @@ exports.allFilterPagination = async (req, res) => {
         totalPage: totalpages,
         status: true,
         currentPage: page,
-        totalItem: totalData,
+        totalItem: groupTotalData,
         pageSize: limit,
         message: "Data Found",
         code: "OK",

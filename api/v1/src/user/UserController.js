@@ -61,7 +61,7 @@ exports.add = async (req, res) => {
       userRole,
       userType,
     } = req.body;
-    console.log("innn");
+
     if (companyId !== null && companyId !== undefined) {
       const isCompanyExists = await companyService.findCount({
         _id: companyId,
@@ -86,11 +86,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await userService.isExists([
-      { email },
-      { mobile },
-      { userName },
-    ]);
+    let dataExist = await userService.isExists([{ userName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -104,7 +100,11 @@ exports.add = async (req, res) => {
     }
     req.body.password = hashedPassword;
 
-    req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
+    if (mobile.length) {
+      req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
+    } else {
+      req.body.maskedPhoneNo = "";
+    }
     // let dataToUpload = { ...req.body, password: hashedPassword };
     // console.log(dataToUpload);
     //------------------create data-------------------
@@ -182,10 +182,7 @@ exports.update = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await userService.isExists(
-      [{ email }, { mobile }],
-      [idToBeSearch]
-    );
+    let dataExist = await userService.isExists([{ email }], [idToBeSearch]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -271,10 +268,7 @@ exports.updateUser = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await userService.isExists(
-      [{ email }, { mobile }, { userName }],
-      [idToBeSearch]
-    );
+    let dataExist = await userService.isExists([{ userName }], [idToBeSearch]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -294,7 +288,11 @@ exports.updateUser = async (req, res) => {
       }
       req.body.password = hashedPassword;
     }
-    req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
+    if (mobile.length) {
+      req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
+    } else {
+      req.body.maskedPhoneNo = "";
+    }
     let dataUpdated = await userService.getOneAndUpdate(
       {
         _id: idToBeSearch,
