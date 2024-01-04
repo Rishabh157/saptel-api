@@ -175,7 +175,15 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["firstName", "lastName", "mobile", "email", "userName"];
+const searchKeys = [
+  "firstName",
+  "lastName",
+  "mobile",
+  "email",
+  "userName",
+  "userDepartment",
+  "userRole",
+];
 module.exports = mongoose.model("User", UserSchema);
 module.exports.searchKeys = [...searchKeys];
 
