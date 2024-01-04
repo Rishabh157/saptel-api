@@ -25,16 +25,16 @@ const UserSchema = new mongoose.Schema(
     },
     mobile: {
       type: String,
-      required: false,
+      default: "",
       trim: true,
     },
     maskedPhoneNo: {
       type: String,
-      required: true,
+      default: "",
     },
     email: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     password: {

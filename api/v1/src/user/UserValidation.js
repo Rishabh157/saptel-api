@@ -14,8 +14,8 @@ const create = {
     mobile: Joi.string()
 
       .custom(commonValidation.indianMobile)
-      .required(),
-    email: Joi.string().required(),
+      .allow(""),
+    email: Joi.string().allow(""),
     password: Joi.string().required(),
     userType: Joi.string(),
     allowedIp: Joi.array().items(Joi.string()).default([]),
@@ -37,8 +37,8 @@ const update = {
     mobile: Joi.string()
 
       .custom(commonValidation.indianMobile)
-      .required(),
-    email: Joi.string().required(),
+      .allow(""),
+    email: Joi.string().allow(""),
     password: Joi.string().optional(),
     userType: Joi.string(),
     allowedIp: Joi.array().items(Joi.string()).default([]),
