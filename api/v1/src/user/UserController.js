@@ -812,18 +812,18 @@ exports.login = async (req, res) => {
       }
     });
 
-    if (!isUserAllowed && userAllowedIp[0]?.length) {
-      throw new ApiError(
-        httpStatus.OK,
-        `User not allowed to login, Due to IP restriction.`
-      );
-    }
     if (!userFound) {
       throw new ApiError(httpStatus.OK, `User not found.`);
     }
     let matched = await bcrypt.compare(password, userFound?.password);
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
+    }
+    if (!isUserAllowed && userAllowedIp?.[0]?.length) {
+      throw new ApiError(
+        httpStatus.OK,
+        `User not allowed to login, Due to IP restriction.`
+      );
     }
     let {
       _id: userId,
