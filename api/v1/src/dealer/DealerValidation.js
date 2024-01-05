@@ -46,8 +46,8 @@ const create = {
       landLine: Joi.string().allow(""),
     }),
     document: Joi.object().keys({
-      gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
       adharCardNumber: Joi.string().required(),
       adharCard: Joi.string().required(),
     }),
@@ -111,8 +111,8 @@ const update = {
       landLine: Joi.string().allow(""),
     }),
     document: Joi.object().keys({
-      gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
       adharCardNumber: Joi.string().required(),
       adharCard: Joi.string().required(),
     }),

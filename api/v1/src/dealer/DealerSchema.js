@@ -194,13 +194,12 @@ const DealerSchema = new mongoose.Schema(
       type: {
         gstNumber: {
           type: String,
-          required: true,
+          default: "",
           trim: true,
-          lowercase: true,
         },
         gstCertificate: {
           type: String,
-          required: true,
+          default: "",
           trim: true,
         },
         adharCardNumber: {
