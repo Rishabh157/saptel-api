@@ -8,6 +8,11 @@ const InitialCallOneSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    callType: {
+      type: String,
+      required: true,
+      enum: ["COMPLAINT", "INQUIRY"],
+    },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
@@ -23,6 +28,6 @@ const InitialCallOneSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["initialCallName", "companyId"];
+const searchKeys = ["initialCallName", "companyId", "callType"];
 module.exports = mongoose.model("initialcallone", InitialCallOneSchema);
 module.exports.searchKeys = [...searchKeys];

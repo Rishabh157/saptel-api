@@ -16,6 +16,7 @@ const create = {
     isPnd: Joi.boolean(),
     cancelFlag: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    callType: Joi.string().required(),
   }),
 };
 
@@ -35,6 +36,7 @@ const update = {
     isPnd: Joi.boolean(),
     cancelFlag: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    callType: Joi.string().required(),
   }),
 };
 //===============get either all data or single document===============
@@ -112,6 +114,7 @@ const getByInitialCallTwoId = {
       initialCallTwoId: Joi.string()
         .custom(commonValidation.objectId)
         .optional(),
+      calltype: Joi.string().optional(),
     })
     .optional(),
 };

@@ -68,11 +68,11 @@ router.put(
 );
 
 //===============update status document===============
-// router.put(
-//   "/status-change/:id",
-//   validate(dispositionThreeValidation.changeStatus),
-//   dispositionThreeController.statusChange
-// );
+router.put(
+  "/status-change/:id",
+  validate(dispositionThreeValidation.changeStatus),
+  dispositionThreeController.statusChange
+);
 
 //===============delete document===============
 router.delete(

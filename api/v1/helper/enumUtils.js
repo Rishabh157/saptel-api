@@ -94,18 +94,18 @@ const whatsType = Object.freeze({
 });
 
 const applicableCriteria = Object.freeze({
-  isOrder: "IS ORDER",
-  isPrepaid: "IS PREPAID",
-  isReplacement: "IS REPLACEMENT",
-  isCallBack: "IS CALLBACK",
-  isSchemeApp: "IS SCHEME APP",
-  outOfStock: "OUT OF STOCK",
-  isProductApp: "IS PRODUCT APP",
-  adtApplicable: "ADT APPLICABLE",
-  isTextboxReq: "IS TEXTBOX REQ",
-  isUrgent: "IS URGENT",
-  isRemarkDateApp: "IS REMARK DATE APP",
-  isInquiry: "IS INQUIRY",
+  isOrder: "IS_ORDER",
+  isPrepaid: "IS_PREPAID",
+  isReplacement: "IS_REPLACEMENT",
+  isCallBack: "IS_CALLBACK",
+  isSchemeApp: "IS_SCHEME_APP",
+  outOfStock: "OUT_OF_STOCK",
+  isProductApp: "IS_PRODUCT_APP",
+  adtApplicable: "ADT_APPLICABLE",
+  isTextboxReq: "IS_TEXTBOX_REQ",
+  isUrgent: "IS_URGENT",
+  isRemarkDateApp: "IS_REMARK_DATE_APP",
+  isInquiry: "IS_INQUIRY",
 });
 
 const genderType = Object.freeze({

@@ -22,7 +22,7 @@ router.get(
 
 //===============get all document fo initialCallOne  Id===============
 router.get(
-  "/get-all/:id",
+  "/get-all/:initialCallTwoId/calltype/:calltype",
   authCheckMiddleware,
   validate(initialCallThreeValidation.getByInitialCallTwoId),
   initialCallThreeController.getByInitialCallTwoId
@@ -53,11 +53,11 @@ router.put(
 );
 
 //===============update status document===============
-// router.put(
-//   "/status-change/:id",
-//   validate(initialCallThreeValidation.changeStatus),
-//   initialCallThreeController.statusChange
-// );
+router.put(
+  "/status-change/:id",
+  validate(initialCallThreeValidation.changeStatus),
+  initialCallThreeController.statusChange
+);
 
 //===============delete document===============
 router.delete(

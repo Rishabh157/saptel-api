@@ -25,9 +25,9 @@ router.get(
 
 //===============get all document fo initialCallOne  Id===============
 router.get(
-  "/get-all/:id",
+  "/get-all/:initialCallOneId/calltype/:calltype",
   authCheckMiddleware,
-  validate(initialCallTwoValidation.getByDispositionOneId),
+  validate(initialCallTwoValidation.getByInitialCallOneId),
   initialCallTwoController.getByInitialCallOneId
 );
 
@@ -56,11 +56,11 @@ router.put(
 );
 
 //===============update status document===============
-// router.put(
-//   "/status-change/:id",
-//   validate(initialCallOneValidation.changeStatus),
-//   initialCallOneController.statusChange
-// );
+router.put(
+  "/status-change/:id",
+  validate(initialCallTwoValidation.changeStatus),
+  initialCallTwoController.statusChange
+);
 
 //===============delete document===============
 router.delete(

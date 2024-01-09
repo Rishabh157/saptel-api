@@ -531,11 +531,13 @@ exports.deleteDocument = async (req, res) => {
 // =============get all initialCallTwo by Id of initialCallOne Id start================
 exports.getByInitialCallOneId = async (req, res) => {
   try {
-    initialCallOneId = req.params.id;
+    const { initialCallOneId, calltype } = req.params;
+
     let additionalQuery = [
       {
         $match: {
           initialCallOneId: new mongoose.Types.ObjectId(initialCallOneId),
+          callType: calltype,
           isDeleted: false,
         },
       },
@@ -587,3 +589,37 @@ exports.getByInitialCallOneId = async (req, res) => {
   }
 };
 // =============get all initialCallTwo by Id of initialCallOne Id end================
+
+//statusChange
+exports.statusChange = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let dataExist = await initialCallTwoService.getOneByMultiField({ _id });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let isActive = dataExist.isActive ? false : true;
+
+    let statusChanged = await initialCallTwoService.getOneAndUpdate(
+      { _id },
+      { isActive }
+    );
+    if (!statusChanged) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: statusChanged,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};

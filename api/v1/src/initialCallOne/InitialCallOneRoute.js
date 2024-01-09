@@ -48,11 +48,11 @@ router.put(
 );
 
 //===============update status document===============
-// router.put(
-//   "/status-change/:id",
-//   validate(initialCallOneValidation.changeStatus),
-//   initialCallOneController.statusChange
-// );
+router.put(
+  "/status-change/:id",
+  validate(initialCallOneValidation.changeStatus),
+  initialCallOneController.statusChange
+);
 
 //===============delete document===============
 router.delete(

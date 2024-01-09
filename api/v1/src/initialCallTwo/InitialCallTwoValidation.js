@@ -8,6 +8,7 @@ const create = {
   body: Joi.object().keys({
     initialCallName: Joi.string().lowercase().required(),
     initialCallOneId: Joi.string().custom(commonValidation.objectId).required(),
+    callType: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -20,6 +21,7 @@ const update = {
   body: Joi.object().keys({
     initialCallName: Joi.string().lowercase().required(),
     initialCallOneId: Joi.string().custom(commonValidation.objectId).required(),
+    callType: Joi.string().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
@@ -100,6 +102,7 @@ const getByInitialCallOneId = {
       initialCallOneId: Joi.string()
         .custom(commonValidation.objectId)
         .optional(),
+      calltype: Joi.string().optional(),
     })
     .optional(),
 };

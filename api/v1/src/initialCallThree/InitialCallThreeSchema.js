@@ -8,6 +8,11 @@ const InitialCallThreeSchema = new mongoose.Schema(
       enum: [complaintType.complaint, complaintType.enquiry],
       required: true,
     },
+    callType: {
+      type: String,
+      required: true,
+      enum: ["COMPLAINT", "INQUIRY"],
+    },
     emailType: {
       type: String,
       enum: [
@@ -98,6 +103,7 @@ const searchKeys = [
   "emailType",
   "smsType",
   "returnType",
+  "callType",
 ];
 module.exports = mongoose.model("InitialCallThree", InitialCallThreeSchema);
 module.exports.searchKeys = [...searchKeys];

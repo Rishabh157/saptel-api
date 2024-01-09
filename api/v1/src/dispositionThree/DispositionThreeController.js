@@ -663,3 +663,37 @@ exports.deleteDocument = async (req, res) => {
 };
 
 // =============delete api start end============
+
+//statusChange
+exports.statusChange = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let dataExist = await dispositionThreeService.getOneByMultiField({ _id });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let isActive = dataExist.isActive ? false : true;
+
+    let statusChanged = await dispositionThreeService.getOneAndUpdate(
+      { _id },
+      { isActive }
+    );
+    if (!statusChanged) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: statusChanged,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
