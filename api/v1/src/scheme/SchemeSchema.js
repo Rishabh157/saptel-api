@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const SchemeSchema = new mongoose.Schema(
   {
     schemeCode: {
-      type: String,
+      type: Number,
       required: true,
       trim: true,
     },

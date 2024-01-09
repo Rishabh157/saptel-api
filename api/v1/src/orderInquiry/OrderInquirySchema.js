@@ -221,7 +221,7 @@ const OrderInquirySchema = new mongoose.Schema(
     },
     shcemeQuantity: {
       type: Number,
-      required: false,
+      required: true,
       default: 1,
     },
     socialMedia: {

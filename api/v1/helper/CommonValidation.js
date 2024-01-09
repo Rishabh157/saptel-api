@@ -1,105 +1,115 @@
-const moment = require('moment')
-const logger = require('../../../config/logger')
-const { actionMethodEnum } = require('./enumUtils')
-const valid_method_name = ['GET', 'POST', 'PUT', 'DELETE']
-const valid_action_name = Object.keys(actionMethodEnum)
+const moment = require("moment");
+const logger = require("../../../config/logger");
+const { actionMethodEnum } = require("./enumUtils");
+const valid_method_name = ["GET", "POST", "PUT", "DELETE"];
+const valid_action_name = Object.keys(actionMethodEnum);
 
 const objectId = (value, helpers) => {
   if (!value.match(/^[0-9a-fA-F]{24}$/)) {
-    return helpers.message('"{{#label}}" must be a valid mongo id...')
+    return helpers.message('"{{#label}}" must be a valid mongo id...');
   }
-  return value
-}
+  return value;
+};
+
+const minValue = (value, helpers) => {
+  console.log("here i come", value);
+  if (value > 9) {
+    console.log("here i come", value);
+
+    return helpers.message('"{{#label}}" should not be greater than 9');
+  }
+  return value;
+};
 
 const accessactionNameCheck = (value, helpers) => {
   if (!valid_action_name.includes(value.toUpperCase())) {
-    return helpers.message(`{#label} must be any of ${valid_action_name}`)
+    return helpers.message(`{#label} must be any of ${valid_action_name}`);
   }
-  return value.toLowerCase()
-}
+  return value.toLowerCase();
+};
 
 const accessMethodCheck = (value, helpers) => {
   if (!valid_method_name.includes(value.toLowerCase())) {
-    return helpers.message(`{#label} must be any of ${valid_method_name}`)
+    return helpers.message(`{#label} must be any of ${valid_method_name}`);
   }
-  return value.toLowerCase()
-}
+  return value.toLowerCase();
+};
 
 const indianMobile = (value, helpers) => {
   if (!value.match(/^[6-9]\d{9}$/)) {
-    return helpers.message('"{{#label}}" must be a valid mobile number.')
+    return helpers.message('"{{#label}}" must be a valid mobile number.');
   }
-  return value
-}
+  return value;
+};
 const objectIdCustom = (value, lable) => {
   if (!value.match(/^[0-9a-fA-F]{24}$/)) {
-    return { status: true, msg: `${lable} must be a valid mongo id` }
+    return { status: true, msg: `${lable} must be a valid mongo id` };
   }
-  return { status: false, msg: '' }
-}
+  return { status: false, msg: "" };
+};
 
 const requiredCheckCustom = (value, lable) => {
   if (
     value === undefined ||
-    value === 'undefined' ||
+    value === "undefined" ||
     value === null ||
-    value === 'undefined'
+    value === "undefined"
   ) {
-    return { status: true, msg: `${lable} is required.` }
+    return { status: true, msg: `${lable} is required.` };
   } else {
-    let notValid = stringCheckCustom(value, lable)
+    let notValid = stringCheckCustom(value, lable);
     if (notValid.status) {
-      return { status: notValid.status, msg: notValid.msg }
+      return { status: notValid.status, msg: notValid.msg };
     } else {
-      if (value.trim() === '') {
-        return { status: true, msg: `${lable} is required.` }
+      if (value.trim() === "") {
+        return { status: true, msg: `${lable} is required.` };
       }
     }
   }
-  return { status: false, msg: '' }
-}
+  return { status: false, msg: "" };
+};
 
 const password = (value, helpers) => {
   if (value.length < 8) {
-    return helpers.message('password must be at least 8 characters')
+    return helpers.message("password must be at least 8 characters");
   }
   if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
     return helpers.message(
-      'password must contain at least 1 letter and 1 number'
-    )
+      "password must contain at least 1 letter and 1 number"
+    );
   }
-  return value
-}
+  return value;
+};
 
-const checkEmptyBody = req => {
-  let errorMsg = []
+const checkEmptyBody = (req) => {
+  let errorMsg = [];
 
   if (Object.keys(req.body).length === 0) {
     errorMsg.push(
-      'Some data is required to add or update. Empty request found. '
-    )
+      "Some data is required to add or update. Empty request found. "
+    );
   }
-  return errorMsg
-}
+  return errorMsg;
+};
 
 const checkValidKeys = (req, validKeys) => {
-  let errorMsg = []
-  let bodyData = Object.keys(req.body)
+  let errorMsg = [];
+  let bodyData = Object.keys(req.body);
   for (let key in bodyData) {
     if (validKeys.includes(bodyData[key]) === false) {
-      errorMsg.push(`Invalid key ${bodyData[key]}. `)
+      errorMsg.push(`Invalid key ${bodyData[key]}. `);
     }
   }
-  return errorMsg
-}
+  return errorMsg;
+};
 
 const emailFormat = (value, helpers) => {
   if (!value.match(/^\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i)) {
-    return helpers.message('Email is invalid.')
+    return helpers.message("Email is invalid.");
   }
-  return value
+  return value;
   // exports.regEmail = RegExp(/^\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i);
-}
+};
 
 const YYMMDDHHMMSS_fromat = (value, helpers) => {
   if (
@@ -109,58 +119,58 @@ const YYMMDDHHMMSS_fromat = (value, helpers) => {
   ) {
     return helpers.message(
       'Invalid format for date time.It must be "YYYY-MM-DD HH:mm:ss".'
-    )
+    );
   }
-  return value
-}
+  return value;
+};
 
 const dateFormat = (value, helpers) => {
   if (!value.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    return helpers.message('Date fomate must be YYYY-MM-DD.')
+    return helpers.message("Date fomate must be YYYY-MM-DD.");
   }
-  return value
-}
+  return value;
+};
 
 const changeDateFormat = (value, helpers) => {
-  return moment(value).utcOffset('+05:30').format('YYYY-MM-DD')
-}
+  return moment(value).utcOffset("+05:30").format("YYYY-MM-DD");
+};
 ///^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$/i
 const timeFormat = (value, helpers) => {
   if (!value.match(/^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$/)) {
-    return helpers.message('Time fomate must be HH:MM AM/PM.')
+    return helpers.message("Time fomate must be HH:MM AM/PM.");
   }
-  return value
-}
+  return value;
+};
 const timeFormat24Hours = (value, helpers) => {
   if (!value.match(/^([01]\d|2[0-3]):?([0-5]\d)$/)) {
-    return helpers.message('Time fomate must be of 24 hours.')
+    return helpers.message("Time fomate must be of 24 hours.");
   }
-  return value
-}
+  return value;
+};
 const HHMMSS_Format_check = (value, helpers) => {
   if (!value.match(/(?:[01]\d|2[0123]):(?:[012345]\d):(?:[012345]\d)/)) {
-    return helpers.message('Time fomate must be of HH:MM:SS.')
+    return helpers.message("Time fomate must be of HH:MM:SS.");
   }
-  return value
-}
+  return value;
+};
 
 const parseStringfiedKeys = (req, validKeys) => {
-  let errorMsg = []
+  let errorMsg = [];
   for (let key in req.body) {
-    if (validKeys.includes(key) && typeof req.body[key] === 'string') {
-      req.body[key] = JSON.parse(req.body[key])
+    if (validKeys.includes(key) && typeof req.body[key] === "string") {
+      req.body[key] = JSON.parse(req.body[key]);
       // errorMsg.push(`Invalid key ${bodyData[key]}. `)
     }
   }
-  return ''
-}
+  return "";
+};
 
 const todayDateValid = (value, helpers) => {
-  if (!moment(value) === moment().utcOffset('+05:30').format('YYYY-MM-DD')) {
-    return helpers.message('Date must be Today.')
+  if (!moment(value) === moment().utcOffset("+05:30").format("YYYY-MM-DD")) {
+    return helpers.message("Date must be Today.");
   }
-  return value
-}
+  return value;
+};
 
 const DateTimeFormatValid = (value, helpers) => {
   //^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$
@@ -169,77 +179,77 @@ const DateTimeFormatValid = (value, helpers) => {
       /^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$/
     )
   ) {
-    return helpers.message('Time format must be YYYY-MM-DD HH:mm:ss.')
+    return helpers.message("Time format must be YYYY-MM-DD HH:mm:ss.");
   }
-  return value
-}
+  return value;
+};
 const afterTodayValid = (value, helpers) => {
   // /moment(value).isAfter(moment().utcOffset("+05:30").format("YYYY-MM-DD"))
   if (
-    !moment(value).isAfter(moment().utcOffset('+05:30').format('YYYY-MM-DD'))
+    !moment(value).isAfter(moment().utcOffset("+05:30").format("YYYY-MM-DD"))
   ) {
-    return helpers.message(`Date must be after today's date.`)
+    return helpers.message(`Date must be after today's date.`);
   }
-  return value
-}
+  return value;
+};
 const beforeTodayValid = (value, helpers) => {
   if (
-    !moment(value).isBefore(moment().utcOffset('+05:30').format('YYYY-MM-DD'))
+    !moment(value).isBefore(moment().utcOffset("+05:30").format("YYYY-MM-DD"))
   ) {
-    return helpers.message(`Date must be before today's date.`)
+    return helpers.message(`Date must be before today's date.`);
   }
-  return value
-}
+  return value;
+};
 const sameOrAfterToday = (value, helpers) => {
   // /moment(value).isAfter(moment().utcOffset("+05:30").format("YYYY-MM-DD"))
   //moment(value).isSameOrAfter(moment().utcOffset("+05:30").format("YYYY-MM-DD"))
   if (
     !moment(value).isSameOrAfter(
-      moment().utcOffset('+05:30').format('YYYY-MM-DD')
+      moment().utcOffset("+05:30").format("YYYY-MM-DD")
     )
   ) {
-    return helpers.message(`Date must be same or after today's date.`)
+    return helpers.message(`Date must be same or after today's date.`);
   }
-  return value
-}
+  return value;
+};
 
 const sameorBeforeToday = (value, helpers) => {
   if (
-    !moment(value).isBefore(moment().utcOffset('+05:30').format('YYYY-MM-DD'))
+    !moment(value).isBefore(moment().utcOffset("+05:30").format("YYYY-MM-DD"))
   ) {
-    return helpers.message(`Date must be before today's date.`)
+    return helpers.message(`Date must be before today's date.`);
   }
-  return value
-}
+  return value;
+};
 
 const isAfterCurrentTime = (value, helpers) => {
   //
-  let currentDate = moment().format('YYYY-MM-DD')
-  let currentTime = moment().utcOffset('+05:30').format('YYYY-MM-DD HH:mm:ss')
-  var timeAndDate = moment(new Date(currentDate + ' ' + value)).format(
-    'YYYY-MM-DD HH:mm:ss'
-  )
+  let currentDate = moment().format("YYYY-MM-DD");
+  let currentTime = moment().utcOffset("+05:30").format("YYYY-MM-DD HH:mm:ss");
+  var timeAndDate = moment(new Date(currentDate + " " + value)).format(
+    "YYYY-MM-DD HH:mm:ss"
+  );
   if (!moment(timeAndDate).isAfter(currentTime)) {
-    return helpers.message(`Time must be after current time.`)
+    return helpers.message(`Time must be after current time.`);
   }
-  return value
-}
+  return value;
+};
 const dateTimeAfterCurrentTime = (value, helpers) => {
   //
-  let currentTime = moment().utcOffset('+05:30').format('YYYY-MM-DD HH:mm:ss')
+  let currentTime = moment().utcOffset("+05:30").format("YYYY-MM-DD HH:mm:ss");
   if (!moment(value).isAfter(currentTime)) {
-    return helpers.message(`Time must be after current time.`)
+    return helpers.message(`Time must be after current time.`);
   }
-  return value
-}
+  return value;
+};
 
 const checkYoutubeLink = (value, helpers) => {
   // http(?: s ?): \/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?
   if (!value.match(/^(https?\:\/\/)?(www\.youtube\.com|youtu\.be)\/.+$/)) {
-    return helpers.message('Youtube link is not valid.')
+    return helpers.message("Youtube link is not valid.");
   }
-  return value
-}
+  return value;
+};
 
 module.exports = {
   objectId,
@@ -267,5 +277,6 @@ module.exports = {
   accessMethodCheck,
   DateTimeFormatValid,
   dateTimeAfterCurrentTime,
-  HHMMSS_Format_check
-}
+  HHMMSS_Format_check,
+  minValue,
+};

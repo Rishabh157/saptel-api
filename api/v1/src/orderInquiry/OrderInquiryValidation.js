@@ -47,7 +47,7 @@ const create = {
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
     reciversName: Joi.string().allow(""),
     remark: Joi.string().allow(""),
-    shcemeQuantity: Joi.number(),
+    shcemeQuantity: Joi.number().custom(commonValidation.minValue),
     socialMedia: Joi.object().keys({
       facebook: Joi.string().allow(""),
       instagram: Joi.string().allow(""),
@@ -125,7 +125,7 @@ const update = {
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
     reciversName: Joi.string().allow(""),
     remark: Joi.string().allow(""),
-    shcemeQuantity: Joi.number(),
+    shcemeQuantity: Joi.number().custom(commonValidation.minValue),
     socialMedia: Joi.object().keys({
       facebook: Joi.string().allow(""),
       instagram: Joi.string().allow(""),

@@ -244,12 +244,19 @@ exports.update = async (req, res) => {
       recordingStartTime,
       recordingEndTime,
       status,
+      shcemeQuantity,
     } = req.body;
 
     let idToBeSearch = req.params.id;
     let dataExist = await callService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    if (shcemeQuantity > 9) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Scheme quantity should not be more than 9"
+      );
     }
 
     const isUserExists =

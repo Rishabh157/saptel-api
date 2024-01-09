@@ -34,7 +34,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let {
-      schemeCode,
+      // schemeCode,
       schemeName,
       category,
       commission,
@@ -59,7 +59,17 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+    let lastObject = await schemeService.aggregateQuery([
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
 
+    let schemeCode = 0;
+    if (!lastObject.length) {
+      schemeCode = 1;
+    } else {
+      schemeCode = parseInt(lastObject[0]?.schemeCode) + 1;
+    }
     /**
      * check duplicate exist
      */
@@ -71,7 +81,10 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await schemeService.createNewData({ ...req.body });
+    let dataCreated = await schemeService.createNewData({
+      ...req.body,
+      schemeCode,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -98,7 +111,6 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let {
-      schemeCode,
       schemeName,
       category,
       commission,
@@ -126,7 +138,7 @@ exports.update = async (req, res) => {
     }
 
     let dataExist = await schemeService.isExists(
-      [{ schemeCode }, { schemeName }],
+      [{ schemeName }],
       idToBeSearch,
       false
     );

@@ -83,6 +83,7 @@ exports.update = async (req, res) => {
       emailId,
       channel,
       remark,
+      shcemeQuantity,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
     } = req.body;

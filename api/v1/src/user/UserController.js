@@ -811,10 +811,20 @@ exports.login = async (req, res) => {
         return;
       }
     });
-
     if (!userFound) {
-      throw new ApiError(httpStatus.OK, `User not found.`);
+      throw new ApiError(httpStatus.OK, `User not found`);
     }
+    let userFoundIsActive = await userService.getOneByMultiField({
+      userName,
+      isActive: true,
+    });
+    if (!userFoundIsActive) {
+      throw new ApiError(
+        httpStatus.OK,
+        `User Deactivated please contact to higher authority to activate your account`
+      );
+    }
+
     let matched = await bcrypt.compare(password, userFound?.password);
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
