@@ -359,7 +359,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = [];
+    let booleanFields = ["isActive"];
     let numberFileds = [];
     let objectIdFields = ["initialCallOneId", "companyId"];
 
