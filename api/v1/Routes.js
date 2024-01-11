@@ -84,6 +84,7 @@ const wtwMasterServiceRoute = require("./src/warehouseToWarehouse/wtwMasterRoute
 const wtcMasterServiceRoute = require("./src/warehouseToCompany/wtcMasterRoute");
 const wtsMasterServiceRoute = require("./src/warehouseToSample/wtsMasterRoute");
 const dtwMasterServiceRoute = require("./src/dealerToWarehouse/dtwMasterRoute");
+const callCenterMasterServiceRoute = require("./src/callCenterMaster/CallCenterMasterRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -433,6 +434,10 @@ const defaultRoutes = [
   {
     path: "/dtw-master",
     route: dtwMasterServiceRoute,
+  },
+  {
+    path: "/call-center",
+    route: callCenterMasterServiceRoute,
   },
 ];
 // orderRoute;

@@ -9,7 +9,7 @@ const {
 
 //===============get one document (if query) / all document===============
 router.get(
-  "/",
+  "/calltype/:calltype",
   authCheckMiddleware,
   validate(initialCallOneValidation.get),
   initialCallOneController.get

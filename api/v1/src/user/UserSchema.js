@@ -160,6 +160,9 @@ const UserSchema = new mongoose.Schema(
     },
     companyId: { type: ObjectId, default: null },
     branchId: { type: ObjectId, default: null },
+    callCenterId: { type: ObjectId, default: null },
+    floorManagerId: { type: ObjectId, default: null },
+    teamLeadId: { type: ObjectId, default: null },
 
     isDeleted: {
       type: Boolean,
@@ -183,6 +186,7 @@ const searchKeys = [
   "userName",
   "userDepartment",
   "userRole",
+  "callCenterName",
 ];
 module.exports = mongoose.model("User", UserSchema);
 module.exports.searchKeys = [...searchKeys];

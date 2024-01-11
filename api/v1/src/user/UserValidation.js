@@ -21,6 +21,9 @@ const create = {
     allowedIp: Joi.array().items(Joi.string()).default([]),
     companyId: Joi.string().custom(commonValidation.objectId).allow(null),
     branchId: Joi.string().custom(commonValidation.objectId).allow(null),
+    callCenterId: Joi.string().custom(commonValidation.objectId).allow(null),
+    floorManagerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    teamLeadId: Joi.string().custom(commonValidation.objectId).allow(null),
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
   }),
@@ -44,6 +47,9 @@ const update = {
     allowedIp: Joi.array().items(Joi.string()).default([]),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     branchId: Joi.string().custom(commonValidation.objectId).required(),
+    callCenterId: Joi.string().custom(commonValidation.objectId).allow(null),
+    floorManagerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    teamLeadId: Joi.string().custom(commonValidation.objectId).allow(null),
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
   }),
@@ -133,6 +139,13 @@ const getAllDistribution = {
     role: Joi.string(),
   }),
 };
+
+const getAllFloorManagersAndTeamLead = {
+  params: Joi.object().keys({
+    companyid: Joi.string().custom(commonValidation.objectId),
+    callcenterid: Joi.string().required(),
+  }),
+};
 /**
  * refresh token
  */
@@ -204,4 +217,5 @@ module.exports = {
   getById,
   refreshTokenValid,
   changePasswordValid,
+  getAllFloorManagersAndTeamLead,
 };

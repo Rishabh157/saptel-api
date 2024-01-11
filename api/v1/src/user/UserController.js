@@ -5,6 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("./UserService");
 const companyService = require("../company/CompanyService");
 const branchService = require("../companyBranch/CompanyBranchService");
+const callCenterService = require("../callCenterMaster/CallCenterMasterService");
 const jwt = require("jsonwebtoken");
 
 const {
@@ -60,6 +61,9 @@ exports.add = async (req, res) => {
       userDepartment,
       userRole,
       userType,
+      callCenterId,
+      floorManagerId,
+      teamLeadId,
     } = req.body;
 
     if (companyId !== null && companyId !== undefined) {
@@ -72,7 +76,7 @@ exports.add = async (req, res) => {
       }
     }
 
-    if (branchId !== null && companyId !== undefined) {
+    if (branchId !== null && branchId !== undefined) {
       const isCompanyBranchExists = await branchService.findCount({
         _id: branchId,
         isDeleted: false,
@@ -82,7 +86,34 @@ exports.add = async (req, res) => {
       }
     }
 
-    console.log("here");
+    if (callCenterId !== null && callCenterId !== undefined) {
+      const isCallCenterExists = await callCenterService.findCount({
+        _id: callCenterId,
+        isDeleted: false,
+      });
+      if (!isCallCenterExists) {
+        throw new ApiError(httpStatus.OK, "Invalid call center");
+      }
+    }
+    if (floorManagerId !== null && floorManagerId !== undefined) {
+      const isFloorMangerExists = await userService.findCount({
+        _id: floorManagerId,
+        isDeleted: false,
+      });
+      if (!isFloorMangerExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Floor Manager");
+      }
+    }
+
+    if (teamLeadId !== null && teamLeadId !== undefined) {
+      const isTeamLeaderExists = await userService.findCount({
+        _id: teamLeadId,
+        isDeleted: false,
+      });
+      if (!isTeamLeaderExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Team Leader");
+      }
+    }
     /**
      * check duplicate exist
      */
@@ -154,6 +185,9 @@ exports.update = async (req, res) => {
       branchId,
       userDepartment,
       userRole,
+      callCenterId,
+      floorManagerId,
+      teamLeadId,
     } = req.body;
     if (req.userData.userType !== userEnum.user) {
       throw new ApiError(
@@ -177,6 +211,35 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyBranchExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company Branch");
+    }
+
+    if (callCenterId !== null && callCenterId !== undefined) {
+      const isCallCenterExists = await callCenterService.findCount({
+        _id: callCenterId,
+        isDeleted: false,
+      });
+      if (!isCallCenterExists) {
+        throw new ApiError(httpStatus.OK, "Invalid call center");
+      }
+    }
+    if (floorManagerId !== null && floorManagerId !== undefined) {
+      const isFloorMangerExists = await userService.findCount({
+        _id: floorManagerId,
+        isDeleted: false,
+      });
+      if (!isFloorMangerExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Floor Manager");
+      }
+    }
+
+    if (teamLeadId !== null && teamLeadId !== undefined) {
+      const isTeamLeaderExists = await userService.findCount({
+        _id: teamLeadId,
+        isDeleted: false,
+      });
+      if (!isTeamLeaderExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Team Leader");
+      }
     }
 
     /**
@@ -688,6 +751,82 @@ exports.getAllDistributionUser = async (req, res) => {
     ) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let dataExist = await userService.findAllWithQuery(matchQuery);
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+//get floor managers
+
+exports.getAllFloorManagers = async (req, res) => {
+  try {
+    let { companyid, callcenterid } = req.params;
+    let userRole = ["MANAGER_SALES_CENTER", "ASST_MANAGER_SALES_CENTER"];
+
+    let matchQuery = {
+      companyId: companyid,
+      callCenterId: callcenterid,
+      isDeleted: false,
+      userDepartment: "SALES_DEPARTMENT",
+      userRole: { $in: userRole },
+    };
+
+    let dataExist = await userService.findAllWithQuery(matchQuery);
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//get Team leads
+
+exports.getAllTeamLeads = async (req, res) => {
+  try {
+    let { companyid, callcenterid } = req.params;
+    let userRole = [
+      "SR_TEAM_LEADER_OR_SR_EXECUTIVE_MIS",
+      "TEAM_LEADER_OR_EXECUTIVE_SALES_CENTER",
+    ];
+
+    let matchQuery = {
+      companyId: companyid,
+      callCenterId: callcenterid,
+      isDeleted: false,
+      userDepartment: "SALES_DEPARTMENT",
+      userRole: { $in: userRole },
+    };
+
     let dataExist = await userService.findAllWithQuery(matchQuery);
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");

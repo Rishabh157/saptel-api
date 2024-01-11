@@ -139,8 +139,11 @@ exports.update = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
+    console.log("here");
+    const { calltype } = req.params;
     let matchQuery = {
       isDeleted: false,
+      callType: calltype,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);

@@ -28,6 +28,26 @@ router.get(
   validate(userValidation.getAllDistribution),
   userController.getAllDistributionUser
 );
+
+/**
+ * get all floor managers
+ */
+router.get(
+  "/get-floor-managers/company/:companyid/call-center/:callcenterid",
+  authCheckMiddleware,
+  validate(userValidation.getAllFloorManagersAndTeamLead),
+  userController.getAllFloorManagers
+);
+
+/**
+ * get all Team leads
+ */
+router.get(
+  "/get-team-leads/company/:companyid/call-center/:callcenterid",
+  authCheckMiddleware,
+  validate(userValidation.getAllFloorManagersAndTeamLead),
+  userController.getAllTeamLeads
+);
 /**
  * get all user pagination filter
  */

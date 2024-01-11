@@ -3,48 +3,34 @@ Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
 
-//===============create new document===============
+/**
+ * create new document
+ */
 const create = {
   body: Joi.object().keys({
-    initialCallName: Joi.string().lowercase().required(),
-    callType: Joi.string().required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    callCenterName: Joi.string().lowercase().required(),
+    companyId: Joi.string().lowercase().required(),
+    isAgent: Joi.boolean(),
   }),
 };
 
-//===============update document===============
+/**
+ * update existing document
+ */
 const update = {
   params: Joi.object().keys({
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    initialCallName: Joi.string().lowercase().required(),
-    callType: Joi.string().required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
-  }),
-};
-//===============get either all data or single document===============
-const get = {
-  params: Joi.object().keys({
-    companyid: Joi.string().custom(commonValidation.objectId),
-    calltype: Joi.string().optional(),
-  }),
-  query: Joi.object()
-    .keys({
-      _id: Joi.string().custom(commonValidation.objectId).optional(),
-      initialCallName: Joi.string().optional(),
-    })
-    .optional(),
-};
-
-//===============getbyid document===============
-const getById = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
+    callCenterName: Joi.string().lowercase().required(),
+    companyId: Joi.string().lowercase().required(),
+    isAgent: Joi.boolean(),
   }),
 };
 
-//===============  filter and pagination api===============
+/**
+ * filter and pagination api
+ */
 const getAllFilter = {
   body: Joi.object().keys({
     params: Joi.array().items(Joi.string().required()),
@@ -85,25 +71,54 @@ const getAllFilter = {
     isPaginationRequired: Joi.boolean().default(true).optional(),
   }),
 };
-//===============change status of document===============
-const changeStatus = {
+
+/**
+ * get either all data or single document
+ */
+const get = {
+  params: Joi.object().keys({
+    companyid: Joi.string().required(),
+  }),
+  query: Joi.object()
+    .keys({
+      _id: Joi.string().custom(commonValidation.objectId).optional(),
+      callCenterName: Joi.string().optional(),
+    })
+    .optional(),
+};
+
+/**
+ * delete a document
+ */
+const deleteDocument = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
-//===============delete a document===============
-const deleteDocument = {
+/**
+ * get by id
+ */
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
+ * change status of document
+ */
+const changeStatus = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
 module.exports = {
   create,
-  update,
-  get,
-  getById,
-  changeStatus,
   getAllFilter,
+  get,
+  update,
   deleteDocument,
+  changeStatus,
+  getById,
 };

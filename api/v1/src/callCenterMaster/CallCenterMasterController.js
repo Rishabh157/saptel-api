@@ -2,9 +2,9 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const schemeService = require("./SchemeService");
+const callCenterMasterService = require("./CallCenterMasterService");
 const companyService = require("../company/CompanyService");
-const { searchKeys } = require("./SchemeSchema");
+const { searchKeys } = require("./CallCenterMasterSchema");
 const { errorRes } = require("../../../utils/resError");
 const {
   getQuery,
@@ -12,11 +12,6 @@ const {
   getFieldsToDisplay,
   getAllowedField,
 } = require("../../helper/utils");
-const tapeMasterService = require("../tapeMaster/TapeMasterService");
-const {
-  checkIdInCollectionsThenDelete,
-  collectionArrToMatch,
-} = require("../../helper/commonHelper");
 
 const {
   getSearchQuery,
@@ -27,31 +22,15 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const mongoose = require("mongoose");
 const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      // schemeCode,
-      schemeName,
-      category,
-      commission,
-      subCategory,
-      schemePrice,
-      dimension,
-      weight,
-      deliveryCharges,
-      comboPacking,
-      startDate,
-      endDate,
-      schemeDescription,
-      productInformation,
-      faq,
-      companyId,
-    } = req.body;
-
+    let { callCenterName, companyId } = req.body;
+    /**
+     * check duplicate exist
+     */
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -59,34 +38,15 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    let lastObject = await schemeService.aggregateQuery([
-      { $sort: { _id: -1 } },
-      { $limit: 1 },
-    ]);
-
-    let schemeCode = "";
-    if (!lastObject.length) {
-      schemeCode = "SC0001";
-    } else {
-      const lastSchemeCode = lastObject[0]?.schemeCode || "SC0000";
-      const lastNumber = parseInt(lastSchemeCode.replace("SC", ""), 10);
-      const nextNumber = lastNumber + 1;
-      schemeCode = "SC" + String(nextNumber).padStart(4, "0");
-    }
-    /**
-     * check duplicate exist
-     */
-    let dataExist = await schemeService.isExists([
-      { schemeCode },
-      { schemeName },
+    let dataExist = await callCenterMasterService.isExists([
+      { callCenterName },
     ]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await schemeService.createNewData({
+    let dataCreated = await callCenterMasterService.createNewData({
       ...req.body,
-      schemeCode,
     });
 
     if (dataCreated) {
@@ -94,7 +54,7 @@ exports.add = async (req, res) => {
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: "CREATED",
+        code: null,
         issue: null,
       });
     } else {
@@ -113,24 +73,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let {
-      schemeName,
-      category,
-      commission,
-      subCategory,
-      schemePrice,
-      dimension,
-      weight,
-      deliveryCharges,
-      comboPacking,
-      startDate,
-      endDate,
-      schemeDescription,
-      productInformation,
-      faq,
-      companyId,
-    } = req.body;
-    let idToBeSearch = req.params.id;
+    let { callCenterName, companyId } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -139,25 +82,23 @@ exports.update = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-
-    let dataExist = await schemeService.isExists(
-      [{ schemeName }],
-      idToBeSearch,
-      false
+    let idToBeSearch = req.params.id;
+    let dataExist = await callCenterMasterService.isExists(
+      [{ callCenterName }],
+      idToBeSearch
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-
     //------------------Find data-------------------
-    let datafound = await schemeService.getOneByMultiField({
+    let datafound = await callCenterMasterService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Scheme not found.`);
+      throw new ApiError(httpStatus.OK, `CallCenterMaster not found.`);
     }
 
-    let dataUpdated = await schemeService.getOneAndUpdate(
+    let dataUpdated = await callCenterMasterService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -170,11 +111,11 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      return res.status(httpStatus.OK).send({
+      return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
         data: dataUpdated,
         status: true,
-        code: "OK",
+        code: null,
         issue: null,
       });
     } else {
@@ -250,16 +191,9 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = ["comboPacking"];
-    let numberFileds = [
-      "schemeCode",
-      "schemeName",
-      "startDate",
-      "endDate",
-      "schemeDescription",
-    ];
-    let objectIdFields = ["category", "subCategory", "companyId"];
-
+    let booleanFields = [];
+    let numberFileds = [];
+    let objectIdFields = ["companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -291,40 +225,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [
-      {
-        $lookup: {
-          from: "productcategories",
-          localField: "category",
-          foreignField: "_id",
-          as: "parent_name",
-          pipeline: [{ $project: { categoryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "productsubcategories",
-          localField: "subCategory",
-          foreignField: "_id",
-          as: "sub_category_name",
-          pipeline: [{ $project: { subCategoryName: 1 } }],
-        },
-      },
-
-      {
-        $addFields: {
-          productCategoryLabel: {
-            $arrayElemAt: ["$parent_name.categoryName", 0],
-          },
-          ProductSubCategoryLabel: {
-            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["parent_name", "sub_category_name"],
-      },
-    ];
+    let additionalQuery = [];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -335,7 +236,9 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await schemeService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await callCenterMasterService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -353,16 +256,20 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, schemeService);
+
+    let userRoleData = await getUserRoleData(req, callCenterMasterService);
     let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.scheme,
+      moduleType.callCenter,
       userRoleData,
       actionType.pagination
     );
-    let result = await schemeService.aggregateQuery(finalAggregateQuery);
+
+    let result = await callCenterMasterService.aggregateQuery(
+      finalAggregateQuery
+    );
     let allowedFields = getAllowedField(fieldsToDisplay, result);
 
-    if (allowedFields?.length) {
+    if (allowedFields.length) {
       return res.status(200).send({
         data: allowedFields,
         totalPage: totalpages,
@@ -371,8 +278,6 @@ exports.allFilterPagination = async (req, res) => {
         totalItem: totalData,
         pageSize: limit,
         message: "Data Found",
-        code: "OK",
-        issue: null,
       });
     } else {
       throw new ApiError(httpStatus.OK, `No data Found`);
@@ -389,70 +294,31 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
-
     //if no default query then pass {}
-    let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
-      isDeleted: false,
-      isActive: true,
-    };
+    const { companyid } = req.params;
+    let matchQuery = { isDeleted: false, companyId: companyid };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-    let additionalQuery = [
-      { $match: matchQuery },
-      {
-        $lookup: {
-          from: "productcategories",
-          localField: "category",
-          foreignField: "_id",
-          as: "parent_name",
-          pipeline: [{ $project: { categoryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "productsubcategories",
-          localField: "subCategory",
-          foreignField: "_id",
-          as: "sub_category_name",
-          pipeline: [{ $project: { subCategoryName: 1 } }],
-        },
-      },
 
-      {
-        $addFields: {
-          productCategoryLabel: {
-            $arrayElemAt: ["$parent_name.categoryName", 0],
-          },
-          ProductSubCategoryLabel: {
-            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["parent_name", "sub_category_name"],
-      },
-    ];
-
-    let userRoleData = await getUserRoleData(req, schemeService);
+    let userRoleData = await getUserRoleData(req, callCenterMasterService);
     let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.scheme,
+      moduleType.callCenter,
       userRoleData,
       actionType.listAll
     );
-    let dataExist = await schemeService.aggregateQuery(additionalQuery);
+
+    let dataExist = await callCenterMasterService.findAllWithQuery(matchQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields?.length) {
+    if (!allowedFields || !allowedFields.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
         data: allowedFields,
-        code: "OK",
+        code: null,
         issue: null,
       });
     }
@@ -466,68 +332,23 @@ exports.get = async (req, res) => {
   }
 };
 
-//get api
-exports.getByProductGroup = async (req, res) => {
+//get by id
+exports.getById = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
-    let pgid = req.params.pgid;
-    //if no default query then pass {}
-    let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(companyId),
+    let idToBeSearch = req.params.id;
+    let dataExist = await callCenterMasterService.getOneByMultiField({
+      _id: idToBeSearch,
       isDeleted: false,
-      isActive: true,
-    };
-    matchQuery["productInformation.productGroup"] = pgid;
+    });
 
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
-    let additionalQuery = [
-      { $match: matchQuery },
-      {
-        $lookup: {
-          from: "productcategories",
-          localField: "category",
-          foreignField: "_id",
-          as: "parent_name",
-          pipeline: [{ $project: { categoryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "productsubcategories",
-          localField: "subCategory",
-          foreignField: "_id",
-          as: "sub_category_name",
-          pipeline: [{ $project: { subCategoryName: 1 } }],
-        },
-      },
-
-      {
-        $addFields: {
-          productCategoryLabel: {
-            $arrayElemAt: ["$parent_name.categoryName", 0],
-          },
-          ProductSubCategoryLabel: {
-            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["parent_name", "sub_category_name"],
-      },
-    ];
-
-    let dataExist = await schemeService.aggregateQuery(additionalQuery);
-
-    if (!dataExist || !dataExist?.length) {
+    if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: "OK",
+        code: null,
         issue: null,
       });
     }
@@ -541,98 +362,22 @@ exports.getByProductGroup = async (req, res) => {
   }
 };
 
-//single view api
-exports.getById = async (req, res) => {
-  try {
-    //if no default query then pass {}
-    let idToBeSearch = req.params.id;
-
-    let additionalQuery = [
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(idToBeSearch),
-          isDeleted: false,
-          isActive: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "productcategories",
-          localField: "category",
-          foreignField: "_id",
-          as: "parent_name",
-          pipeline: [{ $project: { categoryName: 1 } }],
-        },
-      },
-      {
-        $lookup: {
-          from: "productsubcategories",
-          localField: "subCategory",
-          foreignField: "_id",
-          as: "sub_category_name",
-          pipeline: [{ $project: { subCategoryName: 1 } }],
-        },
-      },
-
-      {
-        $addFields: {
-          productCategoryLabel: {
-            $arrayElemAt: ["$parent_name.categoryName", 0],
-          },
-          ProductSubCategoryLabel: {
-            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["parent_name", "sub_category_name"],
-      },
-    ];
-    let dataExist = await schemeService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist[0],
-        code: "OK",
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await schemeService.getOneByMultiField({ _id }))) {
+    if (!(await callCenterMasterService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(
-      collectionArrToMatch,
-      "scheme",
-      _id
-    );
-
-    if (deleteRefCheck.status === true) {
-      let deleted = await schemeService.getOneAndDelete({ _id });
-      if (!deleted) {
-        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-      }
+    let deleted = await callCenterMasterService.getOneAndDelete({ _id });
+    if (!deleted) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
     return res.status(httpStatus.OK).send({
-      message: deleteRefCheck.message,
-      status: deleteRefCheck.status,
+      message: "Successfull.",
+      status: true,
       data: null,
-      code: "OK",
+      code: null,
       issue: null,
     });
   } catch (err) {
@@ -648,13 +393,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await schemeService.getOneByMultiField({ _id });
+    let dataExist = await callCenterMasterService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await schemeService.getOneAndUpdate(
+    let statusChanged = await callCenterMasterService.getOneAndUpdate(
       { _id },
       { isActive }
     );
@@ -665,7 +410,7 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
-      code: "OK",
+      code: null,
       issue: null,
     });
   } catch (err) {

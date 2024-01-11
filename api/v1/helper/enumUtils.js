@@ -191,6 +191,7 @@ const moduleType = Object.freeze({
   item: "ITEM",
   product: "PRODUCT",
   cartonBox: "CARTON_BOX",
+  callCenter: "CALL_CENTER_MASTER",
   company: "COMPANY",
   barcode: "BARCODE",
   locations: "LOCATIONS",
