@@ -9,13 +9,14 @@ const create = {
     initialCallName: Joi.string().lowercase().required(),
     initialCallOneId: Joi.string().custom(commonValidation.objectId).required(),
     initialCallTwoId: Joi.string().custom(commonValidation.objectId).required(),
-    complaintType: Joi.string().required(),
+
     emailType: Joi.string().required(),
     smsType: Joi.string().required(),
     returnType: Joi.array().items(Joi.string()).required(),
     isPnd: Joi.boolean(),
     cancelFlag: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    callType: Joi.string().required(),
   }),
 };
 
@@ -28,13 +29,14 @@ const update = {
     initialCallName: Joi.string().lowercase().required(),
     initialCallOneId: Joi.string().custom(commonValidation.objectId).required(),
     initialCallTwoId: Joi.string().custom(commonValidation.objectId).required(),
-    complaintType: Joi.string().required(),
+
     emailType: Joi.string().required(),
     smsType: Joi.string().required(),
     returnType: Joi.array().items(Joi.string()).required(),
     isPnd: Joi.boolean(),
     cancelFlag: Joi.boolean(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    callType: Joi.string().required(),
   }),
 };
 //===============get either all data or single document===============

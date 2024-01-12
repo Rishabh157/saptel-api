@@ -40,7 +40,7 @@ exports.add = async (req, res) => {
       initialCallOneId,
       initialCallTwoId,
       companyId,
-      complaintType,
+      callType,
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -71,7 +71,7 @@ exports.add = async (req, res) => {
     let dataExist = await initialCallThreeService.isExists(
       [
         { initialCallName },
-        { complaintType },
+        { callType },
         { initialCallOneId },
         { initialCallTwoId },
       ],
@@ -111,15 +111,20 @@ exports.add = async (req, res) => {
 // =============update  start================
 exports.update = async (req, res) => {
   try {
-    let { initialCallName, initialCallOneId, initialCallTwoId, companyId } =
-      req.body;
+    let {
+      initialCallName,
+      initialCallOneId,
+      initialCallTwoId,
+      callType,
+      companyId,
+    } = req.body;
 
     let idToBeSearch = req.params.id;
 
     let dataExist = await initialCallThreeService.isExists(
       [
         { initialCallName },
-        { complaintType },
+        { callType },
         { initialCallOneId },
         { initialCallTwoId },
       ],

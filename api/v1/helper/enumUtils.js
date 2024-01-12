@@ -33,7 +33,7 @@ const tapeType = Object.freeze({
 
 const complaintType = Object.freeze({
   complaint: "COMPLAINT",
-  enquiry: "ENQUIRY",
+  inquiry: "INQUIRY",
 });
 
 const slotType = Object.freeze({
@@ -81,10 +81,10 @@ const smsType = Object.freeze({
 });
 
 const emailType = Object.freeze({
-  personalEmail: "PERSONAL EMAIL",
-  officialEmail: "OFFICIAL EMAIL",
-  buisnessEmail: "BUISNESS EMAIL",
-  companyEmail: "COMPANY EMAIL",
+  personalEmail: "PERSONAL_EMAIL",
+  officialEmail: "OFFICIAL_EMAIL",
+  buisnessEmail: "BUISNESS_EMAIL",
+  companyEmail: "COMPANY_EMAIL",
 });
 
 const whatsType = Object.freeze({

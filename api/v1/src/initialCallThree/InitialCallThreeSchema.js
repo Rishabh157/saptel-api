@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const { complaintType, smsType, emailType } = require("../../helper/enumUtils");
 const InitialCallThreeSchema = new mongoose.Schema(
   {
-    complaintType: {
+    callType: {
       type: String,
-      enum: [complaintType.complaint, complaintType.enquiry],
+      enum: [complaintType.complaint, complaintType.inquiry],
       required: true,
     },
 
@@ -15,6 +15,7 @@ const InitialCallThreeSchema = new mongoose.Schema(
         emailType.buisnessEmail,
         emailType.officialEmail,
         emailType.personalEmail,
+        emailType.companyEmail,
       ],
       required: true,
     },
@@ -47,12 +48,12 @@ const InitialCallThreeSchema = new mongoose.Schema(
     },
     isPnd: {
       type: Boolean,
-      required: false,
+
       default: false,
     },
     cancelFlag: {
       type: Boolean,
-      required: false,
+
       default: false,
     },
     initialCallName: {
@@ -95,7 +96,7 @@ const searchKeys = [
   "initialCallOneId",
   "initialCallTwoId",
   "companyId",
-  "complaintType",
+
   "emailType",
   "smsType",
   "returnType",
