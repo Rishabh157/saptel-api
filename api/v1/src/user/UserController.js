@@ -786,6 +786,7 @@ exports.getAllFloorManagers = async (req, res) => {
       userDepartment: "SALES_DEPARTMENT",
       userRole: { $in: userRole },
     };
+    console.log(matchQuery, "query");
 
     let dataExist = await userService.findAllWithQuery(matchQuery);
     if (!dataExist || !dataExist.length) {

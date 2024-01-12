@@ -8,11 +8,7 @@ const InitialCallThreeSchema = new mongoose.Schema(
       enum: [complaintType.complaint, complaintType.enquiry],
       required: true,
     },
-    callType: {
-      type: String,
-      required: true,
-      enum: ["COMPLAINT", "INQUIRY"],
-    },
+
     emailType: {
       type: String,
       enum: [

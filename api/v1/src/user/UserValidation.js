@@ -26,6 +26,7 @@ const create = {
     teamLeadId: Joi.string().custom(commonValidation.objectId).allow(null),
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
+    isAgent: Joi.boolean(),
   }),
 };
 
@@ -52,6 +53,7 @@ const update = {
     teamLeadId: Joi.string().custom(commonValidation.objectId).allow(null),
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
+    isAgent: Joi.boolean(),
   }),
 };
 

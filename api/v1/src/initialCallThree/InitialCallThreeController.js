@@ -35,8 +35,13 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 // ============= add  start  ================
 exports.add = async (req, res) => {
   try {
-    let { initialCallName, initialCallOneId, initialCallTwoId, companyId } =
-      req.body;
+    let {
+      initialCallName,
+      initialCallOneId,
+      initialCallTwoId,
+      companyId,
+      complaintType,
+    } = req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -63,9 +68,16 @@ exports.add = async (req, res) => {
     }
 
     // -----------------------check duplicate exist --------------------
-    let dataExist = await initialCallThreeService.isExists([
-      { initialCallName },
-    ]);
+    let dataExist = await initialCallThreeService.isExists(
+      [
+        { initialCallName },
+        { complaintType },
+        { initialCallOneId },
+        { initialCallTwoId },
+      ],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -105,8 +117,14 @@ exports.update = async (req, res) => {
     let idToBeSearch = req.params.id;
 
     let dataExist = await initialCallThreeService.isExists(
-      [{ initialCallName }],
-      idToBeSearch
+      [
+        { initialCallName },
+        { complaintType },
+        { initialCallOneId },
+        { initialCallTwoId },
+      ],
+      idToBeSearch,
+      true
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
