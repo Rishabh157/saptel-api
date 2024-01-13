@@ -66,12 +66,12 @@ exports.add = async (req, res) => {
 
     let schemeCode = "";
     if (!lastObject.length) {
-      schemeCode = "SC0001";
+      schemeCode = "SC00001";
     } else {
-      const lastSchemeCode = lastObject[0]?.schemeCode || "SC0000";
+      const lastSchemeCode = lastObject[0]?.schemeCode || "SC00000";
       const lastNumber = parseInt(lastSchemeCode.replace("SC", ""), 10);
       const nextNumber = lastNumber + 1;
-      schemeCode = "SC" + String(nextNumber).padStart(4, "0");
+      schemeCode = "SC" + String(nextNumber).padStart(5, "0");
     }
     /**
      * check duplicate exist
