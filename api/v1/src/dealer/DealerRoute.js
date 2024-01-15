@@ -103,6 +103,16 @@ router.put(
   validate(dealerValidation.changeStatus),
   dealerController.statusChange
 );
+
+/**
+ * update dealer approval
+ */
+router.put(
+  "/dealer-approve/:id",
+  authCheckMiddleware,
+  validate(dealerValidation.changeStatus),
+  dealerController.dealerApproval
+);
 /**
  * delete document
  */

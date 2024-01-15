@@ -36,7 +36,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { poCode, vendorId, wareHouseId, purchaseOrder, companyId } = req.body;
+    let { vendorId, wareHouseId, purchaseOrder, companyId } = req.body;
 
     const isVendorExists = await vendorService.findCount({
       _id: vendorId,
@@ -65,6 +65,21 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    let lastObject = await purchaseOrderService.aggregateQuery([
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
+
+    let poCode = "";
+    if (!lastObject.length) {
+      poCode = "PO00001";
+    } else {
+      const lastSchemeCode = lastObject[0]?.poCode || "PO00000";
+      const lastNumber = parseInt(lastSchemeCode.replace("PO", ""), 10);
+      const nextNumber = lastNumber + 1;
+      poCode = "PO" + String(nextNumber).padStart(5, "0");
     }
 
     /**

@@ -254,13 +254,17 @@ const DealerSchema = new mongoose.Schema(
       trim: false,
       default: null,
     },
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   {
