@@ -95,12 +95,12 @@ const WareHouseSchema = new mongoose.Schema(
         },
         gstNumber: {
           type: String,
-          required: true,
+          default: "",
           trim: true,
         },
         gstCertificate: {
           type: String,
-          required: true,
+          default: "",
           trim: true,
         },
       },

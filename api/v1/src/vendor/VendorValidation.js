@@ -38,8 +38,8 @@ const create = {
       landLine: Joi.string().allow(""),
     }),
     document: Joi.object().keys({
-      gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
       declarationForm: Joi.string().allow(""),
     }),
     bankInformation: Joi.array().items({
@@ -94,8 +94,8 @@ const update = {
       landLine: Joi.string().allow(""),
     }),
     document: Joi.object().keys({
-      gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
       declarationForm: Joi.string().allow(""),
     }),
     bankInformation: Joi.array().items({

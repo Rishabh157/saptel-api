@@ -30,8 +30,8 @@ const create = {
       stateId: Joi.string().custom(commonValidation.objectId).required(),
       districtId: Joi.string().custom(commonValidation.objectId).required(),
       pincodeId: Joi.string().custom(commonValidation.objectId).required(),
-      gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
     }),
     contactInformation: Joi.array().items({
       name: Joi.string().allow(""),
@@ -76,8 +76,8 @@ const update = {
       stateId: Joi.string().custom(commonValidation.objectId).required(),
       districtId: Joi.string().custom(commonValidation.objectId).required(),
       pincodeId: Joi.string().custom(commonValidation.objectId).required(),
-      gstNumber: Joi.string().required(),
-      gstCertificate: Joi.string().required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
     }),
     contactInformation: Joi.array().items({
       name: Joi.string().allow(""),
