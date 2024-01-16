@@ -102,6 +102,12 @@ const getDocument = {
   }),
 };
 
+const getPincode = {
+  params: Joi.object().keys({
+    pincode: Joi.string(),
+  }),
+};
+
 /**
  * delete a document
  */
@@ -127,4 +133,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDocument,
+  getPincode,
 };

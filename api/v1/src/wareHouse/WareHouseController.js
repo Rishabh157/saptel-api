@@ -102,7 +102,10 @@ exports.add = async (req, res) => {
     });
     req.body.contactInformation = updatedContactInformation;
 
-    let dataCreated = await wareHouseService.createNewData({ ...req.body });
+    let dataCreated = await wareHouseService.createNewData({
+      ...req.body,
+      wareHouseCode,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

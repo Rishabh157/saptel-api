@@ -91,7 +91,7 @@ exports.add = async (req, res) => {
     }
     const output = req.body.purchaseOrder.map((order) => {
       return {
-        poCode: req.body.poCode,
+        poCode: poCode,
         vendorId: req.body.vendorId,
         wareHouseId: req.body.wareHouseId,
         purchaseOrder: {

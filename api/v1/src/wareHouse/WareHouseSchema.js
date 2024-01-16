@@ -6,7 +6,6 @@ const WareHouseSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
     },
     wareHouseName: {
       type: String,

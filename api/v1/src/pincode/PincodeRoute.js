@@ -63,6 +63,15 @@ router.get(
   pincodeController.getPincodeByDistrict
 );
 /**
+ * get one by pincode
+ */
+router.get(
+  "/get-by-pincode/:pincode",
+  authCheckMiddleware,
+  validate(pincodeValidation.getPincode),
+  pincodeController.getPincode
+);
+/**
  * get one document
  */
 router.get(
@@ -71,6 +80,7 @@ router.get(
   validate(pincodeValidation.getDocument),
   pincodeController.getById
 );
+
 /**
  * get all pincode pagination filter
  */

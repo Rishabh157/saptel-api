@@ -676,6 +676,51 @@ exports.getById = async (req, res) => {
   }
 };
 
+// get by pincode
+
+exports.getPincode = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let pincodeToBeSearch = req.params.pincode;
+    let additionalQuery = [
+      {
+        $match: {
+          pincode: pincodeToBeSearch,
+          isDeleted: false,
+        },
+      },
+    ];
+
+    let userRoleData = await getUserRoleData(req, pincodeService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.pincode,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await pincodeService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: allowedFields[0] ? allowedFields[0] : null,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // get all pincodes by tehsil
 exports.getPincodeByTehsil = async (req, res) => {
   try {
