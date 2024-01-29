@@ -159,7 +159,7 @@ exports.allFilterPagination = async (req, res) => {
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
-    console.log(filterBy);
+
     let rangeFilterBy = req.body.rangeFilterBy;
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -223,7 +223,7 @@ exports.allFilterPagination = async (req, res) => {
       numberFileds,
       objectIdFields
     );
-    console.log(filterQuery);
+
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

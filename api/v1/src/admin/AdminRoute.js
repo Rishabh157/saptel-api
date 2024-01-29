@@ -61,6 +61,13 @@ router.post(
   adminController.logout
 );
 
+router.post(
+  "/test-ip",
+  // accessModuleCheck,
+  // authCheckMiddleware,
+  adminController.testingIp
+);
+
 /**
  * change password
  */

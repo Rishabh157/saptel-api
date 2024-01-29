@@ -39,6 +39,7 @@
     "node-path": "^0.0.3",
     "nodemailer": "^6.9.1",
     "nodemon": "^2.0.22",
+    "proxy-chain": "^2.4.0",
     "redis": "^4.6.5",
     "request": "^2.88.2",
     "swagger-jsdoc": "^6.2.8",

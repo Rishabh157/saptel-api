@@ -139,7 +139,7 @@ exports.update = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    console.log("here");
+
     const { calltype } = req.params;
     let matchQuery = {
       isDeleted: false,
@@ -393,7 +393,7 @@ exports.deleteDocument = async (req, res) => {
       initialCallOneId: _id,
       isDeleted: false,
     });
-    console.log(isInitialCallOneExists);
+
     if (isInitialCallOneExists) {
       throw new ApiError(
         httpStatus.OK,

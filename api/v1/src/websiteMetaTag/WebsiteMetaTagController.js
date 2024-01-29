@@ -55,7 +55,6 @@ exports.add = async (req, res) => {
       isDeleted: false,
     });
 
-    console.log(isCompanyExists);
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }

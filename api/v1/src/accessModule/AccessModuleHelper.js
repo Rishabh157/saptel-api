@@ -69,11 +69,6 @@ const checkBodyData = async (modelName, fields) => {
 };
 
 const isActionMethodValid = async (actionName, method) => {
-  console.log(
-    actionName,
-    actionMethodEnum[actionName]?.toLowerCase(),
-    method.toLowerCase()
-  );
   return actionMethodEnum[actionName]?.toLowerCase() === method.toLowerCase()
     ? true
     : false;

@@ -451,7 +451,6 @@ exports.get = async (req, res) => {
     let dataExist = await orderInquiryFlowService.aggregateQuery(
       additionalQuery
     );
-    console.log(dataExist);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
     if (!allowedFields || !allowedFields?.length) {

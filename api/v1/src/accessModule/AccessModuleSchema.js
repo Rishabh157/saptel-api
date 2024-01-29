@@ -10,7 +10,6 @@ const validateAccessType = (value) => {
   if (!Array.isArray(value) || !value.length) {
     return false;
   }
-  console.log(value, allowedValues);
   return value.every((v) => allowedValues.includes(v));
 };
 

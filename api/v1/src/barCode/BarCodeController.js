@@ -366,8 +366,6 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push(...additionalQuery);
     }
 
-    console.log(matchQuery, "matchQuery");
-
     //-----------------------------------
     let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
@@ -782,7 +780,6 @@ exports.getAllByGroup = async (req, res) => {
 //single view api
 exports.getById = async (req, res) => {
   try {
-    console.log("yha");
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
     let additionalQuery = [
@@ -870,7 +867,7 @@ exports.getByBarcode = async (req, res) => {
     const productGroupId = req.params.productgroupid;
     const status = req.params.status;
     const cid = req.params.cid;
-    console.log(barcodeToBeSearch, status, productGroupId, cid);
+
     let additionalQueryForAll = [
       {
         $match: {
@@ -979,7 +976,7 @@ exports.getByBarcode = async (req, res) => {
     const dataExist = await barCodeService.aggregateQuery(
       additionalQueryForAll
     );
-    console.log(dataExist, "dataExist");
+
     if (dataExist.length === 0) {
       const foundBarcode = await barCodeService.aggregateQuery(
         additionalQueryForOne
@@ -1163,7 +1160,7 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
 exports.getBarcode = async (req, res) => {
   try {
     const barcodeToBeSearch = req.params.barcode;
-    console.log("inn", barcodeToBeSearch);
+
     let additionalQuery = [
       {
         $match: {
@@ -1842,7 +1839,7 @@ exports.getDealerInventory = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    console.log("herere dealer");
+
     let additionalQuery = [
       {
         $lookup: {
@@ -2035,7 +2032,6 @@ exports.statusChange = async (req, res) => {
 
 exports.updateInventory = async (req, res) => {
   try {
-    console.log("innnnn");
     let { barcodedata } = req.body;
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
@@ -2048,7 +2044,7 @@ exports.updateInventory = async (req, res) => {
       currentHour +
       currentMinute +
       currentSecond;
-    console.log(outerBoxCode, "outerBoxCode");
+
     const promises = barcodedata?.map(async (ele) => {
       const dataUpdated = await barCodeService.getOneAndUpdate(
         {
@@ -2107,7 +2103,7 @@ exports.updateInventory = async (req, res) => {
 exports.updateWarehouseInventory = async (req, res) => {
   try {
     let { barcodedata, wId, from } = req.body;
-    console.log("barcodedata", barcodedata);
+
     const promises = barcodedata?.map(async (ele) => {
       const dataUpdated = await barCodeService.getOneAndUpdate(
         {
@@ -2249,7 +2245,6 @@ exports.outwardInventory = async (req, res) => {
         isUsed: true,
       });
       let foundObj = groupedArray?.find((fele) => {
-        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
         if (fele?.outerBoxbarCodeNumber !== null) {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
@@ -2375,12 +2370,10 @@ exports.rtvOutwardInventory = async (req, res) => {
         isUsed: true,
       });
       let foundObj = groupedArray?.find((fele) => {
-        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
         if (fele?.outerBoxbarCodeNumber !== null) {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
       });
-      console.log(foundObj, "foundObj");
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
@@ -2503,12 +2496,10 @@ exports.wtwOutwardInventory = async (req, res) => {
         isUsed: true,
       });
       let foundObj = groupedArray?.find((fele) => {
-        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
         if (fele?.outerBoxbarCodeNumber !== null) {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
       });
-      console.log(foundObj, "foundObj");
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
@@ -2630,12 +2621,10 @@ exports.dtwOutwardInventory = async (req, res) => {
         isUsed: true,
       });
       let foundObj = groupedArray?.find((fele) => {
-        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
         if (fele?.outerBoxbarCodeNumber !== null) {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
       });
-      console.log(foundObj, "foundObj");
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
@@ -2757,12 +2746,10 @@ exports.wtcOutwardInventory = async (req, res) => {
         isUsed: true,
       });
       let foundObj = groupedArray?.find((fele) => {
-        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
         if (fele?.outerBoxbarCodeNumber !== null) {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
       });
-      console.log(foundObj, "foundObj");
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
@@ -2885,12 +2872,10 @@ exports.wtsOutwardInventory = async (req, res) => {
         isUsed: true,
       });
       let foundObj = groupedArray?.find((fele) => {
-        console.log(fele?.outerBoxbarCodeNumber, ele?.outerBoxbarCodeNumber);
         if (fele?.outerBoxbarCodeNumber !== null) {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
       });
-      console.log(foundObj, "foundObj");
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
@@ -2986,7 +2971,7 @@ exports.wtsOutwardInventory = async (req, res) => {
 exports.orderDispatch = async (req, res) => {
   try {
     let { barcodedata, orderId } = req.body;
-    console.log("innn");
+
     let barcodeaIds = barcodedata?.map((ele) => {
       return ele?._id;
     });
@@ -3128,7 +3113,7 @@ exports.orderDispatch = async (req, res) => {
 exports.dealerOrderDispatch = async (req, res) => {
   try {
     let { barcodedata, orderId, deliveryBoyId } = req.body;
-    console.log("innn");
+
     let barcodeaIds = barcodedata?.map((ele) => {
       return ele?._id;
     });

@@ -13,7 +13,6 @@ const getEstTimeFromShipYaari = async (data) => {
     data["service_type"] = serviceType;
     data["partner"] = partner;
     data["service"] = service;
-    console.log(data);
     const formData = qs.stringify(data);
     const HEADER = {
       "Content-Type": "application/x-www-form-urlencoded", // Set the content type
@@ -23,7 +22,6 @@ const getEstTimeFromShipYaari = async (data) => {
       formData,
       { headers: HEADER }
     );
-    console.log(response, "response");
     if (response) {
       return response.data;
     }

@@ -316,7 +316,6 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    console.log("hereeeeeeeeeeeee");
     //if no default query then pass {}
     let matchQuery = {
       isDeleted: false,
@@ -357,7 +356,6 @@ exports.get = async (req, res) => {
 // unauth
 exports.getUnauth = async (req, res) => {
   try {
-    console.log("hereeeeeeeeeeeee");
     let matchQuery = {
       isDeleted: false,
     };
@@ -510,12 +508,12 @@ exports.getStateByCountry = async (req, res) => {
   try {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    console.log(idToBeSearch);
+
     let dataExist = await stateService.findAllWithQuery({
       countryId: idToBeSearch,
       isDeleted: false,
     });
-    console.log(dataExist);
+
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {

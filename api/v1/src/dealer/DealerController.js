@@ -249,9 +249,7 @@ exports.login = async (req, res) => {
   try {
     let reqEmail = req.body.email;
     let password = req.body.password;
-    console.log(reqEmail);
     let dataFound = await dealerService.getOneByMultiField({ email: reqEmail });
-    console.log(dataFound);
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Dealer not found.`);
     }

@@ -221,6 +221,84 @@ exports.update = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    let { status, remark, dispositionOne, dispositionTwo, orderId } = req.body;
+
+    let dataExist = await orderService.isExists([]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isDispositionTwoExists = await dispositionTwoService.findCount({
+      _id: dispositionOne,
+      isDeleted: false,
+    });
+    if (!isDispositionTwoExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
+    }
+
+    const isDispositionThreeExists = await dispositionThreeService.findCount({
+      _id: dispositionTwo,
+      isDeleted: false,
+    });
+    if (!isDispositionThreeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+    }
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: orderId,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+    await orderInquiryFlowService.createNewData({
+      ...datafound,
+      orderId: orderId,
+
+      dispositionLevelTwoId: dispositionOne,
+      dispositionLevelThreeId: dispositionTwo,
+    });
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: orderId,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          // barcodeId: barcode,
+          status,
+          remark,
+          dispositionLevelTwoId: dispositionOne,
+          dispositionLevelThreeId: dispositionTwo,
+        },
+      }
+    );
+    //barcode, status, remark, dispositionOne, dispositionTwo
+
+    if (dataUpdated) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // =============update  end================
 
 // =============get  start================
@@ -1474,6 +1552,432 @@ exports.allFilterPagination = async (req, res) => {
   }
 };
 
+exports.allFilterPaginationDileveryBoy = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let searchValue = req.body.searchValue;
+    let searchIn = req.body.searchIn;
+    let filterBy = req.body.filterBy;
+    let rangeFilterBy = req.body.rangeFilterBy;
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+
+    /**
+     * to send only active data on web
+     */
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    //----------------------------
+
+    /**
+     * check search keys valid
+     **/
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+    const rangeQuery = getRangeQuery(rangeFilterBy);
+    if (rangeQuery && rangeQuery.length) {
+      matchQuery.$and.push(...rangeQuery);
+    }
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = [];
+    let numberFileds = [];
+    let objectIdFields = [
+      "dispositionLevelTwoId",
+      "dispositionLevelThreeId",
+      "countryId",
+      "stateId",
+      "schemeId",
+      "districtId",
+      "tehsilId",
+      "pincodeId",
+      "areaId",
+      "channel",
+      "agentDistrictId",
+    ];
+
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+    //----------------------------
+    //calander filter
+    /**
+     * ToDo : for date filter
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    // if (datefilterQuery && datefilterQuery.length) {
+    //
+
+    //   matchQuery.$and.push(...datefilterQuery);
+    // }
+
+    //calander filter
+    //----------------------------
+
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelId",
+          foreignField: "_id",
+          as: "channelData",
+          pipeline: [
+            {
+              $project: {
+                channelName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
+          foreignField: "_id",
+          as: "deleivery_by_data",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          channelLabel: {
+            $arrayElemAt: ["$channelData.channelName", 0],
+          },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          "channelData",
+          "agentDistrictData",
+          "product_group",
+          "deleivery_by_data",
+        ],
+      },
+    ];
+
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+
+    //-----------------------------------
+    //
+    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+    // let userRoleData = await getUserRoleData(req, orderService);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.order,
+    //   userRoleData,
+    //   actionType.pagination
+    // );
+    let result = await orderService.aggregateQuery(finalAggregateQuery);
+    // let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (result?.length) {
+      return res.status(200).send({
+        data: result,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // =============all filter dealer order pagination api start================
 exports.allFilterDealerOrderPagination = async (req, res) => {
   try {

@@ -138,7 +138,6 @@ exports.update = async (req, res) => {
       allwtcOfThisNumber?.map(async (ele) => {
         orgIds.push(String(ele?._id));
         if (!wtcIds.includes(String(ele?._id))) {
-          console.log("updateing.........");
           await wtcMasterService.getOneAndUpdate(
             {
               _id: new mongoose.Types.ObjectId(ele?._id), // Changed from ele?.id to ele?._id
@@ -159,7 +158,6 @@ exports.update = async (req, res) => {
       wtcData?.map(async (ele) => {
         if (!orgIds.includes(ele.id)) {
           const { id, ...rest } = ele;
-          console.log("creating", rest);
 
           await wtcMasterService.createNewData({ ...rest });
         }
@@ -378,11 +376,11 @@ exports.allFilterGroupPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    console.log("here");
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }
-    console.log("here 2");
+
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
       req.body.orderByValue

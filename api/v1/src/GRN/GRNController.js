@@ -402,8 +402,6 @@ exports.getByPoCode = async (req, res) => {
       isDeleted: false,
     };
 
-    console.log(matchQuery);
-
     let additionalQuery = [
       { $match: matchQuery },
       {
@@ -437,8 +435,6 @@ exports.getByPoCode = async (req, res) => {
     for (let i = 0; i < recQuntArr.length; i++) {
       recievedQuantity += recQuntArr[i];
     }
-
-    console.log(recievedQuantity);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");

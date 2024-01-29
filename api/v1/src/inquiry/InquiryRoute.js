@@ -5,6 +5,7 @@ const inquiryController = require("./InquiryController");
 const {
   authCheckMiddleware,
   otpVerifyToken,
+  authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
@@ -28,6 +29,11 @@ router.post("/", authCheckMiddleware, inquiryController.allFilterPagination);
 
 //===============get all pagination filter===============
 router.post("/unauth-inquiry", inquiryController.allFilterPaginationUnauth);
+router.post(
+  "/get-dileveryboy-order",
+  authCheckDeliveryBoyMiddleware,
+  inquiryController.allFilterPaginationUnauth
+);
 
 //===============create new document===============
 // router.post(

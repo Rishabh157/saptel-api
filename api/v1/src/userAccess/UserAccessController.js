@@ -123,7 +123,7 @@ exports.userRoleUpdate = async (req, res) => {
     let datafound = await userAccessService.findAllWithQuery({
       userRoleId: idToBeSearch,
     });
-    console.log(datafound);
+
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `UserAccess not found.`);
     }
@@ -328,7 +328,7 @@ exports.get = async (req, res) => {
     // if (req.query && Object.keys(req.query).length) {
     //   matchQuery = getQuery(matchQuery, req.query);
     // }
-    console.log(matchQueryUser);
+
     let dataExist = await userAccessService.getOneByMultiField(
       { ...matchQueryUser },
       {

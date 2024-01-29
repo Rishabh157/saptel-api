@@ -48,7 +48,6 @@ const findAllWithQuery = async (matchObj, projectObj) => {
 
 //==================== etById================
 const getById = async (id) => {
-  console.log(id);
   return DispositionTwo.find({
     dispositionOneId: new mongoose.Types.ObjectId(id),
     isDeleted: false,

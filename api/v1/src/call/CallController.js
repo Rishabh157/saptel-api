@@ -434,7 +434,6 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
-    console.log(err, "err");
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;

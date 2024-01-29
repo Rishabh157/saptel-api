@@ -352,7 +352,6 @@ exports.allFilterPagination = async (req, res) => {
       numberFileds,
       objectIdFields
     );
-    console.log(filterQuery);
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }

@@ -12,10 +12,7 @@ const objectId = (value, helpers) => {
 };
 
 const minValue = (value, helpers) => {
-  console.log("here i come", value);
   if (value > 9) {
-    console.log("here i come", value);
-
     return helpers.message('"{{#label}}" should not be greater than 9');
   }
   return value;

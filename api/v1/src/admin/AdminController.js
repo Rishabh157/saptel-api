@@ -15,6 +15,9 @@ const bcrypt = require("bcrypt");
 const redisClient = require("../../../../database/redis");
 const jwt = require("jsonwebtoken");
 const { logOut } = require("../../helper/utils");
+const ProxyChain = require("proxy-chain");
+
+const { default: axios } = require("axios");
 /*********************************************************************/
 
 /**
@@ -98,6 +101,48 @@ exports.logout = async (req, res) => {
     code: "OK",
     issue: null,
   });
+};
+exports.testingIp = async (req, res) => {
+  let name = "mayank";
+  let email = "mayank@gmail.com";
+  let targerUrl = "https://v60h5qlq-3005.inc1.devtunnels.ms/v1/dashboard/test";
+
+  // const proxyUrl = await ProxyChain.anonymizeProxy({
+  //   target: targerUrl.trim(), // Your proxy server address
+  // });
+  //
+  const responseData = await axios.get(
+    "https://vm22s609-3009.inc1.devtunnels.ms/"
+  );
+
+  try {
+    let response = await axios.post(
+      targerUrl,
+      { name, email }
+      // { proxy: { host: proxyUrl, port: 1080 } }
+    );
+
+    return res.status(httpStatus.OK).send({
+      message: `Logout successfull!`,
+      data: response.data,
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    return res.status(httpStatus.OK).send({
+      message: `something went wrong`,
+      data: null,
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } finally {
+    // Close the proxy server when done
+    if (proxyUrl) {
+      await ProxyChain.closeAnonymizedProxy(proxyUrl, true);
+    }
+  }
 };
 
 exports.changePassword = async (req, res) => {
@@ -290,7 +335,7 @@ exports.refreshToken = async (req, res) => {
     }
     const tokenKey = `${decoded.Id}*`;
     // const allKeys = await redisClient.keys();
-    // console.log(allKeys, "redisClient.keys");
+    //
     const allRedisValue = await redisClient.keys(tokenKey);
     if (!allRedisValue.length) {
       throw new ApiError(

@@ -129,7 +129,6 @@ exports.update = async (req, res) => {
       allrtvOfThisNumber?.map(async (ele) => {
         orgIds.push(String(ele?._id));
         if (!dtwIds.includes(String(ele?._id))) {
-          console.log("updateing.........");
           await dtwMasterService.getOneAndUpdate(
             {
               _id: new mongoose.Types.ObjectId(ele?._id), // Changed from ele?.id to ele?._id
@@ -150,7 +149,6 @@ exports.update = async (req, res) => {
       dtwData?.map(async (ele) => {
         if (!orgIds.includes(ele.id)) {
           const { id, ...rest } = ele;
-          console.log("creating", rest);
 
           await dtwMasterService.createNewData({ ...rest });
         }
@@ -369,11 +367,11 @@ exports.allFilterGroupPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    console.log("here");
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }
-    console.log("here 2");
+
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
       req.body.orderByValue
@@ -599,11 +597,11 @@ exports.allFilterGroupPaginationErp = async (req, res) => {
     /**
      * to send only active data on web
      */
-    console.log("here");
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }
-    console.log("here 2");
+
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
       req.body.orderByValue
@@ -852,7 +850,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let dtwnumberToBeSearch = req.params.dtwnumber;
-    console.log(dtwnumberToBeSearch, "dtwnumberToBeSearch");
+
     let dataExist = await dtwMasterService.findAllWithQuery({
       dtwNumber: dtwnumberToBeSearch,
       isDeleted: false,

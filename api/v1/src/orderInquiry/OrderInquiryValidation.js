@@ -210,6 +210,19 @@ const get = {
     .optional(),
 };
 
+const updateStatus = {
+  body: Joi.object().keys({
+    // barcode: Joi.array()
+    //   .items(Joi.string().custom(commonValidation.objectId).required())
+    //   .required(),
+    status: Joi.string().required(),
+    remark: Joi.string(),
+    dispositionOne: Joi.string().custom(commonValidation.objectId).required(),
+    dispositionTwo: Joi.string().custom(commonValidation.objectId).required(),
+    orderId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 /**
  * delete a document
  */
@@ -253,4 +266,5 @@ module.exports = {
   changeStatus,
   getById,
   orderStatusChange,
+  updateStatus,
 };

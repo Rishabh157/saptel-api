@@ -6,6 +6,7 @@ const {
   authCheckMiddleware,
   otpVerifyToken,
   authCheckDealerMiddleware,
+  authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
@@ -23,6 +24,12 @@ router.get(
   //   validate(orderValidation),
   orderController.getById
 );
+router.put(
+  "/update-order-status",
+  authCheckDeliveryBoyMiddleware,
+  validate(orderValidation.updateStatus),
+  orderController.updateOrderStatus
+);
 
 //===============get document by id for dealer===============
 router.get(
@@ -34,6 +41,12 @@ router.get(
 
 //===============get all pagination filter===============
 router.post("/", authCheckMiddleware, orderController.allFilterPagination);
+
+router.post(
+  "/get-dileveryboy-order",
+  authCheckDeliveryBoyMiddleware,
+  orderController.allFilterPaginationDileveryBoy
+);
 
 //===============get all pagination filter===============
 router.post(
@@ -51,6 +64,7 @@ router.post(
 // );
 
 //===============update document===============
+
 router.put(
   "/:id",
   authCheckMiddleware,

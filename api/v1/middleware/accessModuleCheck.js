@@ -12,7 +12,6 @@ exports.accessModuleCheck = async (req, res, next) => {
      */
     let method = req.method;
     let route = req.baseUrl + req.route.path;
-    console.log(route, method);
     if (
       !(await accessmoduleService.getOneByMultiField({
         route: route.toLowerCase(),

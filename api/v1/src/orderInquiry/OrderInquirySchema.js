@@ -341,6 +341,7 @@ const OrderInquirySchema = new mongoose.Schema(
 
 const searchKeys = [
   "didNo",
+  "schemeLabel",
   "alternateNo",
   "mobileNo",
   "callType",

@@ -304,8 +304,6 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    console.log(req.userData, "req.userData");
-
     let dealerId = req?.userData?.Id;
     //if no default query then pass {}
     let matchQuery = { isDeleted: false, dealerId };
@@ -408,9 +406,9 @@ exports.login = async (req, res) => {
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `User not found.`);
     }
-    console.log(password, dataFound.password);
+
     let matched = await bcrypt.compare(password, dataFound.password);
-    console.log(matched, "matched");
+
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Password!`);
     }

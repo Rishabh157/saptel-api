@@ -133,7 +133,6 @@ exports.update = async (req, res) => {
       allSoOfThisNumber?.map(async (ele) => {
         orgIds.push(String(ele?._id));
         if (!soIds.includes(String(ele?._id))) {
-          console.log("updateing.........");
           await salesOrderService.getOneAndUpdate(
             {
               _id: new mongoose.Types.ObjectId(ele?._id), // Changed from ele?.id to ele?._id
@@ -154,7 +153,6 @@ exports.update = async (req, res) => {
       soData?.map(async (ele) => {
         if (!orgIds.includes(ele.id)) {
           const { id, ...rest } = ele;
-          console.log("creating", rest);
 
           await salesOrderService.createNewData({ ...rest });
         }
@@ -184,7 +182,6 @@ exports.update = async (req, res) => {
     const updatedDataFound = updateResults.some(
       (dataUpdated) => dataUpdated !== null
     );
-    console.log(updatedDataFound, "updatedDataFound");
 
     if (updatedDataFound) {
       return res.status(httpStatus.OK).send({
@@ -330,19 +327,14 @@ exports.updateLevel = async (req, res) => {
           }
 
           // This code will execute after the loop is completed
-          console.log(
-            salesOrderBalance,
-            totalAmount,
-            totalTaxAmount,
-            "---------------------"
-          );
+
           if (soData[0].accApproved === true) {
             const balance = await getBalance(
               soData[0].dealerId,
               0,
               parseInt(totalTaxAmount)
             );
-            console.log(balance, "balance");
+
             //------------------create data-------------------
             let dataCreated = await ledgerService.createNewData({
               noteType: ledgerType.debit,
@@ -357,7 +349,6 @@ exports.updateLevel = async (req, res) => {
           }
         })();
       } else {
-        console.log("productGroupId is empty or not an array");
       }
     }
 
@@ -401,11 +392,11 @@ exports.allFilterGroupPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    console.log("here");
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }
-    console.log("here 2");
+
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
       req.body.orderByValue
@@ -689,11 +680,11 @@ exports.allFilterGroupPaginationForDealer = async (req, res) => {
     /**
      * to send only active data on web
      */
-    console.log("here");
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }
-    console.log("here 2");
+
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
       req.body.orderByValue
