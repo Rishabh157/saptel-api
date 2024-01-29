@@ -137,9 +137,9 @@ exports.add = async (req, res) => {
       req.body.maskedPhoneNo = "";
     }
     // let dataToUpload = { ...req.body, password: hashedPassword };
-    // 
+    //
     //------------------create data-------------------
-    
+
     let dataCreated = await userService.createNewData({ ...req.body });
 
     if (dataCreated) {
@@ -786,7 +786,6 @@ exports.getAllFloorManagers = async (req, res) => {
       userDepartment: "SALES_DEPARTMENT",
       userRole: { $in: userRole },
     };
-    
 
     let dataExist = await userService.findAllWithQuery(matchQuery);
     if (!dataExist || !dataExist.length) {
@@ -969,7 +968,7 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
     }
-    
+
     if (!isUserAllowed && userAllowedIp?.[0]?.length) {
       throw new ApiError(
         httpStatus.OK,
@@ -1107,7 +1106,7 @@ exports.refreshToken = async (req, res) => {
     }
     const tokenKey = `${decoded.Id}*`;
     // const allKeys = await redisClient.keys();
-    // 
+    //
     const allRedisValue = await redisClient.keys(tokenKey);
     if (!allRedisValue.length) {
       throw new ApiError(
@@ -1172,12 +1171,7 @@ exports.changePassword = async (req, res) => {
     const deviceId = req.headers["device-id"];
     const token = req.headers["x-access-token"];
     const { currentPassword, newPassword, userId } = req.body;
-    
-      currentPassword,
-      newPassword,
-      userId,
-      " currentPassword, newPassword, userId"
-    );
+
     const decoded = await jwt.verify(token, config.jwt_secret);
     if (decoded.Id !== userId) {
       throw new ApiError(httpStatus.OK, `Invalid Token`);
