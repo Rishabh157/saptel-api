@@ -37,16 +37,16 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     },
     agentId: {
       type: ObjectId,
-      required: true,
+      default: null,
     },
     agentName: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
     companyId: {
       type: ObjectId,
-      required: true,
+      default: null,
     },
 
     approved: {
@@ -56,7 +56,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     },
     didNo: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     ageGroup: {
@@ -71,7 +71,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     },
     mobileNo: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
 
@@ -302,6 +302,8 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    address: { type: String, default: "" },
+
     status: {
       type: String,
       enum: [

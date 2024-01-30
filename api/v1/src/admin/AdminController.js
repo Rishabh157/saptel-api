@@ -16,6 +16,9 @@ const redisClient = require("../../../../database/redis");
 const jwt = require("jsonwebtoken");
 const { logOut } = require("../../helper/utils");
 const ProxyChain = require("proxy-chain");
+const HttpsProxyAgent = require("https-proxy-agent");
+const rp = require("request-promise");
+const tunnel = require("tunnel");
 
 const { default: axios } = require("axios");
 /*********************************************************************/
@@ -105,44 +108,44 @@ exports.logout = async (req, res) => {
 exports.testingIp = async (req, res) => {
   let name = "mayank";
   let email = "mayank@gmail.com";
-  let targerUrl = "https://v60h5qlq-3005.inc1.devtunnels.ms/v1/dashboard/test";
+  let targetUrl = "https://v60h5qlq-3005.inc1.devtunnels.ms/v1/dashboard/test";
 
-  // const proxyUrl = await ProxyChain.anonymizeProxy({
-  //   target: targerUrl.trim(), // Your proxy server address
-  // });
-  //
-  const responseData = await axios.get(
-    "https://vm22s609-3009.inc1.devtunnels.ms/"
-  );
+  const agent = tunnel.httpsOverHttp({
+    proxy: {
+      host: "192.168.1.34",
+      port: 5000,
+    },
+  });
 
-  try {
-    let response = await axios.post(
-      targerUrl,
-      { name, email }
-      // { proxy: { host: proxyUrl, port: 1080 } }
-    );
+  const requestOptions = {
+    uri: targetUrl,
+    method: "POST",
+    json: true,
+    body: { name, email },
+    agent: agent,
+  };
 
-    return res.status(httpStatus.OK).send({
-      message: `Logout successfull!`,
-      data: response.data,
-      status: true,
-      code: "OK",
-      issue: null,
+  rp(requestOptions)
+    .then((response) => {
+      console.log("Response:", response);
+      return res.status(httpStatus.OK).send({
+        message: `Logout successfull!`,
+        data: response.data,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      return res.status(httpStatus.OK).send({
+        message: `Logout `,
+        data: null,
+        status: false,
+        code: "OK",
+        issue: null,
+      });
     });
-  } catch (err) {
-    return res.status(httpStatus.OK).send({
-      message: `something went wrong`,
-      data: null,
-      status: true,
-      code: "OK",
-      issue: null,
-    });
-  } finally {
-    // Close the proxy server when done
-    if (proxyUrl) {
-      await ProxyChain.closeAnonymizedProxy(proxyUrl, true);
-    }
-  }
 };
 
 exports.changePassword = async (req, res) => {

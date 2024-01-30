@@ -9,6 +9,13 @@ const {
   authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
 
+router.put(
+  "/delivery-boy/update-order-status",
+  authCheckDeliveryBoyMiddleware,
+  validate(orderValidation.updateStatus),
+  orderController.updateOrderStatus
+);
+
 //===============get one document (if query) / all document===============
 router.get(
   "/",
@@ -23,12 +30,6 @@ router.get(
   authCheckMiddleware,
   //   validate(orderValidation),
   orderController.getById
-);
-router.put(
-  "/update-order-status",
-  authCheckDeliveryBoyMiddleware,
-  validate(orderValidation.updateStatus),
-  orderController.updateOrderStatus
 );
 
 //===============get document by id for dealer===============
@@ -63,6 +64,13 @@ router.post(
 //   orderController.add
 // );
 
+// order add for e-commerce
+router.put(
+  "/e-commerce/add",
+  authCheckMiddleware,
+  validate(orderValidation.ecomValidation),
+  orderController.add
+);
 //===============update document===============
 
 router.put(

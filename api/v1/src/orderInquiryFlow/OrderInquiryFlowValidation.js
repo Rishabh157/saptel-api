@@ -9,13 +9,13 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     orderId: Joi.string().custom(commonValidation.objectId).required(),
-    approved: Joi.boolean().required(),
-    didNo: Joi.string().required(),
-    agentId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
-    agentName: Joi.string().required(),
+    approved: Joi.boolean().allow(""),
+    didNo: Joi.string().allow(""),
+    agentId: Joi.string().custom(commonValidation.objectId).allow(null),
+    companyId: Joi.string().custom(commonValidation.objectId).allow(null),
+    agentName: Joi.string().allow(""),
     ageGroup: Joi.string().allow(""),
-    mobileNo: Joi.string().required(),
+    mobileNo: Joi.string().allow(""),
     alternateNo: Joi.string().allow(""),
     autoFillingShippingAddress: Joi.string().allow(""),
 

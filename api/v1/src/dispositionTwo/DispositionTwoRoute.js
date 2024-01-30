@@ -2,7 +2,10 @@ const router = require("express").Router();
 const dispositionTwoController = require("./DispositionTwoController");
 const dispositionTwoValidation = require("./DispositionTwoValidation");
 const validate = require("../../middleware/validate");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDeliveryBoyMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
@@ -12,6 +15,13 @@ router.get(
   dispositionTwoController.get
 );
 
+// get disposition for divelry boy API
+router.get(
+  "/delivery-boy/dispositiontwo",
+  authCheckDeliveryBoyMiddleware,
+  validate(dispositionTwoValidation.get),
+  dispositionTwoController.getAuth
+);
 //===============get one document (if query) / all document  (without token)===============
 router.get(
   "/unauth-dp2",

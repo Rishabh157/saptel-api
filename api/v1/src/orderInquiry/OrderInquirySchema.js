@@ -39,26 +39,26 @@ const OrderInquirySchema = new mongoose.Schema(
     },
     agentId: {
       type: ObjectId,
-      required: true,
+      default: "",
     },
     agentName: {
       type: String,
       trim: true,
-      required: true,
+      default: "",
     },
     companyId: {
       type: ObjectId,
-      required: true,
+      default: "",
     },
 
     approved: {
       type: Boolean,
-      required: true,
+      default: "",
       default: true,
     },
     didNo: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
     ageGroup: {
@@ -73,7 +73,7 @@ const OrderInquirySchema = new mongoose.Schema(
     },
     mobileNo: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
 
@@ -82,6 +82,7 @@ const OrderInquirySchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    address: { type: String, default: "" },
     callType: {
       type: String,
       required: false,
@@ -221,7 +222,7 @@ const OrderInquirySchema = new mongoose.Schema(
     },
     shcemeQuantity: {
       type: Number,
-      required: true,
+      default: "",
       default: 1,
     },
     socialMedia: {

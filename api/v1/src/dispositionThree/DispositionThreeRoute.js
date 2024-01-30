@@ -2,7 +2,10 @@ const router = require("express").Router();
 const dispositionThreeController = require("./DispositionThreeController");
 const dispositionThreeValidation = require("./DispositionThreeValidation");
 const validate = require("../../middleware/validate");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDeliveryBoyMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
 router.get(
@@ -31,6 +34,13 @@ router.get(
 router.get(
   "/unauth/get-all/:id",
   // authCheckMiddleware,
+  validate(dispositionThreeValidation.getByDispositionOneId),
+  dispositionThreeController.getByDispositionTwoId
+);
+//===============get all document fo dispositionTwoId (without token for delivery boy)===============
+router.get(
+  "/delivery-boy/dispositionthree/:id",
+  authCheckDeliveryBoyMiddleware,
   validate(dispositionThreeValidation.getByDispositionOneId),
   dispositionThreeController.getByDispositionTwoId
 );

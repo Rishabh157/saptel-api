@@ -223,6 +223,16 @@ const updateStatus = {
   }),
 };
 
+const ecomValidation = {
+  body: Joi.object().keys({
+    fullName: Joi.string(),
+    mobile: Joi.string().required(),
+    email: Joi.string(),
+    pincode: Joi.string(),
+    address: Joi.string(),
+  }),
+};
+
 /**
  * delete a document
  */
@@ -267,4 +277,5 @@ module.exports = {
   getById,
   orderStatusChange,
   updateStatus,
+  ecomValidation,
 };

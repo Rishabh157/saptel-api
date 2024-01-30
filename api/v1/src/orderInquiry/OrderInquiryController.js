@@ -47,6 +47,46 @@ const {
   productStatus,
 } = require("../../helper/enumUtils");
 
+exports.add = async (req, res) => {
+  try {
+    let { fullName, mobile, email, pincode, address } = req.body;
+
+    await orderInquiryFlowService.createNewData({
+      customerName: fullName,
+      mobileNo: mobile,
+      emailId: email,
+      pincodeId: pincode,
+      address: address,
+    });
+
+    let dataCreated = await orderService.createNewData({
+      customerName: fullName,
+      mobileNo: mobile,
+      emailId: email,
+      pincodeId: pincode,
+      address: address,
+    });
+
+    if (dataCreated) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataCreated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // =============update  start================
 exports.update = async (req, res) => {
   try {
@@ -254,42 +294,42 @@ exports.updateOrderStatus = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
-    await orderInquiryFlowService.createNewData({
-      ...datafound,
-      orderId: orderId,
+    console.log(datafound, "datafound");
 
-      dispositionLevelTwoId: dispositionOne,
-      dispositionLevelThreeId: dispositionTwo,
-    });
-
-    let dataUpdated = await orderService.getOneAndUpdate(
-      {
-        _id: orderId,
-        isDeleted: false,
-      },
-      {
-        $set: {
-          // barcodeId: barcode,
+    let dataUpdated = await orderService
+      .getOneAndUpdate(
+        {
+          _id: orderId,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            // barcodeId: barcode,
+            status,
+            remark,
+            dispositionLevelTwoId: dispositionOne,
+            dispositionLevelThreeId: dispositionTwo,
+          },
+        }
+      )
+      .then(async (ress) => {
+        console.log(ress);
+        await orderInquiryFlowService.createNewData({
+          ...ress,
+          orderId: orderId,
           status,
-          remark,
           dispositionLevelTwoId: dispositionOne,
           dispositionLevelThreeId: dispositionTwo,
-        },
-      }
-    );
-    //barcode, status, remark, dispositionOne, dispositionTwo
-
-    if (dataUpdated) {
-      return res.status(httpStatus.OK).send({
-        message: "Updated successfully.",
-        data: dataUpdated,
-        status: true,
-        code: "OK",
-        issue: null,
+        });
+        return res.status(httpStatus.OK).send({
+          message: "Updated successfully.",
+          data: null,
+          status: true,
+          code: "OK",
+          issue: null,
+        });
       });
-    } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
-    }
+    //barcode, status, remark, dispositionOne, dispositionTwo
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
