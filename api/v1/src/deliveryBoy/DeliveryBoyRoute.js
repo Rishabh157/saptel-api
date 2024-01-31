@@ -4,6 +4,7 @@ const validate = require("../../middleware/validate");
 const deliveryBoyValidation = require("./DeliveryBoyValidation");
 const {
   authCheckDealerMiddleware,
+
   otpVerifyToken,
 } = require("../../middleware/authenticationCheck");
 
@@ -26,6 +27,14 @@ router.post(
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.getAllFilter),
   deliveryBoyController.allFilterPagination
+);
+
+// for dealers app
+router.get(
+  "/dealer/deliveryboy",
+  authCheckDealerMiddleware,
+  validate(deliveryBoyValidation.get),
+  deliveryBoyController.get
 );
 
 /**

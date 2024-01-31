@@ -16,6 +16,13 @@ router.put(
   orderController.updateOrderStatus
 );
 
+router.put(
+  "/dealer/update-order-status",
+  authCheckDealerMiddleware,
+  validate(orderValidation.updateStatus),
+  orderController.updateOrderStatus
+);
+
 //===============get one document (if query) / all document===============
 router.get(
   "/",

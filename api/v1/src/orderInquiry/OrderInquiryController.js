@@ -902,7 +902,7 @@ exports.getById = async (req, res) => {
 exports.getByIdForDealer = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-
+    console.log(idToBeSearch, "idToBeSearch");
     let additionalQuery = [
       {
         $match: {
@@ -2031,6 +2031,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
+    console.log(dealerId, "dealerId");
     let matchQuery = {
       $and: [
         {

@@ -276,6 +276,89 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+exports.getForDeliveryBoy = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let matchQuery = {
+      isDeleted: false,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dispositionones",
+          localField: "dispositionOneId",
+          foreignField: "_id",
+          as: "dispositionOneData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionTwoId",
+          foreignField: "_id",
+          as: "dispositionTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          dispostionOneLabel: {
+            $arrayElemAt: ["$dispositionOneData.dispositionName", 0],
+          },
+          dispostionTwoLabel: {
+            $arrayElemAt: ["$dispositionTwoData.dispositionName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["dispositionOneData", "dispositionTwoData"],
+      },
+    ];
+
+    let dataExist = await dispositionThreeService.aggregateQuery(
+      additionalQuery
+    );
+
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // =============update Disposition start end================
 
 // =============get by Id start================
