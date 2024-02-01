@@ -4,6 +4,7 @@ const dispositionThreeValidation = require("./DispositionThreeValidation");
 const validate = require("../../middleware/validate");
 const {
   authCheckMiddleware,
+  authCheckDealerMiddleware,
   authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
 
@@ -41,6 +42,14 @@ router.get(
 router.get(
   "/delivery-boy/dispositionthree/:id",
   authCheckDeliveryBoyMiddleware,
+  validate(dispositionThreeValidation.getByDispositionOneId),
+  dispositionThreeController.getByDispositionTwoId
+);
+
+//===============get all document fo dispositionTwoId ( for dealer app)===============
+router.get(
+  "/dealer-app/dispositionthree/:id",
+  authCheckDealerMiddleware,
   validate(dispositionThreeValidation.getByDispositionOneId),
   dispositionThreeController.getByDispositionTwoId
 );

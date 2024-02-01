@@ -5,6 +5,7 @@ const validate = require("../../middleware/validate");
 const {
   authCheckMiddleware,
   authCheckDeliveryBoyMiddleware,
+  authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //===============get one document (if query) / all document===============
@@ -19,6 +20,14 @@ router.get(
 router.get(
   "/delivery-boy/dispositiontwo",
   authCheckDeliveryBoyMiddleware,
+  validate(dispositionTwoValidation.get),
+  dispositionTwoController.getAuth
+);
+
+// get disposition for dealer app API
+router.get(
+  "/dealer-app/dispositiontwo",
+  authCheckDealerMiddleware,
   validate(dispositionTwoValidation.get),
   dispositionTwoController.getAuth
 );
