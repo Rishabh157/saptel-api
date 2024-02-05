@@ -5,6 +5,7 @@ const barCodeValidation = require("./BarCodeValidation");
 const {
   authCheckMiddleware,
   authCheckDealerMiddleware,
+  authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -16,6 +17,16 @@ router.get(
   authCheckMiddleware,
   validate(barCodeValidation.get),
   barCodeController.get
+);
+
+/**
+ * return true if barcode is valid
+ */
+router.post(
+  "/check-barcode-and-update-status",
+  authCheckDeliveryBoyMiddleware,
+  validate(barCodeValidation.checkBarcode),
+  barCodeController.checkBarcode
 );
 
 /**

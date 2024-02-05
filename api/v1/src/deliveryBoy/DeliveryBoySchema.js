@@ -22,6 +22,6 @@ const DeliveryBoySchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["name", "mobile", "password"];
+const searchKeys = ["name", "mobile"];
 module.exports = mongoose.model("DeliveryBoy", DeliveryBoySchema);
 module.exports.searchKeys = [...searchKeys];

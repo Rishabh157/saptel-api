@@ -98,6 +98,11 @@ const OrderInquirySchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    orderInvoice: {
+      type: String,
+      required: false,
+      default: "",
+    },
     deliveryTimeAndDate: {
       type: String,
       required: false,

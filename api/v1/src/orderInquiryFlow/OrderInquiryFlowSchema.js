@@ -321,6 +321,11 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       ],
       default: orderStatusEnum.fresh,
     },
+    orderInvoice: {
+      type: String,
+      required: false,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

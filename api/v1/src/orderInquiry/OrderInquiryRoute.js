@@ -39,6 +39,14 @@ router.get(
   orderController.getById
 );
 
+//===============get document by mobile number===============
+router.post(
+  "/get-customer-info",
+  authCheckMiddleware,
+  validate(orderValidation.getComplainData),
+  orderController.getByMobileNumber
+);
+
 //===============get document by id for dealer===============
 router.get(
   "/dealer/:id",

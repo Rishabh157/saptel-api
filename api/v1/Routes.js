@@ -85,6 +85,9 @@ const wtcMasterServiceRoute = require("./src/warehouseToCompany/wtcMasterRoute")
 const wtsMasterServiceRoute = require("./src/warehouseToSample/wtsMasterRoute");
 const dtwMasterServiceRoute = require("./src/dealerToWarehouse/dtwMasterRoute");
 const callCenterMasterServiceRoute = require("./src/callCenterMaster/CallCenterMasterRoute");
+const ndrDispositionServiceRoute = require("./src/ndrDisposition/NdrDispositionRoute");
+const complainServiceRoute = require("./src/complain/ComplainRoute");
+const complainLogsServiceRoute = require("./src/complainLogs/ComplainLogsRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -438,6 +441,18 @@ const defaultRoutes = [
   {
     path: "/call-center",
     route: callCenterMasterServiceRoute,
+  },
+  {
+    path: "/ndr-disposition",
+    route: ndrDispositionServiceRoute,
+  },
+  {
+    path: "/complaint",
+    route: complainServiceRoute,
+  },
+  {
+    path: "/complaint-logs",
+    route: complainLogsServiceRoute,
   },
 ];
 // orderRoute;

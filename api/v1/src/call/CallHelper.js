@@ -6,6 +6,7 @@ const ledgerService = require("../ledger/LedgerService");
 const wareHouseService = require("../wareHouse/WareHouseService");
 const InquiryService = require("../inquiry/InquiryService");
 const orderService = require("../orderInquiry/OrderInquiryService");
+const complaintService = require("../complain/ComplainService");
 const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 
 const { default: mongoose } = require("mongoose");
@@ -45,6 +46,22 @@ exports.getOrderNumber = async () => {
     orderNumber = 1;
   }
   return orderNumber;
+};
+
+exports.getComplaintNumber = async () => {
+  let complaintNumber = 0;
+
+  let lastObject = await complaintService.aggregateQuery([
+    { $sort: { _id: -1 } },
+    { $limit: 1 },
+  ]);
+
+  if (lastObject.length) {
+    complaintNumber = parseInt(lastObject[0].complaintNumber) + 1;
+  } else {
+    complaintNumber = 1;
+  }
+  return complaintNumber;
 };
 
 exports.isOrder = async (applicableCriteriaList) => {

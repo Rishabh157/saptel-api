@@ -298,6 +298,13 @@ const get = {
     .optional(),
 };
 
+const checkBarcode = {
+  body: Joi.object().keys({
+    barcode: Joi.string().custom(commonValidation.objectId),
+    orderId: Joi.string().required(),
+    status: Joi.string().required(),
+  }),
+};
 /**
  * get a document
  */
@@ -458,4 +465,5 @@ module.exports = {
   getInventoryByStatus,
   orderDispatch,
   dtwOutwardInventory,
+  checkBarcode,
 };

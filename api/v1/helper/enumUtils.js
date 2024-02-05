@@ -145,6 +145,17 @@ const apiAppEnum = Object.freeze({
   dashboard: "dashboard",
   all: "all",
 });
+
+const complainCallTypeEnum = Object.freeze({
+  complain: "COMPLAIN",
+  inquiry: "INQUIRY",
+});
+
+const complainStatusEnum = Object.freeze({
+  open: "OPEN",
+  closed: "CLOSED",
+  pending: "PENDING",
+});
 const paymentType = Object.freeze({
   cheque: "CHEQUE",
   netBanking: "NETBANKING",
@@ -415,4 +426,6 @@ module.exports = {
   productStatus,
   approvalType,
   barcodeStatusType,
+  complainCallTypeEnum,
+  complainStatusEnum,
 };

@@ -697,6 +697,61 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+exports.checkBarcode = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let { barcode, orderId, status } = req.body;
+    console.log(req.body, "body");
+    let additionalQuery = [
+      {
+        $match: {
+          isDeleted: false,
+          _id: new mongoose.Types.ObjectId(barcode),
+        },
+      },
+    ];
+
+    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+
+    if (dataExist) {
+      console.log("here", orderId);
+      let orderInquiry = await orderInquiryService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(orderId),
+          barcodeId: { $in: [new mongoose.Types.ObjectId(barcode)] },
+        },
+        {
+          $set: {
+            status,
+          },
+        }
+      );
+      console.log(orderInquiry, "orderInquiry");
+      if (!orderInquiry) {
+        throw new ApiError(
+          httpStatus.OK,
+          "Barcode with this orderId not found"
+        );
+      } else {
+        return res.status(httpStatus.OK).send({
+          message: "Successfull.",
+          status: true,
+          data: dataExist,
+          code: "OK",
+          issue: null,
+        });
+      }
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //get api
 exports.getAllByGroup = async (req, res) => {
   try {

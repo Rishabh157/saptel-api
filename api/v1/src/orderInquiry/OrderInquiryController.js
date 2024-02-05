@@ -13,7 +13,9 @@ const schemeService = require("../scheme/SchemeService");
 const districtService = require("../district/DistrictService");
 const tehsilService = require("../tehsil/TehsilService");
 const pincodeService = require("../pincode/PincodeService");
+const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
+const barcodeService = require("../barCode/BarCodeService");
 const channelService = require("../channelMaster/ChannelMasterService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
@@ -896,6 +898,349 @@ exports.getById = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// get by mobilenumber
+
+exports.getByMobileNumber = async (req, res) => {
+  try {
+    let {
+      barcode,
+      contactNumber,
+      incomingNumber,
+      complaintNumber,
+      email,
+      orderNumber,
+    } = req.body;
+
+    let matchQuery = {};
+
+    if (contactNumber) {
+      matchQuery.mobileNo = contactNumber;
+    }
+    if (incomingNumber) {
+      matchQuery.incomingCallerNo = incomingNumber;
+    }
+    if (email) {
+      matchQuery.emailId = email;
+    }
+    if (orderNumber) {
+      matchQuery.orderNumber = orderNumber;
+    }
+    if (barcode) {
+      let barcodeData = await barcodeService.getOneByMultiField({
+        barcodeNumber: barcode,
+      });
+      if (barcodeData) {
+        matchQuery.barcodeId = {
+          $in: [new mongoose.Types.ObjectId(barcodeData?._id)],
+        };
+      }
+    }
+    if (complaintNumber) {
+      let complaintData = await complaintService.getOneByMultiField({
+        isDeleted: false,
+        complaintNumber,
+      });
+      if (complaintData) {
+        matchQuery.orderNumber = complaintData.orderNumber;
+      }
+    }
+
+    console.log(matchQuery, "matchQuery");
+    const isEmpty = (obj) => {
+      return Object.keys(obj).length === 0;
+    };
+    if (isEmpty(matchQuery)) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let isDataFound = await orderService.aggregateQuery([
+      {
+        $match: matchQuery,
+      },
+    ]);
+    if (!isDataFound.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+          "product_group",
+        ],
+      },
+    ];
+    if (isDataFound.length) {
+      additionalQuery.push({
+        $match: matchQuery,
+      });
+    }
+    let userRoleData = await getUserRoleData(req, orderService);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    let allOrderData = await orderService.aggregateQuery([
+      {
+        $match: {
+          isDeleted: false,
+          mobileNo: contactNumber,
+        },
+      },
+    ]);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields[0]) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: allowedFields[0],
+        allOrderData: allOrderData.length ? allOrderData : null,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============get DispositionTwo by Id  end================
 
 // get by id for dealer
