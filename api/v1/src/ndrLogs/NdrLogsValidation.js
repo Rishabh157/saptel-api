@@ -8,29 +8,18 @@ const commonValidation = require("../../helper/CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    dealerId: Joi.string().custom(commonValidation.objectId).required(),
-    details: Joi.array()
-      .items({
-        schemeId: Joi.string().custom(commonValidation.objectId).required(),
-        pincodes: Joi.array().items(Joi.string().required()),
-      })
-      .required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
-  }),
-};
-
-/**
- * update existing document
- */
-const update = {
-  params: Joi.object().keys({
-    id: Joi.required().custom(commonValidation.objectId),
-  }),
-  body: Joi.object().keys({
-    dealerId: Joi.string().custom(commonValidation.objectId).required(),
-    schemeId: Joi.string().custom(commonValidation.objectId).required(),
-    pincodes: Joi.array().items(Joi.string().required()),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    ndrId: Joi.string().custom(commonValidation.objectId).required(),
+    ndrCreatedById: Joi.string().custom(commonValidation.objectId).required(),
+    orderNumber: Joi.number().required(),
+    addressLine1: Joi.string().lowercase().required(),
+    addressLine2: Joi.string().lowercase().required(),
+    pincode: Joi.string().custom(commonValidation.objectId).required(),
+    district: Joi.string().custom(commonValidation.objectId).required(),
+    state: Joi.string().custom(commonValidation.objectId).required(),
+    callDisposition: Joi.string().custom(commonValidation.objectId).required(),
+    rtoReattemptReason: Joi.string(),
+    validCourierRemark: Joi.string().required(),
+    reAttemptDate: Joi.string(),
   }),
 };
 
@@ -82,68 +71,26 @@ const getAllFilter = {
  * get either all data or single document
  */
 const get = {
-  params: Joi.object().keys({
-    companyid: Joi.string().custom(commonValidation.objectId),
-  }),
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      dealerId: Joi.string().optional(),
     })
     .optional(),
 };
 
 /**
- * get a document
+ * get by id
  */
-const getDocument = {
+const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
-/**
- * get a document
- */
-const getDealerScheme = {
-  params: Joi.object().keys({
-    dealerid: Joi.string().custom(commonValidation.objectId),
-    companyid: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-const getDealerBySchemeAndPincode = {
-  params: Joi.object().keys({
-    pid: Joi.string(),
-    sid: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-/**
- * delete a document
- */
-const deleteDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-/**
- * change status of document
- */
-const changeStatus = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
 module.exports = {
   create,
   getAllFilter,
   get,
-  update,
-  getDocument,
-  getDealerScheme,
-  deleteDocument,
-  changeStatus,
-  getDealerBySchemeAndPincode,
+
+  getById,
 };

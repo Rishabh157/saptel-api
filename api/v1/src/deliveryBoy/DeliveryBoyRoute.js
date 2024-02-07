@@ -47,6 +47,15 @@ router.post(
   deliveryBoyController.add
 );
 /**
+ * change password
+ */
+router.put(
+  "/change-password",
+  authCheckDealerMiddleware,
+  validate(deliveryBoyValidation.changePasswordValid),
+  deliveryBoyController.changePassword
+);
+/**
  * update document
  */
 router.put(
@@ -64,6 +73,7 @@ router.put(
   validate(deliveryBoyValidation.changeStatus),
   deliveryBoyController.statusChange
 );
+
 /**
  * delete document
  */

@@ -23,6 +23,14 @@ router.put(
   orderController.updateOrderStatus
 );
 
+// assign order
+router.put(
+  "/assign-order",
+  authCheckMiddleware,
+  validate(orderValidation.assignOrder),
+  orderController.assignOrder
+);
+
 //===============get one document (if query) / all document===============
 router.get(
   "/",

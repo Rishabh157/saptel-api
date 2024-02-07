@@ -394,6 +394,49 @@ exports.statusChange = async (req, res) => {
   }
 };
 
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, deliveryBoyId } = req.body;
+
+    const deliveryBoy = await deliveryBoyService.getOneByMultiField({
+      _id: deliveryBoyId,
+      isDeleted: false,
+    }); // assuming you're using Passport.js or similar for authentication
+    let { _id, name, mobile, password, companyId, dealerId } = deliveryBoy;
+    // Check if the current password matches the user's password
+    const isMatch = await bcrypt.compare(currentPassword, password);
+    if (!isMatch) {
+      throw new ApiError(httpStatus.OK, `Current password not matched`);
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password in the database
+    deliveryBoy.password = hashedPassword;
+    await deliveryBoy.save();
+
+    return res.status(httpStatus.OK).send({
+      message: `Password change successful!`,
+      data: {
+        name: name,
+        mobile: mobile,
+      },
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 /**
  *login
  */
@@ -412,7 +455,7 @@ exports.login = async (req, res) => {
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Password!`);
     }
-    let { _id: userId, name, companyId } = dataFound;
+    let { _id: userId, name, companyId, dealerId } = dataFound;
 
     let token = await deliveryBoyTokenCreate(dataFound);
     if (!token) {
@@ -429,6 +472,7 @@ exports.login = async (req, res) => {
         userId: userId,
         mobile: mobile,
         name: name,
+        dealerId,
         companyId: companyId,
       },
       status: true,

@@ -27,6 +27,15 @@ router.get(
   validate(dealerSchemeValidation.getDealerScheme),
   dealerSchemeController.getDealerScheme
 );
+/**
+ * get documents by pincode and scheme
+ */
+router.get(
+  "/scheme/:sid/pincode/:pid",
+  authCheckMiddleware,
+  validate(dealerSchemeValidation.getDealerBySchemeAndPincode),
+  dealerSchemeController.getDealerBySchemeAndPincode
+);
 
 /**
  * get one document

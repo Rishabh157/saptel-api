@@ -221,6 +221,13 @@ const orderDispatch = {
   }),
 };
 
+const assignDeliveryBoy = {
+  body: Joi.object().keys({
+    orderId: Joi.string().custom(commonValidation.objectId).required(),
+    deliveryBoyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 const dealerInwardInventory = {
   body: Joi.object().keys({
     barcodedata: Joi.array().items({
@@ -300,9 +307,10 @@ const get = {
 
 const checkBarcode = {
   body: Joi.object().keys({
-    barcode: Joi.string().custom(commonValidation.objectId),
+    barcode: Joi.string().required(),
     orderId: Joi.string().required(),
     status: Joi.string().required(),
+    // dealerId: Joi.string().custom(commonValidation.objectId).required,
   }),
 };
 /**
@@ -466,4 +474,5 @@ module.exports = {
   orderDispatch,
   dtwOutwardInventory,
   checkBarcode,
+  assignDeliveryBoy,
 };

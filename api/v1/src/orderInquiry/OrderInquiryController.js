@@ -11,7 +11,9 @@ const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
 const schemeService = require("../scheme/SchemeService");
 const districtService = require("../district/DistrictService");
+const dealerService = require("../dealer/DealerService");
 const tehsilService = require("../tehsil/TehsilService");
+const warehouseService = require("../wareHouse/WareHouseService");
 const pincodeService = require("../pincode/PincodeService");
 const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
@@ -342,6 +344,78 @@ exports.updateOrderStatus = async (req, res) => {
   }
 };
 // =============update  end================
+
+// ========assign order ===============
+exports.assignOrder = async (req, res) => {
+  try {
+    let { dealerId, warehouseId, orderId } = req.body;
+
+    if (dealerId !== null) {
+      const isDealerExists = await dealerService.findCount({
+        _id: dealerId,
+        isDeleted: false,
+      });
+      if (!isDealerExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Dealer.");
+      }
+    }
+    if (warehouseId !== null) {
+      const isWarehouseExists = await warehouseService.findCount({
+        _id: warehouseId,
+        isDeleted: false,
+      });
+      if (!isWarehouseExists) {
+        throw new ApiError(httpStatus.OK, "Invalid company warehouse");
+      }
+    }
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: orderId,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+
+    let dataUpdated = await orderService
+      .getOneAndUpdate(
+        {
+          _id: orderId,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            assignDealerId: dealerId,
+            assignWarehouseId: warehouseId,
+          },
+        }
+      )
+      .then(async (ress) => {
+        console.log(ress);
+        await orderInquiryFlowService.createNewData({
+          ...ress,
+          orderId: orderId,
+          assignDealerId: dealerId,
+          assignWarehouseId: warehouseId,
+        });
+        return res.status(httpStatus.OK).send({
+          message: "Updated successfully.",
+          data: null,
+          status: true,
+          code: "OK",
+          issue: null,
+        });
+      });
+    //barcode, status, remark, dispositionOne, dispositionTwo
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 
 // =============get  start================
 exports.get = async (req, res) => {
@@ -1948,8 +2022,14 @@ exports.allFilterPaginationDileveryBoy = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
+    console.log(req.userData, "req.userData.Id");
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [
+        {
+          isDeleted: false,
+          delivery_boy_id: new mongoose.Types.ObjectId(req.userData.Id),
+        },
+      ],
     };
 
     /**

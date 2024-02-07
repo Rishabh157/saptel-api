@@ -222,6 +222,14 @@ const updateStatus = {
     orderId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
+
+const assignOrder = {
+  body: Joi.object().keys({
+    dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    warehouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+    orderId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
 const getComplainData = {
   body: Joi.object().keys({
     barcode: Joi.string().allow(""),
@@ -289,4 +297,5 @@ module.exports = {
   updateStatus,
   ecomValidation,
   getComplainData,
+  assignOrder,
 };

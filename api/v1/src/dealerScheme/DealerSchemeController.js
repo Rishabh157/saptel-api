@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const mongoose = require("mongoose");
 const dealerSchemeService = require("./DealerSchemeService");
+const warehouseService = require("../wareHouse/WareHouseService");
 const companyService = require("../company/CompanyService");
 const schemeService = require("../scheme/SchemeService");
 const dealerService = require("../dealer/DealerService");
@@ -644,6 +645,85 @@ exports.getDealerScheme = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: DealerScheme,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.getDealerBySchemeAndPincode = async (req, res) => {
+  try {
+    let { pid, sid } = req.params;
+    let cid = req.userData.companyId;
+    console.log(req.userData, "userData");
+    //if no default query then pass {}
+    let matchQuery = {
+      isDeleted: false,
+      isActive: true,
+      companyId: new mongoose.Types.ObjectId(cid),
+      schemeId: new mongoose.Types.ObjectId(sid),
+      pincodes: { $in: [pid] },
+    };
+
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealerData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          dealerName: {
+            $concat: [
+              { $arrayElemAt: ["$dealerData.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealerData.lastName", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $unset: ["dealerData"],
+      },
+    ];
+
+    let getAllScheme = await dealerSchemeService.aggregateQuery(
+      additionalQuery
+    );
+    console.log(cid);
+    let getAllCompanyWarehouse = await warehouseService.findAllWithQuery({
+      isDeleted: false,
+      isActive: true,
+      dealerId: null,
+      companyId: new mongoose.Types.ObjectId(cid),
+    });
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      dealerData: getAllScheme.length ? getAllScheme : null,
+      companyWarehouse: getAllCompanyWarehouse.length
+        ? getAllCompanyWarehouse
+        : null,
       code: "OK",
       issue: null,
     });

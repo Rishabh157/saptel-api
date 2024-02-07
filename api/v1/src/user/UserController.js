@@ -293,23 +293,22 @@ exports.update = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     let {
-      firstName,
-      lastName,
       userName,
       mobile,
-      email,
+
       password,
       companyId,
       branchId,
-      userDepartment,
-      userRole,
     } = req.body;
+    let deviceId = req.headers["device-id"];
+
     // if (req.userData.userType !== userEnum.user) {
     //   throw new ApiError(
     //     httpStatus.UNAUTHORIZED,
     //     `You do not have authority to access this.`
     //   );
     // }
+    console.log("ye wali");
 
     let idToBeSearch = req.params.id;
 
@@ -367,14 +366,53 @@ exports.updateUser = async (req, res) => {
         },
       }
     );
+    let {
+      _id: userId,
+      userType,
+      firstName,
 
-    if (dataUpdated) {
+      lastName,
+      email,
+      companyId: newCompanyId,
+      userRole,
+    } = dataUpdated;
+    let token = await tokenCreate(dataUpdated);
+    if (!token) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let refreshToken = await refreshTokenCreate(dataUpdated);
+    if (!refreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    await redisClient.set(userId + deviceId, token + "***" + refreshToken);
+    const redisValue = await redisClient.get(userId + deviceId);
+    if (redisValue) {
       return res.status(httpStatus.OK).send({
-        message: "Updated successfully.",
-        data: dataUpdated,
+        message: "updated successfully!",
+        data: {
+          token: token,
+          refreshToken: refreshToken,
+          userId: userId,
+          fullName: `${firstName} ${lastName}`,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          mobile: mobile,
+          userName: userName,
+          userType: userType,
+          userRole: userRole ? userRole : "ADMIN",
+          companyId: newCompanyId,
+          branchId: branchId,
+        },
         status: true,
-        code: "OK",
-        issue: null,
+        code: null,
       });
     } else {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);

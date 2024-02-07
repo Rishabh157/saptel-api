@@ -362,29 +362,29 @@ exports.update = async (req, res) => {
       dispositionThreeData[0]?.applicableCriteria
     );
 
-    let dealerServingPincodes = await dealerSurvingPincode(
-      pincodeLabel,
-      companyId,
-      schemeId
-    );
+    // let dealerServingPincodes = await dealerSurvingPincode(
+    //   pincodeLabel,
+    //   companyId,
+    //   schemeId
+    // );
 
-    let activeDealer = await getDealer(dealerServingPincodes, pincodeId);
-    let assignWarehouseId = null;
-    if (activeDealer === null) {
-      const servingWarehouseAtPincode = await getAssignWarehouse(
-        pincodeId,
-        companyId
-      );
-      assignWarehouseId = servingWarehouseAtPincode;
-    }
+    // let activeDealer = await getDealer(dealerServingPincodes, pincodeId);
+    // let assignWarehouseId = null;
+    // if (activeDealer === null) {
+    //   const servingWarehouseAtPincode = await getAssignWarehouse(
+    //     pincodeId,
+    //     companyId
+    //   );
+    //   assignWarehouseId = servingWarehouseAtPincode;
+    // }
     const orderNumber = await getOrderNumber();
 
     const orderInquiry = await orderService.createNewData({
       ...req.body,
       status: status,
       orderNumber: orderNumber,
-      assignDealerId: activeDealer,
-      assignWarehouseId: assignWarehouseId,
+      assignDealerId: null,
+      assignWarehouseId: null,
       approved: flag ? true : prepaidOrderFlag ? false : true,
       agentId: agentId,
       agentName: agentName,
@@ -398,8 +398,8 @@ exports.update = async (req, res) => {
       ...req.body,
       status: status,
       orderId: orderInquiry?._id,
-      assignDealerId: activeDealer,
-      assignWarehouseId: assignWarehouseId,
+      assignDealerId: null,
+      assignWarehouseId: null,
       approved: flag ? true : prepaidOrderFlag ? false : true,
       agentId: agentId,
       agentName: agentName,

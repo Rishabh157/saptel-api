@@ -2,9 +2,8 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const complainService = require("./ComplainService");
-const complainLogsService = require("../complainLogs/ComplainLogsService");
-const { searchKeys } = require("./ComplainSchema");
+const ndrLogsService = require("./NdrLogsService");
+const { searchKeys } = require("./NdrLogsSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -17,134 +16,37 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { default: mongoose } = require("mongoose");
-const {
-  complainStatusEnum,
-  complainCallTypeEnum,
-} = require("../../helper/enumUtils");
-const { getComplaintNumber } = require("../call/CallHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
     let {
+      ndrId,
       orderNumber,
-      orderId,
-      schemeId,
-      schemeName,
-      schemeCode,
-      orderStatus,
-      courierStatus,
-      callType,
-      icOne,
-      status,
-      icTwo,
-      icThree,
-      remark,
+      addressLine1,
+      addressLine2,
+      pincode,
+      district,
+      state,
+      callDisposition,
+      rtoReattemptReason,
+      validCourierRemark,
+      reAttemptDate,
     } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await complainService.getOneByMultiField({
-      callType: complainCallTypeEnum.complain,
-      status: complainStatusEnum.open,
-      orderNumber,
-      icOne,
-    });
-    if (dataExist) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Can not set another complain with same disposition"
-      );
-    }
-    //------------------create data-------------------
-    let complaintNumber = await getComplaintNumber();
-    let dataCreated = await complainService.createNewData({
-      complaintNumber,
-      ...req.body,
-    });
-
-    if (dataCreated) {
-      await complainLogsService.createNewData({
-        complainId: dataCreated._id,
-        complaintById: req.userData.Id,
-
-        ...req.body,
-      });
-      return res.status(httpStatus.CREATED).send({
-        message: "Added successfully.",
-        data: dataCreated,
-        status: true,
-        code: null,
-        issue: null,
-      });
-    } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-//update start
-exports.update = async (req, res) => {
-  try {
-    let {
-      orderNumber,
-      orderId,
-      schemeId,
-      schemeName,
-      schemeCode,
-      orderStatus,
-      courierStatus,
-      callType,
-      icOne,
-      icTwo,
-      icThree,
-      remark,
-    } = req.body;
-
-    let idToBeSearch = req.params.id;
-    let dataExist = await complainService.isExists([]);
+    let dataExist = await ndrLogsService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    //------------------Find data-------------------
-    let datafound = await complainService.getOneByMultiField({
-      _id: idToBeSearch,
-    });
-    if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Complain not found.`);
-    }
-    let complaintNumber = await getComplaintNumber();
+    //------------------create data-------------------
+    let dataCreated = await ndrLogsService.createNewData({ ...req.body });
 
-    let dataUpdated = await complainService.getOneAndUpdate(
-      {
-        _id: idToBeSearch,
-        isDeleted: false,
-      },
-      {
-        $set: {
-          complaintNumber,
-          ...req.body,
-        },
-      }
-    );
-
-    if (dataUpdated) {
-      await complainLogsService.createNewData({
-        complainId: dataCreated._id,
-        complaintById: req.userData.Id,
-        ...req.body,
-      });
+    if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
-        message: "Updated successfully.",
-        data: dataUpdated,
+        message: "Added successfully.",
+        data: dataCreated,
         status: true,
         code: null,
         issue: null,
@@ -224,7 +126,13 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["orderId", "schemeId", "icOne", "icTwo", "icThree"];
+    let objectIdFields = [
+      "ndrId",
+      "pincode",
+      "district",
+      "state",
+      "callDisposition",
+    ];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -259,30 +167,14 @@ exports.allFilterPagination = async (req, res) => {
     let additionalQuery = [
       {
         $lookup: {
-          from: "initialcallthrees",
-          localField: "icThree",
+          from: "states",
+          localField: "stateId",
           foreignField: "_id",
-          as: "initialcallThreeData",
+          as: "stateData",
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $lookup: {
-          from: "initialcalltwos",
-          localField: "icTwo",
-          foreignField: "_id",
-          as: "initialcallTwoData",
-          pipeline: [
-            {
-              $project: {
-                initialCallName: 1,
+                stateName: 1,
               },
             },
           ],
@@ -290,14 +182,44 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
-          from: "initialcallones",
-          localField: "icOne",
+          from: "districts",
+          localField: "districtId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "districtData",
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "ndrdispositions",
+          localField: "callDisposition",
+          foreignField: "_id",
+          as: "ndrData",
+          pipeline: [
+            {
+              $project: {
+                ndrDisposition: 1,
               },
             },
           ],
@@ -306,7 +228,7 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "complaintById",
+          localField: "ndrCreatedById",
           foreignField: "_id",
           as: "userData",
           pipeline: [
@@ -321,16 +243,19 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
           },
-          initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
           },
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
           },
-          complaintbyLabel: {
+          callDispositionLabel: {
+            $arrayElemAt: ["$ndrData.ndrDisposition", 0],
+          },
+          ndrCreatedByLabel: {
             $concat: [
               { $arrayElemAt: ["$userData.firstName", 0] },
               " ",
@@ -341,9 +266,10 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $unset: [
-          "initialcallTwoData",
-          "initialcallOneData",
-          "initialcallThreeData",
+          "stateData",
+          "districtData",
+          "pincodeData",
+          "ndrData",
           "userData",
         ],
       },
@@ -358,7 +284,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await complainService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await ndrLogsService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -377,7 +303,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await complainService.aggregateQuery(finalAggregateQuery);
+    let result = await ndrLogsService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -412,30 +338,14 @@ exports.get = async (req, res) => {
       { $match: matchQuery },
       {
         $lookup: {
-          from: "initialcallthrees",
-          localField: "icThree",
+          from: "states",
+          localField: "stateId",
           foreignField: "_id",
-          as: "initialcallThreeData",
+          as: "stateData",
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $lookup: {
-          from: "initialcalltwos",
-          localField: "icTwo",
-          foreignField: "_id",
-          as: "initialcallTwoData",
-          pipeline: [
-            {
-              $project: {
-                initialCallName: 1,
+                stateName: 1,
               },
             },
           ],
@@ -443,14 +353,44 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
-          from: "initialcallones",
-          localField: "icOne",
+          from: "districts",
+          localField: "districtId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "districtData",
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "ndrdispositions",
+          localField: "callDisposition",
+          foreignField: "_id",
+          as: "ndrData",
+          pipeline: [
+            {
+              $project: {
+                ndrDisposition: 1,
               },
             },
           ],
@@ -459,7 +399,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "complaintById",
+          localField: "ndrCreatedById",
           foreignField: "_id",
           as: "userData",
           pipeline: [
@@ -474,16 +414,19 @@ exports.get = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
           },
-          initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
           },
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
           },
-          complaintbyLabel: {
+          callDispositionLabel: {
+            $arrayElemAt: ["$ndrData.ndrDisposition", 0],
+          },
+          ndrCreatedByLabel: {
             $concat: [
               { $arrayElemAt: ["$userData.firstName", 0] },
               " ",
@@ -494,15 +437,16 @@ exports.get = async (req, res) => {
       },
       {
         $unset: [
-          "initialcallTwoData",
-          "initialcallOneData",
-          "initialcallThreeData",
+          "stateData",
+          "districtData",
+          "pincodeData",
+          "ndrData",
           "userData",
         ],
       },
     ];
 
-    let dataExist = await complainService.aggregateQuery(additionalQuery);
+    let dataExist = await ndrLogsService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -531,37 +475,19 @@ exports.getById = async (req, res) => {
     let idToBeSearch = req.params.id;
     let additionalQuery = [
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(idToBeSearch),
-          isDeleted: false,
-        },
+        _id: new mongoose.Types.ObjectId(idToBeSearch),
+        isDeleted: false,
       },
       {
         $lookup: {
-          from: "initialcallthrees",
-          localField: "icThree",
+          from: "states",
+          localField: "stateId",
           foreignField: "_id",
-          as: "initialcallThreeData",
+          as: "stateData",
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $lookup: {
-          from: "initialcalltwos",
-          localField: "icTwo",
-          foreignField: "_id",
-          as: "initialcallTwoData",
-          pipeline: [
-            {
-              $project: {
-                initialCallName: 1,
+                stateName: 1,
               },
             },
           ],
@@ -569,14 +495,44 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "initialcallones",
-          localField: "icOne",
+          from: "districts",
+          localField: "districtId",
           foreignField: "_id",
-          as: "initialcallOneData",
+          as: "districtData",
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "ndrdispositions",
+          localField: "callDisposition",
+          foreignField: "_id",
+          as: "ndrData",
+          pipeline: [
+            {
+              $project: {
+                ndrDisposition: 1,
               },
             },
           ],
@@ -585,7 +541,7 @@ exports.getById = async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "complaintById",
+          localField: "ndrCreatedById",
           foreignField: "_id",
           as: "userData",
           pipeline: [
@@ -600,16 +556,19 @@ exports.getById = async (req, res) => {
       },
       {
         $addFields: {
-          initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
           },
-          initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
           },
-          initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
           },
-          complaintbyLabel: {
+          callDispositionLabel: {
+            $arrayElemAt: ["$ndrData.ndrDisposition", 0],
+          },
+          ndrCreatedByLabel: {
             $concat: [
               { $arrayElemAt: ["$userData.firstName", 0] },
               " ",
@@ -620,14 +579,15 @@ exports.getById = async (req, res) => {
       },
       {
         $unset: [
-          "initialcallTwoData",
-          "initialcallOneData",
-          "initialcallThreeData",
+          "stateData",
+          "districtData",
+          "pincodeData",
+          "ndrData",
           "userData",
         ],
       },
     ];
-    let dataExist = await complainService.aggregateQuery(additionalQuery);
+    let dataExist = await ndrLogsService.aggregateQuery(additionalQuery);
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -640,67 +600,6 @@ exports.getById = async (req, res) => {
         issue: null,
       });
     }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-//delete api
-exports.deleteDocument = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    if (!(await complainService.getOneByMultiField({ _id }))) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-    let deleted = await complainService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
-    return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
-      data: null,
-      code: null,
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-//statusChange
-exports.statusChange = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    let dataExist = await complainService.getOneByMultiField({ _id });
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-    let isActive = dataExist.isActive ? false : true;
-
-    let statusChanged = await complainService.getOneAndUpdate(
-      { _id },
-      { isActive }
-    );
-    if (!statusChanged) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
-    return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
-      data: statusChanged,
-      code: null,
-      issue: null,
-    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

@@ -105,7 +105,18 @@ const loginValid = {
     })
     .required(),
 };
-
+/**
+ * changePassword
+ */
+const changePasswordValid = {
+  body: Joi.object()
+    .keys({
+      currentPassword: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      deliveryBoyId: Joi.string().custom(commonValidation.objectId).required(),
+    })
+    .required(),
+};
 /**
  * change status of document
  */
@@ -122,4 +133,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   loginValid,
+  changePasswordValid,
 };

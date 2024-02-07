@@ -88,6 +88,8 @@ const callCenterMasterServiceRoute = require("./src/callCenterMaster/CallCenterM
 const ndrDispositionServiceRoute = require("./src/ndrDisposition/NdrDispositionRoute");
 const complainServiceRoute = require("./src/complain/ComplainRoute");
 const complainLogsServiceRoute = require("./src/complainLogs/ComplainLogsRoute");
+const ndrModuleServiceRoute = require("./src/ndrModule/NdrModuleRoute");
+const ndrLogsModuleServiceRoute = require("./src/ndrLogs/NdrLogsRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -453,6 +455,14 @@ const defaultRoutes = [
   {
     path: "/complaint-logs",
     route: complainLogsServiceRoute,
+  },
+  {
+    path: "/ndr",
+    route: ndrModuleServiceRoute,
+  },
+  {
+    path: "/ndr-logs",
+    route: ndrLogsModuleServiceRoute,
   },
 ];
 // orderRoute;

@@ -8,6 +8,16 @@ const {
   authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
 
+/**
+ * return true if barcode is valid
+ */
+router.post(
+  "/check-barcode-and-update-status",
+  authCheckDeliveryBoyMiddleware,
+  validate(barCodeValidation.checkBarcode),
+  barCodeController.checkBarcode
+);
+
 //-----------------------------------------------------
 /**
  * get one document (if query) / all documents
@@ -17,16 +27,6 @@ router.get(
   authCheckMiddleware,
   validate(barCodeValidation.get),
   barCodeController.get
-);
-
-/**
- * return true if barcode is valid
- */
-router.post(
-  "/check-barcode-and-update-status",
-  authCheckDeliveryBoyMiddleware,
-  validate(barCodeValidation.checkBarcode),
-  barCodeController.checkBarcode
 );
 
 /**
@@ -173,9 +173,9 @@ router.put(
 
 // order dispatch from dealer warehouse
 router.put(
-  "/dealer/order-dispatch",
+  "/dealer/assign-delivery-boy/order",
   authCheckDealerMiddleware,
-  validate(barCodeValidation.orderDispatch),
+  validate(barCodeValidation.assignDeliveryBoy),
   barCodeController.dealerOrderDispatch
 );
 
