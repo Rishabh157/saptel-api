@@ -283,7 +283,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, barCodeFlowService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
@@ -372,7 +372,7 @@ exports.get = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    let userRoleData = await getUserRoleData(req, barCodeFlowService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
@@ -455,7 +455,7 @@ exports.getById = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    let userRoleData = await getUserRoleData(req, barCodeFlowService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,

@@ -493,7 +493,7 @@ exports.allFilterPagination = async (req, res) => {
       },
     });
 
-    let userRoleData = await getUserRoleData(req, purchaseOrderService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.purchaseOrder,
       userRoleData,
@@ -601,7 +601,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, purchaseOrderService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.purchaseOrder,
       userRoleData,
@@ -880,7 +880,7 @@ exports.getById = async (req, res) => {
         $unset: ["vendors_name", "warehouses_name", "purchaseOrders"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, purchaseOrderService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.purchaseOrder,
       userRoleData,

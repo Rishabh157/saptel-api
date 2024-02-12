@@ -135,7 +135,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let userRoleData = await getUserRoleData(req, artistService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.artist,
       userRoleData,
@@ -170,7 +170,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let _id = req.params.id;
-    let userRoleData = await getUserRoleData(req, artistService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.artist,
       userRoleData,
@@ -308,7 +308,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, artistService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.artist,
       userRoleData,

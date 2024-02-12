@@ -34,11 +34,20 @@ const tapeType = Object.freeze({
 const complaintType = Object.freeze({
   complaint: "COMPLAINT",
   inquiry: "INQUIRY",
+  feedback: "FEEDBACK",
 });
 
 const slotType = Object.freeze({
   fixed: "FIXED",
   flexible: "FLEXIBLE",
+});
+
+const ndrRtoAttemptEnum = Object.freeze({
+  customerWillConnect: "CUSTOMER_WILL_CONNECT",
+  attempt: "ATTEMPT",
+  rto: "RTO",
+  hold: "HOLD",
+  cancel: "CANCEL",
 });
 
 const slotDaysType = Object.freeze({
@@ -62,22 +71,47 @@ const companyEnum = Object.freeze({
 });
 
 const smsType = Object.freeze({
-  alcobanSms: "ALCOBAN SMS",
-  complaintCCA_CNC: "CUSTOMER NOT CONTACTABLE",
-  complaintCCA_OWEI: "COMPLAINT CCA-ORDERS WITH EMAIL ID",
-  complaintCCA_OWNEI: "COMPLAINT CCA-ORDERS WITHOUT EMAIL ID",
-  complaintORC: "CREATE ORDER REFUND-CHEQUE",
-  complaintORN: "CREATE ORDER REFUND-NEFT",
-  complaintRPIM: "CREATE RPI-MANUAL",
-  complaintRPI: "CREATE RPI-TV-SHOP COURIER ASSIGNED",
-  complaintSCD: "COMPLAINT SERVICE DETAILS",
-  createComplant: "CREATE COMPLAINT",
-  dealerDelivered: "DEALER DELIVERED",
-  dealerDeliveredBI: "DEALER DELIVERED BOY INTRANSIT",
-  dispositionMsg: "DISPOSITION MESSAGE",
+  alcobanSms: "ALCOBAN_SMS",
+  complaintCCA_CNC: "COMPLAINT_CCA-CUSTOMER_NOT_CONTACTABLE",
+  complaintCCA_OWEI: "COMPLAINT_CCA-ORDERS_WITH_EMAIL_ID",
+  complaintCCA_OWNEI: "COMPLAINT_CCA-ORDERS_WITHOUT_EMAIL_ID",
+  complaintORC: "COMPLAINT_ORDER_REFUNDED-CHEQUE",
+  complaintORN: "COMPLAINT_ORDER_REFUNDED-NEFT",
+  complaintRPIM: "COMPLAINT_RPI-MANUAL",
+  complaintRPI: "COMPLAINT_RPI-TV-SHOP_COURIER_ASSIGNED",
+  complaintSCD: "COMPLAINT_SERVICE_CENTRE_DETAILS",
+  createComplant: "CREATE_COMPLAINT",
+  dealerDelivered: "DEALER_DELIVERED",
+  dealerDeliveredBI: "DEALER_DELIVERED_BOY_INTRANSIT",
+  dealer_intransite: "DEALER_INTRANSIT",
+  default: "DEFAULT",
+  dhundhar: "DHUNDHAR",
+  dispositionMsg: "DISPOSITION_MESSAGE",
   hold: "HOLD",
-  inTransitDB: "IN-TRANSIT-DELIVERY-BOY",
-  invoiceSent: "INVOICE SENT",
+  inTransitDB: "IN-TRANSIT_DELIVERY_BOY",
+  invoiceSent: "INVOICE_SENT",
+  nonConnect: "NON-CONNECT",
+  orderCancellationAgentId: "ORDER_CANCELLATION-CANCELLATION_BY_AN_AGENT_ID",
+  orderCancellationOutOfStock: "ORDER_CANCELLATION-OUT_OF_STOCK",
+  orderCreation: "ORDER_CREATION",
+  orderCreationTest: "ORDER_CREATION_TEST",
+  orderDelivered: "ORDER_DELIVERED",
+  orderMarkedNDR: "ORDER_MARKED_NDR",
+  orderShippedCOD: "ORDER_SHIPPED_COD",
+  orderShippedPrepaid: "ORDER_SHIPPED_PREPAID",
+  orderShippingSlaBreach: "ORDER_SHIPPING_SLA_BREACH",
+  orderVerification: "ORDER_VERIFICATION",
+  orderManualSms: "ORDER-MANUAL_SMS",
+  productReceived: "PRODUCT_RECEIVED",
+  refundChequePrepared: "REFUND_CHEQUE_PREPARED",
+  refundProcessed: "REFUND_PROCESSED",
+  replacementOrderCreat: "REPLACEMENT_ORDER_CREAT",
+  replacementOrderShipp: "REPLACEMENT_ORDER_SHIPP",
+  replacementProcessed: "REPLACEMENT_PROCESSED",
+  sendCourierDetails: "SEND_COURIER_DETAILS",
+  test: "TEST",
+  tribeslimSms: "TRIBESLIM_SMS",
+  urgentOrder: "URGENT_ORDER",
 });
 
 const emailType = Object.freeze({
@@ -147,7 +181,7 @@ const apiAppEnum = Object.freeze({
 });
 
 const complainCallTypeEnum = Object.freeze({
-  complain: "COMPLAIN",
+  complaint: "COMPLAINT",
   inquiry: "INQUIRY",
 });
 
@@ -428,4 +462,5 @@ module.exports = {
   barcodeStatusType,
   complainCallTypeEnum,
   complainStatusEnum,
+  ndrRtoAttemptEnum,
 };

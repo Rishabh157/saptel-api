@@ -18,6 +18,16 @@ router.post(
   barCodeController.checkBarcode
 );
 
+/**
+ * return true if barcode is valid
+ */
+router.put(
+  "/dealer/check-barcode-and-update-status",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.checkBarcode),
+  barCodeController.checkBarcodeDealerApp
+);
+
 //-----------------------------------------------------
 /**
  * get one document (if query) / all documents

@@ -279,7 +279,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, dealersCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.dealerCategory,
       userRoleData,
@@ -324,7 +324,7 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-    let userRoleData = await getUserRoleData(req, dealersCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.dealerCategory,
       userRoleData,
@@ -360,7 +360,7 @@ exports.getById = async (req, res) => {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
 
-    let userRoleData = await getUserRoleData(req, dealersCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.dealerCategory,
       userRoleData,

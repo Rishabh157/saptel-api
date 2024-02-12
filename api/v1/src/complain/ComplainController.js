@@ -68,7 +68,7 @@ exports.add = async (req, res) => {
       await complainLogsService.createNewData({
         complainId: dataCreated._id,
         complaintById: req.userData.Id,
-
+        complaintNumber,
         ...req.body,
       });
       return res.status(httpStatus.CREATED).send({
@@ -121,7 +121,6 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Complain not found.`);
     }
-    let complaintNumber = await getComplaintNumber();
 
     let dataUpdated = await complainService.getOneAndUpdate(
       {
@@ -130,7 +129,6 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
-          complaintNumber,
           ...req.body,
         },
       }
@@ -138,8 +136,9 @@ exports.update = async (req, res) => {
 
     if (dataUpdated) {
       await complainLogsService.createNewData({
-        complainId: dataCreated._id,
+        complainId: dataUpdated._id,
         complaintById: req.userData.Id,
+        complaintNumber: dataUpdated?.complaintNumber,
         ...req.body,
       });
       return res.status(httpStatus.CREATED).send({

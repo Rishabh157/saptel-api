@@ -409,7 +409,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, pincodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.pincode,
       userRoleData,
@@ -529,7 +529,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, pincodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.pincode,
       userRoleData,
@@ -646,7 +646,7 @@ exports.getById = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, pincodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.pincode,
       userRoleData,
@@ -691,7 +691,7 @@ exports.getPincode = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, pincodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.pincode,
       userRoleData,

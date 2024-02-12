@@ -353,7 +353,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, schemeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.scheme,
       userRoleData,
@@ -436,7 +436,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, schemeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.scheme,
       userRoleData,

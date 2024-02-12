@@ -261,7 +261,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, initialCallThreeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.initialCallerThree,
       userRoleData,
@@ -352,7 +352,7 @@ exports.getById = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, initialCallThreeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.initialCallerThree,
       userRoleData,
@@ -556,7 +556,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, initialCallThreeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.initialCallerThree,
       userRoleData,

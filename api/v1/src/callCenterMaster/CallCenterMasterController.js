@@ -257,7 +257,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, callCenterMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.callCenter,
       userRoleData,
@@ -301,7 +301,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let userRoleData = await getUserRoleData(req, callCenterMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.callCenter,
       userRoleData,

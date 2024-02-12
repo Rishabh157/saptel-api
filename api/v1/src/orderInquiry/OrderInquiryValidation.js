@@ -200,6 +200,51 @@ const getAllFilter = {
 };
 
 /**
+ * filter and pagination api
+ */
+const getAllFilterDeliveryBoy = {
+  body: Joi.object().keys({
+    deliveryBoyId: Joi.string().custom(commonValidation.objectId).optional(),
+    params: Joi.array().items(Joi.string().required()),
+    searchValue: Joi.string().allow(""),
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+    rangeFilterBy: Joi.object()
+      .keys({
+        rangeFilterKey: Joi.string().allow(""),
+        rangeInitial: Joi.string().allow(""),
+        rangeEnd: Joi.string().allow(""),
+      })
+      .default({})
+      .optional(),
+    orderBy: Joi.string().allow(""),
+    orderByValue: Joi.number().valid(1, -1).allow(""),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+    filterBy: Joi.array().items(
+      Joi.object().keys({
+        fieldName: Joi.string().allow(""),
+        value: Joi.alternatives().try(
+          Joi.string().allow(""),
+          Joi.number().allow(""),
+          Joi.boolean().allow(""),
+          Joi.array().items(Joi.string()).default([]),
+          Joi.array().items(Joi.number()).default([]),
+          Joi.array().items(Joi.boolean()).default([]),
+          Joi.array().default([])
+        ),
+      })
+    ),
+    isPaginationRequired: Joi.boolean().default(true).optional(),
+  }),
+};
+
+/**
  * get either all data or single document
  */
 const get = {
@@ -228,6 +273,13 @@ const assignOrder = {
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
     warehouseId: Joi.string().custom(commonValidation.objectId).allow(null),
     orderId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
+const assignOrderToDeliveryBoy = {
+  body: Joi.object().keys({
+    orderId: Joi.string().custom(commonValidation.objectId).required(),
+    deliveryBoyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 const getComplainData = {
@@ -298,4 +350,6 @@ module.exports = {
   ecomValidation,
   getComplainData,
   assignOrder,
+  assignOrderToDeliveryBoy,
+  getAllFilterDeliveryBoy,
 };

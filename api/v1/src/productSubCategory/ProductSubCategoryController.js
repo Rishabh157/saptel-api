@@ -301,7 +301,7 @@ exports.allFilterPagination = async (req, res) => {
     }
     finalAggregateQuery.push(...additionalQuery);
 
-    let userRoleData = await getUserRoleData(req, productSubCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.productSubCategory,
       userRoleData,
@@ -372,7 +372,7 @@ exports.get = async (req, res) => {
       { $unset: ["product_category", "app_taxes"] },
     ];
 
-    let userRoleData = await getUserRoleData(req, productSubCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.productSubCategory,
       userRoleData,
@@ -436,7 +436,7 @@ exports.getById = async (req, res) => {
       { $unset: ["product_category", "app_taxes"] },
     ];
 
-    let userRoleData = await getUserRoleData(req, productSubCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.productSubCategory,
       userRoleData,

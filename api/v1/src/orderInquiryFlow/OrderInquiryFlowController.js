@@ -442,7 +442,7 @@ exports.get = async (req, res) => {
         ],
       },
     ];
-    let userRoleData = await getUserRoleData(req, orderInquiryFlowService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.order_inquiry_flow,
       userRoleData,
@@ -705,7 +705,7 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
-    let userRoleData = await getUserRoleData(req, orderInquiryFlowService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.order_inquiry_flow,
       userRoleData,
@@ -1094,7 +1094,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, orderInquiryFlowService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.order,
       userRoleData,

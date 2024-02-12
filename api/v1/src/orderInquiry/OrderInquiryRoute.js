@@ -16,6 +16,8 @@ router.put(
   orderController.updateOrderStatus
 );
 
+// dealer app deliver order
+
 router.put(
   "/dealer/update-order-status",
   authCheckDealerMiddleware,
@@ -29,6 +31,14 @@ router.put(
   authCheckMiddleware,
   validate(orderValidation.assignOrder),
   orderController.assignOrder
+);
+
+// assign order for dealer app
+router.put(
+  "/dealer/assign-order",
+  authCheckDealerMiddleware,
+  validate(orderValidation.assignOrderToDeliveryBoy),
+  orderController.assignOrderToDeliveryBoy
 );
 
 //===============get one document (if query) / all document===============
@@ -70,6 +80,14 @@ router.post(
   "/get-dileveryboy-order",
   authCheckDeliveryBoyMiddleware,
   orderController.allFilterPaginationDileveryBoy
+);
+
+// dealer app
+router.post(
+  "/dealer/get-dileveryboy-order",
+  authCheckDealerMiddleware,
+  validate(orderValidation.getAllFilterDeliveryBoy),
+  orderController.allFilterPaginationDileveryBoyForDealerPanel
 );
 
 //===============get all pagination filter===============

@@ -577,7 +577,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, userService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.user,
       userRoleData,
@@ -661,7 +661,7 @@ exports.get = async (req, res) => {
         $unset: ["branch_data"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, userService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.user,
       userRoleData,
@@ -729,7 +729,7 @@ exports.getById = async (req, res) => {
         $unset: ["branch_data"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, userService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.user,
       userRoleData,

@@ -657,7 +657,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, dealerService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -869,7 +869,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, dealerService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -1079,7 +1079,7 @@ exports.getByPincode = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, dealerService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -1283,7 +1283,7 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
-    let userRoleData = await getUserRoleData(req, dealerService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,

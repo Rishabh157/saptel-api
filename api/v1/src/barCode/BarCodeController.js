@@ -385,7 +385,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, barCodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
@@ -668,7 +668,7 @@ exports.get = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    let userRoleData = await getUserRoleData(req, barCodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
@@ -702,19 +702,111 @@ exports.checkBarcode = async (req, res) => {
   try {
     //if no default query then pass {}
     console.log("here");
-    let { barcode, orderId, status, dealerId } = req.body;
+    let { barcode, orderId, status } = req.body;
     console.log(req.body, "body");
     let additionalQuery = [
       {
         $match: {
           isDeleted: false,
           barcodeNumber: barcode,
-          dealerId: req.userData.dealerId,
+          dealerId: new mongoose.Types.ObjectId(req.userData.dealerId),
         },
       },
     ];
 
     let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+    if (!dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Barcode not found");
+    }
+    let orderInquiryData = await orderInquiryService.getOneByMultiField({
+      isDeleted: false,
+      _id: orderId,
+    });
+    if (!orderInquiryData) {
+      throw new ApiError(httpStatus.OK, "Order not found");
+    }
+    if (
+      dataExist[0]?.productGroupId?.toString() !==
+      orderInquiryData?.productGroupId?.toString()
+    ) {
+      throw new ApiError(httpStatus.OK, "Invalid Barcode");
+    }
+
+    if (dataExist) {
+      console.log("here", orderId);
+      let orderInquiry = await orderInquiryService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(orderId),
+        },
+        {
+          $set: {
+            status,
+          },
+          $push: {
+            barcodeId: dataExist[0]?._id,
+          },
+        }
+      );
+
+      console.log(orderInquiry, "orderInquiry");
+      if (!orderInquiry) {
+        throw new ApiError(
+          httpStatus.OK,
+          "Barcode with this orderId not found"
+        );
+      } else {
+        await barCodeService.getOneAndUpdate(
+          {
+            isDeleted: false,
+            barcodeNumber: barcode,
+            dealerId: new mongoose.Types.ObjectId(req.userData.dealerId),
+          },
+          {
+            $set: {
+              status: barcodeStatusType.delivered,
+            },
+          }
+        );
+        return res.status(httpStatus.OK).send({
+          message: "Successfull.",
+          status: true,
+          data: dataExist,
+          code: "OK",
+          issue: null,
+        });
+      }
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// scan barcode and deliver dealer app
+
+exports.checkBarcodeDealerApp = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    console.log("here");
+    let { barcode, orderId, status } = req.body;
+    console.log(req.body, "body");
+    console.log(req.userData);
+    let additionalQuery = [
+      {
+        $match: {
+          isDeleted: false,
+          barcodeNumber: barcode,
+          dealerId: new mongoose.Types.ObjectId(req.userData.Id),
+        },
+      },
+    ];
+    console.log(additionalQuery, "additionalQuery");
+    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
+    console.log(dataExist, "dataExist");
     if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Barcode not found");
     }
@@ -754,6 +846,18 @@ exports.checkBarcode = async (req, res) => {
           "Barcode with this orderId not found"
         );
       } else {
+        await barCodeService.getOneAndUpdate(
+          {
+            isDeleted: false,
+            barcodeNumber: barcode,
+            dealerId: new mongoose.Types.ObjectId(req.userData.Id),
+          },
+          {
+            $set: {
+              status: barcodeStatusType.delivered,
+            },
+          }
+        );
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
           status: true,
@@ -772,6 +876,7 @@ exports.checkBarcode = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //get api
 exports.getAllByGroup = async (req, res) => {
   try {
@@ -905,7 +1010,7 @@ exports.getById = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    let userRoleData = await getUserRoleData(req, barCodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
@@ -1524,7 +1629,7 @@ exports.getInventory = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, barCodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
@@ -1767,7 +1872,7 @@ exports.getInventoryByStatus = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, barCodeService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,

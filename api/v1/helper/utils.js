@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../../config/config");
 const redisClient = require("../../../database/redis");
+const userAccessService = require("../src/userAccess/UserAccessService");
 
 exports.combineObjects = (objectsArray) => {
   let arra = objectsArray.reduce((acc, el) => {
@@ -35,7 +36,7 @@ exports.getFieldsToDisplay = (moduleName, userRoleData, actionName) => {
   return fields;
 };
 
-exports.getUserRoleData = async (req, service) => {
+exports.getUserRoleData = async (req) => {
   let token = req.headers["x-access-token"];
   const decoded = jwt.verify(token, config.jwt_secret);
   let userId = decoded?.Id;
@@ -43,8 +44,10 @@ exports.getUserRoleData = async (req, service) => {
 
   let matchQueryUser = { isDeleted: false, userId: userId };
   let matchQueryUserRole = { isDeleted: false, userRoleId: userRoleId };
-  let dataExistWithUserId = await service.findAllWithQuery(matchQueryUser);
-  let dataExistWithUserRole = await service.findAllWithQuery(
+  let dataExistWithUserId = await userAccessService.findAllWithQuery(
+    matchQueryUser
+  );
+  let dataExistWithUserRole = await userAccessService.findAllWithQuery(
     matchQueryUserRole
   );
 

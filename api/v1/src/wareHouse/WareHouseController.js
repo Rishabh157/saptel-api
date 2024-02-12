@@ -456,7 +456,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, wareHouseService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -742,7 +742,7 @@ exports.allFilterPaginationWarehouse = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, wareHouseService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -922,7 +922,7 @@ exports.getWarehouse = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, wareHouseService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -1265,7 +1265,7 @@ exports.getDealerWarehouse = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, wareHouseService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -1440,7 +1440,7 @@ exports.getByDealerId = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, wareHouseService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,
@@ -1779,7 +1779,7 @@ exports.getById = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, wareHouseService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.wareHouse,
       userRoleData,

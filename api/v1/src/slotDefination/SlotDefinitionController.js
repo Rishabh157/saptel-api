@@ -385,7 +385,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, slotMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.slotManagement,
       userRoleData,
@@ -495,7 +495,7 @@ exports.get = async (req, res) => {
         $unset: ["channel_data", "tape_data", "channelGroup_data"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, slotMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.slotManagement,
       userRoleData,
@@ -600,7 +600,7 @@ exports.getById = async (req, res) => {
         $unset: ["channel_data", "tape_data", "channelGroup_data"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, slotMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.slotManagement,
       userRoleData,

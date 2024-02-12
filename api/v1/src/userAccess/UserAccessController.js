@@ -317,6 +317,7 @@ exports.get = async (req, res) => {
       userId: userId,
       isDeleted: false,
     });
+    console.log(isUserExists, userId, userRoleId, "isUserExists");
     let matchQueryUser = {};
     if (userId && isUserExists) {
       matchQueryUser["userId"] = userId;
@@ -328,7 +329,7 @@ exports.get = async (req, res) => {
     // if (req.query && Object.keys(req.query).length) {
     //   matchQuery = getQuery(matchQuery, req.query);
     // }
-
+    console.log(matchQueryUser, "matchQueryUser");
     let dataExist = await userAccessService.getOneByMultiField(
       { ...matchQueryUser },
       {
@@ -365,7 +366,7 @@ exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.userRoleId;
     let userId = req.params.userId;
-
+    console.log(idToBeSearch, userId, "ppp");
     let dataExist = await userAccessService.getOneByMultiField({
       userRoleId: idToBeSearch,
       userId: userId,

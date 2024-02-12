@@ -60,7 +60,10 @@ exports.update = async (req, res) => {
     let { ndrDisposition } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await ndrDispositionService.isExists([{ ndrDisposition }]);
+    let dataExist = await ndrDispositionService.isExists(
+      [{ ndrDisposition }],
+      idToBeSearch
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }

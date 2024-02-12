@@ -22,7 +22,7 @@ const ComplainLogsSchema = new mongoose.Schema(
     },
     callType: {
       type: String,
-      enum: [complainCallTypeEnum.complain, complainCallTypeEnum.inquiry],
+      enum: [complainCallTypeEnum.complaint, complainCallTypeEnum.inquiry],
       required: true,
       trim: true,
     },

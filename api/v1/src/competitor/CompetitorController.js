@@ -178,7 +178,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let userRoleData = await getUserRoleData(req, competitorService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.competitor,
       userRoleData,
@@ -213,7 +213,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let _id = req.params.id;
-    let userRoleData = await getUserRoleData(req, competitorService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.competitor,
       userRoleData,
@@ -388,7 +388,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req, competitorService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.competitor,
       userRoleData,

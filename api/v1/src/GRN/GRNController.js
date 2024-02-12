@@ -285,7 +285,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, goodReceivedNoteService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.grn,
       userRoleData,
@@ -356,7 +356,7 @@ exports.get = async (req, res) => {
         $unset: ["item_name"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, goodReceivedNoteService);
+    let userRoleData = await getUserRoleData(req);
 
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.grn,
@@ -491,7 +491,7 @@ exports.getById = async (req, res) => {
         $unset: ["item_name"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, goodReceivedNoteService);
+    let userRoleData = await getUserRoleData(req);
 
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.grn,

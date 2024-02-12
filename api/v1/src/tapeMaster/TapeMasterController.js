@@ -395,7 +395,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, tapeMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.tapeManangement,
       userRoleData,
@@ -524,7 +524,7 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req, tapeMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.tapeManangement,
       userRoleData,
@@ -641,7 +641,7 @@ exports.getById = async (req, res) => {
         $unset: ["channel_group_data", "scheme_data", "language_data"],
       },
     ];
-    let userRoleData = await getUserRoleData(req, tapeMasterService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.tapeManangement,
       userRoleData,

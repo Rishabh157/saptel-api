@@ -1,5 +1,5 @@
 const UserAccess = require("./UserAccessSchema");
-const { combineObjects } = require("../../helper/utils");
+const combineObjects = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return UserAccess.findOne({ [fieldName]: fieldValue, isDeleted: false });
@@ -101,7 +101,7 @@ const findCount = async (matchObj) => {
 
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
-    let combinedObj = await combineObjects(filterArray);
+    let combinedObj = await combineObjects.combineObjects(filterArray);
 
     if (exceptIds) {
       combinedObj["_id"] = { $nin: exceptIds };

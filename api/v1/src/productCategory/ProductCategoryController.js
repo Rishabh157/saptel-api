@@ -271,7 +271,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
-    let userRoleData = await getUserRoleData(req, productCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.productCategory,
       userRoleData,
@@ -320,7 +320,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let userRoleData = await getUserRoleData(req, productCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.productCategory,
       userRoleData,
@@ -356,7 +356,7 @@ exports.getById = async (req, res) => {
     //if no default query then pass {}
     let idToBeSearch = req.params.id;
 
-    let userRoleData = await getUserRoleData(req, productCategoryService);
+    let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.productCategory,
       userRoleData,

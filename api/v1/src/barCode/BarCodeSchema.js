@@ -19,7 +19,6 @@ const BarCodeSchema = new mongoose.Schema(
         barcodeStatusType.atWarehouse,
         barcodeStatusType.atDealerWarehouse,
         barcodeStatusType.inTransit,
-        barcodeStatusType.delivered,
         barcodeStatusType.rtv,
         barcodeStatusType.wts,
         barcodeStatusType.wtw,
