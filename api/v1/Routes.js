@@ -90,6 +90,7 @@ const complainServiceRoute = require("./src/complain/ComplainRoute");
 const complainLogsServiceRoute = require("./src/complainLogs/ComplainLogsRoute");
 const ndrModuleServiceRoute = require("./src/ndrModule/NdrModuleRoute");
 const ndrLogsModuleServiceRoute = require("./src/ndrLogs/NdrLogsRoute");
+const dashboardRoute = require("./src/dashboard/DashBoardRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -463,6 +464,10 @@ const defaultRoutes = [
   {
     path: "/ndr-logs",
     route: ndrLogsModuleServiceRoute,
+  },
+  {
+    path: "/dashboard",
+    route: dashboardRoute,
   },
 ];
 // orderRoute;

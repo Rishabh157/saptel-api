@@ -45,18 +45,28 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await complainService.getOneByMultiField({
-      callType: complainCallTypeEnum.complain,
-      status: complainStatusEnum.open,
+    console.log(
+      complainCallTypeEnum.complaint,
+      complainStatusEnum.open,
       orderNumber,
       icOne,
+      "oooopopo"
+    );
+    // if (status === complainStatusEnum.open) {
+    let dataExist = await complainService.getOneByMultiField({
+      callType: complainCallTypeEnum.complaint,
+      status: complainStatusEnum.open,
+      orderNumber,
+      icOne: new mongoose.Types.ObjectId(icOne),
     });
+    console.log(dataExist, "dataExist");
     if (dataExist) {
       throw new ApiError(
         httpStatus.OK,
         "Can not set another complain with same disposition"
       );
     }
+    // }
     //------------------create data-------------------
     let complaintNumber = await getComplaintNumber();
     let dataCreated = await complainService.createNewData({
