@@ -282,6 +282,12 @@ const assignOrderToDeliveryBoy = {
     deliveryBoyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
+
+const dealerApprove = {
+  params: Joi.object().keys({
+    orderid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
 const getComplainData = {
   body: Joi.object().keys({
     barcode: Joi.string().allow(""),
@@ -352,4 +358,5 @@ module.exports = {
   assignOrder,
   assignOrderToDeliveryBoy,
   getAllFilterDeliveryBoy,
+  dealerApprove,
 };

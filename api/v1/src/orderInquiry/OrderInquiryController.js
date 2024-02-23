@@ -754,6 +754,278 @@ exports.get = async (req, res) => {
   }
 };
 // =============update start end================
+// =============get  start================
+exports.getUnAuth = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    const { phno } = req.params;
+    let matchQuery = { isDeleted: false, mobileNo: phno };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+          "product_group",
+        ],
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 
 // =============get DispositionTwo by Id start================
 exports.getById = async (req, res) => {
@@ -1713,6 +1985,7 @@ exports.allFilterPagination = async (req, res) => {
       "dispositionLevelTwoId",
       "dispositionLevelThreeId",
       "countryId",
+      "companyId",
       "stateId",
       "schemeId",
       "districtId",
@@ -1948,6 +2221,37 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -1988,6 +2292,16 @@ exports.allFilterPagination = async (req, res) => {
           deleiveryBoyLabel: {
             $arrayElemAt: ["$deleivery_by_data.name", 0],
           },
+          assignWarehouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          assignDealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
         },
       },
       {
@@ -2005,6 +2319,8 @@ exports.allFilterPagination = async (req, res) => {
           "agentDistrictData",
           "product_group",
           "deleivery_by_data",
+          "dealer_data",
+          "warehouse_data",
         ],
       },
     ];
@@ -3261,6 +3577,22 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
@@ -3301,6 +3633,14 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           deleiveryBoyLabel: {
             $arrayElemAt: ["$deleivery_by_data.name", 0],
           },
+
+          dealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
         },
       },
       {
@@ -3318,6 +3658,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
           "agentDistrictData",
           "product_group",
           "deleivery_by_data",
+          "dealer_data",
         ],
       },
     ];
@@ -3435,6 +3776,32 @@ exports.orderStatusChange = async (req, res) => {
     return res.status(httpStatus.OK).send({
       message: deleteRefCheck.message,
       status: deleteRefCheck.status,
+      data: null,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.dealerApprove = async (req, res) => {
+  try {
+    let _id = req.params.orderid;
+    if (!(await orderService.getOneByMultiField({ _id }))) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    await orderService.getOneAndUpdate({ _id }, { approved: true });
+
+    return res.status(httpStatus.OK).send({
+      message: "Approved!",
+      status: true,
       data: null,
       code: "OK",
       issue: null,

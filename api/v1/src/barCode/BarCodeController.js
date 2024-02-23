@@ -767,6 +767,18 @@ exports.checkBarcode = async (req, res) => {
             },
           }
         );
+        await barcodeFlowService.createNewData({
+          productGroupId: dataUpdated.productGroupId,
+          barcodeNumber: dataUpdated.barcodeNumber,
+          cartonBoxId: dataUpdated.cartonBoxId,
+          barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+          outerBoxbarCodeNumber: dataUpdatedouterBoxCode,
+          lotNumber: dataUpdated.lotNumber,
+          isUsed: dataUpdated.isUsed,
+          wareHouseId: dataUpdated.wareHouseId,
+          status: barcodeStatusType.delivered,
+          companyId: dataUpdated.companyId,
+        });
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
           status: true,
@@ -846,7 +858,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
           "Barcode with this orderId not found"
         );
       } else {
-        await barCodeService.getOneAndUpdate(
+        let dataUpdated =  await barCodeService.getOneAndUpdate(
           {
             isDeleted: false,
             barcodeNumber: barcode,
@@ -858,6 +870,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
             },
           }
         );
+       
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
           status: true,

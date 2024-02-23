@@ -41,12 +41,26 @@ router.put(
   orderController.assignOrderToDeliveryBoy
 );
 
+// assign order for dealer app
+router.put(
+  "/approve-order/:orderid",
+  authCheckMiddleware,
+  validate(orderValidation.dealerApprove),
+  orderController.dealerApprove
+);
+
 //===============get one document (if query) / all document===============
 router.get(
   "/",
   authCheckMiddleware,
   //   validate(orderValidation.get),
   orderController.get
+);
+//===============get one document (if query) / all document===============
+router.get(
+  "/unauth/phoneno/:phno",
+  //   validate(orderValidation.get),
+  orderController.getUnAuth
 );
 
 //===============get document by id===============
@@ -129,7 +143,7 @@ router.put(
 // );
 
 //===============change order status document===============
-router.delete(
+router.put(
   "/change-order-status/:id",
   authCheckMiddleware,
   validate(orderValidation.orderStatusChange),
