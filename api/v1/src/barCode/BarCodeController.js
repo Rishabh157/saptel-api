@@ -755,7 +755,7 @@ exports.checkBarcode = async (req, res) => {
           "Barcode with this orderId not found"
         );
       } else {
-        await barCodeService.getOneAndUpdate(
+        let dataUpdated = await barCodeService.getOneAndUpdate(
           {
             isDeleted: false,
             barcodeNumber: barcode,
@@ -772,7 +772,7 @@ exports.checkBarcode = async (req, res) => {
           barcodeNumber: dataUpdated.barcodeNumber,
           cartonBoxId: dataUpdated.cartonBoxId,
           barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-          outerBoxbarCodeNumber: dataUpdatedouterBoxCode,
+          outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
           lotNumber: dataUpdated.lotNumber,
           isUsed: dataUpdated.isUsed,
           wareHouseId: dataUpdated.wareHouseId,
@@ -858,7 +858,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
           "Barcode with this orderId not found"
         );
       } else {
-        let dataUpdated =  await barCodeService.getOneAndUpdate(
+        let dataUpdated = await barCodeService.getOneAndUpdate(
           {
             isDeleted: false,
             barcodeNumber: barcode,
@@ -870,7 +870,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
             },
           }
         );
-       
+
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
           status: true,
