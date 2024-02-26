@@ -43,6 +43,7 @@ const {
   orderType,
   moduleType,
   actionType,
+  orderStatusEnum,
 } = require("../../helper/enumUtils");
 
 const {
@@ -245,12 +246,33 @@ exports.update = async (req, res) => {
       recordingEndTime,
       status,
       shcemeQuantity,
+      mobileNo,
+      alternateNo,
     } = req.body;
-
+    let isOrderExists = await orderService.aggregateQuery([
+      {
+        $match: {
+          isDeleted: false,
+          isActive: true,
+          schemeId: new mongoose.Types.ObjectId(schemeId),
+          mobileNo: mobileNo,
+          status: {
+            $nin: [
+              orderStatusEnum.delivered,
+              orderStatusEnum.doorCancelled,
+              orderStatusEnum.rto,
+            ],
+          },
+        },
+      },
+    ]);
     let idToBeSearch = req.params.id;
-    let dataExist = await callService.isExists([]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+
+    if (isOrderExists.length) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Order with this number already in process"
+      );
     }
     if (shcemeQuantity > 9) {
       throw new ApiError(
@@ -259,15 +281,14 @@ exports.update = async (req, res) => {
       );
     }
 
-    const isUserExists =
-      agentName !== null
-        ? await userService.findCount({
-            userName: agentName,
-            isDeleted: false,
-          })
-        : null;
-    if (agentName !== null && !isUserExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Agent User Name.");
+    const isUserExists = await userService.getOneByMultiField({
+      _id: agentId,
+      isDeleted: false,
+      isActive: true,
+    });
+
+    if (!isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent ");
     }
 
     const isStateExists = await stateService.findCount({
@@ -318,14 +339,6 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
     }
 
-    // const isChannelExists = await channelService.findCount({
-    //   _id: channelId,
-    //   isDeleted: false,
-    // });
-    // if (!isChannelExists) {
-    //   throw new ApiError(httpStatus.OK, "Invalid Channel.");
-    // }
-
     const isDispositionTwoExists = await dispositionTwoService.findCount({
       _id: dispositionLevelTwoId,
       isDeleted: false,
@@ -362,21 +375,6 @@ exports.update = async (req, res) => {
       dispositionThreeData[0]?.applicableCriteria
     );
 
-    // let dealerServingPincodes = await dealerSurvingPincode(
-    //   pincodeLabel,
-    //   companyId,
-    //   schemeId
-    // );
-
-    // let activeDealer = await getDealer(dealerServingPincodes, pincodeId);
-    // let assignWarehouseId = null;
-    // if (activeDealer === null) {
-    //   const servingWarehouseAtPincode = await getAssignWarehouse(
-    //     pincodeId,
-    //     companyId
-    //   );
-    //   assignWarehouseId = servingWarehouseAtPincode;
-    // }
     const orderNumber = await getOrderNumber();
 
     const orderInquiry = await orderService.createNewData({
@@ -390,7 +388,8 @@ exports.update = async (req, res) => {
       agentName: agentName,
       recordingStartTime: recordingStartTime,
       recordingEndTime: recordingEndTime,
-
+      callCenterId: isUserExists?.callCenterId,
+      branchId: isUserExists?.branchId,
       // dealerAssignedId: dealerId,
     });
 
@@ -405,7 +404,8 @@ exports.update = async (req, res) => {
       agentName: agentName,
       recordingStartTime: recordingStartTime,
       recordingEndTime: recordingEndTime,
-
+      callCenterId: isUserExists?.callCenterId,
+      branchId: isUserExists?.branchId,
       // dealerAssignedId: dealerId,
     });
 

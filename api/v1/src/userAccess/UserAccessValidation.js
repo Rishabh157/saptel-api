@@ -19,12 +19,14 @@ const create = {
       .items({
         moduleId: Joi.string().required(),
         moduleName: Joi.string().required(),
-
+        parentGroup: Joi.array().items(Joi.string()).allow(),
         moduleAction: Joi.array()
           .items({
             actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
+            compulsoryFields: Joi.array().items(Joi.string()).allow(),
+
             parentGroup: Joi.array().items(Joi.string()).default([]),
             fields: Joi.array()
               .items({
@@ -60,12 +62,13 @@ const update = {
       .items({
         moduleId: Joi.string().required(),
         moduleName: Joi.string().required(),
-
+        parentGroup: Joi.array().items(Joi.string()).allow(),
         moduleAction: Joi.array()
           .items({
             actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
+            compulsoryFields: Joi.array().items(Joi.string()).allow(),
             parentGroup: Joi.array().items(Joi.string()).default([]),
             fields: Joi.array()
               .items({

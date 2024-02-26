@@ -331,6 +331,14 @@ const OrderInquirySchema = new mongoose.Schema(
       ],
       default: orderStatusEnum.fresh,
     },
+    callCenterId: {
+      type: ObjectId,
+      default: null,
+    },
+    branchId: {
+      type: ObjectId,
+      default: null,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -682,6 +682,9 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
           as: "dealerData",
           pipeline: [
             {
+              $match: { isActive: true }, // Add this stage to filter active dealers
+            },
+            {
               $project: {
                 firstName: 1,
                 lastName: 1,
@@ -709,18 +712,36 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
     let getAllScheme = await dealerSchemeService.aggregateQuery(
       additionalQuery
     );
-    console.log(cid);
-    let getAllCompanyWarehouse = await warehouseService.findAllWithQuery({
-      isDeleted: false,
-      isActive: true,
-      dealerId: null,
-      companyId: new mongoose.Types.ObjectId(cid),
+    console.log(getAllScheme, "getAllScheme");
+    let newAllSchemes = getAllScheme?.filter((ele) => {
+      if (ele?.dealerName) {
+        return ele;
+      }
     });
+    console.log(newAllSchemes, "newAllSchemes");
+
+    console.log(cid);
+    let getAllCompanyWarehouse = await warehouseService.aggregateQuery([
+      {
+        $match: {
+          isDeleted: false,
+          isActive: true,
+          dealerId: null,
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          wareHouseName: 1,
+        },
+      },
+    ]);
 
     return res.status(httpStatus.OK).send({
       message: "Successfull.",
       status: true,
-      dealerData: getAllScheme.length ? getAllScheme : null,
+      dealerData: newAllSchemes.length ? newAllSchemes : null,
       companyWarehouse: getAllCompanyWarehouse.length
         ? getAllCompanyWarehouse
         : null,

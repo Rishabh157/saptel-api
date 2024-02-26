@@ -326,6 +326,14 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    callCenterId: {
+      type: ObjectId,
+      default: null,
+    },
+    branchId: {
+      type: ObjectId,
+      default: null,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -74,6 +74,8 @@ const create = {
     recordingStartTime: Joi.string().allow(""),
     recordingEndTime: Joi.string().allow(""),
     status: Joi.string().required(""),
+    callCenterId: Joi.string().custom(commonValidation.objectId).allow(null),
+    branchId: Joi.string().custom(commonValidation.objectId).allow(null),
   }),
 };
 
@@ -152,6 +154,8 @@ const update = {
     recordingStartTime: Joi.string().allow(""),
     recordingEndTime: Joi.string().allow(""),
     status: Joi.string().required(""),
+    callCenterId: Joi.string().custom(commonValidation.objectId).allow(null),
+    branchId: Joi.string().custom(commonValidation.objectId).allow(null),
   }),
 };
 

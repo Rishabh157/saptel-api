@@ -45,6 +45,10 @@ const UserAccessSchema = new mongoose.Schema(
             required: true,
             trim: true,
           },
+          parentGroup: {
+            type: [String],
+            default: [],
+          },
 
           moduleAction: {
             type: [
@@ -65,7 +69,10 @@ const UserAccessSchema = new mongoose.Schema(
                   required: true,
                   trim: true,
                 },
-
+                compulsoryFields: {
+                  type: [String],
+                  default: [],
+                },
                 parentGroup: {
                   type: [String],
                   required: true,

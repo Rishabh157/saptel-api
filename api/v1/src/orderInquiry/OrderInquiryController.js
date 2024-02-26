@@ -16,6 +16,7 @@ const deliveryBoyService = require("../deliveryBoy/DeliveryBoyService");
 const tehsilService = require("../tehsil/TehsilService");
 const warehouseService = require("../wareHouse/WareHouseService");
 const pincodeService = require("../pincode/PincodeService");
+const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
 const barcodeService = require("../barCode/BarCodeService");
@@ -50,19 +51,12 @@ const {
   moduleType,
   actionType,
   productStatus,
+  userEnum,
 } = require("../../helper/enumUtils");
 
 exports.add = async (req, res) => {
   try {
     let { fullName, mobile, email, pincode, address } = req.body;
-
-    await orderInquiryFlowService.createNewData({
-      customerName: fullName,
-      mobileNo: mobile,
-      emailId: email,
-      pincodeId: pincode,
-      address: address,
-    });
 
     let dataCreated = await orderService.createNewData({
       customerName: fullName,
@@ -73,6 +67,14 @@ exports.add = async (req, res) => {
     });
 
     if (dataCreated) {
+      await orderInquiryFlowService.createNewData({
+        customerName: fullName,
+        mobileNo: mobile,
+        emailId: email,
+        pincodeId: pincode,
+        address: address,
+      });
+
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataCreated,
@@ -935,6 +937,40 @@ exports.getUnAuth = async (req, res) => {
       },
       {
         $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                wareHouseCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: "productgroups",
           localField: "productGroupId",
           foreignField: "_id",
@@ -984,6 +1020,22 @@ exports.getUnAuth = async (req, res) => {
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          dealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
+          },
         },
       },
       {
@@ -1000,6 +1052,8 @@ exports.getUnAuth = async (req, res) => {
           // "channelData",
           "agentDistrictData",
           "product_group",
+          "dealer_data",
+          "warehouse_data",
         ],
       },
     ];
@@ -1922,6 +1976,7 @@ exports.getByIdForDealer = async (req, res) => {
 // =============all filter pagination api start================
 exports.allFilterPagination = async (req, res) => {
   try {
+    const { Id } = req.userData;
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.searchIn;
@@ -1931,9 +1986,29 @@ exports.allFilterPagination = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
+
+    const isUserExists = await userService.getOneByMultiField({
+      _id: Id,
+      isDeleted: false,
+      isActive: true,
+    });
+
+    if (!isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent ");
+    }
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
+
+    if (isUserExists?.isAgent) {
+      matchQuery.$and.push({ callCenterId: isUserExists?.callCenterId });
+      matchQuery.$and.push({ agentId: Id });
+    }
+
+    if (isUserExists?.userType !== userEnum.admin) {
+      matchQuery.$and.push({ branchId: isUserExists?.branchId });
+    }
+
     /**
      * to send only active data on web
      */
@@ -2110,6 +2185,7 @@ exports.allFilterPagination = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
+                schemeCode: 1,
               },
             },
           ],
@@ -2231,6 +2307,8 @@ exports.allFilterPagination = async (req, res) => {
               $project: {
                 firstName: 1,
                 lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
               },
             },
           ],
@@ -2268,6 +2346,9 @@ exports.allFilterPagination = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$schemeData.schemeName", 0],
           },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
+          },
           districtLabel: {
             $arrayElemAt: ["$districtData.districtName", 0],
           },
@@ -2294,6 +2375,12 @@ exports.allFilterPagination = async (req, res) => {
           },
           assignWarehouseLabel: {
             $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
           },
           assignDealerLabel: {
             $concat: [

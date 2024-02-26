@@ -21,9 +21,9 @@ const VendorSchema = new mongoose.Schema(
     },
     ownerShipType: {
       type: String,
+      enum: ["PARTNERSHIP", "SINGLE"],
       required: true,
       trim: true,
-      lowercase: true,
     },
     websiteAddress: { type: String, required: false, default: "", trim: true },
     registrationAddress: {

@@ -61,13 +61,13 @@ const slotDaysType = Object.freeze({
 });
 
 const companyEnum = Object.freeze({
-  pltc: "Private Limited Company",
-  plc: "Public Limited Company",
-  psc: "Partnerships Company",
-  llp: "Limited Liability Partnership",
-  opc: "One Person Company",
-  sp: "Sole Proprietorship",
-  sec: "Section 8 Company",
+  pltc: "PRIVATE_LIMITED_COMPANY",
+  plc: "PUBLIC_LIMITED_COMPANY",
+  psc: "PARTNERSHIPS_COMPANY",
+  llp: "LIMITED_LIABILITY_PARTNERSHIP",
+  opc: "ONE_PERSON_COMPANY",
+  sp: "SOLE_PROPRIETORSHIP",
+  sec: "SECTION_8_COMPANY",
 });
 
 const smsType = Object.freeze({
@@ -122,9 +122,9 @@ const emailType = Object.freeze({
 });
 
 const whatsType = Object.freeze({
-  temp1: "TEMP ONE",
-  temp2: "TEMP TWO",
-  temp3: "TEMP THREE",
+  temp1: "TEMP_ONE",
+  temp2: "TEMP_TWO",
+  temp3: "TEMP_THREE",
 });
 
 const applicableCriteria = Object.freeze({
@@ -171,6 +171,7 @@ const orderStatusEnum = Object.freeze({
   pnd: "PND",
   urgent: "URGENT",
   nonAction: "NON_ACTION",
+  rto: "RTO",
 });
 
 const apiAppEnum = Object.freeze({
