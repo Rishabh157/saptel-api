@@ -159,6 +159,13 @@ const update = {
   }),
 };
 
+const getGlobalSearch = {
+  body: Joi.object().keys({
+    orderNumber: Joi.string().optional(),
+    phoneNumber: Joi.string().allow(""),
+  }),
+};
+
 /**
  * filter and pagination api
  */
@@ -363,4 +370,5 @@ module.exports = {
   assignOrderToDeliveryBoy,
   getAllFilterDeliveryBoy,
   dealerApprove,
+  getGlobalSearch,
 };

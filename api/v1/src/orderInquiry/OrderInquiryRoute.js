@@ -56,6 +56,14 @@ router.get(
   //   validate(orderValidation.get),
   orderController.get
 );
+
+//=============== Global search order===============
+router.post(
+  "/global-search",
+  authCheckMiddleware,
+  validate(orderValidation.getGlobalSearch),
+  orderController.globalSearch
+);
 //===============get one document (if query) / all document===============
 router.get(
   "/unauth/phoneno/:phno",

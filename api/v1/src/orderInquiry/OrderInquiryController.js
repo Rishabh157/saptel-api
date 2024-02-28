@@ -755,6 +755,299 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// Global search
+exports.globalSearch = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    const { orderNumber, phoneNumber } = req.body;
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    if (parseInt(orderNumber) > 0) {
+      matchQuery.$and.push({
+        orderNumber: parseInt(orderNumber),
+      });
+    }
+    if (phoneNumber) {
+      matchQuery.$and.push({
+        mobileNo: phoneNumber,
+      });
+    }
+
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+          "product_group",
+        ],
+      },
+    ];
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: allowedFields,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============update start end================
 // =============get  start================
 exports.getUnAuth = async (req, res) => {
@@ -2001,12 +2294,33 @@ exports.allFilterPagination = async (req, res) => {
     };
 
     if (isUserExists?.isAgent) {
-      matchQuery.$and.push({ callCenterId: isUserExists?.callCenterId });
       matchQuery.$and.push({ agentId: Id });
+      matchQuery.$and.push({ callCenterId: isUserExists?.callCenterId });
     }
 
-    if (isUserExists?.userType !== userEnum.admin) {
-      matchQuery.$and.push({ branchId: isUserExists?.branchId });
+    if (
+      isUserExists?.userType !== userEnum.admin &&
+      isUserExists?.isAgent === false &&
+      isUserExists?.callCenterId === null
+    ) {
+      matchQuery.$and.push({
+        branchId: new mongoose.Types.ObjectId(isUserExists?.branchId),
+      });
+    }
+    console.log(
+      isUserExists?.userType,
+      isUserExists?.isAgent,
+      isUserExists?.callCenterId
+    );
+    if (
+      isUserExists?.userType !== userEnum.admin &&
+      isUserExists?.isAgent === false &&
+      isUserExists?.callCenterId !== null
+    ) {
+      console.log("yhaa ");
+      matchQuery.$and.push({
+        callCenterId: new mongoose.Types.ObjectId(isUserExists?.callCenterId),
+      });
     }
 
     /**
@@ -2055,7 +2369,7 @@ exports.allFilterPagination = async (req, res) => {
      * get filter query
      */
     let booleanFields = [];
-    let numberFileds = [];
+    let numberFileds = ["orderNumber"];
     let objectIdFields = [
       "dispositionLevelTwoId",
       "dispositionLevelThreeId",
@@ -2147,6 +2461,21 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterdata",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: "countries",
           localField: "countryId",
           foreignField: "_id",
@@ -2186,6 +2515,7 @@ exports.allFilterPagination = async (req, res) => {
               $project: {
                 schemeName: 1,
                 schemeCode: 1,
+                deliveryCharges: 1,
               },
             },
           ],
@@ -2251,21 +2581,7 @@ exports.allFilterPagination = async (req, res) => {
           ],
         },
       },
-      {
-        $lookup: {
-          from: "channelmasters",
-          localField: "channelId",
-          foreignField: "_id",
-          as: "channelData",
-          pipeline: [
-            {
-              $project: {
-                channelName: 1,
-              },
-            },
-          ],
-        },
-      },
+
       {
         $lookup: {
           from: "districts",
@@ -2330,7 +2646,52 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "didmanagements",
+          localField: "didNo",
+          foreignField: "didNumber",
+          as: "did_data",
+          pipeline: [
+            {
+              $lookup: {
+                from: "channelmasters",
+                localField: "channelId",
+                foreignField: "_id",
+                as: "channel_data",
+                pipeline: [
+                  {
+                    $project: {
+                      channelName: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+
+      {
         $addFields: {
+          channelLabel: {
+            $arrayElemAt: ["$did_data.channel_data.channelName", 0],
+          },
+
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
           },
@@ -2349,6 +2710,9 @@ exports.allFilterPagination = async (req, res) => {
           schemeCode: {
             $arrayElemAt: ["$schemeData.schemeCode", 0],
           },
+          deliveryCharges: {
+            $arrayElemAt: ["$schemeData.deliveryCharges", 0],
+          },
           districtLabel: {
             $arrayElemAt: ["$districtData.districtName", 0],
           },
@@ -2361,9 +2725,7 @@ exports.allFilterPagination = async (req, res) => {
           areaLabel: {
             $arrayElemAt: ["$areaData.area", 0],
           },
-          channelLabel: {
-            $arrayElemAt: ["$channelData.channelName", 0],
-          },
+
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
@@ -2382,6 +2744,10 @@ exports.allFilterPagination = async (req, res) => {
           dealerStatus: {
             $arrayElemAt: ["$dealer_data.isActive", 0],
           },
+          callCenterLabel: {
+            $arrayElemAt: ["$callcenterdata.callCenterName", 0],
+          },
+
           assignDealerLabel: {
             $concat: [
               { $arrayElemAt: ["$dealer_data.firstName", 0] },
@@ -2393,7 +2759,10 @@ exports.allFilterPagination = async (req, res) => {
       },
       {
         $unset: [
+          "channel_data",
+          "did_data",
           "dispositionLevelTwoData",
+          "callcenterdata",
           "dispositionthreesData",
           "countrieData",
           "stateData",

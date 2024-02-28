@@ -103,19 +103,20 @@ const userRoleUpdate = {
       .items({
         moduleId: Joi.string().required(),
         moduleName: Joi.string().required(),
-
+        parentGroup: Joi.array().items(Joi.string()).allow(),
         moduleAction: Joi.array()
           .items({
             actionUrl: Joi.string().allow(""),
             actionId: Joi.string().required(),
             actionName: Joi.string().required(),
+            compulsoryFields: Joi.array().items(Joi.string()).allow(),
             parentGroup: Joi.array().items(Joi.string()).default([]),
             fields: Joi.array()
               .items({
                 fieldId: Joi.string().required(),
                 fieldName: Joi.string().required(),
 
-                fieldValue: Joi.string().required(),
+                fieldValue: Joi.string().allow(""),
               })
               .default([]),
           })

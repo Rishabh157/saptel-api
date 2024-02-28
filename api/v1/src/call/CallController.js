@@ -376,7 +376,7 @@ exports.update = async (req, res) => {
     );
 
     const orderNumber = await getOrderNumber();
-
+    console.log(isUserExists, "isUserExists");
     const orderInquiry = await orderService.createNewData({
       ...req.body,
       status: status,
