@@ -52,6 +52,7 @@ const {
   actionType,
   productStatus,
   userEnum,
+  callPageTabType,
 } = require("../../helper/enumUtils");
 
 exports.add = async (req, res) => {
@@ -800,6 +801,18 @@ exports.globalSearch = async (req, res) => {
       },
       {
         $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: "dispositionthrees",
           localField: "dispositionLevelThreeId",
           foreignField: "_id",
@@ -808,6 +821,21 @@ exports.globalSearch = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterdata",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
               },
             },
           ],
@@ -853,6 +881,8 @@ exports.globalSearch = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
+                schemeCode: 1,
+                deliveryCharges: 1,
               },
             },
           ],
@@ -918,21 +948,7 @@ exports.globalSearch = async (req, res) => {
           ],
         },
       },
-      // {
-      //   $lookup: {
-      //     from: "channelmasters",
-      //     localField: "channelId",
-      //     foreignField: "_id",
-      //     as: "channelData",
-      //     pipeline: [
-      //       {
-      //         $project: {
-      //           channelName: 1,
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
+
       {
         $lookup: {
           from: "districts",
@@ -950,19 +966,99 @@ exports.globalSearch = async (req, res) => {
       },
       {
         $lookup: {
-          from: "productgroups",
-          localField: "productGroupId",
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
           foreignField: "_id",
-          as: "product_group",
+          as: "deleivery_by_data",
           pipeline: [
-            { $match: { isDeleted: false } },
-            { $project: { groupName: 1 } },
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "didmanagements",
+          localField: "didNo",
+          foreignField: "didNumber",
+          as: "did_data",
+          pipeline: [
+            {
+              $lookup: {
+                from: "channelmasters",
+                localField: "channelId",
+                foreignField: "_id",
+                as: "channel_data",
+                pipeline: [
+                  {
+                    $project: {
+                      channelName: 1,
+                    },
+                  },
+                ],
+              },
+            },
           ],
         },
       },
 
       {
         $addFields: {
+          channelLabel: {
+            $arrayElemAt: ["$did_data.channel_data.channelName", 0],
+          },
+
           dispositionLevelTwo: {
             $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
           },
@@ -978,6 +1074,12 @@ exports.globalSearch = async (req, res) => {
           schemeLabel: {
             $arrayElemAt: ["$schemeData.schemeName", 0],
           },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
+          },
+          deliveryCharges: {
+            $arrayElemAt: ["$schemeData.deliveryCharges", 0],
+          },
           districtLabel: {
             $arrayElemAt: ["$districtData.districtName", 0],
           },
@@ -990,20 +1092,44 @@ exports.globalSearch = async (req, res) => {
           areaLabel: {
             $arrayElemAt: ["$areaData.area", 0],
           },
-          // channelLabel: {
-          //   $arrayElemAt: ["$channelData.channelName", 0],
-          // },
+
           agentDistrictLabel: {
             $arrayElemAt: ["$agentDistrictData.districtName", 0],
           },
           productGroupLabel: {
             $arrayElemAt: ["$product_group.groupName", 0],
           },
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
+          assignWarehouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
+          },
+          callCenterLabel: {
+            $arrayElemAt: ["$callcenterdata.callCenterName", 0],
+          },
+
+          assignDealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
         },
       },
       {
         $unset: [
+          "channel_data",
+          "did_data",
           "dispositionLevelTwoData",
+          "callcenterdata",
           "dispositionthreesData",
           "countrieData",
           "stateData",
@@ -1012,9 +1138,12 @@ exports.globalSearch = async (req, res) => {
           "tehsilData",
           "pincodeData",
           "areaData",
-          // "channelData",
+          "channelData",
           "agentDistrictData",
           "product_group",
+          "deleivery_by_data",
+          "dealer_data",
+          "warehouse_data",
         ],
       },
     ];
@@ -1053,6 +1182,431 @@ exports.globalSearch = async (req, res) => {
 exports.getUnAuth = async (req, res) => {
   try {
     //if no default query then pass {}
+    const { phno, type } = req.params;
+
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+
+    if (type === callPageTabType.order) {
+      matchQuery.$and.push({
+        orderNumber: { $ne: null },
+      });
+      matchQuery.$and.push({
+        mobileNo: phno,
+      });
+    }
+    if (type === callPageTabType.history) {
+      matchQuery.$and.push({
+        mobileNo: phno,
+      });
+    }
+    if (type === callPageTabType.complaint) {
+      matchQuery.$and.push({
+        customerNumber: phno,
+      });
+    }
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    if (type === callPageTabType.history || type === callPageTabType.order) {
+      var additionalQuery = [
+        {
+          $match: matchQuery,
+        },
+        { $sort: { _id: -1 } },
+        { $limit: 15 },
+        {
+          $lookup: {
+            from: "dispositiontwos",
+            localField: "dispositionLevelTwoId",
+            foreignField: "_id",
+            as: "dispositionLevelTwoData",
+            pipeline: [
+              {
+                $project: {
+                  dispositionName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "dispositionthrees",
+            localField: "dispositionLevelThreeId",
+            foreignField: "_id",
+            as: "dispositionthreesData",
+            pipeline: [
+              {
+                $project: {
+                  dispositionName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "countries",
+            localField: "countryId",
+            foreignField: "_id",
+            as: "countrieData",
+            pipeline: [
+              {
+                $project: {
+                  countryName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "states",
+            localField: "stateId",
+            foreignField: "_id",
+            as: "stateData",
+            pipeline: [
+              {
+                $project: {
+                  stateName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "schemes",
+            localField: "schemeId",
+            foreignField: "_id",
+            as: "schemeData",
+            pipeline: [
+              {
+                $project: {
+                  schemeName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "districts",
+            localField: "districtId",
+            foreignField: "_id",
+            as: "districtData",
+            pipeline: [
+              {
+                $project: {
+                  districtName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "tehsils",
+            localField: "tehsilId",
+            foreignField: "_id",
+            as: "tehsilData",
+            pipeline: [
+              {
+                $project: {
+                  tehsilName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "pincodes",
+            localField: "pincodeId",
+            foreignField: "_id",
+            as: "pincodeData",
+            pipeline: [
+              {
+                $project: {
+                  pincode: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "areas",
+            localField: "areaId",
+            foreignField: "_id",
+            as: "areaData",
+            pipeline: [
+              {
+                $project: {
+                  area: 1,
+                },
+              },
+            ],
+          },
+        },
+        // {
+        //   $lookup: {
+        //     from: "channelmasters",
+        //     localField: "channelId",
+        //     foreignField: "_id",
+        //     as: "channelData",
+        //     pipeline: [
+        //       {
+        //         $project: {
+        //           channelName: 1,
+        //         },
+        //       },
+        //     ],
+        //   },
+        // },
+        {
+          $lookup: {
+            from: "districts",
+            localField: "agentDistrictId",
+            foreignField: "_id",
+            as: "agentDistrictData",
+            pipeline: [
+              {
+                $project: {
+                  districtName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "dealers",
+            localField: "assignDealerId",
+            foreignField: "_id",
+            as: "dealer_data",
+            pipeline: [
+              {
+                $project: {
+                  firstName: 1,
+                  lastName: 1,
+                  dealerCode: 1,
+                  isActive: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "assignWarehouseId",
+            foreignField: "_id",
+            as: "warehouse_data",
+            pipeline: [
+              {
+                $project: {
+                  wareHouseName: 1,
+                  wareHouseCode: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "productgroups",
+            localField: "productGroupId",
+            foreignField: "_id",
+            as: "product_group",
+            pipeline: [
+              { $match: { isDeleted: false } },
+              { $project: { groupName: 1 } },
+            ],
+          },
+        },
+
+        {
+          $addFields: {
+            dispositionLevelTwo: {
+              $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+            },
+            dispositionLevelThree: {
+              $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+            },
+            countryLabel: {
+              $arrayElemAt: ["$countrieData.countryName", 0],
+            },
+            stateLabel: {
+              $arrayElemAt: ["$stateData.stateName", 0],
+            },
+            schemeLabel: {
+              $arrayElemAt: ["$schemeData.schemeName", 0],
+            },
+            districtLabel: {
+              $arrayElemAt: ["$districtData.districtName", 0],
+            },
+            tehsilLabel: {
+              $arrayElemAt: ["$tehsilData.tehsilName", 0],
+            },
+            pincodeLabel: {
+              $arrayElemAt: ["$pincodeData.pincode", 0],
+            },
+            areaLabel: {
+              $arrayElemAt: ["$areaData.area", 0],
+            },
+            // channelLabel: {
+            //   $arrayElemAt: ["$channelData.channelName", 0],
+            // },
+            agentDistrictLabel: {
+              $arrayElemAt: ["$agentDistrictData.districtName", 0],
+            },
+            productGroupLabel: {
+              $arrayElemAt: ["$product_group.groupName", 0],
+            },
+            dealerLabel: {
+              $concat: [
+                { $arrayElemAt: ["$dealer_data.firstName", 0] },
+                " ",
+                { $arrayElemAt: ["$dealer_data.lastName", 0] },
+              ],
+            },
+            wareHouseLabel: {
+              $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+            },
+            dealerCode: {
+              $arrayElemAt: ["$dealer_data.dealerCode", 0],
+            },
+            dealerStatus: {
+              $arrayElemAt: ["$dealer_data.isActive", 0],
+            },
+          },
+        },
+        {
+          $unset: [
+            "dispositionLevelTwoData",
+            "dispositionthreesData",
+            "countrieData",
+            "stateData",
+            "schemeData",
+            "districtData",
+            "tehsilData",
+            "pincodeData",
+            "areaData",
+            // "channelData",
+            "agentDistrictData",
+            "product_group",
+            "dealer_data",
+            "warehouse_data",
+          ],
+        },
+      ];
+    }
+    if (type === callPageTabType.complaint) {
+      var additionalComplaintQuery = [
+        {
+          $match: matchQuery,
+        },
+
+        { $sort: { _id: -1 } },
+        { $limit: 15 },
+        {
+          $lookup: {
+            from: "initialcallones",
+            localField: "icOne",
+            foreignField: "_id",
+            as: "icOneData",
+            pipeline: [
+              {
+                $project: {
+                  initialCallName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "initialcalltwos",
+            localField: "icTwo",
+            foreignField: "_id",
+            as: "icTwoData",
+            pipeline: [
+              {
+                $project: {
+                  initialCallName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "initialcallthrees",
+            localField: "icThree",
+            foreignField: "_id",
+            as: "icThreeData",
+            pipeline: [
+              {
+                $project: {
+                  initialCallName: 1,
+                },
+              },
+            ],
+          },
+        },
+        {
+          $addFields: {
+            icOneLabel: {
+              $arrayElemAt: ["$icOneData.initialCallName", 0],
+            },
+            icTwoLabel: {
+              $arrayElemAt: ["$icTwoData.initialCallName", 0],
+            },
+            icThreeLabel: {
+              $arrayElemAt: ["$icThreeData.initialCallName", 0],
+            },
+          },
+        },
+        {
+          $unset: ["icOneData","icTwoData","icThreeData"],
+        },
+      ];
+    }
+
+    if (type === callPageTabType.complaint) {
+      var complaintDataExist = await complaintService.aggregateQuery(
+        additionalComplaintQuery
+      );
+    } else {
+      var dataExist = await orderService.aggregateQuery(additionalQuery);
+    }
+    console.log(dataExist, "dataExist");
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: dataExist ? dataExist : complaintDataExist,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get by ph number unauth
+
+exports.getUnAuthGetByPhNumber = async (req, res) => {
+  try {
+    //if no default query then pass {}
     const { phno } = req.params;
     let matchQuery = { isDeleted: false, mobileNo: phno };
     if (req.query && Object.keys(req.query).length) {
@@ -1063,6 +1617,8 @@ exports.getUnAuth = async (req, res) => {
       {
         $match: matchQuery,
       },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
       {
         $lookup: {
           from: "dispositiontwos",
@@ -1359,7 +1915,7 @@ exports.getUnAuth = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: dataExist[0],
         code: "OK",
         issue: null,
       });

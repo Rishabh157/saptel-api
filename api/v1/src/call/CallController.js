@@ -249,31 +249,47 @@ exports.update = async (req, res) => {
       mobileNo,
       alternateNo,
     } = req.body;
-    let isOrderExists = await orderService.aggregateQuery([
-      {
-        $match: {
-          isDeleted: false,
-          isActive: true,
-          schemeId: new mongoose.Types.ObjectId(schemeId),
-          mobileNo: mobileNo,
-          status: {
-            $nin: [
-              orderStatusEnum.delivered,
-              orderStatusEnum.doorCancelled,
-              orderStatusEnum.rto,
-            ],
+
+    const isDispositionThreeExists =
+      await dispositionThreeService.getOneByMultiField({
+        _id: dispositionLevelThreeId,
+        isDeleted: false,
+        isActive: true,
+      });
+    if (!isDispositionThreeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+    }
+    let applicableCriteriaData =
+      isDispositionThreeExists?.applicableCriteria[0];
+    if (applicableCriteriaData !== applicableCriteria.isInquiry) {
+      let isOrderExists = await orderService.aggregateQuery([
+        {
+          $match: {
+            isDeleted: false,
+            isActive: true,
+            schemeId: new mongoose.Types.ObjectId(schemeId),
+            mobileNo: mobileNo,
+
+            status: {
+              $nin: [
+                orderStatusEnum.delivered,
+                orderStatusEnum.doorCancelled,
+                orderStatusEnum.rto,
+              ],
+            },
           },
         },
-      },
-    ]);
+      ]);
+      if (isOrderExists.length) {
+        throw new ApiError(
+          httpStatus.OK,
+          "Order with this number already in process"
+        );
+      }
+    }
+
     let idToBeSearch = req.params.id;
 
-    if (isOrderExists.length) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Order with this number already in process"
-      );
-    }
     if (shcemeQuantity > 9) {
       throw new ApiError(
         httpStatus.OK,
@@ -347,14 +363,6 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
     }
 
-    const isDispositionThreeExists = await dispositionThreeService.findCount({
-      _id: dispositionLevelThreeId,
-      isDeleted: false,
-    });
-    if (!isDispositionThreeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
-    }
-
     //------------------Find data-------------------
     let datafound = await callService.getOneByMultiField({
       _id: idToBeSearch,
@@ -376,11 +384,14 @@ exports.update = async (req, res) => {
     );
 
     const orderNumber = await getOrderNumber();
+    const inquiryNumber = await getInquiryNumber();
+
     console.log(isUserExists, "isUserExists");
     const orderInquiry = await orderService.createNewData({
       ...req.body,
       status: status,
-      orderNumber: orderNumber,
+      orderNumber: flag ? orderNumber : null,
+      inquiryNumber: inquiryNumber,
       assignDealerId: null,
       assignWarehouseId: null,
       approved: flag ? true : prepaidOrderFlag ? false : true,

@@ -11,7 +11,7 @@ const create = {
     companyName: Joi.string().lowercase().required(),
     vendorCode: Joi.string().required(),
     companyType: Joi.string().required(),
-    ownerShipType: Joi.string().lowercase().required(),
+    ownerShipType: Joi.string().required(),
     websiteAddress: Joi.string().allow(""),
     registrationAddress: Joi.object().keys({
       phone: Joi.string().required(),
@@ -67,7 +67,7 @@ const update = {
     companyName: Joi.string().lowercase().required(),
     vendorCode: Joi.string().required(),
     companyType: Joi.string().required(),
-    ownerShipType: Joi.string().lowercase().required(),
+    ownerShipType: Joi.string().required(),
     websiteAddress: Joi.string().allow(""),
     registrationAddress: Joi.object().keys({
       phone: Joi.string().required(),

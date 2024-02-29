@@ -163,6 +163,7 @@ const UserSchema = new mongoose.Schema(
     callCenterId: { type: ObjectId, default: null },
     floorManagerId: { type: ObjectId, default: null },
     teamLeadId: { type: ObjectId, default: null },
+    mySenior: { type: ObjectId, default: null },
     isAgent: { type: Boolean, default: false },
     isDeleted: {
       type: Boolean,

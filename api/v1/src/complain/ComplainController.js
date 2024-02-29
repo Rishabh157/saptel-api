@@ -41,17 +41,12 @@ exports.add = async (req, res) => {
       icTwo,
       icThree,
       remark,
+      customerNumber,
     } = req.body;
     /**
      * check duplicate exist
      */
-    console.log(
-      complainCallTypeEnum.complaint,
-      complainStatusEnum.open,
-      orderNumber,
-      icOne,
-      "oooopopo"
-    );
+
     // if (status === complainStatusEnum.open) {
     let dataExist = await complainService.getOneByMultiField({
       callType: complainCallTypeEnum.complaint,
@@ -71,6 +66,7 @@ exports.add = async (req, res) => {
     let complaintNumber = await getComplaintNumber();
     let dataCreated = await complainService.createNewData({
       complaintNumber,
+
       ...req.body,
     });
 

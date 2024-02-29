@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userAccessService = require("./UserAccessService");
+const userService = require("../user/UserService");
 const { searchKeys } = require("./UserAccessSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -17,38 +18,126 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 
-//add start
 exports.add = async (req, res) => {
   try {
-    let { userId, userRoleId } = req.body;
+    let { userId, departmentId, userRoleId } = req.body;
+
+    /**
+     * check user exist
+     */
+    if (userId) {
+      let userExist = await userService.getOneByMultiField({
+        _id: userId,
+      });
+      if (!userExist) {
+        throw new ApiError(httpStatus.OK, "User not found.");
+      }
+    }
+
+    /**
+     * check department exist
+     */
+
     /**
      * check duplicate exist
      */
 
-    let dataExist = await userAccessService.isExists(
-      [{ userId }, { userRoleId }],
-      false,
-      true
-    );
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
-
-    //------------------create data-------------------
-    let dataCreated = await userAccessService.createNewData({ ...req.body });
-
-    if (dataCreated) {
-      return res.status(httpStatus.CREATED).send({
-        message: "Added successfully.",
-        data: dataCreated,
-        status: true,
-        code: null,
-        issue: null,
+    if (userId === null) {
+      let dataExistWithPosition = await userAccessService.getOneByMultiField({
+        userRoleId: userRoleId,
+        isDeleted: false,
       });
+
+      if (dataExistWithPosition) {
+        let dataUpdated = await userAccessService.updateMany(
+          {
+            userRoleId: userRoleId,
+            isDeleted: false,
+          },
+          {
+            $set: {
+              module: req.body.module,
+            },
+          }
+        );
+        if (dataUpdated) {
+          return res.status(httpStatus.CREATED).send({
+            message: "Updated successfully.",
+            data: dataUpdated,
+            status: true,
+            code: "OK",
+            issue: null,
+          });
+        }
+      } else {
+        let dataCreated = await userAccessService.createNewData({
+          ...req.body,
+        });
+
+        if (dataCreated) {
+          return res.status(httpStatus.CREATED).send({
+            message: "Added successfully.",
+            data: dataCreated,
+            status: true,
+            code: "OK",
+            issue: null,
+          });
+        } else {
+          throw new ApiError(
+            httpStatus.NOT_IMPLEMENTED,
+            `Something went wrong.`
+          );
+        }
+      }
     } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+      let dataExist = await userAccessService.getOneByMultiField({
+        userId: userId,
+      });
+
+      if (dataExist) {
+        let dataUpdated = await userAccessService.getOneAndUpdate(
+          {
+            _id: dataExist._id,
+            isDeleted: false,
+          },
+          {
+            $set: {
+              ...req.body,
+            },
+          }
+        );
+        if (dataUpdated) {
+          return res.status(httpStatus.CREATED).send({
+            message: "Updated successfully.",
+            data: dataUpdated,
+            status: true,
+            code: "OK",
+            issue: null,
+          });
+        }
+      } else {
+        let dataCreated = await userAccessService.createNewData({
+          ...req.body,
+        });
+
+        if (dataCreated) {
+          return res.status(httpStatus.CREATED).send({
+            message: "Added successfully.",
+            data: dataCreated,
+            status: true,
+            code: "OK",
+            issue: null,
+          });
+        } else {
+          throw new ApiError(
+            httpStatus.NOT_IMPLEMENTED,
+            `Something went wrong.`
+          );
+        }
+      }
     }
   } catch (err) {
+    console.log(err);
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;

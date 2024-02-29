@@ -45,6 +45,7 @@ const {
 } = require("../../helper/paginationFilterHelper");
 const { userEnum, moduleType, actionType } = require("../../helper/enumUtils");
 const redisClient = require("../../../../database/redis");
+const { getSeniorUserRole } = require("./UserHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -64,6 +65,7 @@ exports.add = async (req, res) => {
       callCenterId,
       floorManagerId,
       teamLeadId,
+      mySenior,
     } = req.body;
 
     if (companyId !== null && companyId !== undefined) {
@@ -114,6 +116,16 @@ exports.add = async (req, res) => {
         throw new ApiError(httpStatus.OK, "Invalid Team Leader");
       }
     }
+    if (mySenior !== null) {
+      const isMySeniorExists = await userService.findCount({
+        _id: mySenior,
+        isDeleted: false,
+      });
+      if (!isMySeniorExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Senior!");
+      }
+    }
+
     /**
      * check duplicate exist
      */
@@ -188,6 +200,7 @@ exports.update = async (req, res) => {
       callCenterId,
       floorManagerId,
       teamLeadId,
+      mySenior,
     } = req.body;
     if (req.userData.userType !== userEnum.user) {
       throw new ApiError(
@@ -197,7 +210,15 @@ exports.update = async (req, res) => {
     }
 
     let idToBeSearch = req.userData.Id;
-
+    if (mySenior !== null) {
+      const isMySeniorExists = await userService.findCount({
+        _id: mySenior,
+        isDeleted: false,
+      });
+      if (!isMySeniorExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Senior!");
+      }
+    }
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -886,6 +907,45 @@ exports.getAllTeamLeads = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// get all users by user role
+exports.getAllUsers = async (req, res) => {
+  try {
+    let { userrole } = req.params;
+    let { companyId } = req.userData;
+    console.log(userrole, "userrole");
+
+    let seniorUserRole = await getSeniorUserRole(userrole);
+    console.log(seniorUserRole, "seniorUserRole");
+    let matchQuery = {
+      companyId: companyId,
+      isDeleted: false,
+      isActive: true,
+      userRole: seniorUserRole,
+    };
+
+    let dataExist = await userService.findAllWithQuery(matchQuery);
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {

@@ -23,7 +23,6 @@ const VendorSchema = new mongoose.Schema(
       type: String,
       enum: ["PARTNERSHIP", "SINGLE"],
       required: true,
-      trim: true,
     },
     websiteAddress: { type: String, required: false, default: "", trim: true },
     registrationAddress: {

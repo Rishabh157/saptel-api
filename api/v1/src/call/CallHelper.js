@@ -36,6 +36,7 @@ exports.getOrderNumber = async () => {
   let orderNumber = 0;
 
   let lastObject = await orderService.aggregateQuery([
+    { $match: { orderNumber: { $ne: null } } }, // Modify the $match stage
     { $sort: { _id: -1 } },
     { $limit: 1 },
   ]);
@@ -46,6 +47,22 @@ exports.getOrderNumber = async () => {
     orderNumber = 1;
   }
   return orderNumber;
+};
+
+exports.getInquiryNumber = async () => {
+  let inquiryNumber = 0;
+
+  let lastObject = await orderService.aggregateQuery([
+    { $sort: { _id: -1 } },
+    { $limit: 1 },
+  ]);
+
+  if (lastObject.length) {
+    inquiryNumber = parseInt(lastObject[0].inquiryNumber) + 1;
+  } else {
+    inquiryNumber = 1;
+  }
+  return inquiryNumber;
 };
 
 exports.getComplaintNumber = async () => {

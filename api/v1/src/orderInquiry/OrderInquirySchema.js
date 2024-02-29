@@ -12,6 +12,10 @@ const OrderInquirySchema = new mongoose.Schema(
   {
     orderNumber: {
       type: Number,
+      default: null,
+    },
+    inquiryNumber: {
+      type: Number,
       required: true,
     },
     barcodeId: {

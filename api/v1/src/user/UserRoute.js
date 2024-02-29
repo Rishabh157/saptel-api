@@ -48,6 +48,16 @@ router.get(
   validate(userValidation.getAllFloorManagersAndTeamLead),
   userController.getAllTeamLeads
 );
+
+/**
+ * get all user by user role
+ */
+router.get(
+  "/get-all-users/user-role/:userrole",
+  authCheckMiddleware,
+  validate(userValidation.getAllUsers),
+  userController.getAllUsers
+);
 /**
  * get all user pagination filter
  */

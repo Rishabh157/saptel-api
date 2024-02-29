@@ -8,6 +8,7 @@ const ComplainSchema = new mongoose.Schema(
   {
     complaintNumber: { type: Number, required: true },
     orderNumber: { type: Number, required: true, trim: true },
+    customerNumber: { type: String, required: true },
     orderId: { type: ObjectId, required: true, trim: true },
     schemeId: { type: ObjectId, required: true, trim: true },
     schemeName: { type: String, required: true, trim: true },

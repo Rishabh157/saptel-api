@@ -9,6 +9,7 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     orderNumber: Joi.number().required(),
+    customerNumber: Joi.string().required(),
     orderId: Joi.string().custom(commonValidation.objectId).required(),
     schemeId: Joi.string().custom(commonValidation.objectId).required(),
     schemeName: Joi.string().required(),
@@ -33,6 +34,7 @@ const update = {
   }),
   body: Joi.object().keys({
     orderNumber: Joi.number().required(),
+    customerNumber: Joi.string().required(),
     orderId: Joi.string().custom(commonValidation.objectId).required(),
     schemeId: Joi.string().custom(commonValidation.objectId).required(),
     schemeName: Joi.string().required(),

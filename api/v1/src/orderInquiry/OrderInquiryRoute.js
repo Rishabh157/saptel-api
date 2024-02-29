@@ -66,7 +66,7 @@ router.post(
 );
 //===============get one document (if query) / all document===============
 router.get(
-  "/unauth/phoneno/:phno",
+  "/unauth/phoneno/:phno/type/:type",
   //   validate(orderValidation.get),
   orderController.getUnAuth
 );
@@ -93,6 +93,13 @@ router.get(
   authCheckDealerMiddleware,
   //   validate(orderValidation),
   orderController.getByIdForDealer
+);
+
+// get order data by number unauth
+router.get(
+  "/unauth/:phno/get-by-phnumber",
+
+  orderController.getUnAuthGetByPhNumber
 );
 
 //===============get all pagination filter===============

@@ -70,6 +70,12 @@ const companyEnum = Object.freeze({
   sec: "SECTION_8_COMPANY",
 });
 
+const callPageTabType = Object.freeze({
+  history: "history",
+  order: "order",
+  complaint: "complaint",
+});
+
 const smsType = Object.freeze({
   alcobanSms: "ALCOBAN_SMS",
   complaintCCA_CNC: "COMPLAINT_CCA-CUSTOMER_NOT_CONTACTABLE",
@@ -300,6 +306,7 @@ const userRoleType = Object.freeze({
   srTeamLeaderOrSrEXECUTIVEMIS: "SR_TEAM_LEADER_OR_SR_EXECUTIVE_MIS",
   teamLeaderOrEXECUTIVESalesCenter: "TEAM_LEADER_OR_EXECUTIVE_SALES_CENTER",
   srEXECUTIVESalesCenter: "SR_EXECUTIVE_SALES_CENTER",
+  executiveSalesCenter: "EXECUTIVE_SALES_CENTER",
   EXECUTIVETrainee: "EXECUTIVE_TRAINEE",
   avpHr: "HR_AVP",
   amgHrAndStatutoryCompliance: "AMG_HR_AND_STATUTORY_COMPLIANCE",
@@ -464,4 +471,5 @@ module.exports = {
   complainCallTypeEnum,
   complainStatusEnum,
   ndrRtoAttemptEnum,
+  callPageTabType,
 };

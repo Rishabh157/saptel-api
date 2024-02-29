@@ -2,6 +2,7 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
+const { userRoleType } = require("../../helper/enumUtils");
 
 /**
  * create new document
@@ -27,6 +28,26 @@ const create = {
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
     isAgent: Joi.boolean(),
+    mySenior: Joi.when("userRole", {
+      is: Joi.valid(
+        userRoleType.avpSales,
+        userRoleType.avpHr,
+        userRoleType.avpDistribution,
+        userRoleType.avpFinance,
+        userRoleType.avpMedia,
+        userRoleType.avpMediaProduction,
+        userRoleType.avpIT,
+        userRoleType.avpDevelopment,
+        userRoleType.avpWebDevelopment,
+        userRoleType.avpOperations,
+        userRoleType.avpQA,
+        userRoleType.avpLogistics,
+        userRoleType.avpMapping,
+        userRoleType.avpAdmin
+      ),
+      then: Joi.string().custom(commonValidation.objectId).allow(null),
+      otherwise: Joi.string().custom(commonValidation.objectId).required(),
+    }),
   }),
 };
 
@@ -54,6 +75,26 @@ const update = {
     userDepartment: Joi.string().required(),
     userRole: Joi.string().required(),
     isAgent: Joi.boolean(),
+    mySenior: Joi.when("userRole", {
+      is: Joi.valid(
+        userRoleType.avpSales,
+        userRoleType.avpHr,
+        userRoleType.avpDistribution,
+        userRoleType.avpFinance,
+        userRoleType.avpMedia,
+        userRoleType.avpMediaProduction,
+        userRoleType.avpIT,
+        userRoleType.avpDevelopment,
+        userRoleType.avpWebDevelopment,
+        userRoleType.avpOperations,
+        userRoleType.avpQA,
+        userRoleType.avpLogistics,
+        userRoleType.avpMapping,
+        userRoleType.avpAdmin
+      ),
+      then: Joi.string().custom(commonValidation.objectId).allow(null),
+      otherwise: Joi.string().custom(commonValidation.objectId).required(),
+    }),
   }),
 };
 
@@ -148,6 +189,12 @@ const getAllFloorManagersAndTeamLead = {
     callcenterid: Joi.string().required(),
   }),
 };
+
+const getAllUsers = {
+  params: Joi.object().keys({
+    userrole: Joi.string().required(),
+  }),
+};
 /**
  * refresh token
  */
@@ -220,4 +267,5 @@ module.exports = {
   refreshTokenValid,
   changePasswordValid,
   getAllFloorManagersAndTeamLead,
+  getAllUsers,
 };
