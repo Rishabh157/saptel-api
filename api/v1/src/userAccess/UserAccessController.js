@@ -18,126 +18,38 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 
+// add start
 exports.add = async (req, res) => {
   try {
-    let { userId, departmentId, userRoleId } = req.body;
-
-    /**
-     * check user exist
-     */
-    if (userId) {
-      let userExist = await userService.getOneByMultiField({
-        _id: userId,
-      });
-      if (!userExist) {
-        throw new ApiError(httpStatus.OK, "User not found.");
-      }
-    }
-
-    /**
-     * check department exist
-     */
-
+    let { userId, userRoleId } = req.body;
     /**
      * check duplicate exist
      */
 
-    if (userId === null) {
-      let dataExistWithPosition = await userAccessService.getOneByMultiField({
-        userRoleId: userRoleId,
-        isDeleted: false,
+    let dataExist = await userAccessService.isExists(
+      [{ userId }, { userRoleId }],
+      false,
+      true
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    //------------------create data-------------------
+    let dataCreated = await userAccessService.createNewData({ ...req.body });
+
+    if (dataCreated) {
+      return res.status(httpStatus.CREATED).send({
+        message: "Added successfully.",
+        data: dataCreated,
+        status: true,
+        code: null,
+        issue: null,
       });
-
-      if (dataExistWithPosition) {
-        let dataUpdated = await userAccessService.updateMany(
-          {
-            userRoleId: userRoleId,
-            isDeleted: false,
-          },
-          {
-            $set: {
-              module: req.body.module,
-            },
-          }
-        );
-        if (dataUpdated) {
-          return res.status(httpStatus.CREATED).send({
-            message: "Updated successfully.",
-            data: dataUpdated,
-            status: true,
-            code: "OK",
-            issue: null,
-          });
-        }
-      } else {
-        let dataCreated = await userAccessService.createNewData({
-          ...req.body,
-        });
-
-        if (dataCreated) {
-          return res.status(httpStatus.CREATED).send({
-            message: "Added successfully.",
-            data: dataCreated,
-            status: true,
-            code: "OK",
-            issue: null,
-          });
-        } else {
-          throw new ApiError(
-            httpStatus.NOT_IMPLEMENTED,
-            `Something went wrong.`
-          );
-        }
-      }
     } else {
-      let dataExist = await userAccessService.getOneByMultiField({
-        userId: userId,
-      });
-
-      if (dataExist) {
-        let dataUpdated = await userAccessService.getOneAndUpdate(
-          {
-            _id: dataExist._id,
-            isDeleted: false,
-          },
-          {
-            $set: {
-              ...req.body,
-            },
-          }
-        );
-        if (dataUpdated) {
-          return res.status(httpStatus.CREATED).send({
-            message: "Updated successfully.",
-            data: dataUpdated,
-            status: true,
-            code: "OK",
-            issue: null,
-          });
-        }
-      } else {
-        let dataCreated = await userAccessService.createNewData({
-          ...req.body,
-        });
-
-        if (dataCreated) {
-          return res.status(httpStatus.CREATED).send({
-            message: "Added successfully.",
-            data: dataCreated,
-            status: true,
-            code: "OK",
-            issue: null,
-          });
-        } else {
-          throw new ApiError(
-            httpStatus.NOT_IMPLEMENTED,
-            `Something went wrong.`
-          );
-        }
-      }
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
-    console.log(err);
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
@@ -146,6 +58,135 @@ exports.add = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// exports.add = async (req, res) => {
+//   try {
+//     let { userId, departmentId, userRoleId } = req.body;
+
+//     /**
+//      * check user exist
+//      */
+//     if (userId) {
+//       let userExist = await userService.getOneByMultiField({
+//         _id: userId,
+//       });
+//       if (!userExist) {
+//         throw new ApiError(httpStatus.OK, "User not found.");
+//       }
+//     }
+
+//     /**
+//      * check department exist
+//      */
+
+//     /**
+//      * check duplicate exist
+//      */
+
+//     if (userId === null) {
+//       let dataExistWithPosition = await userAccessService.getOneByMultiField({
+//         userRoleId: userRoleId,
+//         isDeleted: false,
+//       });
+
+//       if (dataExistWithPosition) {
+//         let dataUpdated = await userAccessService.updateMany(
+//           {
+//             userRoleId: userRoleId,
+//             isDeleted: false,
+//           },
+//           {
+//             $set: {
+//               module: req.body.module,
+//             },
+//           }
+//         );
+//         if (dataUpdated) {
+//           return res.status(httpStatus.CREATED).send({
+//             message: "Updated successfully.",
+//             data: dataUpdated,
+//             status: true,
+//             code: "OK",
+//             issue: null,
+//           });
+//         }
+//       } else {
+//         let dataCreated = await userAccessService.createNewData({
+//           ...req.body,
+//         });
+
+//         if (dataCreated) {
+//           return res.status(httpStatus.CREATED).send({
+//             message: "Added successfully.",
+//             data: dataCreated,
+//             status: true,
+//             code: "OK",
+//             issue: null,
+//           });
+//         } else {
+//           throw new ApiError(
+//             httpStatus.NOT_IMPLEMENTED,
+//             `Something went wrong.`
+//           );
+//         }
+//       }
+//     } else {
+//       let dataExist = await userAccessService.getOneByMultiField({
+//         userId: userId,
+//       });
+
+//       if (dataExist) {
+//         let dataUpdated = await userAccessService.getOneAndUpdate(
+//           {
+//             _id: dataExist._id,
+//             isDeleted: false,
+//           },
+//           {
+//             $set: {
+//               ...req.body,
+//             },
+//           }
+//         );
+//         if (dataUpdated) {
+//           return res.status(httpStatus.CREATED).send({
+//             message: "Updated successfully.",
+//             data: dataUpdated,
+//             status: true,
+//             code: "OK",
+//             issue: null,
+//           });
+//         }
+//       } else {
+//         let dataCreated = await userAccessService.createNewData({
+//           ...req.body,
+//         });
+
+//         if (dataCreated) {
+//           return res.status(httpStatus.CREATED).send({
+//             message: "Added successfully.",
+//             data: dataCreated,
+//             status: true,
+//             code: "OK",
+//             issue: null,
+//           });
+//         } else {
+//           throw new ApiError(
+//             httpStatus.NOT_IMPLEMENTED,
+//             `Something went wrong.`
+//           );
+//         }
+//       }
+//     }
+//   } catch (err) {
+//     console.log(err);
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 //update start
 exports.update = async (req, res) => {
