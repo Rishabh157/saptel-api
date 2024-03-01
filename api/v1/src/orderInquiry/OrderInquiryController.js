@@ -1571,7 +1571,7 @@ exports.getUnAuth = async (req, res) => {
           },
         },
         {
-          $unset: ["icOneData","icTwoData","icThreeData"],
+          $unset: ["icOneData", "icTwoData", "icThreeData"],
         },
       ];
     }
@@ -2826,6 +2826,8 @@ exports.getByIdForDealer = async (req, res) => {
 exports.allFilterPagination = async (req, res) => {
   try {
     const { Id } = req.userData;
+    console.log("in");
+    let isOrderOrInquiry = req.body.isOrderOrInquiry;
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.searchIn;
@@ -2940,16 +2942,25 @@ exports.allFilterPagination = async (req, res) => {
       "channel",
       "agentDistrictId",
     ];
-
-    const filterQuery = getFilterQuery(
-      filterBy,
-      booleanFields,
-      numberFileds,
-      objectIdFields
-    );
-    if (filterQuery && filterQuery.length) {
-      matchQuery.$and.push(...filterQuery);
+    if (isOrderOrInquiry === "order") {
+      matchQuery.$and.push({ orderNumber: { $ne: null } });
     }
+    if (isOrderOrInquiry === "inquiry") {
+      matchQuery.$and.push({ orderNumber: { $eq: null } });
+    }
+    if (isOrderOrInquiry === "") {
+      const filterQuery = getFilterQuery(
+        filterBy,
+        booleanFields,
+        numberFileds,
+        objectIdFields
+      );
+      console.log(filterQuery, "filterQuery");
+      if (filterQuery && filterQuery.length) {
+        matchQuery.$and.push(...filterQuery);
+      }
+    }
+
     //----------------------------
     //calander filter
     /**

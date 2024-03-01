@@ -309,7 +309,8 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+
+    let matchQuery = { isDeleted: false, isActive: true };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
@@ -358,6 +359,7 @@ exports.getById = async (req, res) => {
     let dataExist = await dispositionOneService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
+      isActive: true,
     });
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 

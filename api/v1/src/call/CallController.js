@@ -270,6 +270,7 @@ exports.update = async (req, res) => {
             isActive: true,
             productGroupId: new mongoose.Types.ObjectId(productGroupId),
             mobileNo: mobileNo,
+            orderNumber: { $ne: null },
 
             status: {
               $nin: [

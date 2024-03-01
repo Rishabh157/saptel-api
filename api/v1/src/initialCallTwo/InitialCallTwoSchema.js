@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { complaintType } = require("../../helper/enumUtils");
 const InitialCallTwoSchema = new mongoose.Schema(
   {
     initialCallName: {
@@ -11,7 +12,11 @@ const InitialCallTwoSchema = new mongoose.Schema(
     callType: {
       type: String,
       required: true,
-      enum: ["COMPLAINT", "INQUIRY"],
+      enum: [
+        complaintType.complaint,
+        complaintType.inquiry,
+        complaintType.feedback,
+      ],
     },
     initialCallOneId: {
       type: ObjectId,

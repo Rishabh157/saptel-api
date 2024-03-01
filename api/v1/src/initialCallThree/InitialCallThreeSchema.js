@@ -5,7 +5,11 @@ const InitialCallThreeSchema = new mongoose.Schema(
   {
     callType: {
       type: String,
-      enum: [complaintType.complaint, complaintType.inquiry],
+      enum: [
+        complaintType.complaint,
+        complaintType.inquiry,
+        complaintType.feedback,
+      ],
       required: true,
     },
 

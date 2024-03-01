@@ -158,6 +158,7 @@ exports.get = async (req, res) => {
     //if no default query then pass {}
     let matchQuery = {
       isDeleted: false,
+      isActive: true,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
@@ -371,6 +372,7 @@ exports.getByDispositionOneId = async (req, res) => {
         $match: {
           dispositionOneId: new mongoose.Types.ObjectId(dispositionOneId),
           isDeleted: false,
+          isActive: true,
         },
       },
       {
