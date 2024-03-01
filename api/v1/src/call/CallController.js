@@ -248,6 +248,7 @@ exports.update = async (req, res) => {
       shcemeQuantity,
       mobileNo,
       alternateNo,
+      productGroupId,
     } = req.body;
 
     const isDispositionThreeExists =
@@ -267,7 +268,7 @@ exports.update = async (req, res) => {
           $match: {
             isDeleted: false,
             isActive: true,
-            schemeId: new mongoose.Types.ObjectId(schemeId),
+            productGroupId: new mongoose.Types.ObjectId(productGroupId),
             mobileNo: mobileNo,
 
             status: {
