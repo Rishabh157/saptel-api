@@ -450,7 +450,12 @@ exports.update = async (req, res) => {
           unique_id: mobileNo,
           disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
         },
-        { headers: { XAuth: config.server_auth_key } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            XAuth: config.server_auth_key,
+          },
+        }
       );
 
       return res.status(httpStatus.OK).send({
