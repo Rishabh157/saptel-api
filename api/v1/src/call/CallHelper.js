@@ -82,7 +82,10 @@ exports.getComplaintNumber = async () => {
 };
 
 exports.isOrder = async (applicableCriteriaList) => {
-  let applicableCriteriaArray = [applicableCriteria.isOrder];
+  let applicableCriteriaArray = [
+    applicableCriteria.isOrder,
+    applicableCriteria.isUrgent,
+  ];
   let flag = false;
   applicableCriteriaList?.map((e) => {
     if (applicableCriteriaArray.includes(e)) {
