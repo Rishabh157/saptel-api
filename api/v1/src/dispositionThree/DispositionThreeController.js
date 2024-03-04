@@ -40,7 +40,9 @@ exports.add = async (req, res) => {
       priority,
       applicableCriteria,
     } = req.body;
+    let dispositionDisplayName = dispositionName;
 
+    req.body.dispositionName = dispositionName?.replaceAll(" ", "");
     const isDispositionOneExists = await dispositionOneService.findCount({
       _id: dispositionOneId,
       isDeleted: false,
@@ -75,6 +77,7 @@ exports.add = async (req, res) => {
     // ----------------------create data-------------------------
     let dataCreated = await dispositionThreeService.createNewData({
       ...req.body,
+      dispositionDisplayName: dispositionDisplayName,
     });
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -111,7 +114,8 @@ exports.update = async (req, res) => {
       priority,
       applicableCriteria,
     } = req.body;
-
+    let dispositionDisplayName = dispositionName;
+    req.body.dispositionName = dispositionName?.replaceAll(" ", "");
     let idToBeSearch = req.params.id;
 
     let dataExist = await dispositionThreeService.isExists(
@@ -160,6 +164,7 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
+          dispositionDisplayName: dispositionDisplayName,
         },
       }
     );

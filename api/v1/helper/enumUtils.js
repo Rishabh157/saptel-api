@@ -134,18 +134,18 @@ const whatsType = Object.freeze({
 });
 
 const applicableCriteria = Object.freeze({
-  isOrder: "IS_ORDER",
-  isPrepaid: "IS_PREPAID",
-  isReplacement: "IS_REPLACEMENT",
-  isCallBack: "IS_CALLBACK",
-  isSchemeApp: "IS_SCHEME_APP",
-  outOfStock: "OUT_OF_STOCK",
-  isProductApp: "IS_PRODUCT_APP",
-  adtApplicable: "ADT_APPLICABLE",
-  isTextboxReq: "IS_TEXTBOX_REQ",
-  isUrgent: "IS_URGENT",
-  isRemarkDateApp: "IS_REMARK_DATE_APP",
-  isInquiry: "IS_INQUIRY",
+  isOrder: "ISORDER",
+  isPrepaid: "ISPREPAID",
+  isReplacement: "ISREPLACEMENT",
+  isCallBack: "ISCALLBACK",
+  isSchemeApp: "ISSCHEMEAPP",
+  outOfStock: "OUTOFSTOCK",
+  isProductApp: "ISPRODUCTAPP",
+  adtApplicable: "ADTAPPLICABLE",
+  isTextboxReq: "ISTEXTBOXREQ",
+  isUrgent: "ISURGENT",
+  isRemarkDateApp: "ISREMARKDATEAPP",
+  isInquiry: "ISINQUIRY",
 });
 
 const genderType = Object.freeze({
@@ -380,6 +380,12 @@ const userRoleType = Object.freeze({
   managerAdmin: "MANAGER_ADMIN",
   srEXECUTIVEAdmin: "SR_EXECUTIVE_ADMIN",
   EXECUTIVEAdmin: "EXECUTIVE_ADMIN",
+  customerCareAvp: "CUSTOMER_CARE_AVP",
+  customerCareManager: "CUSTOMER_CARE_MANAGER",
+  customerCareAm: "CUSTOMER_CARE_AM",
+  customerCareTeamLead: "CUSTOMER_CARE_TEAM_LEADER",
+  customerCareSrEx: "CUSTOMER_CARE_SR_EXECUTIVE",
+  customerCareEx: "CUSTOMER_CARE_EXECUTIVE",
 });
 const ledgerType = Object.freeze({
   credit: "CREDIT_NOTE_CREATED",

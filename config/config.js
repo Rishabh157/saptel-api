@@ -19,6 +19,7 @@ let {
   BASEURL_LIVE,
   JWT_SECRET_OTP,
   JWT_EXPIRATION_MINUTES_OTP,
+  SERVER_AUTH_KEY,
 } = process.env;
 
 let envObj = {
@@ -37,6 +38,7 @@ let envObj = {
   BASEURL_LIVE,
   JWT_SECRET_OTP,
   JWT_EXPIRATION_MINUTES_OTP,
+  SERVER_AUTH_KEY,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -62,6 +64,7 @@ const envVarsSchema = Joi.object().keys({
   JWT_EXPIRATION_MINUTES_OTP: Joi.string()
     .default("20 minutes")
     .description("minutes after which otp token expires"),
+  SERVER_AUTH_KEY: Joi.string().required().label("Server auth key is required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -95,6 +98,7 @@ module.exports = {
   jwt_secret_otp: envVars.JWT_SECRET_OTP,
   jwt_expires_otp: envVars.JWT_EXPIRATION_MINUTES_OTP,
   localhost: envVars.LOCALHOST,
+  server_auth_key: envVars.SERVER_AUTH_KEY,
 
   base_url:
     envVars.NODE_ENV === "development"

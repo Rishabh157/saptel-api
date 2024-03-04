@@ -55,6 +55,7 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: axios } = require("axios");
 
 //add start
 exports.add = async (req, res) => {
@@ -436,6 +437,24 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
+      await axios
+        .post(
+          "https://uat.onetelemart.com/agent/v2/click-2-hangup",
+          {
+            user: agentName,
+            phone_number: mobileNo,
+            unique_id: mobileNo,
+            disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
+          },
+          { headers: { XAuth: config.server_auth_key } }
+        )
+        .then((res) => {
+          console.log(res, "resss");
+        })
+        .catch((err) => {
+          console.log(err, "error");
+        });
+
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,

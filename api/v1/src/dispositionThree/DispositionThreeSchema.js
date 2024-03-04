@@ -13,6 +13,12 @@ const DispositionThreeSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      uppercase: true,
+    },
+    dispositionDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
       lowercase: true,
     },
     dispositionOneId: {

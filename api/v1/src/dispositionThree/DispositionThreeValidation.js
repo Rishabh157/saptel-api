@@ -6,7 +6,7 @@ const commonValidation = require("../../helper/CommonValidation");
 //===============create new document===============
 const create = {
   body: Joi.object().keys({
-    dispositionName: Joi.string().lowercase().required(),
+    dispositionName: Joi.string().uppercase().required(),
     dispositionOneId: Joi.string().custom(commonValidation.objectId).required(),
     dispositionTwoId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
