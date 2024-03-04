@@ -2852,8 +2852,10 @@ exports.allFilterPagination = async (req, res) => {
     };
 
     if (isUserExists?.isAgent) {
-      matchQuery.$and.push({ agentId: Id });
-      matchQuery.$and.push({ callCenterId: isUserExists?.callCenterId });
+      matchQuery.$and.push({ agentId: new mongoose.Types.ObjectId(Id) });
+      matchQuery.$and.push({
+        callCenterId: new mongoose.Types.ObjectId(isUserExists?.callCenterId),
+      });
     }
 
     if (
