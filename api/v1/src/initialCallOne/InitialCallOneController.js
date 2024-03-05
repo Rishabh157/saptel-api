@@ -382,57 +382,57 @@ exports.allFilterPagination = async (req, res) => {
 // =============all filter pagination api end================
 
 // =============delete api start==================
-exports.deleteDocument = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    if (!(await initialCallOneService.getOneByMultiField({ _id }))) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-    // ------find disposition (if use in other module / not)------
-    let isInitialCallOneExists = await initialCallTwoService.findCount({
-      initialCallOneId: _id,
-      isDeleted: false,
-    });
+// exports.deleteDocument = async (req, res) => {
+//   try {
+//     let _id = req.params.id;
+//     if (!(await initialCallOneService.getOneByMultiField({ _id }))) {
+//       throw new ApiError(httpStatus.OK, "Data not found.");
+//     }
+//     // ------find disposition (if use in other module / not)------
+//     let isInitialCallOneExists = await initialCallTwoService.findCount({
+//       initialCallOneId: _id,
+//       isDeleted: false,
+//     });
 
-    if (isInitialCallOneExists) {
-      throw new ApiError(
-        httpStatus.OK,
-        "InitialCall One can't be deleted as it is used in other module"
-      );
-    }
+//     if (isInitialCallOneExists) {
+//       throw new ApiError(
+//         httpStatus.OK,
+//         "InitialCall One can't be deleted as it is used in other module"
+//       );
+//     }
 
-    let isInitialCallOneExistsInIcThree =
-      await initialCallThreeService.findCount({
-        dispositionOneId: _id,
-        isDeleted: false,
-      });
-    if (isInitialCallOneExistsInIcThree) {
-      throw new ApiError(
-        httpStatus.OK,
-        "InitialCall One  can't be deleted as it is used in other module"
-      );
-    }
+//     let isInitialCallOneExistsInIcThree =
+//       await initialCallThreeService.findCount({
+//         dispositionOneId: _id,
+//         isDeleted: false,
+//       });
+//     if (isInitialCallOneExistsInIcThree) {
+//       throw new ApiError(
+//         httpStatus.OK,
+//         "InitialCall One  can't be deleted as it is used in other module"
+//       );
+//     }
 
-    let deleted = await initialCallOneService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
-    return res.status(httpStatus.OK).send({
-      message: "Delete Successfull.",
-      status: true,
-      data: null,
-      code: "OK",
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//     let deleted = await initialCallOneService.getOneAndDelete({ _id });
+//     if (!deleted) {
+//       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+//     }
+//     return res.status(httpStatus.OK).send({
+//       message: "Delete Successfull.",
+//       status: true,
+//       data: null,
+//       code: "OK",
+//       issue: null,
+//     });
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 // =============delete api start end============
 

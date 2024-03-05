@@ -82,6 +82,15 @@ const getAllFilter = {
   }),
 };
 
+/**
+ * change status of document
+ */
+const changeStatus = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 //===============delete a document===============
 const deleteDocument = {
   params: Joi.object().keys({
@@ -94,4 +103,5 @@ module.exports = {
   get,
   getAllFilter,
   deleteDocument,
+  changeStatus,
 };

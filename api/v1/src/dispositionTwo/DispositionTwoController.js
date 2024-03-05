@@ -645,41 +645,41 @@ exports.statusChange = async (req, res) => {
 // =============statusChange end================
 
 // =============delete api start==================
-exports.deleteDocument = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    if (!(await dispositionTwoService.getOneByMultiField({ _id }))) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
+// exports.deleteDocument = async (req, res) => {
+//   try {
+//     let _id = req.params.id;
+//     if (!(await dispositionTwoService.getOneByMultiField({ _id }))) {
+//       throw new ApiError(httpStatus.OK, "Data not found.");
+//     }
 
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(
-      collectionArrToMatch,
-      "dispositionTwoId",
-      _id
-    );
+//     const deleteRefCheck = await checkIdInCollectionsThenDelete(
+//       collectionArrToMatch,
+//       "dispositionTwoId",
+//       _id
+//     );
 
-    if (deleteRefCheck.status === true) {
-      let deleted = await dispositionTwoService.getOneAndDelete({ _id });
-      if (!deleted) {
-        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-      }
-    }
+//     if (deleteRefCheck.status === true) {
+//       let deleted = await dispositionTwoService.getOneAndDelete({ _id });
+//       if (!deleted) {
+//         throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+//       }
+//     }
 
-    return res.status(httpStatus.OK).send({
-      message: deleteRefCheck.message,
-      status: deleteRefCheck.status,
-      data: null,
-      code: "OK",
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//     return res.status(httpStatus.OK).send({
+//       message: deleteRefCheck.message,
+//       status: deleteRefCheck.status,
+//       data: null,
+//       code: "OK",
+//       issue: null,
+//     });
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 // =============delete api start end============

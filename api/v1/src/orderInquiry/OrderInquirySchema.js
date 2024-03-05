@@ -332,6 +332,7 @@ const OrderInquirySchema = new mongoose.Schema(
         orderStatusEnum.pnd,
         orderStatusEnum.urgent,
         orderStatusEnum.nonAction,
+        orderStatusEnum.inquiry,
       ],
       default: orderStatusEnum.fresh,
     },

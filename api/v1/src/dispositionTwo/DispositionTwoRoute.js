@@ -95,11 +95,11 @@ router.put(
 );
 
 //===============delete document===============
-router.delete(
-  "/:id",
-  authCheckMiddleware,
-  validate(dispositionTwoValidation.deleteDocument),
-  dispositionTwoController.deleteDocument
-);
+// router.delete(
+//   "/:id",
+//   authCheckMiddleware,
+//   validate(dispositionTwoValidation.deleteDocument),
+//   dispositionTwoController.deleteDocument
+// );
 
 module.exports = router;

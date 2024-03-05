@@ -32,6 +32,7 @@ exports.add = async (req, res) => {
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
+      isActive: true,
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
@@ -88,6 +89,7 @@ exports.update = async (req, res) => {
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
+      isActive: true,
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
@@ -104,6 +106,7 @@ exports.update = async (req, res) => {
       {
         _id: idToBeSearch,
         isDeleted: false,
+        isActive: true,
       },
       {
         $set: {
@@ -143,6 +146,7 @@ exports.get = async (req, res) => {
     let matchQuery = {
       companyId: companyId,
       isDeleted: false,
+      isActive: true,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
@@ -194,6 +198,7 @@ exports.getById = async (req, res) => {
     let dataExist = await complaintDispositionService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
+      isActive: true,
     });
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
@@ -404,3 +409,39 @@ exports.deleteDocument = async (req, res) => {
 };
 
 // =============delete api start end============
+
+//statusChange
+exports.statusChange = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let dataExist = await complaintDispositionService.getOneByMultiField({
+      _id,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    let isActive = dataExist.isActive ? false : true;
+
+    let statusChanged = await complaintDispositionService.getOneAndUpdate(
+      { _id },
+      { isActive }
+    );
+    if (!statusChanged) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: statusChanged,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};

@@ -44,6 +44,17 @@ router.put(
   complaintDispositionController.update
 );
 
+/**
+ * update status
+ */
+router.put(
+  "/status-change/:id",
+
+  authCheckMiddleware,
+  validate(complaintDispositionValidation.changeStatus),
+  complaintDispositionController.statusChange
+);
+
 //===============delete document===============
 router.delete(
   "/:id",

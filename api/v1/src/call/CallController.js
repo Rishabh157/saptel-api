@@ -392,7 +392,7 @@ exports.update = async (req, res) => {
     console.log(isUserExists, "isUserExists");
     const orderInquiry = await orderService.createNewData({
       ...req.body,
-      status: status,
+      status: inquiryNumber ? orderStatusEnum.inquiry : status,
       orderNumber: flag ? orderNumber : null,
       inquiryNumber: inquiryNumber,
       assignDealerId: null,
@@ -409,7 +409,7 @@ exports.update = async (req, res) => {
 
     await orderInquiryFlowService.createNewData({
       ...req.body,
-      status: status,
+      status: inquiryNumber ? orderStatusEnum.inquiry : status,
       orderId: orderInquiry?._id,
       assignDealerId: null,
       assignWarehouseId: null,
@@ -430,7 +430,7 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
-          status: status,
+          status: inquiryNumber ? orderStatusEnum.inquiry : status,
           ...req.body,
         },
       }

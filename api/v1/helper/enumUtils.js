@@ -178,6 +178,7 @@ const orderStatusEnum = Object.freeze({
   urgent: "URGENT",
   nonAction: "NON_ACTION",
   rto: "RTO",
+  inquiry: "INQUIRY",
 });
 
 const apiAppEnum = Object.freeze({

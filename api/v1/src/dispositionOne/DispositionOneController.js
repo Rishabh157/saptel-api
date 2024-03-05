@@ -384,43 +384,43 @@ exports.getById = async (req, res) => {
   }
 };
 //delete api
-exports.deleteDocument = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    if (!(await dispositionOneService.getOneByMultiField({ _id }))) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-    // ------find disposition (if use in other module / not)------
+// exports.deleteDocument = async (req, res) => {
+//   try {
+//     let _id = req.params.id;
+//     if (!(await dispositionOneService.getOneByMultiField({ _id }))) {
+//       throw new ApiError(httpStatus.OK, "Data not found.");
+//     }
+//     // ------find disposition (if use in other module / not)------
 
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(
-      collectionArrToMatch,
-      "dispositionOneId",
-      _id
-    );
+//     const deleteRefCheck = await checkIdInCollectionsThenDelete(
+//       collectionArrToMatch,
+//       "dispositionOneId",
+//       _id
+//     );
 
-    if (deleteRefCheck.status === true) {
-      let deleted = await dispositionOneService.getOneAndDelete({ _id });
-      if (!deleted) {
-        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-      }
-    }
+//     if (deleteRefCheck.status === true) {
+//       let deleted = await dispositionOneService.getOneAndDelete({ _id });
+//       if (!deleted) {
+//         throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+//       }
+//     }
 
-    return res.status(httpStatus.OK).send({
-      message: deleteRefCheck.message,
-      status: deleteRefCheck.status,
-      data: null,
-      code: "OK",
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//     return res.status(httpStatus.OK).send({
+//       message: deleteRefCheck.message,
+//       status: deleteRefCheck.status,
+//       data: null,
+//       code: "OK",
+//       issue: null,
+//     });
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 //statusChange
 exports.statusChange = async (req, res) => {
   try {

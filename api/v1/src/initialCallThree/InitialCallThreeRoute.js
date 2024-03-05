@@ -60,11 +60,11 @@ router.put(
 );
 
 //===============delete document===============
-router.delete(
-  "/:id",
-  authCheckMiddleware,
-  validate(initialCallThreeValidation.deleteDocument),
-  initialCallThreeController.deleteDocument
-);
+// router.delete(
+//   "/:id",
+//   authCheckMiddleware,
+//   validate(initialCallThreeValidation.deleteDocument),
+//   initialCallThreeController.deleteDocument
+// );
 
 module.exports = router;

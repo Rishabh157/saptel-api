@@ -171,7 +171,6 @@ const getGlobalSearch = {
  */
 const getAllFilter = {
   body: Joi.object().keys({
-    isOrderOrInquiry: Joi.string().allow(""),
     params: Joi.array().items(Joi.string().required()),
     searchValue: Joi.string().allow(""),
     dateFilter: Joi.object()

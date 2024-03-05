@@ -725,33 +725,33 @@ exports.getByDispositionTwoId = async (req, res) => {
 // =============get all DispositionThree by Id of DispositionTwo Id end================
 
 // =============delete api start==================
-exports.deleteDocument = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    if (!(await dispositionThreeService.getOneByMultiField({ _id }))) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-    let deleted = await dispositionThreeService.getOneAndDelete({ _id });
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
+// exports.deleteDocument = async (req, res) => {
+//   try {
+//     let _id = req.params.id;
+//     if (!(await dispositionThreeService.getOneByMultiField({ _id }))) {
+//       throw new ApiError(httpStatus.OK, "Data not found.");
+//     }
+//     let deleted = await dispositionThreeService.getOneAndDelete({ _id });
+//     if (!deleted) {
+//       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+//     }
 
-    return res.status(httpStatus.OK).send({
-      message: "Delete Successfull.",
-      status: true,
-      data: null,
-      code: "OK",
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//     return res.status(httpStatus.OK).send({
+//       message: "Delete Successfull.",
+//       status: true,
+//       data: null,
+//       code: "OK",
+//       issue: null,
+//     });
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 // =============delete api start end============
 
