@@ -54,6 +54,7 @@ const {
   userEnum,
   callPageTabType,
 } = require("../../helper/enumUtils");
+const { getCustomerReputation } = require("./OrderInquiryHelper");
 
 exports.add = async (req, res) => {
   try {
@@ -1906,15 +1907,18 @@ exports.getUnAuthGetByPhNumber = async (req, res) => {
         ],
       },
     ];
-
+    let allComplaints = await complaintService.findAllWithQuery({
+      customerNumber: phno,
+    });
+    let customerReputation = await getCustomerReputation(allComplaints);
     let dataExist = await orderService.aggregateQuery(additionalQuery);
-
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
+        customerReputation: customerReputation,
         data: dataExist[0],
         code: "OK",
         issue: null,
@@ -2211,23 +2215,18 @@ exports.getById = async (req, res) => {
 
 exports.getByMobileNumber = async (req, res) => {
   try {
-    let {
-      barcode,
-      contactNumber,
-      incomingNumber,
-      complaintNumber,
-      email,
-      orderNumber,
-    } = req.body;
+    let { barcode, contactNumber, complaintNumber, email, orderNumber } =
+      req.body;
 
     let matchQuery = {};
 
     if (contactNumber) {
-      matchQuery.mobileNo = contactNumber;
+      matchQuery.$or = [
+        { mobileNo: contactNumber },
+        { alternateNo: contactNumber },
+      ];
     }
-    if (incomingNumber) {
-      matchQuery.incomingCallerNo = incomingNumber;
-    }
+
     if (email) {
       matchQuery.emailId = email;
     }
@@ -2517,14 +2516,7 @@ exports.getByMobileNumber = async (req, res) => {
       actionType.view
     );
     let dataExist = await orderService.aggregateQuery(additionalQuery);
-    let allOrderData = await orderService.aggregateQuery([
-      {
-        $match: {
-          isDeleted: false,
-          mobileNo: contactNumber,
-        },
-      },
-    ]);
+
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
     if (!allowedFields[0]) {
@@ -2534,7 +2526,7 @@ exports.getByMobileNumber = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: allowedFields[0],
-        allOrderData: allOrderData.length ? allOrderData : null,
+        allOrderData: allowedFields,
         code: "OK",
         issue: null,
       });

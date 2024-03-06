@@ -42,7 +42,8 @@ exports.add = async (req, res) => {
       companyId,
       callType,
     } = req.body;
-
+    let initialCallDisplayName = initialCallName;
+    req.body.initialCallName = initialCallName?.replaceAll(" ", "");
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -85,6 +86,7 @@ exports.add = async (req, res) => {
     // ----------------------create data-------------------------
     let dataCreated = await initialCallThreeService.createNewData({
       ...req.body,
+      initialCallDisplayName: initialCallDisplayName,
     });
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -491,6 +493,7 @@ exports.allFilterPagination = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -506,6 +509,7 @@ exports.allFilterPagination = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -518,6 +522,12 @@ exports.allFilterPagination = async (req, res) => {
           },
           initialCallOneLabel: {
             $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+          initialCallTwoDisplayLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
+          },
+          initialCallOneDisplayLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },

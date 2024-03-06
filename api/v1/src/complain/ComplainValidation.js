@@ -105,6 +105,12 @@ const get = {
     .optional(),
 };
 
+const getByNumber = {
+  query: Joi.object().keys({
+    number: Joi.string().required(),
+  }),
+};
+
 /**
  * delete a document
  */
@@ -139,4 +145,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  getByNumber,
 };

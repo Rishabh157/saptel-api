@@ -6,6 +6,12 @@ const DispositionOneSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      uppercase: true,
+    },
+    dispositionDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
       lowercase: true,
     },
     companyId: { type: ObjectId, required: true, trim: true },

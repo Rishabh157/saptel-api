@@ -219,11 +219,11 @@ const OrderInquirySchema = new mongoose.Schema(
       default: null,
     },
 
-    reciversName: {
-      type: String,
-      required: false,
-      default: "",
-    },
+    // reciversName: {
+    //   type: String,
+    //   required: false,
+    //   default: "",
+    // },
     remark: {
       type: String,
       required: false,

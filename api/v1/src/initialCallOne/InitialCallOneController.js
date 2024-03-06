@@ -31,7 +31,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let { initialCallName, companyId } = req.body;
-
+    let initialCallDisplayName = initialCallName;
+    req.body.initialCallName = initialCallName?.replaceAll(" ", "");
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -48,6 +49,7 @@ exports.add = async (req, res) => {
     // ----------------------create data-------------------------
     let dataCreated = await initialCallOneService.createNewData({
       ...req.body,
+      initialCallDisplayName: initialCallDisplayName,
     });
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -179,7 +181,7 @@ exports.get = async (req, res) => {
 };
 // =============update start end================
 
-// =============get DispositionTwo by Id start================
+// =============get initialTwo by Id start================
 exports.getById = async (req, res) => {
   try {
     //if no default query then pass {}

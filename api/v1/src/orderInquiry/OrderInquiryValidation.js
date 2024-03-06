@@ -45,7 +45,7 @@ const create = {
     orderForOther: Joi.string().allow(""),
     paymentMode: Joi.string().allow(""),
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
-    reciversName: Joi.string().allow(""),
+    // reciversName: Joi.string().allow(""),
     remark: Joi.string().allow(""),
     shcemeQuantity: Joi.number().custom(commonValidation.minValue),
     socialMedia: Joi.object().keys({
@@ -125,7 +125,7 @@ const update = {
     orderForOther: Joi.string().allow(""),
     paymentMode: Joi.string().allow(""),
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
-    reciversName: Joi.string().allow(""),
+    // reciversName: Joi.string().allow(""),
     remark: Joi.string().allow(""),
     shcemeQuantity: Joi.number().custom(commonValidation.minValue),
     socialMedia: Joi.object().keys({
@@ -303,7 +303,7 @@ const getComplainData = {
   body: Joi.object().keys({
     barcode: Joi.string().allow(""),
     contactNumber: Joi.string().allow(""),
-    incomingNumber: Joi.string().allow(""),
+
     complaintNumber: Joi.number(),
     email: Joi.string().allow(""),
     orderNumber: Joi.number(),

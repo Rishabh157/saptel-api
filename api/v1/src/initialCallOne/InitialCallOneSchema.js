@@ -7,6 +7,12 @@ const InitialCallOneSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      uppercase: true,
+    },
+    initialCallDisplayName: {
+      type: String,
+      required: true,
+      trim: true,
       lowercase: true,
     },
     callType: {

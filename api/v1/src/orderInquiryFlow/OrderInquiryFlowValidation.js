@@ -45,7 +45,7 @@ const create = {
     orderForOther: Joi.string().allow(""),
     paymentMode: Joi.string().allow(""),
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
-    reciversName: Joi.string().allow(""),
+    // reciversName: Joi.string().allow(""),
     remark: Joi.string().allow(""),
     shcemeQuantity: Joi.number(),
     socialMedia: Joi.object().keys({
@@ -122,7 +122,7 @@ const update = {
     orderForOther: Joi.string().allow(""),
     paymentMode: Joi.string().allow(""),
     productGroupId: Joi.string().custom(commonValidation.objectId).allow(null),
-    reciversName: Joi.string().allow(""),
+    // reciversName: Joi.string().allow(""),
     remark: Joi.string().allow(""),
     shcemeQuantity: Joi.number(),
     socialMedia: Joi.object().keys({

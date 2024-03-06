@@ -20,6 +20,15 @@ router.get(
   complainController.get
 );
 /**
+ * get by number
+ */
+router.get(
+  "/get-by-number/:number",
+  authCheckMiddleware,
+  // validate(complainValidation.getByNumber),
+  complainController.getByNumber
+);
+/**
  * get all complain pagination filter
  */
 

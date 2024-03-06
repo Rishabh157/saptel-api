@@ -530,6 +530,132 @@ exports.get = async (req, res) => {
   }
 };
 
+//get by number
+exports.getByNumber = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    const { number } = req.params;
+    let matchQuery = { isDeleted: false, customerNumber: number };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "initialcallthrees",
+          localField: "icThree",
+          foreignField: "_id",
+          as: "initialcallThreeData",
+          pipeline: [
+            {
+              $project: {
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "initialcalltwos",
+          localField: "icTwo",
+          foreignField: "_id",
+          as: "initialcallTwoData",
+          pipeline: [
+            {
+              $project: {
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "icOne",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "complaintById",
+          foreignField: "_id",
+          as: "userData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          initialCallThreeLabel: {
+            $arrayElemAt: ["$initialcallThreeData.initialCallDisplayName", 0],
+          },
+          initialCallTwoLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
+          },
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
+          },
+          complaintbyLabel: {
+            $concat: [
+              { $arrayElemAt: ["$userData.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$userData.lastName", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $unset: [
+          "initialcallTwoData",
+          "initialcallOneData",
+          "initialcallThreeData",
+          "userData",
+        ],
+      },
+    ];
+
+    let dataExist = await complainService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //get by id
 exports.getById = async (req, res) => {
   try {

@@ -35,7 +35,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let { dispositionName, dispositionOneId, companyId } = req.body;
-
+    let dispositionDisplayName = dispositionName;
+    req.body.dispositionName = dispositionName?.replaceAll(" ", "");
     const isDispositionOneExists = await dispositionOneService.findCount({
       _id: dispositionOneId,
       isDeleted: false,
@@ -60,6 +61,7 @@ exports.add = async (req, res) => {
     // ----------------------create data-------------------------
     let dataCreated = await dispositionTwoService.createNewData({
       ...req.body,
+      dispositionDisplayName: dispositionDisplayName,
     });
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -521,6 +523,7 @@ exports.getFilterPagination = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -531,6 +534,9 @@ exports.getFilterPagination = async (req, res) => {
         $addFields: {
           dispostionOneLabel: {
             $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionDisplayName", 0],
           },
         },
       },

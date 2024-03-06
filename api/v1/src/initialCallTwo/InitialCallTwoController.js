@@ -36,7 +36,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let { initialCallName, initialCallOneId, companyId } = req.body;
-
+    let initialCallDisplayName = initialCallName;
+    req.body.initialCallName = initialCallName?.replaceAll(" ", "");
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -62,6 +63,7 @@ exports.add = async (req, res) => {
     // ----------------------create data-------------------------
     let dataCreated = await initialCallTwoService.createNewData({
       ...req.body,
+      initialCallDisplayName: initialCallDisplayName,
     });
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -405,6 +407,7 @@ exports.allFilterPagination = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -414,6 +417,9 @@ exports.allFilterPagination = async (req, res) => {
         $addFields: {
           initialCallOneLabel: {
             $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+          initialCallOneDisplayLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },

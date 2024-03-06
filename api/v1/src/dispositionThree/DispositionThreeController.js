@@ -114,8 +114,7 @@ exports.update = async (req, res) => {
       priority,
       applicableCriteria,
     } = req.body;
-    let dispositionDisplayName = dispositionName;
-    req.body.dispositionName = dispositionName?.replaceAll(" ", "");
+
     let idToBeSearch = req.params.id;
 
     let dataExist = await dispositionThreeService.isExists(
@@ -164,7 +163,6 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
-          dispositionDisplayName: dispositionDisplayName,
         },
       }
     );
@@ -560,6 +558,7 @@ exports.getFilterPagination = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -575,6 +574,7 @@ exports.getFilterPagination = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -587,6 +587,12 @@ exports.getFilterPagination = async (req, res) => {
           },
           dispostionTwoLabel: {
             $arrayElemAt: ["$dispositionTwoData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionOneData.dispositionDisplayName", 0],
+          },
+          dispostionTwoDisplayLabel: {
+            $arrayElemAt: ["$dispositionTwoData.dispositionDisplayName", 0],
           },
         },
       },

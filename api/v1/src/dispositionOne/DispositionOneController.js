@@ -34,7 +34,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let { dispositionName, companyId } = req.body;
-
+    let dispositionDisplayName = dispositionName;
+    req.body.dispositionName = dispositionName?.replaceAll(" ", "");
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -53,6 +54,7 @@ exports.add = async (req, res) => {
     //------------------create data-------------------
     let dataCreated = await dispositionOneService.createNewData({
       ...req.body,
+      dispositionDisplayName: dispositionDisplayName,
     });
 
     if (dataCreated) {
