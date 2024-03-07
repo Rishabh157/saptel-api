@@ -66,7 +66,7 @@ exports.add = async (req, res) => {
     let complaintNumber = await getComplaintNumber();
     let dataCreated = await complainService.createNewData({
       complaintNumber,
-
+      complaintById: req.userData.Id,
       ...req.body,
     });
 
@@ -136,6 +136,7 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
+          complaintById: req.userData.Id,
         },
       }
     );
@@ -271,7 +272,7 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -287,7 +288,7 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -302,7 +303,7 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -327,13 +328,13 @@ exports.allFilterPagination = async (req, res) => {
       {
         $addFields: {
           initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallThreeData.initialCallDisplayName", 0],
           },
           initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
           },
           initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
           complaintbyLabel: {
             $concat: [
@@ -424,7 +425,7 @@ exports.get = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -440,7 +441,7 @@ exports.get = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -455,7 +456,7 @@ exports.get = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],

@@ -28,6 +28,7 @@ const ComplainSchema = new mongoose.Schema(
     icOne: { type: ObjectId, required: true, trim: true },
     icTwo: { type: ObjectId, required: true, trim: true },
     icThree: { type: ObjectId, required: true, trim: true },
+    complaintById: { type: ObjectId, required: true, trim: true },
     status: {
       type: String,
       enum: [
