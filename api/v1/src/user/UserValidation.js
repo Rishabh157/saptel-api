@@ -43,7 +43,8 @@ const create = {
         userRoleType.avpQA,
         userRoleType.avpLogistics,
         userRoleType.avpMapping,
-        userRoleType.avpAdmin
+        userRoleType.avpAdmin,
+        userRoleType.customerCareAvp
       ),
       then: Joi.string().custom(commonValidation.objectId).allow(null),
       otherwise: Joi.string().custom(commonValidation.objectId).required(),
@@ -90,7 +91,8 @@ const update = {
         userRoleType.avpQA,
         userRoleType.avpLogistics,
         userRoleType.avpMapping,
-        userRoleType.avpAdmin
+        userRoleType.avpAdmin,
+        userRoleType.customerCareAvp
       ),
       then: Joi.string().custom(commonValidation.objectId).allow(null),
       otherwise: Joi.string().custom(commonValidation.objectId).required(),
