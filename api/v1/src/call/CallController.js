@@ -443,21 +443,21 @@ exports.update = async (req, res) => {
         mobileNo,
         isDispositionThreeExists?.dispositionName
       );
-      await axios.post(
-        "https://uat.onetelemart.com/agent/v2/click-2-hangup",
-        {
-          user: agentName,
-          phone_number: mobileNo,
-          unique_id: mobileNo,
-          disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            XAuth: config.server_auth_key,
-          },
-        }
-      );
+      // await axios.post(
+      //   "https://uat.onetelemart.com/agent/v2/click-2-hangup",
+      //   {
+      //     user: agentName,
+      //     phone_number: mobileNo,
+      //     unique_id: mobileNo,
+      //     disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       XAuth: config.server_auth_key,
+      //     },
+      //   }
+      // );
 
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",

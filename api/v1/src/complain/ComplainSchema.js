@@ -54,13 +54,16 @@ const ComplainSchema = new mongoose.Schema(
 );
 
 const searchKeys = [
+  "complaintNumber",
+  "orderNumber",
+  "customerNumber",
   "schemeName",
   "schemeCode",
-  "orderStatus",
-  "courierStatus",
   "callType",
-
-  "remark",
+  "initialCallThreeLabel",
+  "initialCallTwoLabel",
+  "initialCallOneLabel",
+  "complaintbyLabel",
 ];
 module.exports = mongoose.model("Complain", ComplainSchema);
 module.exports.searchKeys = [...searchKeys];

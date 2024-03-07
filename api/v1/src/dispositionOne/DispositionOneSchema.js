@@ -29,6 +29,6 @@ const DispositionOneSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["dispositionName", "companyId"];
+const searchKeys = ["dispositionName", "companyId", "dispositionDisplayName"];
 module.exports = mongoose.model("DispositionOne", DispositionOneSchema);
 module.exports.searchKeys = [...searchKeys];

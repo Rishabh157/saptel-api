@@ -913,15 +913,21 @@ exports.getAllUsers = async (req, res) => {
   try {
     let { userrole } = req.params;
     let { companyId } = req.userData;
-    console.log(userrole, "userrole");
-
-    let seniorUserRole = await getSeniorUserRole(userrole);
-    console.log(seniorUserRole, "seniorUserRole");
+    let allSeniorRoles = [];
+    let tempRole = userrole;
+    for (let i = 0; i <= 10; i++) {
+      let seniorUserRole = await getSeniorUserRole(tempRole);
+      tempRole = seniorUserRole;
+      if (seniorUserRole) {
+        allSeniorRoles.push(seniorUserRole);
+      }
+    }
+    allSeniorRoles.push(userEnum.admin);
     let matchQuery = {
       companyId: companyId,
       isDeleted: false,
       isActive: true,
-      userRole: seniorUserRole,
+      userRole: { $in: allSeniorRoles },
     };
 
     let dataExist = await userService.findAllWithQuery(matchQuery);

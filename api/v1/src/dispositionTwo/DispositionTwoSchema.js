@@ -38,6 +38,6 @@ const DispositionTwoSchema = mongoose.Schema(
   }
 );
 
-const searchKeys = ["dispositionName", "dispositionOneId", "companyId"];
+const searchKeys = ["dispositionName", "dispositionDisplayName"];
 module.exports = mongoose.model("dispositionTwo", DispositionTwoSchema);
 module.exports.searchKeys = [...searchKeys];

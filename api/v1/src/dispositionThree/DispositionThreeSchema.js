@@ -148,6 +148,7 @@ const searchKeys = [
   "priority",
   "whatsApp",
   "applicableCriteria",
+  "dispositionDisplayName",
 ];
 module.exports = mongoose.model("DispositionThree", DispositionThreeSchema);
 module.exports.searchKeys = [...searchKeys];

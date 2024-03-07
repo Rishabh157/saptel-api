@@ -51,7 +51,7 @@ const InitialCallTwoSchema = new mongoose.Schema(
 const searchKeys = [
   "initialCallName",
   "initialCallOneId",
-  "companyId",
+  "initialCallDisplayName",
   "callType",
 ];
 module.exports = mongoose.model("initialCallTwo", InitialCallTwoSchema);

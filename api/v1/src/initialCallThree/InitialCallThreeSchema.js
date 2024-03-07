@@ -131,7 +131,7 @@ const searchKeys = [
   "initialCallName",
   "initialCallOneId",
   "initialCallTwoId",
-  "companyId",
+  "initialCallDisplayName",
 
   "emailType",
   "smsType",
