@@ -58,6 +58,7 @@ const UserSchema = new mongoose.Schema(
         userDepartmentType.logisticDepartment,
         userDepartmentType.mappingAndMISDepartment,
         userDepartmentType.adminDepartment,
+        userDepartmentType.customerCareDepartement,
         "ADMIN",
       ],
       uppercase: true,

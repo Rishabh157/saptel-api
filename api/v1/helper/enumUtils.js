@@ -297,6 +297,7 @@ const userDepartmentType = Object.freeze({
   logisticDepartment: "LOGISTIC_DEPARTMENT",
   mappingAndMISDepartment: "MAPPING_AND_MIS_DEPARTMENT",
   adminDepartment: "ADMIN_DEPARTMENT",
+  customerCareDepartement: "CUSTOMER_CARE_DEPARTMENT",
 });
 
 const userRoleType = Object.freeze({
