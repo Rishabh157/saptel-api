@@ -382,6 +382,7 @@ exports.update = async (req, res) => {
 
     // ---------map for order-------
     let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
+    console.log("flagflagflagflag", flag);
     let prepaidOrderFlag = await isPrepaid(
       dispositionThreeData[0]?.applicableCriteria
     );
@@ -392,7 +393,7 @@ exports.update = async (req, res) => {
     console.log(isUserExists, "isUserExists");
     const orderInquiry = await orderService.createNewData({
       ...req.body,
-      status: inquiryNumber ? orderStatusEnum.inquiry : status,
+      status: !flag ? orderStatusEnum.inquiry : status,
       orderNumber: flag ? orderNumber : null,
       inquiryNumber: inquiryNumber,
       assignDealerId: null,

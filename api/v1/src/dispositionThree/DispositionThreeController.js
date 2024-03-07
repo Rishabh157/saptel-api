@@ -214,6 +214,7 @@ exports.get = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -229,6 +230,7 @@ exports.get = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -241,6 +243,12 @@ exports.get = async (req, res) => {
           },
           dispostionTwoLabel: {
             $arrayElemAt: ["$dispositionTwoData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionOneData.dispositionDisplayName", 0],
+          },
+          dispostionTwoDisplayLabel: {
+            $arrayElemAt: ["$dispositionTwoData.dispositionDisplayName", 0],
           },
         },
       },
@@ -304,6 +312,7 @@ exports.getForDeliveryBoy = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -319,6 +328,7 @@ exports.getForDeliveryBoy = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -331,6 +341,12 @@ exports.getForDeliveryBoy = async (req, res) => {
           },
           dispostionTwoLabel: {
             $arrayElemAt: ["$dispositionTwoData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionOneData.dispositionDisplayName", 0],
+          },
+          dispostionTwoDisplayLabel: {
+            $arrayElemAt: ["$dispositionTwoData.dispositionDisplayName", 0],
           },
         },
       },
@@ -388,6 +404,7 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -403,6 +420,7 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -415,6 +433,12 @@ exports.getById = async (req, res) => {
           },
           dispostionTwoLabel: {
             $arrayElemAt: ["$dispositionTwoData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionOneData.dispositionDisplayName", 0],
+          },
+          dispostionTwoDisplayLabel: {
+            $arrayElemAt: ["$dispositionTwoData.dispositionDisplayName", 0],
           },
         },
       },

@@ -179,6 +179,7 @@ exports.get = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -189,6 +190,9 @@ exports.get = async (req, res) => {
         $addFields: {
           dispostionOneLabel: {
             $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionDisplayName", 0],
           },
         },
       },
@@ -251,6 +255,7 @@ exports.getAuth = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -261,6 +266,9 @@ exports.getAuth = async (req, res) => {
         $addFields: {
           dispostionOneLabel: {
             $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionDisplayName", 0],
           },
         },
       },
@@ -315,6 +323,7 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -325,6 +334,9 @@ exports.getById = async (req, res) => {
         $addFields: {
           dispostionOneLabel: {
             $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionDisplayName", 0],
           },
         },
       },
@@ -387,6 +399,7 @@ exports.getByDispositionOneId = async (req, res) => {
             {
               $project: {
                 dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -397,6 +410,9 @@ exports.getByDispositionOneId = async (req, res) => {
         $addFields: {
           dispostionOneLabel: {
             $arrayElemAt: ["$dispositionData.dispositionName", 0],
+          },
+          dispostionOneDisplayLabel: {
+            $arrayElemAt: ["$dispositionData.dispositionDisplayName", 0],
           },
         },
       },

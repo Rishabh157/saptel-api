@@ -219,22 +219,6 @@ exports.get = async (req, res) => {
       },
       {
         $lookup: {
-          from: "initialcallones",
-          localField: "initialCallOneId",
-          foreignField: "_id",
-          as: "initialcallOneData",
-          pipeline: [
-            {
-              $project: {
-                initialCallName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $lookup: {
           from: "initialcalltwos",
           localField: "initialCallTwoId",
           foreignField: "_id",
@@ -243,6 +227,23 @@ exports.get = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -255,6 +256,12 @@ exports.get = async (req, res) => {
           },
           initialCallOneLabel: {
             $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+          initialCallTwoDisplayLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
+          },
+          initialCallOneDisplayLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },
@@ -310,22 +317,6 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
-          from: "initialcallones",
-          localField: "initialCallOneId",
-          foreignField: "_id",
-          as: "initialcallOneData",
-          pipeline: [
-            {
-              $project: {
-                initialCallName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $lookup: {
           from: "initialcalltwos",
           localField: "initialCallTwoId",
           foreignField: "_id",
@@ -334,6 +325,23 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "initialCallOneId",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -346,6 +354,12 @@ exports.getById = async (req, res) => {
           },
           initialCallOneLabel: {
             $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+          initialCallTwoDisplayLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
+          },
+          initialCallOneDisplayLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },

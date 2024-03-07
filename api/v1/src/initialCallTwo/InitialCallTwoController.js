@@ -183,6 +183,7 @@ exports.get = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -192,6 +193,9 @@ exports.get = async (req, res) => {
         $addFields: {
           initialCallOneLabel: {
             $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+          initialCallOneDisplayLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },
@@ -254,6 +258,7 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -263,6 +268,9 @@ exports.getById = async (req, res) => {
         $addFields: {
           initialCallOneLabel: {
             $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+          },
+          initialCallOneDisplayLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },
