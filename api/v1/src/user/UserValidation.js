@@ -188,6 +188,7 @@ const getAllDistribution = {
 const getAllFloorManagersAndTeamLead = {
   params: Joi.object().keys({
     companyid: Joi.string().custom(commonValidation.objectId),
+    departmentid: Joi.string(),
     callcenterid: Joi.string().required(),
   }),
 };

@@ -263,7 +263,11 @@ exports.update = async (req, res) => {
     }
     let applicableCriteriaData =
       isDispositionThreeExists?.applicableCriteria[0];
-    if (applicableCriteriaData !== applicableCriteria.isInquiry) {
+    if (
+      applicableCriteriaData === applicableCriteria.isOrder ||
+      applicableCriteriaData === applicableCriteria.isPrepaid ||
+      applicableCriteriaData === applicableCriteria.isUrgent
+    ) {
       let isOrderExists = await orderService.aggregateQuery([
         {
           $match: {

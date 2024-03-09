@@ -43,7 +43,13 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { userEnum, moduleType, actionType } = require("../../helper/enumUtils");
+const {
+  userEnum,
+  moduleType,
+  actionType,
+  userRoleType,
+  userDepartmentType,
+} = require("../../helper/enumUtils");
 const redisClient = require("../../../../database/redis");
 const { getSeniorUserRole } = require("./UserHelper");
 
@@ -872,18 +878,25 @@ exports.getAllFloorManagers = async (req, res) => {
 
 exports.getAllTeamLeads = async (req, res) => {
   try {
-    let { companyid, callcenterid } = req.params;
-    let userRole = [
-      "SR_TEAM_LEADER_OR_SR_EXECUTIVE_MIS",
-      "TEAM_LEADER_OR_EXECUTIVE_SALES_CENTER",
+    let { companyid, callcenterid, departmentid } = req.params;
+    let userRoleSales = [
+      userRoleType.srTeamLeaderOrSrEXECUTIVEMIS,
+      userRoleType.teamLeaderOrEXECUTIVESalesCenter,
     ];
+    let userRoleCustomer = [
+      userRoleType.customerCareTeamLead,
+      userRoleType.customerCareSrEx,
+    ];
+    const isSales = departmentid === userDepartmentType.salesDepartment;
 
     let matchQuery = {
       companyId: companyid,
       callCenterId: callcenterid,
       isDeleted: false,
-      userDepartment: "SALES_DEPARTMENT",
-      userRole: { $in: userRole },
+      userDepartment: isSales
+        ? userDepartmentType.salesDepartment
+        : userDepartmentType.customerCareDepartement,
+      userRole: { $in: isSales ? userRoleSales : userRoleCustomer },
     };
 
     let dataExist = await userService.findAllWithQuery(matchQuery);
@@ -918,10 +931,12 @@ exports.getAllUsers = async (req, res) => {
     for (let i = 0; i <= 10; i++) {
       let seniorUserRole = await getSeniorUserRole(tempRole);
       tempRole = seniorUserRole;
+      console.log(tempRole, "tempRole");
       if (seniorUserRole) {
         allSeniorRoles.push(seniorUserRole);
       }
     }
+    console.log(allSeniorRoles, "allSeniorRoles");
     allSeniorRoles.push(userEnum.admin);
     let matchQuery = {
       companyId: companyId,
@@ -931,6 +946,7 @@ exports.getAllUsers = async (req, res) => {
     };
 
     let dataExist = await userService.findAllWithQuery(matchQuery);
+    console.log(dataExist, "dataExist");
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {

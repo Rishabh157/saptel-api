@@ -43,7 +43,7 @@ router.get(
  * get all Team leads
  */
 router.get(
-  "/get-team-leads/company/:companyid/call-center/:callcenterid",
+  "/get-team-leads/company/:companyid/call-center/:callcenterid/department/:departmentid",
   authCheckMiddleware,
   validate(userValidation.getAllFloorManagersAndTeamLead),
   userController.getAllTeamLeads
