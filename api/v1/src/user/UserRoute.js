@@ -33,7 +33,7 @@ router.get(
  * get all floor managers
  */
 router.get(
-  "/get-floor-managers/company/:companyid/call-center/:callcenterid",
+  "/get-floor-managers/company/:companyid/call-center/:callcenterid/department/:departmentid",
   authCheckMiddleware,
   validate(userValidation.getAllFloorManagersAndTeamLead),
   userController.getAllFloorManagers

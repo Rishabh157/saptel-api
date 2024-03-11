@@ -237,6 +237,24 @@ exports.getSeniorUserRole = async (userRole) => {
     case userRoleType.EXECUTIVEAdmin:
       seniorUserRole = userRoleType.srEXECUTIVEAdmin;
       break;
+    case userRoleType.customerCareAvp:
+      seniorUserRole = null;
+      break;
+    case userRoleType.customerCareManager:
+      seniorUserRole = userRoleType.EXECUTIVEAdmin;
+      break;
+    case userRoleType.customerCareAm:
+      seniorUserRole = userRoleType.customerCareManager;
+      break;
+    case userRoleType.customerCareTeamLead:
+      seniorUserRole = userRoleType.customerCareAm;
+      break;
+    case userRoleType.customerCareSrEx:
+      seniorUserRole = userRoleType.customerCareTeamLead;
+      break;
+    case userRoleType.customerCareEx:
+      seniorUserRole = userRoleType.customerCareSrEx;
+      break;
   }
   return seniorUserRole;
 };

@@ -841,15 +841,25 @@ exports.getAllDistributionUser = async (req, res) => {
 
 exports.getAllFloorManagers = async (req, res) => {
   try {
-    let { companyid, callcenterid } = req.params;
-    let userRole = ["MANAGER_SALES_CENTER", "ASST_MANAGER_SALES_CENTER"];
+    let { companyid, callcenterid, departmentid } = req.params;
+    let userRoleSales = [
+      userRoleType.managerSalesCenter,
+      userRoleType.asstManagerSalesCenter,
+    ];
+    let userRoleCustomer = [
+      userRoleType.customerCareManager,
+      userRoleType.customerCareAm,
+    ];
+    const isSales = departmentid === userDepartmentType.salesDepartment;
 
     let matchQuery = {
       companyId: companyid,
       callCenterId: callcenterid,
       isDeleted: false,
-      userDepartment: "SALES_DEPARTMENT",
-      userRole: { $in: userRole },
+      userDepartment: isSales
+        ? userDepartmentType.salesDepartment
+        : userDepartmentType.customerCareDepartement,
+      userRole: { $in: isSales ? userRoleSales : userRoleCustomer },
     };
 
     let dataExist = await userService.findAllWithQuery(matchQuery);
@@ -936,7 +946,7 @@ exports.getAllUsers = async (req, res) => {
         allSeniorRoles.push(seniorUserRole);
       }
     }
-    console.log(allSeniorRoles, "allSeniorRoles");
+    console.log(allSeniorRoles, companyId, "allSeniorRoles");
     allSeniorRoles.push(userEnum.admin);
     let matchQuery = {
       companyId: companyId,
