@@ -247,9 +247,11 @@ exports.update = async (req, res) => {
 //dealer login
 exports.login = async (req, res) => {
   try {
-    let reqEmail = req.body.email;
+    let dealerCode = req.body.dealerCode;
     let password = req.body.password;
-    let dataFound = await dealerService.getOneByMultiField({ email: reqEmail });
+    let dataFound = await dealerService.getOneByMultiField({
+      dealerCode: dealerCode,
+    });
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Dealer not found.`);
     }
@@ -263,7 +265,6 @@ exports.login = async (req, res) => {
       firmName,
       firstName,
       lastName,
-      dealerCode,
       email,
       companyId,
     } = dataFound;
@@ -1529,6 +1530,44 @@ exports.changePassword = async (req, res) => {
         companyId: companyId,
         warehouseId: dealerWarehouse?._id ? dealerWarehouse?._id : null,
       },
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.changeDealerPassword = async (req, res) => {
+  try {
+    const token = req.headers["x-access-token"];
+    const { newPassword, dealerCode } = req.body;
+
+    const dealer = await dealerService.getOneByMultiField({
+      dealerCode: dealerCode,
+      isDeleted: false,
+    }); // assuming you're using Passport.js or similar for authentication
+    if (!dealer) {
+      throw new ApiError(httpStatus.OK, `Invalid dealer`);
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the dealer's password in the database
+    dealer.password = hashedPassword;
+    await dealer.save();
+
+    return res.status(httpStatus.OK).send({
+      message: `Password change successful!`,
+      data: null,
       status: true,
       code: "OK",
       issue: null,

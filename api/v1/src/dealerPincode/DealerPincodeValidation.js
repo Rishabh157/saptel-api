@@ -15,10 +15,10 @@ const create = {
           districtId: Joi.string().custom(commonValidation.objectId).required(),
           pincode: Joi.array().items(Joi.string()).required(),
           estTime: Joi.number().required(),
+          tehsilId: Joi.string().custom(commonValidation.objectId).required(),
         })
       )
       .required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -38,10 +38,10 @@ const update = {
           districtId: Joi.string().custom(commonValidation.objectId).required(),
           pincode: Joi.array().items(Joi.string()).required(),
           estTime: Joi.number().required(),
+          tehsilId: Joi.string().custom(commonValidation.objectId).required(),
         })
       )
       .required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 
@@ -121,8 +121,10 @@ const getByPincode = {
  */
 const getDealerData = {
   params: Joi.object().keys({
-    companyid: Joi.string().custom(commonValidation.objectId),
     dealerid: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    tehsilid: Joi.string().custom(commonValidation.objectId).allow(null),
   }),
 };
 

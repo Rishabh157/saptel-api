@@ -35,8 +35,8 @@ router.get(
 /**
  * get all document of a single dealer
  */
-router.get(
-  "/dealer/:dealerid/company/:companyid/",
+router.post(
+  "/dealer/:dealerid/get-scheme-pincode",
   authCheckMiddleware,
   validate(dealerPincodeValidation.getDealerData),
   dealerPincodeController.getDealerPincode

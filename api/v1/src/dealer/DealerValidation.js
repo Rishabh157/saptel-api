@@ -218,7 +218,7 @@ const getDocument = {
 const loginValid = {
   body: Joi.object()
     .keys({
-      email: Joi.string().required(),
+      dealerCode: Joi.string().required(),
       password: Joi.string().required(),
     })
     .required(),
@@ -258,6 +258,16 @@ const changePasswordValid = {
     })
     .required(),
 };
+
+const changeDealerPassword = {
+  body: Joi.object()
+    .keys({
+      newPassword: Joi.string().required(),
+      dealerCode: Joi.string().required(),
+    })
+    .required(),
+};
+
 module.exports = {
   create,
   getAllFilter,
@@ -271,4 +281,5 @@ module.exports = {
   refreshTokenValid,
   getByPincode,
   changePasswordValid,
+  changeDealerPassword,
 };

@@ -165,6 +165,14 @@ router.put(
   orderController.orderStatusChange
 );
 
+//===============dealer change order status===============
+router.put(
+  "/dealer/change-order-status/:id",
+  authCheckDealerMiddleware,
+  validate(orderValidation.dealerOrderStatusChange),
+  orderController.dealerOrderStatusChange
+);
+
 //===============delete document===============
 router.delete(
   "/:id",

@@ -169,7 +169,7 @@ const orderStatusEnum = Object.freeze({
   fresh: "FRESH",
   all: "ALL",
   prepaid: "PREPAID",
-  delivered: "DELIVERD",
+  delivered: "DELIVERED",
   doorCancelled: "DOORCANCELLED",
   hold: "HOLD",
   psc: "PSC",

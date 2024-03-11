@@ -2,6 +2,7 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
+const { orderStatusEnum } = require("../../helper/enumUtils");
 
 /**
  * create new document
@@ -338,6 +339,21 @@ const orderStatusChange = {
   }),
 };
 
+const dealerOrderStatusChange = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    status: Joi.string()
+      .valid(
+        orderStatusEnum.delivered,
+        orderStatusEnum.doorCancelled,
+        orderStatusEnum.hold
+      )
+      .required(),
+  }),
+};
+
 /**
  * get by id
  */
@@ -371,4 +387,5 @@ module.exports = {
   getAllFilterDeliveryBoy,
   dealerApprove,
   getGlobalSearch,
+  dealerOrderStatusChange,
 };

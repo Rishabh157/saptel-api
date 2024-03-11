@@ -2564,7 +2564,7 @@ exports.getByIdForDealer = async (req, res) => {
           pipeline: [
             {
               $project: {
-                dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -2579,7 +2579,7 @@ exports.getByIdForDealer = async (req, res) => {
           pipeline: [
             {
               $project: {
-                dispositionName: 1,
+                dispositionDisplayName: 1,
               },
             },
           ],
@@ -2736,10 +2736,13 @@ exports.getByIdForDealer = async (req, res) => {
       {
         $addFields: {
           dispositionLevelTwo: {
-            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+            $arrayElemAt: [
+              "$dispositionLevelTwoData.dispositionDisplayName",
+              0,
+            ],
           },
           dispositionLevelThree: {
-            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+            $arrayElemAt: ["$dispositionthreesData.dispositionDisplayName", 0],
           },
           countryLabel: {
             $arrayElemAt: ["$countrieData.countryName", 0],
@@ -4784,6 +4787,40 @@ exports.orderStatusChange = async (req, res) => {
     return res.status(httpStatus.OK).send({
       message: deleteRefCheck.message,
       status: deleteRefCheck.status,
+      data: null,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// dealer ordaer status change
+exports.dealerOrderStatusChange = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    let { status } = req.body;
+    if (!(await orderService.getOneByMultiField({ _id }))) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    let orderUpdated = await orderService.getOneAndUpdate(
+      { _id },
+      { status: status }
+    );
+    if (!orderUpdated) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: "Updated successfully!",
+      status: true,
       data: null,
       code: "OK",
       issue: null,

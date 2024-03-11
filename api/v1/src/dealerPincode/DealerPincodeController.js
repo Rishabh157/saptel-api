@@ -5,6 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const dealerPincodeService = require("./DealerPincodeService");
 const companyService = require("../company/CompanyService");
 const dealerService = require("../dealer/DealerService");
+const tehsilService = require("../tehsil/TehsilService");
 const DealerScheme = require("../dealerScheme/DealerSchemeSchema");
 
 const { searchKeys } = require("./DealerPincodeSchema");
@@ -26,13 +27,13 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dealerId, pincodeDetail, companyId } = req.body;
+    let { dealerId, pincodeDetail } = req.body;
     /**
      * check duplicate exist
      */
 
     const isCompanyExists = await companyService.findCount({
-      _id: companyId,
+      _id: req.userData.companyId,
       isDeleted: false,
     });
     if (!isCompanyExists) {
@@ -46,6 +47,13 @@ exports.add = async (req, res) => {
     if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
+    // const isTehsilExists = await tehsilService.findCount({
+    //   _id: tehsilId,
+    //   isDeleted: false,
+    // });
+    // if (!isTehsilExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Tehsil");
+    // }
     let output = [];
     pincodeDetail.map((ele) => {
       ele?.pincode?.map((pin) => {
@@ -56,7 +64,8 @@ exports.add = async (req, res) => {
             districtId: ele?.districtId,
             pincode: pin,
             estTime: ele?.estTime,
-            companyId: companyId,
+            companyId: req.userData.companyId,
+            tehsilId: ele?.tehsilId,
           },
         ];
       });
@@ -113,12 +122,12 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { dealerId, companyId } = req.body;
+    let { dealerId } = req.body;
 
     let idToBeSearch = req.params.id;
 
     const isCompanyExists = await companyService.findCount({
-      _id: companyId,
+      _id: req.userData.companyId,
       isDeleted: false,
     });
     if (!isCompanyExists) {
@@ -501,16 +510,19 @@ exports.getByPincode = async (req, res) => {
 //get all dealer
 exports.getDealerPincode = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
+    let tehsilid = req.body.tehsilid;
     let dealerId = req.params.dealerid;
 
     //if no default query then pass {}
     let matchQuery = {
-      companyId: companyId,
+      companyId: req.userData.companyId,
       dealerId: dealerId,
       isDeleted: false,
       isActive: true,
     };
+    if (tehsilid) {
+      matchQuery.tehsilId = tehsilid;
+    }
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

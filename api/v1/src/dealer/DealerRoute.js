@@ -25,6 +25,14 @@ router.put(
   dealerController.changePassword
 );
 
+// admin can change dealer password
+router.put(
+  "/change-dealer-password",
+  authCheckMiddleware,
+  validate(dealerValidation.changeDealerPassword),
+  dealerController.changeDealerPassword
+);
+
 /**
  * pincode wise dealer
  */
