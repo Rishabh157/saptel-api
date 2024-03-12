@@ -451,7 +451,7 @@ exports.update = async (req, res) => {
         await axios.post(
           "https://uat.onetelemart.com/agent/v2/click-2-hangup",
           {
-            user: agentName,
+            user: agentName + "@uat",
             phone_number: mobileNo,
             unique_id: mobileNo,
             disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,

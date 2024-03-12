@@ -662,7 +662,7 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
   try {
     let { pid, sid } = req.params;
     let cid = req.userData.companyId;
-    console.log(req.userData, "userData");
+    console.log(req.userData, "userData", pid, cid, sid);
     //if no default query then pass {}
     let matchQuery = {
       isDeleted: false,
