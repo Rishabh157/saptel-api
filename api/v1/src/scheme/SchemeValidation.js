@@ -139,6 +139,14 @@ const get = {
     })
     .optional(),
 };
+
+// get dealer wise scheme
+
+const getDealerWiseScheme = {
+  params: Joi.object().keys({
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
 /**
  * get a document
  */
@@ -183,4 +191,5 @@ module.exports = {
   changeStatus,
   getDocument,
   getByProductGroup,
+  getDealerWiseScheme,
 };

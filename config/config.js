@@ -20,6 +20,7 @@ let {
   JWT_SECRET_OTP,
   JWT_EXPIRATION_MINUTES_OTP,
   SERVER_AUTH_KEY,
+  DIALER_DOMAIN,
 } = process.env;
 
 let envObj = {
@@ -39,6 +40,7 @@ let envObj = {
   JWT_SECRET_OTP,
   JWT_EXPIRATION_MINUTES_OTP,
   SERVER_AUTH_KEY,
+  DIALER_DOMAIN,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -65,6 +67,7 @@ const envVarsSchema = Joi.object().keys({
     .default("20 minutes")
     .description("minutes after which otp token expires"),
   SERVER_AUTH_KEY: Joi.string().required().label("Server auth key is required"),
+  DIALER_DOMAIN: Joi.string().required().label("Dialer domain key is required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -99,6 +102,7 @@ module.exports = {
   jwt_expires_otp: envVars.JWT_EXPIRATION_MINUTES_OTP,
   localhost: envVars.LOCALHOST,
   server_auth_key: envVars.SERVER_AUTH_KEY,
+  dialer_domain: envVars.DIALER_DOMAIN,
 
   base_url:
     envVars.NODE_ENV === "development"

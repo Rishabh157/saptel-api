@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const dealerService = require("./DealerService");
 const warehouseService = require("../wareHouse/WareHouseService");
+const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 const companyService = require("../company/CompanyService");
 const dealersCategoryService = require("../dealersCategory/DealersCategoryService");
 const ledgerService = require("../ledger/LedgerService");
@@ -890,6 +891,79 @@ exports.get = async (req, res) => {
         issue: null,
       });
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get scheme wise dealer
+exports.getSchemeWiseDealer = async (req, res) => {
+  try {
+    let companyId = req.userData.companyId;
+    let schemeId = req.params.schemeId;
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+      isActive: true,
+      isApproved: true,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      { $project: { firstName: 1, lastName: 1 } },
+    ];
+
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.dealer,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await dealerService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    let alreadyHaveScheme = [];
+    let notAssignedScheme = [];
+
+    await Promise.all(
+      allowedFields?.map(async (ele) => {
+        let dealerSchemeFound = await dealerSchemeService?.getOneByMultiField({
+          isDeleted: false,
+          isActive: true,
+          dealerId: ele?._id,
+          schemeId: schemeId,
+        });
+        if (dealerSchemeFound) {
+          alreadyHaveScheme.push({
+            value: ele?._id,
+            label: ele?.firstName + " " + ele?.lastName,
+            flag: true,
+          });
+        } else {
+          notAssignedScheme.push({
+            value: ele?._id,
+            label: ele?.firstName + " " + ele?.lastName,
+            flag: false,
+          });
+        }
+      })
+    );
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      alreadyHaveScheme: alreadyHaveScheme,
+      notAssignedScheme: notAssignedScheme,
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

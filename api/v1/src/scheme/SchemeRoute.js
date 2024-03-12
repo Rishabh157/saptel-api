@@ -14,6 +14,16 @@ router.get(
   validate(schemeValidation.get),
   schemeController.get
 );
+
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/dealer-wise-scheme/:dealerId",
+  authCheckMiddleware,
+  validate(schemeValidation.getDealerWiseScheme),
+  schemeController.getDealerWiseScheme
+);
 /**
  * get all documents without token for inbound calls
  */

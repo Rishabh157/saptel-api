@@ -398,7 +398,7 @@ exports.update = async (req, res) => {
     try {
       const orderInquiry = await orderService.createNewData({
         ...req.body,
-        status: !flag ? orderStatusEnum.inquiry : status,
+        status: flag ? status : orderStatusEnum.inquiry,
         orderNumber: flag ? orderNumber : null,
         inquiryNumber: inquiryNumber,
         assignDealerId: null,
@@ -451,7 +451,7 @@ exports.update = async (req, res) => {
         await axios.post(
           "https://uat.onetelemart.com/agent/v2/click-2-hangup",
           {
-            user: agentName + "@uat",
+            user: agentName + config.dialer_domain,
             phone_number: mobileNo,
             unique_id: mobileNo,
             disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,

@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const mongoose = require("mongoose");
 const dealerSchemeService = require("./DealerSchemeService");
+const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 const warehouseService = require("../wareHouse/WareHouseService");
 const companyService = require("../company/CompanyService");
 const schemeService = require("../scheme/SchemeService");
@@ -92,6 +93,188 @@ exports.add = async (req, res) => {
     //------------------create data-------------------
 
     let dataCreated = await dealerSchemeService.createMany(output);
+
+    if (dataCreated) {
+      return res.status(httpStatus.CREATED).send({
+        message: "Added successfully.",
+        data: dataCreated,
+        status: true,
+        code: "CREATED",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// scheme to dealer mapping
+exports.schemeToDealer = async (req, res) => {
+  try {
+    let { schemeId, dealers } = req.body;
+
+    const isDealerExists = await Promise.all(
+      dealers?.map(async (ele) => {
+        return await dealerService.findCount({
+          _id: ele,
+          isDeleted: false,
+        });
+      })
+    );
+    if (isDealerExists.includes(0)) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer");
+    }
+
+    await schemeService.findCount({
+      _id: schemeId,
+      isDeleted: false,
+    });
+
+    if (!schemeService) {
+      throw new ApiError(httpStatus.OK, "Invalid scheme");
+    }
+
+    /**
+     * check duplicate exist
+     */
+
+    //------------------create data-------------------
+    const output = await Promise.all(
+      dealers.map(async (dealer) => {
+        let dealerWithSchemeExist = await dealerSchemeService.findCount({
+          isDeleted: false,
+          isActive: true,
+          schemeId: schemeId,
+          dealerId: dealer,
+        });
+        if (!dealerWithSchemeExist) {
+          let dealerPincodes = await dealerPincodeService?.aggregateQuery([
+            {
+              $match: {
+                isDeleted: false,
+                isActive: true,
+                dealerId: new mongoose.Types.ObjectId(dealer),
+              },
+            },
+            {
+              $project: { pincode: 1 },
+            },
+          ]);
+          let allDealerPincodes = dealerPincodes?.map((dpin) => {
+            return dpin.pincode;
+          });
+          console.log(allDealerPincodes, "allDealerPincodes");
+          if (allDealerPincodes.length) {
+            return {
+              dealerId: dealer,
+              schemeId: schemeId,
+              pincodes: allDealerPincodes,
+              companyId: req.userData.companyId,
+            };
+          }
+        }
+      })
+    );
+    const filteredOutput = output.filter((item) => item !== undefined);
+    console.log(filteredOutput, "filteredOutput");
+    let dataCreated = await dealerSchemeService.createMany(filteredOutput);
+
+    if (dataCreated) {
+      return res.status(httpStatus.CREATED).send({
+        message: "Added successfully.",
+        data: dataCreated,
+        status: true,
+        code: "CREATED",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// dealer to scheme mapping
+exports.DealerToscheme = async (req, res) => {
+  try {
+    let { dealerId, schemes } = req.body;
+
+    const isSchemeExists = await Promise.all(
+      schemes?.map(async (ele) => {
+        return await schemeService.findCount({
+          _id: ele,
+          isDeleted: false,
+        });
+      })
+    );
+    if (isSchemeExists.includes(0)) {
+      throw new ApiError(httpStatus.OK, "Invalid Scheme");
+    }
+
+    await dealerService.findCount({
+      _id: dealerId,
+      isDeleted: false,
+    });
+
+    if (!schemeService) {
+      throw new ApiError(httpStatus.OK, "Invalid dealer");
+    }
+
+    /**
+     * check duplicate exist
+     */
+    // getting all pincodes of this dealer
+    let dealerPincodes = await dealerPincodeService?.aggregateQuery([
+      {
+        $match: {
+          isDeleted: false,
+          isActive: true,
+          dealerId: new mongoose.Types.ObjectId(dealerId),
+        },
+      },
+      {
+        $project: { pincode: 1 },
+      },
+    ]);
+    let allDealerPincodes = dealerPincodes?.map((dpin) => {
+      return dpin.pincode;
+    });
+
+    //------------------create data-------------------
+    const output = await Promise.all(
+      schemes.map(async (scheme) => {
+        let schemeWithDealerExist = await dealerSchemeService.findCount({
+          isDeleted: false,
+          isActive: true,
+          schemeId: scheme,
+          dealerId: dealerId,
+        });
+        if (!schemeWithDealerExist) {
+          return {
+            dealerId: dealerId,
+            schemeId: scheme,
+            pincodes: allDealerPincodes,
+            companyId: req.userData.companyId,
+          };
+        }
+      })
+    );
+    const filteredOutput = output.filter((item) => item !== undefined);
+
+    let dataCreated = await dealerSchemeService.createMany(filteredOutput);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

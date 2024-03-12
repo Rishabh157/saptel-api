@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const schemeService = require("./SchemeService");
 const companyService = require("../company/CompanyService");
+const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 const { searchKeys } = require("./SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
 const {
@@ -456,6 +457,78 @@ exports.get = async (req, res) => {
         issue: null,
       });
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get dealer wise scheme
+exports.getDealerWiseScheme = async (req, res) => {
+  try {
+    let companyId = req.userData.companyId;
+    let dealerId = req.params.dealerId;
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+      isActive: true,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      { $project: { schemeName: 1 } },
+    ];
+
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.scheme,
+      userRoleData,
+      actionType.listAll
+    );
+    let dataExist = await schemeService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    let alreadyHaveScheme = [];
+    let notAssignedScheme = [];
+
+    await Promise.all(
+      allowedFields?.map(async (ele) => {
+        let dealerSchemeFound = await dealerSchemeService?.getOneByMultiField({
+          isDeleted: false,
+          isActive: true,
+          dealerId: dealerId,
+          schemeId: ele?._id,
+        });
+        if (dealerSchemeFound) {
+          alreadyHaveScheme.push({
+            value: ele?._id,
+            label: ele?.schemeName,
+            flag: true,
+          });
+        } else {
+          notAssignedScheme.push({
+            value: ele?._id,
+            label: ele?.schemeName,
+            flag: false,
+          });
+        }
+      })
+    );
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      alreadyHaveScheme: alreadyHaveScheme,
+      notAssignedScheme: notAssignedScheme,
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

@@ -18,6 +18,16 @@ router.get(
   dealerController.get
 );
 
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/scheme-wise-dealer/:schemeId",
+  authCheckMiddleware,
+  validate(dealerValidation.getSchemeWiseDealer),
+  dealerController.getSchemeWiseDealer
+);
+
 router.put(
   "/change-password",
   authCheckDealerMiddleware,

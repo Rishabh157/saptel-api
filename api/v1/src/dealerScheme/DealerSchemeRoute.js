@@ -77,6 +77,28 @@ router.post(
   validate(dealerSchemeValidation.create),
   dealerSchemeController.add
 );
+
+/**
+ * scheme to dealer mapping
+ * one scheme map to multiple dealers
+ */
+router.post(
+  "/scheme-to-dealer-mapping",
+  authCheckMiddleware,
+  validate(dealerSchemeValidation.schemeToDealer),
+  dealerSchemeController.schemeToDealer
+);
+
+/**
+ * scheme to dealer mapping
+ * one scheme map to multiple dealers
+ */
+router.post(
+  "/dealer-to-scheme-mapping",
+  authCheckMiddleware,
+  validate(dealerSchemeValidation.DealerToscheme),
+  dealerSchemeController.DealerToscheme
+);
 /**
  * update document
  */

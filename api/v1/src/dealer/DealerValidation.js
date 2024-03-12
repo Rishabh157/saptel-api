@@ -198,6 +198,14 @@ const get = {
     .optional(),
 };
 
+// get scheme wise dealer
+
+const getSchemeWiseDealer = {
+  params: Joi.object().keys({
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 /**
  * pincode wise dealer
  */
@@ -282,4 +290,5 @@ module.exports = {
   getByPincode,
   changePasswordValid,
   changeDealerPassword,
+  getSchemeWiseDealer,
 };

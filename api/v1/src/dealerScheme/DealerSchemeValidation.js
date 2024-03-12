@@ -19,6 +19,22 @@ const create = {
   }),
 };
 
+// scheme to dealer mapping
+const schemeToDealer = {
+  body: Joi.object().keys({
+    schemeId: Joi.string().custom(commonValidation.objectId).required(),
+    dealers: Joi.array().items(Joi.string().required()).required(),
+  }),
+};
+
+// dealer to scheme mapping
+const DealerToscheme = {
+  body: Joi.object().keys({
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    schemes: Joi.array().items(Joi.string().required()).required(),
+  }),
+};
+
 /**
  * update existing document
  */
@@ -146,4 +162,6 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getDealerBySchemeAndPincode,
+  schemeToDealer,
+  DealerToscheme,
 };
