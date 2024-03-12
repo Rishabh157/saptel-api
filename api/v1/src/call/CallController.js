@@ -395,83 +395,110 @@ exports.update = async (req, res) => {
     const inquiryNumber = await getInquiryNumber();
 
     console.log(isUserExists, "isUserExists");
-    const orderInquiry = await orderService.createNewData({
-      ...req.body,
-      status: !flag ? orderStatusEnum.inquiry : status,
-      orderNumber: flag ? orderNumber : null,
-      inquiryNumber: inquiryNumber,
-      assignDealerId: null,
-      assignWarehouseId: null,
-      approved: flag ? true : prepaidOrderFlag ? false : true,
-      agentId: agentId,
-      agentName: agentName,
-      recordingStartTime: recordingStartTime,
-      recordingEndTime: recordingEndTime,
-      callCenterId: isUserExists?.callCenterId,
-      branchId: isUserExists?.branchId,
-      // dealerAssignedId: dealerId,
-    });
-
-    await orderInquiryFlowService.createNewData({
-      ...req.body,
-      status: inquiryNumber ? orderStatusEnum.inquiry : status,
-      orderId: orderInquiry?._id,
-      assignDealerId: null,
-      assignWarehouseId: null,
-      approved: flag ? true : prepaidOrderFlag ? false : true,
-      agentId: agentId,
-      agentName: agentName,
-      recordingStartTime: recordingStartTime,
-      recordingEndTime: recordingEndTime,
-      callCenterId: isUserExists?.callCenterId,
-      branchId: isUserExists?.branchId,
-      // dealerAssignedId: dealerId,
-    });
-
-    let dataUpdated = await callService.getOneAndUpdate(
-      {
-        _id: idToBeSearch,
-        isDeleted: false,
-      },
-      {
-        $set: {
-          status: inquiryNumber ? orderStatusEnum.inquiry : status,
-          ...req.body,
-        },
-      }
-    );
-
-    if (dataUpdated) {
-      console.log(
-        agentName,
-        mobileNo,
-        isDispositionThreeExists?.dispositionName
-      );
-      // await axios.post(
-      //   "https://uat.onetelemart.com/agent/v2/click-2-hangup",
-      //   {
-      //     user: agentName,
-      //     phone_number: mobileNo,
-      //     unique_id: mobileNo,
-      //     disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
-      //   },
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       XAuth: config.server_auth_key,
-      //     },
-      //   }
-      // );
-
-      return res.status(httpStatus.OK).send({
-        message: "Updated successfully.",
-        data: dataUpdated,
-        status: true,
-        code: "OK",
-        issue: null,
+    try {
+      const orderInquiry = await orderService.createNewData({
+        ...req.body,
+        status: !flag ? orderStatusEnum.inquiry : status,
+        orderNumber: flag ? orderNumber : null,
+        inquiryNumber: inquiryNumber,
+        assignDealerId: null,
+        assignWarehouseId: null,
+        approved: flag ? true : prepaidOrderFlag ? false : true,
+        agentId: agentId,
+        agentName: agentName,
+        recordingStartTime: recordingStartTime,
+        recordingEndTime: recordingEndTime,
+        callCenterId: isUserExists?.callCenterId,
+        branchId: isUserExists?.branchId,
+        // dealerAssignedId: dealerId,
       });
-    } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+
+      const orderInquiryFlow = await orderInquiryFlowService.createNewData({
+        ...req.body,
+        status: inquiryNumber ? orderStatusEnum.inquiry : status,
+        orderId: orderInquiry?._id,
+        assignDealerId: null,
+        assignWarehouseId: null,
+        approved: flag ? true : prepaidOrderFlag ? false : true,
+        agentId: agentId,
+        agentName: agentName,
+        recordingStartTime: recordingStartTime,
+        recordingEndTime: recordingEndTime,
+        callCenterId: isUserExists?.callCenterId,
+        branchId: isUserExists?.branchId,
+        // dealerAssignedId: dealerId,
+      });
+
+      const dataUpdated = await callService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            status: inquiryNumber ? orderStatusEnum.inquiry : status,
+            ...req.body,
+          },
+        }
+      );
+
+      if (dataUpdated) {
+        console.log(
+          agentName,
+          mobileNo,
+          isDispositionThreeExists?.dispositionName
+        );
+        await axios.post(
+          "https://uat.onetelemart.com/agent/v2/click-2-hangup",
+          {
+            user: agentName,
+            phone_number: mobileNo,
+            unique_id: mobileNo,
+            disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              XAuth: config.server_auth_key,
+            },
+          }
+        );
+
+        return res.status(httpStatus.OK).send({
+          message: "Updated successfully.",
+          data: dataUpdated,
+          status: true,
+          code: "OK",
+          issue: null,
+        });
+      }
+    } catch (error) {
+      // Rollback logic
+      if (orderInquiry) {
+        // Delete created order inquiry
+        await orderService.getByIdAndDelete(orderInquiry._id);
+      }
+
+      if (orderInquiryFlow) {
+        // Delete created order inquiry flow
+        await orderInquiryFlowService.getByIdAndDelete(orderInquiryFlow._id);
+      }
+
+      // Handle status rollback for call service
+      await callService.getOneAndUpdate(
+        { _id: idToBeSearch, isDeleted: false },
+        { $set: { status: status } }
+      );
+
+      // Handle error response
+      console.error("API call failed:", error);
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+        message: "Something went wrong!",
+        data: null,
+        status: false,
+        code: "ERROR",
+        issue: "API call failed",
+      });
     }
   } catch (err) {
     let errData = errorRes(err);
