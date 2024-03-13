@@ -110,6 +110,16 @@ router.put(
   validate(userValidation.changePasswordValid),
   userController.changePassword
 );
+
+/**
+ * change password
+ */
+router.put(
+  "/change-password/by-admin",
+  authCheckMiddleware,
+  validate(userValidation.changePasswordByAdmin),
+  userController.changePasswordByAdmin
+);
 router.put(
   "/:id",
   authCheckMiddleware,

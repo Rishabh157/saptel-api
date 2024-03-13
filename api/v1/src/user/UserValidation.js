@@ -65,7 +65,7 @@ const update = {
       .custom(commonValidation.indianMobile)
       .allow(""),
     email: Joi.string().allow(""),
-    password: Joi.string().optional(),
+    // password: Joi.string().optional(),
     userType: Joi.string(),
     allowedIp: Joi.array().items(Joi.string()).default([]),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
@@ -241,6 +241,15 @@ const changePasswordValid = {
     })
     .required(),
 };
+// change password by admin
+const changePasswordByAdmin = {
+  body: Joi.object()
+    .keys({
+      newPassword: Joi.string().required(),
+      userId: Joi.string().custom(commonValidation.objectId).required(),
+    })
+    .required(),
+};
 
 /**
  * verify otp
@@ -271,4 +280,5 @@ module.exports = {
   changePasswordValid,
   getAllFloorManagersAndTeamLead,
   getAllUsers,
+  changePasswordByAdmin,
 };

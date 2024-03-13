@@ -16,6 +16,16 @@ router.get(
   validate(complainLogsValidation.get),
   complainLogsController.get
 );
+
+/**
+ * get all documents of a complaint
+ */
+router.get(
+  "/get/:complaintId",
+  authCheckMiddleware,
+  validate(complainLogsValidation.getLogs),
+  complainLogsController.getLogs
+);
 /**
  * get all complainLogs pagination filter
  */

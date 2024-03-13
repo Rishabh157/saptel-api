@@ -319,14 +319,7 @@ exports.update = async (req, res) => {
 //update start
 exports.updateUser = async (req, res) => {
   try {
-    let {
-      userName,
-      mobile,
-
-      password,
-      companyId,
-      branchId,
-    } = req.body;
+    let { userName, mobile, companyId, branchId } = req.body;
     let deviceId = req.headers["device-id"];
 
     // if (req.userData.userType !== userEnum.user) {
@@ -367,16 +360,7 @@ exports.updateUser = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `User not found.`);
     }
-    if (password) {
-      let hashedPassword = await bcryptjs.hash(password, 12);
-      if (!hashedPassword) {
-        throw new ApiError(
-          httpStatus.OK,
-          `Something went wrong with the password.`
-        );
-      }
-      req.body.password = hashedPassword;
-    }
+
     if (mobile.length) {
       req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
     } else {
@@ -1345,20 +1329,89 @@ exports.changePassword = async (req, res) => {
       newToken + "***" + newRefreshToken
     );
     const allRedisValue = await redisClient.keys(`${userId}*`);
-    return res.status(httpStatus.OK).send({
-      message: `Password change successful!`,
-      data: {
-        token: newToken,
-        refreshToken: newRefreshToken,
-        fullName: `${firstName} ${lastName}`,
-        email: email,
-        mobile: mobile,
-        userName: userName,
-      },
-      status: true,
-      code: "OK",
-      issue: null,
+    if (allRedisValue) {
+      return res.status(httpStatus.OK).send({
+        message: `Password change successful!`,
+        data: {
+          token: newToken,
+          refreshToken: newRefreshToken,
+          fullName: `${firstName} ${lastName}`,
+          email: email,
+          mobile: mobile,
+          userName: userName,
+        },
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// change password by admin
+exports.changePasswordByAdmin = async (req, res) => {
+  try {
+    const { newPassword, userId } = req.body;
+    const deviceId = req.headers["device-id"];
+
+    const user = await userService.getOneByMultiField({
+      _id: userId,
+      isDeleted: false,
     });
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password in the database
+    user.password = hashedPassword;
+    await user.save();
+    let newToken = await tokenCreate(user);
+    if (!newToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let newRefreshToken = await refreshTokenCreate(user);
+
+    if (!newRefreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    await redisClient.set(
+      userId + deviceId,
+      newToken + "***" + newRefreshToken
+    );
+    const allRedisValue = await redisClient.keys(`${userId}*`);
+    if (allRedisValue) {
+      return res.status(httpStatus.OK).send({
+        message: `Password change successful!`,
+        data: null,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

@@ -194,7 +194,7 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -210,7 +210,7 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -225,7 +225,7 @@ exports.allFilterPagination = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -241,13 +241,13 @@ exports.allFilterPagination = async (req, res) => {
             ],
           },
           initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallThreeData.initialCallDisplayName", 0],
           },
           initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
           },
           initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },
@@ -350,7 +350,7 @@ exports.get = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -366,7 +366,7 @@ exports.get = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -381,7 +381,7 @@ exports.get = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -397,13 +397,145 @@ exports.get = async (req, res) => {
             ],
           },
           initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallThreeData.initialCallDisplayName", 0],
           },
           initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
           },
           initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "initialcallTwoData",
+          "initialcallOneData",
+          "initialcallThreeData",
+          "userData",
+        ],
+      },
+    ];
+
+    let dataExist = await complainLogsService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get logs of a complaints
+exports.getLogs = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let complaintId = req.params.complaintId;
+    console.log(complaintId, "complaintId");
+    let matchQuery = {
+      isDeleted: false,
+      complainId: new mongoose.Types.ObjectId(complaintId),
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "complaintById",
+          foreignField: "_id",
+          as: "userData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "initialcallthrees",
+          localField: "icThree",
+          foreignField: "_id",
+          as: "initialcallThreeData",
+          pipeline: [
+            {
+              $project: {
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "initialcalltwos",
+          localField: "icTwo",
+          foreignField: "_id",
+          as: "initialcallTwoData",
+          pipeline: [
+            {
+              $project: {
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "initialcallones",
+          localField: "icOne",
+          foreignField: "_id",
+          as: "initialcallOneData",
+          pipeline: [
+            {
+              $project: {
+                initialCallDisplayName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          complaintbyLabel: {
+            $concat: [
+              { $arrayElemAt: ["$userData.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$userData.lastName", 0] },
+            ],
+          },
+          initialCallThreeLabel: {
+            $arrayElemAt: ["$initialcallThreeData.initialCallDisplayName", 0],
+          },
+          initialCallTwoLabel: {
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
+          },
+          initialCallOneLabel: {
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },
@@ -476,7 +608,7 @@ exports.getById = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -492,7 +624,7 @@ exports.getById = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -507,7 +639,7 @@ exports.getById = async (req, res) => {
           pipeline: [
             {
               $project: {
-                initialCallName: 1,
+                initialCallDisplayName: 1,
               },
             },
           ],
@@ -523,13 +655,13 @@ exports.getById = async (req, res) => {
             ],
           },
           initialCallThreeLabel: {
-            $arrayElemAt: ["$initialcallThreeData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallThreeData.initialCallDisplayName", 0],
           },
           initialCallTwoLabel: {
-            $arrayElemAt: ["$initialcallTwoData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallTwoData.initialCallDisplayName", 0],
           },
           initialCallOneLabel: {
-            $arrayElemAt: ["$initialcallOneData.initialCallName", 0],
+            $arrayElemAt: ["$initialcallOneData.initialCallDisplayName", 0],
           },
         },
       },

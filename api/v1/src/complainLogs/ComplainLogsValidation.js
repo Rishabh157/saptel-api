@@ -80,6 +80,16 @@ const get = {
     .optional(),
 };
 
+// complaint logs
+
+const getLogs = {
+  params: Joi.object()
+    .keys({
+      complaintId: Joi.string().custom(commonValidation.objectId),
+    })
+    .optional(),
+};
+
 /**
  * get by id
  */
@@ -94,4 +104,5 @@ module.exports = {
   getAllFilter,
   get,
   getById,
+  getLogs,
 };
