@@ -4,6 +4,10 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const complainService = require("./ComplainService");
 const complainLogsService = require("../complainLogs/ComplainLogsService");
+const moneyBackService = require("../moneyBackRequest/MoneyBackRequestService");
+const initialCallOneService = require("../initialCallOne/InitialCallOneService");
+const moneyBackLogsService = require("../moneyBackRequestLog/MoneyBackRequestLogService");
+const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const { searchKeys } = require("./ComplainSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -47,6 +51,14 @@ exports.add = async (req, res) => {
      * check duplicate exist
      */
 
+    let icOneData = await initialCallOneService.getOneByMultiField({
+      isDeleted: false,
+      isActive: true,
+      _id: icOne,
+    });
+    if (!icOneData) {
+      throw new ApiError(httpStatus.OK, "Invalid IC 1");
+    }
     // if (status === complainStatusEnum.open) {
     let dataExist = await complainService.getOneByMultiField({
       callType: complainCallTypeEnum.complaint,
@@ -77,6 +89,36 @@ exports.add = async (req, res) => {
         complaintNumber,
         ...req.body,
       });
+      let orderDetails = await orderInquiryService.getOneByMultiField({
+        _id: orderId,
+        isDeleted: false,
+        isActive: true,
+      });
+
+      if (config.money_back_id === icOneData.initialCallName) {
+        let moneyBackData = await moneyBackService.createNewData({
+          orderNumber: orderDetails?.orderNumber,
+          complaintNumber: complaintNumber,
+          schemeId: orderDetails?.schemeId,
+          dealerId: orderDetails?.assignDealerId,
+          wareHouseId: orderDetails?.assignWarehouseId,
+          dateOfDelivery: orderDetails?.deliveryTimeAndDate,
+          customerName: orderDetails?.customerName,
+          address: orderDetails?.autoFillingShippingAddress,
+          stateId: orderDetails?.stateId,
+          districtId: orderDetails?.districtId,
+          tehsilId: orderDetails?.tehsilId,
+          pincode: orderDetails?.pincodeId,
+          customerNumber: orderDetails?.mobileNo,
+          alternateNumber: orderDetails?.alternateNo,
+          companyId: req?.userData.companyId,
+        });
+        await moneyBackLogsService.createNewData({
+          moneyBackRequestId: moneyBackData?._id,
+          complaintNumber: complaintNumber,
+          companyId: req?.userData.companyId,
+        });
+      }
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
         data: dataCreated,

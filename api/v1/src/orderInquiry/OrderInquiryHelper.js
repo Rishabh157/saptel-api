@@ -1,39 +1,28 @@
+const config = require("../../../../config/config");
+const { customerReputationColor } = require("../../helper/enumUtils");
+
 exports.getCustomerReputation = (data) => {
-  let redFlags = [
-    "659e2b70ef5489213ce36e80",
-    "659e2b79ef5489213ce36e89",
-    "659e2b88ef5489213ce36e92",
-    "65e8367edf4427723d65e9a4",
-  ];
-  let otherRedFlagIc2 = [
-    "659e2bb8ef5489213ce36eb6",
-    "659e2df5ef5489213ce36f76",
-  ];
-  let otherRedFlagIc3 = [
-    "659f714cef5489213ce37123",
-    "65b0a433aae70b83add8a91d",
-  ];
-  let orangeFlags = ["659e2ba0ef5489213ce36ea4"];
-  let otherOrangeFlags = [
-    "659e2a37ef5489213ce36e1a",
-    "659e2a3fef5489213ce36e22",
-  ];
-  let color = "GREEN"; // Initialize color with a default value
+  let redFlags = config.redFlags;
+  let otherRedFlagIc2 = config.otherRedFlagIc2;
+  let otherRedFlagIc3 = config.otherRedFlagIc3;
+  let orangeFlags = config.orangeFlags;
+  let otherOrangeFlags = config.otherOrangeFlags;
+  let color = customerReputationColor.green; // Initialize color with a default value
   data?.forEach((ele) => {
-    if (redFlags.includes(ele?.icTwo.toString())) {
-      color = "RED";
+    if (redFlags.includes(ele?.icTwoLabel)) {
+      color = customerReputationColor.red;
     }
     if (
-      otherRedFlagIc2.includes(ele?.icTwo.toString()) &&
-      otherRedFlagIc3.includes(ele?.icThree.toString())
+      otherRedFlagIc2.includes(ele?.icTwoLabel) &&
+      otherRedFlagIc3.includes(ele?.icThreeLabel)
     ) {
-      color = "RED";
+      color = customerReputationColor.red;
     }
-    if (orangeFlags.includes(ele?.icTwo.toString())) {
-      color = "ORANGE";
+    if (orangeFlags.includes(ele?.icTwoLabel)) {
+      color = customerReputationColor.orange;
     }
-    if (otherOrangeFlags.includes(ele?.icOne.toString())) {
-      color = "ORANGE";
+    if (otherOrangeFlags.includes(ele?.icOneLabel)) {
+      color = customerReputationColor.orange;
     }
   });
   return color;

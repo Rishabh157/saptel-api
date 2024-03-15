@@ -181,6 +181,12 @@ const orderStatusEnum = Object.freeze({
   inquiry: "INQUIRY",
 });
 
+const customerReputationColor = Object.freeze({
+  red: "RED",
+  orange: "ORANGE",
+  green: "GREEN",
+});
+
 const apiAppEnum = Object.freeze({
   web: "web",
   app: "app",
@@ -480,4 +486,5 @@ module.exports = {
   complainStatusEnum,
   ndrRtoAttemptEnum,
   callPageTabType,
+  customerReputationColor,
 };

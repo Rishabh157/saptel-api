@@ -21,6 +21,9 @@ const create = {
     icOne: Joi.string().custom(commonValidation.objectId).required(),
     icTwo: Joi.string().custom(commonValidation.objectId).required(),
     icThree: Joi.string().custom(commonValidation.objectId).required(),
+    icOneLabel: Joi.string().required(),
+    icTwoLabel: Joi.string().required(),
+    icThreeLabel: Joi.string().required(),
 
     remark: Joi.string().lowercase().required(),
   }),
@@ -47,6 +50,9 @@ const update = {
     icOne: Joi.string().custom(commonValidation.objectId).required(),
     icTwo: Joi.string().custom(commonValidation.objectId).required(),
     icThree: Joi.string().custom(commonValidation.objectId).required(),
+    icOneLabel: Joi.string().required(),
+    icTwoLabel: Joi.string().required(),
+    icThreeLabel: Joi.string().required(),
 
     remark: Joi.string().lowercase().required(),
   }),

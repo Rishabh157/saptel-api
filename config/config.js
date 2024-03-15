@@ -21,6 +21,12 @@ let {
   JWT_EXPIRATION_MINUTES_OTP,
   SERVER_AUTH_KEY,
   DIALER_DOMAIN,
+  MONEY_BACK_ID,
+  RED_FLAG_DISPOSITION,
+  OTHER_RED_FLAG_IC2,
+  OTHER_RED_FLAG_IC3,
+  ORANGE_FLAG_DISPOSITION,
+  OTHER_ORANGE_FLAG,
 } = process.env;
 
 let envObj = {
@@ -41,6 +47,12 @@ let envObj = {
   JWT_EXPIRATION_MINUTES_OTP,
   SERVER_AUTH_KEY,
   DIALER_DOMAIN,
+  MONEY_BACK_ID,
+  RED_FLAG_DISPOSITION,
+  OTHER_RED_FLAG_IC2,
+  OTHER_RED_FLAG_IC3,
+  ORANGE_FLAG_DISPOSITION,
+  OTHER_ORANGE_FLAG,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -68,6 +80,22 @@ const envVarsSchema = Joi.object().keys({
     .description("minutes after which otp token expires"),
   SERVER_AUTH_KEY: Joi.string().required().label("Server auth key is required"),
   DIALER_DOMAIN: Joi.string().required().label("Dialer domain key is required"),
+  MONEY_BACK_ID: Joi.string().required().label("money back id key is required"),
+  RED_FLAG_DISPOSITION: Joi.string()
+    .required()
+    .label("RED FLAG DISPOSITION key is required"),
+  OTHER_RED_FLAG_IC2: Joi.string()
+    .required()
+    .label("OTHER RED FLAG IC2 is required"),
+  OTHER_RED_FLAG_IC3: Joi.string()
+    .required()
+    .label("OTHER RED FLAG IC3 is required"),
+  ORANGE_FLAG_DISPOSITION: Joi.string()
+    .required()
+    .label("ORANGE FLAG DISPOSITION is required"),
+  OTHER_ORANGE_FLAG: Joi.string()
+    .required()
+    .label("OTHER ORANGE FLAG is required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -103,7 +131,12 @@ module.exports = {
   localhost: envVars.LOCALHOST,
   server_auth_key: envVars.SERVER_AUTH_KEY,
   dialer_domain: envVars.DIALER_DOMAIN,
-
+  money_back_id: envVars.MONEY_BACK_ID,
+  redFlags: envVars.RED_FLAG_DISPOSITION,
+  otherRedFlagIc2: envVars.OTHER_RED_FLAG_IC2,
+  otherRedFlagIc3: envVars.OTHER_RED_FLAG_IC3,
+  orangeFlags: envVars.ORANGE_FLAG_DISPOSITION,
+  otherOrangeFlags: envVars.OTHER_ORANGE_FLAG,
   base_url:
     envVars.NODE_ENV === "development"
       ? envVars.BASEURL_LOCAL + ":" + envVars.PORT + "/"
