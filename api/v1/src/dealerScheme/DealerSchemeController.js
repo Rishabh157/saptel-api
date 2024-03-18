@@ -118,7 +118,7 @@ exports.add = async (req, res) => {
 // scheme to dealer mapping
 exports.schemeToDealer = async (req, res) => {
   try {
-    let { schemeId, dealers } = req.body;
+    let { schemeId, dealers, dealersToRemove } = req.body;
 
     const isDealerExists = await Promise.all(
       dealers?.map(async (ele) => {
@@ -132,18 +132,45 @@ exports.schemeToDealer = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Dealer");
     }
 
-    await schemeService.findCount({
+    // dealer to remove exists
+    const isDealerToRemoveExists = await Promise.all(
+      dealersToRemove?.map(async (ele) => {
+        return await dealerService.findCount({
+          _id: ele,
+          isDeleted: false,
+        });
+      })
+    );
+    if (isDealerToRemoveExists.includes(0)) {
+      throw new ApiError(httpStatus.OK, "Invalid Dealer");
+    }
+
+    const isSchemeExists = await schemeService.findCount({
       _id: schemeId,
       isDeleted: false,
     });
 
-    if (!schemeService) {
+    if (!isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid scheme");
     }
 
     /**
      * check duplicate exist
      */
+    // dealers To remove
+    const delaerSchemeToDelete = await Promise.all(
+      dealersToRemove.map(async (dealer) => {
+        let dealerWithSchemeExist =
+          await dealerSchemeService.getOneByMultiField({
+            isDeleted: false,
+            isActive: true,
+            schemeId: schemeId,
+            dealerId: dealer,
+          });
+
+        return new mongoose.Types.ObjectId(dealerWithSchemeExist?._id);
+      })
+    );
 
     //------------------create data-------------------
     const output = await Promise.all(
@@ -185,7 +212,7 @@ exports.schemeToDealer = async (req, res) => {
     const filteredOutput = output.filter((item) => item !== undefined);
     console.log(filteredOutput, "filteredOutput");
     let dataCreated = await dealerSchemeService.createMany(filteredOutput);
-
+    await dealerSchemeService.deleteMany(delaerSchemeToDelete);
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -210,7 +237,7 @@ exports.schemeToDealer = async (req, res) => {
 // dealer to scheme mapping
 exports.DealerToscheme = async (req, res) => {
   try {
-    let { dealerId, schemes } = req.body;
+    let { dealerId, schemes, schemesToRemove } = req.body;
 
     const isSchemeExists = await Promise.all(
       schemes?.map(async (ele) => {
@@ -224,12 +251,26 @@ exports.DealerToscheme = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Scheme");
     }
 
-    await dealerService.findCount({
+    // is scheme to remove exists
+
+    const isSchemeToRemoveExists = await Promise.all(
+      schemesToRemove?.map(async (ele) => {
+        return await schemeService.findCount({
+          _id: ele,
+          isDeleted: false,
+        });
+      })
+    );
+    if (isSchemeToRemoveExists.includes(0)) {
+      throw new ApiError(httpStatus.OK, "Invalid Scheme");
+    }
+
+    const isDealerExists = await dealerService.findCount({
       _id: dealerId,
       isDeleted: false,
     });
 
-    if (!schemeService) {
+    if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid dealer");
     }
 
@@ -253,6 +294,25 @@ exports.DealerToscheme = async (req, res) => {
       return dpin.pincode;
     });
 
+    console.log(isSchemeToRemoveExists, "isSchemeToRemoveExists");
+    // schemes to remove
+    const delaerSchemeToDelete = await Promise.all(
+      schemesToRemove?.map(async (scheme) => {
+        let schemeWithDealerExist =
+          await dealerSchemeService.getOneByMultiField({
+            isDeleted: false,
+            isActive: true,
+            schemeId: scheme,
+            dealerId: dealerId,
+          });
+        if (schemeWithDealerExist) {
+          return new mongoose.Types.ObjectId(schemeWithDealerExist?._id);
+        }
+      })
+    );
+
+    console.log(delaerSchemeToDelete, "delaerSchemeToDelete");
+
     //------------------create data-------------------
     const output = await Promise.all(
       schemes.map(async (scheme) => {
@@ -275,7 +335,8 @@ exports.DealerToscheme = async (req, res) => {
     const filteredOutput = output.filter((item) => item !== undefined);
 
     let dataCreated = await dealerSchemeService.createMany(filteredOutput);
-
+    // deleting the schemes
+    await dealerSchemeService.deleteMany(delaerSchemeToDelete);
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",

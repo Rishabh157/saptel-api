@@ -2,7 +2,7 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const moneyBackRequestLogService = require("./MoneyBackRequestLogService");
+const productReplacementRequestLogService = require("./ProductReplacementRequestLogService");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -21,10 +21,12 @@ const { default: mongoose } = require("mongoose");
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    const { moneyBackRequestId } = req.params;
+    const { productReplacementRequestId } = req.params;
     let matchQuery = {
       isDeleted: false,
-      moneyBackRequestId: new mongoose.Types.ObjectId(moneyBackRequestId),
+      productReplacementRequestId: new mongoose.Types.ObjectId(
+        productReplacementRequestId
+      ),
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
@@ -97,11 +99,11 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let dataExist = await moneyBackRequestLogService.aggregateQuery(
+    let dataExist = await productReplacementRequestLogService.aggregateQuery(
       additionalQuery
     );
 
-    if (!dataExist.length) {
+    if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({

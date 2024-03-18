@@ -27,6 +27,10 @@ const {
   complainCallTypeEnum,
 } = require("../../helper/enumUtils");
 const { getComplaintNumber } = require("../call/CallHelper");
+const {
+  addMoneyBackRequest,
+  addProductReplacementRequest,
+} = require("./ComplaintHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -76,6 +80,7 @@ exports.add = async (req, res) => {
     // }
     //------------------create data-------------------
     let complaintNumber = await getComplaintNumber();
+
     let dataCreated = await complainService.createNewData({
       complaintNumber,
       complaintById: req.userData.Id,
@@ -96,28 +101,20 @@ exports.add = async (req, res) => {
       });
 
       if (config.money_back_id === icOneData.initialCallName) {
-        let moneyBackData = await moneyBackService.createNewData({
-          orderNumber: orderDetails?.orderNumber,
-          complaintNumber: complaintNumber,
-          schemeId: orderDetails?.schemeId,
-          dealerId: orderDetails?.assignDealerId,
-          wareHouseId: orderDetails?.assignWarehouseId,
-          dateOfDelivery: orderDetails?.deliveryTimeAndDate,
-          customerName: orderDetails?.customerName,
-          address: orderDetails?.autoFillingShippingAddress,
-          stateId: orderDetails?.stateId,
-          districtId: orderDetails?.districtId,
-          tehsilId: orderDetails?.tehsilId,
-          pincode: orderDetails?.pincodeId,
-          customerNumber: orderDetails?.mobileNo,
-          alternateNumber: orderDetails?.alternateNo,
-          companyId: req?.userData.companyId,
-        });
-        await moneyBackLogsService.createNewData({
-          moneyBackRequestId: moneyBackData?._id,
-          complaintNumber: complaintNumber,
-          companyId: req?.userData.companyId,
-        });
+        let moneyBackData = await addMoneyBackRequest(
+          orderDetails,
+          complaintNumber,
+          req.userData
+        );
+      }
+      if (
+        config.product_replacement_disposition === icOneData.initialCallName
+      ) {
+        let productReplacementkData = await addProductReplacementRequest(
+          orderDetails,
+          complaintNumber,
+          req.userData
+        );
       }
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -584,6 +581,7 @@ exports.getByNumber = async (req, res) => {
     }
     let additionalQuery = [
       { $match: matchQuery },
+      { $sort: { _id: -1 } },
       {
         $lookup: {
           from: "initialcallthrees",

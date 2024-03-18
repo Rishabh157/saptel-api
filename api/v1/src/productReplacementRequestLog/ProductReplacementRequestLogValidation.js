@@ -7,11 +7,11 @@ const commonValidation = require("../../helper/CommonValidation");
  * get either all data or single document
  */
 const get = {
-  params: Joi.object()
+  query: Joi.object()
     .keys({
-      moneyBackRequestId: Joi.string()
-        .custom(commonValidation.objectId)
-        .required(),
+      productReplacementRequestId: Joi.string().custom(
+        commonValidation.objectId
+      ),
     })
     .optional(),
 };

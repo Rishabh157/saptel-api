@@ -1,13 +1,16 @@
-const DealerScheme = require("./DealerSchemeSchema");
+const ProductReplacementRequestLog = require("./ProductReplacementRequestLogSchema");
 const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return DealerScheme.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return ProductReplacementRequestLog.findOne({
+    [fieldName]: fieldValue,
+    isDeleted: false,
+  });
 };
 //-------------------------------------------
 
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return DealerScheme.findOne(
+  return ProductReplacementRequestLog.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
@@ -16,17 +19,17 @@ const getOneByMultiField = async (matchObj, projectObj) => {
 //-------------------------------------------
 
 const createNewData = async (bodyData) => {
-  return DealerScheme.create({ ...bodyData });
+  return ProductReplacementRequestLog.create({ ...bodyData });
 };
 //-------------------------------------------
 
 const getById = async (id) => {
-  return DealerScheme.findById(id);
+  return ProductReplacementRequestLog.findById(id);
 };
 //-------------------------------------------
 
 const getByIdAndUpdate = async (id, updateBody) => {
-  return DealerScheme.findByIdAndUpdate(
+  return ProductReplacementRequestLog.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -35,7 +38,7 @@ const getByIdAndUpdate = async (id, updateBody) => {
 //-------------------------------------------
 
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return DealerScheme.findOneAndUpdate(
+  return ProductReplacementRequestLog.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -44,7 +47,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return DealerScheme.updateOne(
+  return ProductReplacementRequestLog.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -53,17 +56,12 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const getByIdAndDelete = async (id) => {
-  return DealerScheme.findByIdAndDelete(id);
-};
-
-// delete many
-const deleteMany = async (objectIDs) => {
-  return DealerScheme.deleteMany({ _id: { $in: objectIDs } });
+  return ProductReplacementRequestLog.findByIdAndDelete(id);
 };
 //-------------------------------------------
 
 const getOneAndDelete = async (matchObj) => {
-  return DealerScheme.findOneAndUpdate(
+  return ProductReplacementRequestLog.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -72,7 +70,7 @@ const getOneAndDelete = async (matchObj) => {
 //-------------------------------------------
 
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return DealerScheme.find(
+  return ProductReplacementRequestLog.find(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
@@ -80,22 +78,25 @@ const findAllWithQuery = async (matchObj, projectObj) => {
 //-------------------------------------------
 
 const findAll = async () => {
-  return DealerScheme.find();
+  return ProductReplacementRequestLog.find();
 };
 //-------------------------------------------
 
 const aggregateQuery = async (aggregateQueryArray) => {
-  return DealerScheme.aggregate(aggregateQueryArray);
+  return ProductReplacementRequestLog.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 
 const createMany = async (insertDataArray) => {
-  return DealerScheme.insertMany(insertDataArray);
+  return ProductReplacementRequestLog.insertMany(insertDataArray);
 };
 //-------------------------------------------
 
 const findCount = async (matchObj) => {
-  return DealerScheme.find({ ...matchObj, isDeleted: false }).count();
+  return ProductReplacementRequestLog.find({
+    ...matchObj,
+    isDeleted: false,
+  }).count();
 };
 //-------------------------------------------
 
@@ -156,5 +157,4 @@ module.exports = {
   createMany,
   findCount,
   isExists,
-  deleteMany,
 };

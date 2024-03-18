@@ -1,11 +1,10 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const MoneyBackRequestLogSchema = new mongoose.Schema(
+const ProductReplacementRequestLogSchema = new mongoose.Schema(
   {
-    moneyBackRequestId: {
+    productReplacementRequestId: {
       type: ObjectId,
       required: true,
-      trim: true,
     },
     complaintNumber: {
       type: String,
@@ -20,7 +19,6 @@ const MoneyBackRequestLogSchema = new mongoose.Schema(
     ccApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
     accountRemark: {
       type: String,
@@ -31,7 +29,6 @@ const MoneyBackRequestLogSchema = new mongoose.Schema(
     accountApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
     managerFirstRemark: {
       type: String,
@@ -42,7 +39,6 @@ const MoneyBackRequestLogSchema = new mongoose.Schema(
     managerFirstApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
     managerSecondRemark: {
       type: String,
@@ -53,9 +49,23 @@ const MoneyBackRequestLogSchema = new mongoose.Schema(
     managerSecondApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
-    companyId: { type: ObjectId, required: true },
+    replacedSchemeId: {
+      type: ObjectId,
+      default: null,
+    },
+    replacedSchemeLabel: {
+      type: String,
+      default: "",
+    },
+    productGroupId: {
+      type: ObjectId,
+      default: null,
+    },
+    companyId: {
+      type: ObjectId,
+      required: true,
+    },
     managerFirstUserId: {
       type: ObjectId,
       default: null,
@@ -86,9 +96,21 @@ const MoneyBackRequestLogSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["complaintNumber"];
+const searchKeys = [
+  "productReplacementRequestId",
+  "complaintNumber",
+  "ccRemark",
+  "ccApprovalDate",
+  "accountRemark",
+  "accountApprovalDate",
+  "managerFirstRemark",
+  "managerFirstApprovalDate",
+  "managerSecondRemark",
+  "managerSecondApprovalDate",
+  "companyId",
+];
 module.exports = mongoose.model(
-  "MoneyBackRequestLog",
-  MoneyBackRequestLogSchema
+  "ProductReplacementRequestLog",
+  ProductReplacementRequestLogSchema
 );
 module.exports.searchKeys = [...searchKeys];

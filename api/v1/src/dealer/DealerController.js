@@ -944,13 +944,11 @@ exports.getSchemeWiseDealer = async (req, res) => {
           alreadyHaveScheme.push({
             value: ele?._id,
             label: ele?.firstName + " " + ele?.lastName,
-            flag: true,
           });
         } else {
           notAssignedScheme.push({
             value: ele?._id,
             label: ele?.firstName + " " + ele?.lastName,
-            flag: false,
           });
         }
       })

@@ -93,6 +93,8 @@ const ndrLogsModuleServiceRoute = require("./src/ndrLogs/NdrLogsRoute");
 const dashboardRoute = require("./src/dashboard/DashBoardRoute");
 const moneyBackRequestRoute = require("./src/moneyBackRequest/MoneyBackRequestRoute");
 const moneyBackRequestLogRoute = require("./src/moneyBackRequestLog/MoneyBackRequestLogRoute");
+const prodyctReplacementRequestRoute = require("./src/productReplacementRequest/ProductReplacementRequestRoute");
+const prodyctReplacementRequestLogRoute = require("./src/productReplacementRequestLog/ProductReplacementRequestLogRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -478,6 +480,14 @@ const defaultRoutes = [
   {
     path: "/money-back-logs",
     route: moneyBackRequestLogRoute,
+  },
+  {
+    path: "/product-replacement",
+    route: prodyctReplacementRequestRoute,
+  },
+  {
+    path: "/product-replacement-logs",
+    route: prodyctReplacementRequestLogRoute,
   },
 ];
 // orderRoute;

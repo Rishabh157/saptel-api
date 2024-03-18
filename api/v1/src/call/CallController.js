@@ -21,7 +21,6 @@ const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 const {
   getDealer,
   getInquiryNumber,
-  getPrepaidOrderNumber,
   getOrderNumber,
   isOrder,
   dealerSurvingPincode,

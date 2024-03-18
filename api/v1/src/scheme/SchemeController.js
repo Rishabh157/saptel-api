@@ -509,13 +509,11 @@ exports.getDealerWiseScheme = async (req, res) => {
           alreadyHaveScheme.push({
             value: ele?._id,
             label: ele?.schemeName,
-            flag: true,
           });
         } else {
           notAssignedScheme.push({
             value: ele?._id,
             label: ele?.schemeName,
-            flag: false,
           });
         }
       })

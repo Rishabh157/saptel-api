@@ -1,86 +1,82 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const MoneyBackRequestSchema = new mongoose.Schema(
+const ProductReplacementRequestSchema = new mongoose.Schema(
   {
     orderNumber: {
       type: String,
       required: true,
-      trim: true,
     },
     complaintNumber: {
       type: String,
       required: true,
-      trim: true,
+    },
+    productGroupId: {
+      type: ObjectId,
+      required: true,
     },
     schemeId: {
       type: ObjectId,
       required: true,
-      trim: true,
+    },
+    replacedSchemeId: {
+      type: ObjectId,
+      default: null,
+    },
+    replacedSchemeLabel: {
+      type: String,
+      default: "",
     },
     dealerId: {
       type: ObjectId,
       default: null,
-      trim: true,
     },
     wareHouseId: {
       type: ObjectId,
       default: null,
-      trim: true,
     },
     dateOfDelivery: {
       type: String,
       default: "",
-      trim: true,
     },
     requestResolveDate: {
       type: String,
       default: "",
-      trim: true,
     },
-    settledAmount: {
+    customerName: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
     },
-    amountInWords: {
+    address: {
       type: String,
-      default: "",
-      trim: true,
+      required: true,
     },
-    customerName: { type: String, required: true },
-    address: { type: String, required: true },
-    stateId: { type: ObjectId, required: true },
-    districtId: { type: ObjectId, required: true },
-    tehsilId: { type: ObjectId, required: true },
-    pincodeId: { type: ObjectId, required: true },
+    stateId: {
+      type: ObjectId,
+      required: true,
+    },
+    districtId: {
+      type: ObjectId,
+      required: true,
+    },
+    tehsilId: {
+      type: ObjectId,
+      required: true,
+    },
     areaId: {
+      type: ObjectId,
+      required: true,
+    },
+    pincodeId: {
       type: ObjectId,
       required: true,
     },
     customerNumber: {
       type: String,
       required: true,
-      trim: true,
     },
     alternateNumber: {
       type: String,
       default: "",
-      trim: true,
-    },
-    bankName: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    accountNumber: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-    ifscCode: {
-      type: String,
-      default: "",
-      trim: true,
     },
     ccRemark: {
       type: String,
@@ -90,13 +86,11 @@ const MoneyBackRequestSchema = new mongoose.Schema(
     },
     ccApproval: {
       type: Boolean,
-      default: false,
-      trim: true,
+      default: null,
     },
     ccApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
     accountRemark: {
       type: String,
@@ -111,7 +105,6 @@ const MoneyBackRequestSchema = new mongoose.Schema(
     accountApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
     managerFirstRemark: {
       type: String,
@@ -122,12 +115,10 @@ const MoneyBackRequestSchema = new mongoose.Schema(
     managerFirstApproval: {
       type: Boolean,
       default: null,
-      trim: true,
     },
     managerFirstApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
     managerSecondRemark: {
       type: String,
@@ -142,9 +133,7 @@ const MoneyBackRequestSchema = new mongoose.Schema(
     managerSecondApprovalDate: {
       type: String,
       default: "",
-      trim: true,
     },
-    companyId: { type: ObjectId, required: true },
     managerFirstUserId: {
       type: ObjectId,
       default: null,
@@ -165,6 +154,10 @@ const MoneyBackRequestSchema = new mongoose.Schema(
       type: ObjectId,
       required: true,
     },
+    companyId: {
+      type: ObjectId,
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -180,5 +173,8 @@ const MoneyBackRequestSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["orderNumber", "complaintNumber"];
-module.exports = mongoose.model("MoneyBackRequest", MoneyBackRequestSchema);
+module.exports = mongoose.model(
+  "ProductReplacementRequest",
+  ProductReplacementRequestSchema
+);
 module.exports.searchKeys = [...searchKeys];

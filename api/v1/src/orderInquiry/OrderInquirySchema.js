@@ -14,6 +14,10 @@ const OrderInquirySchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    orderReferenceNumber: {
+      type: Number,
+      default: null,
+    },
     inquiryNumber: {
       type: Number,
       required: true,

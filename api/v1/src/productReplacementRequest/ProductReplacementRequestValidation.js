@@ -4,46 +4,6 @@ Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
 
 /**
- * create new document
- */
-const create = {
-  body: Joi.object().keys({
-    orderNumber: Joi.string().required(),
-    complaintNumber: Joi.string().required(),
-    schemeId: Joi.required().custom(commonValidation.objectId),
-    dealerId: Joi.required().custom(commonValidation.objectId).allow(null),
-    wareHouseId: Joi.required().custom(commonValidation.objectId).allow(null),
-    dateOfDelivery: Joi.string().allow(""),
-    requestResolveDate: Joi.string().allow(""),
-    settledAmount: Joi.string().allow(""),
-    amountInWords: Joi.string().allow(""),
-    customerName: Joi.string().required(),
-    address: Joi.string().required(),
-    stateId: Joi.required().custom(commonValidation.objectId),
-    districtId: Joi.required().custom(commonValidation.objectId),
-    tehsilId: Joi.required().custom(commonValidation.objectId),
-    pincode: Joi.string().required(),
-    customerNumber: Joi.string().required(),
-    alternateNumber: Joi.string().allow(""),
-    bankName: Joi.string().required(),
-    accountNumber: Joi.string().required(),
-    ifscCode: Joi.string().required(),
-    ccRemark: Joi.string().lowercase().allow(""),
-    ccApproval: Joi.boolean(),
-    ccApprovalDate: Joi.string().allow(""),
-    accountRemark: Joi.string().lowercase().allow(""),
-    accountApproval: Joi.boolean(),
-    accountApprovalDate: Joi.boolean().allow(""),
-    managerFirstRemark: Joi.string().lowercase().allow(""),
-    managerFirstApproval: Joi.boolean(),
-    managerFirstApprovalDate: Joi.boolean().allow(""),
-    managerSecondRemark: Joi.string().lowercase().allow(""),
-    managerSecondApproval: Joi.boolean(),
-    managerSecondApprovalDate: Joi.boolean().allow(""),
-  }),
-};
-
-/**
  * filter and pagination api
  */
 const getAllFilter = {
@@ -100,22 +60,12 @@ const get = {
     .optional(),
 };
 
-/**
- * get by id
- */
-const getById = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
 const updateManager = {
   body: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
     level: Joi.string().valid("FIRST", "SECOND"),
     approve: Joi.boolean(),
     remark: Joi.string().required(),
-    complaintNumber: Joi.number().required(),
   }),
 };
 
@@ -125,9 +75,9 @@ const ccUpdateDetails = {
     id: Joi.string().custom(commonValidation.objectId),
     customerNumber: Joi.string(),
     alternateNumber: Joi.string().allow(""),
-    bankName: Joi.string(),
-    accountNumber: Joi.string(),
-    ifscCode: Joi.string(),
+    replacedSchemeId: Joi.string().custom(commonValidation.objectId).required(),
+    replacedSchemeLabel: Joi.string().required(),
+    productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     ccRemark: Joi.string().required(),
   }),
 };
@@ -138,18 +88,23 @@ const accountApproval = {
     id: Joi.string().custom(commonValidation.objectId),
     accountRemark: Joi.string().required(),
     accountApproval: Joi.boolean(),
-    settledAmount: Joi.string().allow(""),
-    amountInWords: Joi.string().allow(""),
-    complaintNumber: Joi.number().required(),
+    orderReferenceNumber: Joi.number().required(),
+  }),
+};
+/**
+ * get by id
+ */
+const getById = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
 module.exports = {
-  create,
   getAllFilter,
   get,
-  getById,
   updateManager,
+  getById,
   ccUpdateDetails,
   accountApproval,
 };

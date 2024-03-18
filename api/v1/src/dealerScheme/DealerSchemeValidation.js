@@ -23,7 +23,8 @@ const create = {
 const schemeToDealer = {
   body: Joi.object().keys({
     schemeId: Joi.string().custom(commonValidation.objectId).required(),
-    dealers: Joi.array().items(Joi.string().required()).required(),
+    dealers: Joi.array().items(Joi.string()).allow(),
+    dealersToRemove: Joi.array().items(Joi.string()).allow(),
   }),
 };
 
@@ -31,7 +32,8 @@ const schemeToDealer = {
 const DealerToscheme = {
   body: Joi.object().keys({
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
-    schemes: Joi.array().items(Joi.string().required()).required(),
+    schemesToRemove: Joi.array().items(Joi.string()).allow(),
+    schemes: Joi.array().items(Joi.string()).required(),
   }),
 };
 

@@ -22,6 +22,7 @@ let {
   SERVER_AUTH_KEY,
   DIALER_DOMAIN,
   MONEY_BACK_ID,
+  PRODUCT_REPLACEMENT_DISPOSITION,
   RED_FLAG_DISPOSITION,
   OTHER_RED_FLAG_IC2,
   OTHER_RED_FLAG_IC3,
@@ -48,6 +49,7 @@ let envObj = {
   SERVER_AUTH_KEY,
   DIALER_DOMAIN,
   MONEY_BACK_ID,
+  PRODUCT_REPLACEMENT_DISPOSITION,
   RED_FLAG_DISPOSITION,
   OTHER_RED_FLAG_IC2,
   OTHER_RED_FLAG_IC3,
@@ -81,6 +83,9 @@ const envVarsSchema = Joi.object().keys({
   SERVER_AUTH_KEY: Joi.string().required().label("Server auth key is required"),
   DIALER_DOMAIN: Joi.string().required().label("Dialer domain key is required"),
   MONEY_BACK_ID: Joi.string().required().label("money back id key is required"),
+  PRODUCT_REPLACEMENT_DISPOSITION: Joi.string()
+    .required()
+    .label("product replacement disposition key is required"),
   RED_FLAG_DISPOSITION: Joi.string()
     .required()
     .label("RED FLAG DISPOSITION key is required"),
@@ -132,6 +137,7 @@ module.exports = {
   server_auth_key: envVars.SERVER_AUTH_KEY,
   dialer_domain: envVars.DIALER_DOMAIN,
   money_back_id: envVars.MONEY_BACK_ID,
+  product_replacement_disposition: envVars.PRODUCT_REPLACEMENT_DISPOSITION,
   redFlags: envVars.RED_FLAG_DISPOSITION,
   otherRedFlagIc2: envVars.OTHER_RED_FLAG_IC2,
   otherRedFlagIc3: envVars.OTHER_RED_FLAG_IC3,

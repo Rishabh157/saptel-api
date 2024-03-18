@@ -2,13 +2,17 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const moneyBackRequestService = require("./MoneyBackRequestService");
-const moneyBackRequestLogService = require("../moneyBackRequestLog/MoneyBackRequestLogService");
-const complaintService = require("../complain/ComplainService");
-const { searchKeys } = require("./MoneyBackRequestSchema");
+const productReplacementRequestService = require("./ProductReplacementRequestService");
+const orderInquiryService = require("../orderInquiry/OrderInquiryService");
+const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
+const userService = require("../user/UserService");
+const schemeService = require("../scheme/SchemeService");
+const productReplacementRequestLogService = require("../productReplacementRequestLog/ProductReplacementRequestLogService");
+const { searchKeys } = require("./ProductReplacementRequestSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
+const { getInquiryNumber, getOrderNumber } = require("../call/CallHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -18,8 +22,8 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { orderStatusEnum } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
-const { complainStatusEnum } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -28,35 +32,35 @@ exports.add = async (req, res) => {
       orderNumber,
       complaintNumber,
       schemeId,
+      replacedSchemeId,
       dealerId,
       dateOfDelivery,
       requestResolveDate,
-      settledAmount,
-      amountInWords,
       customerName,
       address,
       stateId,
       districtId,
       tehsilId,
-      pincode,
+      pincodeId,
       customerNumber,
       alternateNumber,
-      bankName,
-      accountNumber,
-      ifscCode,
       ccRemark,
       ccApproval,
+      ccApprovalDate,
       accountRemark,
       accountApproval,
+      accountApprovalDate,
       managerFirstRemark,
       managerFirstApproval,
+      managerFirstApprovalDate,
       managerSecondRemark,
       managerSecondApproval,
+      managerSecondApprovalDate,
     } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await moneyBackRequestService.isExists([
+    let dataExist = await productReplacementRequestService.isExists([
       { orderNumber },
       { complaintNumber },
     ]);
@@ -64,7 +68,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await moneyBackRequestService.createNewData({
+    let dataCreated = await productReplacementRequestService.createNewData({
       ...req.body,
     });
 
@@ -92,6 +96,7 @@ exports.add = async (req, res) => {
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {
+    console.log("ioduf");
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
@@ -105,7 +110,7 @@ exports.allFilterPagination = async (req, res) => {
       $and: [
         {
           isDeleted: false,
-          companyId: new mongoose.Types.ObjectId(req?.userData?.companyId),
+          companyId: new mongoose.Types.ObjectId(req?.userData.companyId),
         },
       ],
     };
@@ -156,17 +161,21 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [
       "ccApproval",
+      "ccApprovalDate",
       "accountApproval",
+      "accountApprovalDate",
       "managerFirstApproval",
       "managerSecondApproval",
     ];
     let numberFileds = [];
     let objectIdFields = [
       "schemeId",
+      "replacedSchemeId",
       "dealerId",
       "stateId",
       "districtId",
       "tehsilId",
+      "pincodeId",
     ];
     const filterQuery = getFilterQuery(
       filterBy,
@@ -211,15 +220,6 @@ exports.allFilterPagination = async (req, res) => {
           ],
         },
       },
-      {
-        $lookup: {
-          from: "users",
-          localField: "requestCreatedById",
-          foreignField: "_id",
-          as: "requestCrBy",
-          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
-        },
-      },
 
       {
         $addFields: {
@@ -232,18 +232,10 @@ exports.allFilterPagination = async (req, res) => {
           schemePrice: {
             $arrayElemAt: ["$schemeData.schemePrice", 0],
           },
-          requestCreatedByLabel: {
-            $concat: [
-              { $arrayElemAt: ["$requestCrBy.firstName", 0] },
-              " ",
-              { $arrayElemAt: ["$requestCrBy.lastName", 0] },
-            ],
-          },
         },
       },
-
       {
-        $unset: ["schemeData", "requestCrBy"],
+        $unset: ["schemeData"],
       },
     ];
 
@@ -256,7 +248,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await moneyBackRequestService.aggregateQuery(
+    let dataFound = await productReplacementRequestService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -277,7 +269,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await moneyBackRequestService.aggregateQuery(
+    let result = await productReplacementRequestService.aggregateQuery(
       finalAggregateQuery
     );
     if (result.length) {
@@ -311,7 +303,9 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await moneyBackRequestService.findAllWithQuery(matchQuery);
+    let dataExist = await productReplacementRequestService.findAllWithQuery(
+      matchQuery
+    );
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -497,7 +491,7 @@ exports.getById = async (req, res) => {
         ],
       },
     ];
-    let dataExist = await moneyBackRequestService.aggregateQuery(
+    let dataExist = await productReplacementRequestService.aggregateQuery(
       additionalQuery
     );
 
@@ -525,9 +519,9 @@ exports.getById = async (req, res) => {
 // update manager approval
 exports.updateManager = async (req, res) => {
   try {
-    let { id, level, approve, remark, complaintNumber } = req.body;
+    let { id, level, approve, remark } = req.body;
 
-    let dataExist = await moneyBackRequestService.findCount({
+    let dataExist = await productReplacementRequestService.findCount({
       _id: id,
       isDeleted: false,
       isActive: true,
@@ -537,33 +531,23 @@ exports.updateManager = async (req, res) => {
     }
 
     if (level === "FIRST") {
-      let firstUpdatedData = await moneyBackRequestService.getOneAndUpdate(
-        { _id: id },
-        {
-          $set: {
-            managerFirstApproval: approve,
-            managerFirstRemark: remark,
-            managerFirstApprovalDate: new Date(),
-            managerFirstUserId: req?.userData.Id,
-          },
-        }
-      );
+      let firstUpdatedData =
+        await productReplacementRequestService.getOneAndUpdate(
+          { _id: id },
+          {
+            $set: {
+              managerFirstApproval: approve,
+              managerFirstRemark: remark,
+              managerFirstApprovalDate: new Date(),
+              managerFirstUserId: req?.userData.Id,
+            },
+          }
+        );
       if (!firstUpdatedData) {
         throw new ApiError(httpStatus.OK, "Something went wrong!");
       } else {
-        if (approve === false) {
-          await complaintService?.getOneAndUpdate(
-            { complaintNumber: complaintNumber },
-            {
-              $set: {
-                status: complainStatusEnum.closed,
-                remark: remark,
-              },
-            }
-          );
-        }
-        await moneyBackRequestLogService.createNewData({
-          moneyBackRequestId: firstUpdatedData?._id,
+        await productReplacementRequestLogService.createNewData({
+          productReplacementRequestId: firstUpdatedData?._id,
           complaintNumber: firstUpdatedData?.complaintNumber,
           managerFirstRemark: remark,
           managerFirstApprovalDate: firstUpdatedData?.managerFirstApprovalDate,
@@ -579,39 +563,29 @@ exports.updateManager = async (req, res) => {
         });
       }
     } else {
-      let secondUpdatedData = await moneyBackRequestService.getOneAndUpdate(
-        { _id: id },
-        {
-          $set: {
-            managerSecondApproval: approve,
-            managerSecondRemark: remark,
-            managerSecondApprovalDate: new Date(),
-            manageSecondUserId: req?.userData.Id,
-          },
-        }
-      );
+      let secondUpdatedData =
+        await productReplacementRequestService.getOneAndUpdate(
+          { _id: id },
+          {
+            $set: {
+              managerSecondApproval: approve,
+              managerSecondRemark: remark,
+              managerSecondApprovalDate: new Date(),
+              manageSecondUserId: req.userData.Id,
+            },
+          }
+        );
       if (!secondUpdatedData) {
         throw new ApiError(httpStatus.OK, "Something went wrong!");
       } else {
-        if (approve === false) {
-          await complaintService?.getOneAndUpdate(
-            { complaintNumber: complaintNumber },
-            {
-              $set: {
-                status: complainStatusEnum.closed,
-                remark: remark,
-              },
-            }
-          );
-        }
-        await moneyBackRequestLogService.createNewData({
-          moneyBackRequestId: secondUpdatedData?._id,
+        await productReplacementRequestLogService.createNewData({
+          productReplacementRequestId: secondUpdatedData?._id,
           complaintNumber: secondUpdatedData?.complaintNumber,
           managerSecondRemark: remark,
           managerSecondApprovalDate:
             secondUpdatedData?.managerSecondApprovalDate,
           companyId: req.userData.companyId,
-          manageSecondUserId: secondUpdatedData?.manageSecondUserId,
+          managerFirstUserId: secondUpdatedData?.manageSecondUserId,
         });
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
@@ -639,13 +613,13 @@ exports.ccUpdateDetails = async (req, res) => {
       id,
       customerNumber,
       alternateNumber,
-      bankName,
-      accountNumber,
-      ifscCode,
+      replacedSchemeId,
+      replacedSchemeLabel,
+      productGroupId,
       ccRemark,
     } = req.body;
 
-    let dataExist = await moneyBackRequestService.findCount({
+    let dataExist = await productReplacementRequestService.findCount({
       _id: id,
       isDeleted: false,
       isActive: true,
@@ -654,32 +628,44 @@ exports.ccUpdateDetails = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    let updatedData = await moneyBackRequestService.getOneAndUpdate(
+    let isSchemeExists = await schemeService.findCount({
+      _id: replacedSchemeId,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!isSchemeExists) {
+      throw new ApiError(httpStatus.OK, "invalid scheme");
+    }
+
+    let updatedData = await productReplacementRequestService.getOneAndUpdate(
       { _id: id },
       {
         $set: {
           customerNumber,
           alternateNumber,
-          bankName,
-          accountNumber,
-          ifscCode,
+          replacedSchemeId,
+          replacedSchemeLabel,
           ccRemark,
           ccApproval: true,
           ccApprovalDate: new Date(),
-          ccInfoAddById: req?.userData?.Id,
+          ccInfoAddById: req?.userData.Id,
+          productGroupId,
         },
       }
     );
     if (!updatedData) {
       throw new ApiError(httpStatus.OK, "Something went wrong!");
     } else {
-      await moneyBackRequestLogService.createNewData({
-        moneyBackRequestId: updatedData?._id,
+      await productReplacementRequestLogService.createNewData({
+        productReplacementRequestId: updatedData?._id,
         complaintNumber: updatedData?.complaintNumber,
         ccRemark: ccRemark,
         ccApprovalDate: updatedData?.ccApprovalDate,
         companyId: req.userData.companyId,
-        ccInfoAddById: req?.userData?.Id,
+        replacedSchemeId: updatedData.replacedSchemeId,
+        replacedSchemeLabel: updatedData.replacedSchemeLabel,
+        ccInfoAddById: updatedData?.ccInfoAddById,
+        productGroupId: updatedData?.productGroupId,
       });
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
@@ -702,16 +688,9 @@ exports.ccUpdateDetails = async (req, res) => {
 //account approval
 exports.accountApproval = async (req, res) => {
   try {
-    let {
-      id,
-      accountRemark,
-      accountApproval,
-      settledAmount,
-      amountInWords,
-      complaintNumber,
-    } = req.body;
+    let { id, accountRemark, accountApproval, orderReferenceNumber } = req.body;
 
-    let dataExist = await moneyBackRequestService.findCount({
+    let dataExist = await productReplacementRequestService.findCount({
       _id: id,
       isDeleted: false,
       isActive: true,
@@ -720,39 +699,89 @@ exports.accountApproval = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    let updatedData = await moneyBackRequestService.getOneAndUpdate(
+    let updatedData = await productReplacementRequestService.getOneAndUpdate(
       { _id: id },
       {
         $set: {
           accountRemark,
           accountApproval,
-          settledAmount,
-          amountInWords,
           requestResolveDate: new Date(),
           accountApprovalDate: new Date(),
-          accoutUserId: req?.userData?.Id,
+
+          accoutUserId: req?.userData.Id,
         },
       }
     );
     if (!updatedData) {
       throw new ApiError(httpStatus.OK, "Something went wrong!");
     } else {
-      await complaintService?.getOneAndUpdate(
-        { complaintNumber: complaintNumber },
-        {
-          $set: {
-            status: complainStatusEnum.closed,
-            remark: accountRemark,
-          },
-        }
-      );
-      await moneyBackRequestLogService.createNewData({
-        moneyBackRequestId: updatedData?._id,
+      if (accountApproval) {
+        const orderNumber = await getOrderNumber();
+        const inquiryNumber = await getInquiryNumber();
+
+        let ccUser = await userService.getOneByMultiField({
+          isDeleted: false,
+          isActive: true,
+          _id: updatedData?.ccInfoAddById,
+        });
+        const orderInquiry = await orderInquiryService.createNewData({
+          schemeId: updatedData?.replacedSchemeId,
+          schemeName: updatedData?.replacedSchemeLabel,
+          productGroupId: updatedData?.productGroupId,
+          price: 0,
+          status: orderStatusEnum.fresh,
+          orderNumber: orderNumber,
+          orderReferenceNumber: orderReferenceNumber,
+          inquiryNumber: inquiryNumber,
+          assignDealerId: updatedData?.dealerId,
+          assignWarehouseId: updatedData?.wareHouseId,
+          approved: true,
+          agentId: new mongoose.Types.ObjectId(updatedData?.ccInfoAddById),
+          agentName: ccUser?.userName,
+          callCenterId: ccUser?.callCenterId,
+          branchId: ccUser?.branchId,
+          stateId: updatedData?.stateId,
+          districtId: updatedData?.districtId,
+          tehsilId: updatedData?.tehsilId,
+          pincodeId: updatedData?.pincodeId,
+          areaId: updatedData?.areaId,
+          autoFillingShippingAddress: updatedData?.address,
+          companyId: updatedData?.companyId,
+        });
+
+        const orderInquiryFlow = await orderInquiryFlowService.createNewData({
+          schemeId: updatedData?.replacedSchemeId,
+          orderReferenceNumber: orderReferenceNumber,
+
+          schemeName: updatedData?.replacedSchemeLabel,
+          productGroupId: updatedData?.productGroupId,
+          price: 0,
+          status: orderStatusEnum.fresh,
+          orderId: orderInquiry?._id,
+          assignDealerId: null,
+          assignWarehouseId: null,
+          approved: true,
+          agentId: updatedData?.ccInfoAddById,
+          agentName: ccUser?.userName,
+          callCenterId: ccUser?.callCenterId,
+          branchId: ccUser?.branchId,
+          stateId: updatedData?.stateId,
+          districtId: updatedData?.districtId,
+          tehsilId: updatedData?.tehsilId,
+          pincodeId: updatedData?.pincodeId,
+          areaId: updatedData?.areaId,
+          autoFillingShippingAddress: updatedData?.address,
+          companyId: updatedData?.companyId,
+        });
+      }
+
+      await productReplacementRequestLogService.createNewData({
+        productReplacementRequestId: updatedData?._id,
         complaintNumber: updatedData?.complaintNumber,
         accountRemark: accountRemark,
         accountApprovalDate: updatedData?.accountApprovalDate,
         companyId: req.userData.companyId,
-        accoutUserId: req?.userData?.Id,
+        accoutUserId: updatedData?.accoutUserId,
       });
       return res.status(httpStatus.OK).send({
         message: "Successfull.",

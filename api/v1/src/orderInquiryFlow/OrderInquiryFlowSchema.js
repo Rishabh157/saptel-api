@@ -12,6 +12,10 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: ObjectId,
       required: true,
     },
+    orderReferenceNumber: {
+      type: Number,
+      default: null,
+    },
     barcodeId: {
       type: [ObjectId],
       default: [],
