@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const productReplacementRequestService = require("./ProductReplacementRequestService");
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
+const complaintService = require("../complain/ComplainService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const userService = require("../user/UserService");
 const schemeService = require("../scheme/SchemeService");
@@ -22,7 +23,10 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { orderStatusEnum } = require("../../helper/enumUtils");
+const {
+  orderStatusEnum,
+  complainStatusEnum,
+} = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
 
 //add start
@@ -519,7 +523,7 @@ exports.getById = async (req, res) => {
 // update manager approval
 exports.updateManager = async (req, res) => {
   try {
-    let { id, level, approve, remark } = req.body;
+    let { id, level, approve, remark, complaintNumber } = req.body;
 
     let dataExist = await productReplacementRequestService.findCount({
       _id: id,
@@ -546,6 +550,17 @@ exports.updateManager = async (req, res) => {
       if (!firstUpdatedData) {
         throw new ApiError(httpStatus.OK, "Something went wrong!");
       } else {
+        if (approve === false) {
+          await complaintService?.getOneAndUpdate(
+            { complaintNumber: complaintNumber },
+            {
+              $set: {
+                status: complainStatusEnum.closed,
+                remark: remark,
+              },
+            }
+          );
+        }
         await productReplacementRequestLogService.createNewData({
           productReplacementRequestId: firstUpdatedData?._id,
           complaintNumber: firstUpdatedData?.complaintNumber,
@@ -578,6 +593,17 @@ exports.updateManager = async (req, res) => {
       if (!secondUpdatedData) {
         throw new ApiError(httpStatus.OK, "Something went wrong!");
       } else {
+        if (approve === false) {
+          await complaintService?.getOneAndUpdate(
+            { complaintNumber: complaintNumber },
+            {
+              $set: {
+                status: complainStatusEnum.closed,
+                remark: remark,
+              },
+            }
+          );
+        }
         await productReplacementRequestLogService.createNewData({
           productReplacementRequestId: secondUpdatedData?._id,
           complaintNumber: secondUpdatedData?.complaintNumber,
@@ -688,7 +714,13 @@ exports.ccUpdateDetails = async (req, res) => {
 //account approval
 exports.accountApproval = async (req, res) => {
   try {
-    let { id, accountRemark, accountApproval, orderReferenceNumber } = req.body;
+    let {
+      id,
+      accountRemark,
+      accountApproval,
+      orderReferenceNumber,
+      complaintNumber,
+    } = req.body;
 
     let dataExist = await productReplacementRequestService.findCount({
       _id: id,
@@ -773,6 +805,16 @@ exports.accountApproval = async (req, res) => {
           autoFillingShippingAddress: updatedData?.address,
           companyId: updatedData?.companyId,
         });
+      } else {
+        await complaintService?.getOneAndUpdate(
+          { complaintNumber: complaintNumber },
+          {
+            $set: {
+              status: complainStatusEnum.closed,
+              remark: accountRemark,
+            },
+          }
+        );
       }
 
       await productReplacementRequestLogService.createNewData({

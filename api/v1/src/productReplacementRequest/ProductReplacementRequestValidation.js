@@ -66,6 +66,7 @@ const updateManager = {
     level: Joi.string().valid("FIRST", "SECOND"),
     approve: Joi.boolean(),
     remark: Joi.string().required(),
+    complaintNumber: Joi.number().required(),
   }),
 };
 
@@ -89,6 +90,7 @@ const accountApproval = {
     accountRemark: Joi.string().required(),
     accountApproval: Joi.boolean(),
     orderReferenceNumber: Joi.number().required(),
+    complaintNumber: Joi.number().required(),
   }),
 };
 /**
