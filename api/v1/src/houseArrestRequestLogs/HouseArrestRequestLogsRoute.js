@@ -13,8 +13,7 @@ const {
  * get one document (if query) / all documents
  */
 router.get(
-  "/",
-
+  "/get-logs/:harId",
   authCheckMiddleware,
   validate(houseArrestRequestLogsValidation.get),
   houseArrestRequestLogsController.get

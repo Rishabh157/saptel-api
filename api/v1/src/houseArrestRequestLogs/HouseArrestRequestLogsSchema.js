@@ -6,6 +6,10 @@ const HouseArrestRequestLogsSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    houseArrestId: {
+      type: ObjectId,
+      required: true,
+    },
     complaintNumber: {
       type: String,
       required: true,

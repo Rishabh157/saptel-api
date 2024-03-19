@@ -7,9 +7,9 @@ const commonValidation = require("../../helper/CommonValidation");
  * get either all data or single document
  */
 const get = {
-  query: Joi.object()
+  params: Joi.object()
     .keys({
-      _id: Joi.string().custom(commonValidation.objectId).optional(),
+      harId: Joi.string().custom(commonValidation.objectId).required(),
     })
     .optional(),
 };

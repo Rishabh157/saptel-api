@@ -21,7 +21,8 @@ const {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    const { harId } = req.params;
+    let matchQuery = { isDeleted: false, houseArrestId: harId };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

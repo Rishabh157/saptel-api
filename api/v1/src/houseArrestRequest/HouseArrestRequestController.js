@@ -121,6 +121,7 @@ exports.add = async (req, res) => {
       await complainLogsService.createNewData({
         complainId: complaint._id,
         complaintNumber,
+
         orderNumber: orderData?.orderNumber,
         customerNumber: orderData?.mobileNo,
         orderId: orderData?._id,
@@ -178,6 +179,7 @@ exports.add = async (req, res) => {
 
     await houseArrestLogsService.createNewData({
       orderNumber,
+      houseArrestId: dataCreated?._id,
       complaintNumber: dataCreated?.complaintNumber,
       requestCreatedBy: dataCreated?.requestCreatedBy,
       mbkNumber: dataCreated?.mbkNumber,
