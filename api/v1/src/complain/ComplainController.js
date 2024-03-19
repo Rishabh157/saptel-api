@@ -84,6 +84,7 @@ exports.add = async (req, res) => {
     let dataCreated = await complainService.createNewData({
       complaintNumber,
       complaintById: req.userData.Id,
+      companyId: req.userData.companyId,
       ...req.body,
     });
 
@@ -92,6 +93,7 @@ exports.add = async (req, res) => {
         complainId: dataCreated._id,
         complaintById: req.userData.Id,
         complaintNumber,
+        companyId: req.userData.companyId,
         ...req.body,
       });
       let orderDetails = await orderInquiryService.getOneByMultiField({
@@ -159,6 +161,15 @@ exports.update = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+
+    let icOneData = await initialCallOneService.getOneByMultiField({
+      isDeleted: false,
+      isActive: true,
+      _id: icOne,
+    });
+    if (!icOneData) {
+      throw new ApiError(httpStatus.OK, "Invalid IC 1");
+    }
     //------------------Find data-------------------
     let datafound = await complainService.getOneByMultiField({
       _id: idToBeSearch,
@@ -187,6 +198,29 @@ exports.update = async (req, res) => {
         complaintNumber: dataUpdated?.complaintNumber,
         ...req.body,
       });
+
+      let orderDetails = await orderInquiryService.getOneByMultiField({
+        _id: orderId,
+        isDeleted: false,
+        isActive: true,
+      });
+
+      if (config.money_back_id === icOneData.initialCallName) {
+        let moneyBackData = await addMoneyBackRequest(
+          orderDetails,
+          dataUpdated.complaintNumber,
+          req.userData
+        );
+      }
+      if (
+        config.product_replacement_disposition === icOneData.initialCallName
+      ) {
+        let productReplacementkData = await addProductReplacementRequest(
+          orderDetails,
+          dataUpdated.complaintNumber,
+          req.userData
+        );
+      }
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
         data: dataUpdated,

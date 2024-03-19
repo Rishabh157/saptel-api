@@ -43,6 +43,10 @@ const ComplainSchema = new mongoose.Schema(
       trim: true,
     },
     remark: { type: String, required: true, trim: true, lowercase: true },
+    companyId: {
+      type: ObjectId,
+      required: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

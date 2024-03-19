@@ -1,46 +1,34 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const ProductReplacementRequestSchema = new mongoose.Schema(
+const HouseArrestRequestSchema = new mongoose.Schema(
   {
     orderNumber: {
       type: String,
+      required: true,
+    },
+    mbkNumber: {
+      type: Number,
       required: true,
     },
     complaintNumber: {
       type: String,
       required: true,
     },
-    productGroupId: {
+    requestCreatedBy: {
       type: ObjectId,
+      required: true,
+    },
+    requestCreatedByRemark: {
+      type: String,
       required: true,
     },
     schemeId: {
       type: ObjectId,
       required: true,
     },
-    replacedSchemeId: {
-      type: ObjectId,
-      default: null,
-    },
-    replacedSchemeLabel: {
-      type: String,
-      default: "",
-    },
     dealerId: {
       type: ObjectId,
-      default: null,
-    },
-    wareHouseId: {
-      type: ObjectId,
-      default: null,
-    },
-    dateOfDelivery: {
-      type: String,
-      default: "",
-    },
-    requestResolveDate: {
-      type: String,
-      default: "",
+      required: true,
     },
     customerName: {
       type: String,
@@ -62,11 +50,11 @@ const ProductReplacementRequestSchema = new mongoose.Schema(
       type: ObjectId,
       required: true,
     },
-    areaId: {
+    pincodeId: {
       type: ObjectId,
       required: true,
     },
-    pincodeId: {
+    areaId: {
       type: ObjectId,
       required: true,
     },
@@ -78,23 +66,71 @@ const ProductReplacementRequestSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    ccRemark: {
-      type: String,
-      default: "",
-      trim: true,
-      lowercase: true,
-    },
     ccApproval: {
       type: Boolean,
-      default: false,
+      default: null,
     },
     ccApprovalDate: {
       type: String,
       default: "",
     },
-    accountRemark: {
+    ccRemark: {
       type: String,
       default: "",
+
+      trim: true,
+      lowercase: true,
+    },
+    setteldAmount: {
+      type: String,
+      default: "",
+    },
+    managerFirstApproval: {
+      type: Boolean,
+      default: null,
+    },
+    managerFirstApprovalDate: {
+      type: String,
+      default: "",
+    },
+    managerFirstRemark: {
+      type: String,
+      default: "",
+
+      trim: true,
+      lowercase: true,
+    },
+    dealerApproval: {
+      type: Boolean,
+      default: null,
+    },
+    dealerApprovalDate: {
+      type: String,
+      default: "",
+    },
+    dealerRemark: {
+      type: String,
+      default: "",
+
+      trim: true,
+      lowercase: true,
+    },
+    returnItemBarcode: {
+      type: String,
+      default: "",
+    },
+    managerSecondApproval: {
+      type: Boolean,
+      default: null,
+    },
+    managerSecondApprovalDate: {
+      type: String,
+      default: "",
+    },
+    managerSecondRemark: {
+      type: String,
+      default: "",
+
       trim: true,
       lowercase: true,
     },
@@ -106,53 +142,9 @@ const ProductReplacementRequestSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    managerFirstRemark: {
+    requestResolveDate: {
       type: String,
       default: "",
-      trim: true,
-      lowercase: true,
-    },
-    managerFirstApproval: {
-      type: Boolean,
-      default: null,
-    },
-    managerFirstApprovalDate: {
-      type: String,
-      default: "",
-    },
-    managerSecondRemark: {
-      type: String,
-      default: "",
-      trim: true,
-      lowercase: true,
-    },
-    managerSecondApproval: {
-      type: Boolean,
-      default: null,
-    },
-    managerSecondApprovalDate: {
-      type: String,
-      default: "",
-    },
-    managerFirstUserId: {
-      type: ObjectId,
-      default: null,
-    },
-    manageSecondUserId: {
-      type: ObjectId,
-      default: null,
-    },
-    ccInfoAddById: {
-      type: ObjectId,
-      default: null,
-    },
-    accoutUserId: {
-      type: ObjectId,
-      default: null,
-    },
-    requestCreatedById: {
-      type: ObjectId,
-      required: true,
     },
     companyId: {
       type: ObjectId,
@@ -173,8 +165,5 @@ const ProductReplacementRequestSchema = new mongoose.Schema(
 );
 
 const searchKeys = ["orderNumber", "complaintNumber"];
-module.exports = mongoose.model(
-  "ProductReplacementRequest",
-  ProductReplacementRequestSchema
-);
+module.exports = mongoose.model("HouseArrestRequest", HouseArrestRequestSchema);
 module.exports.searchKeys = [...searchKeys];

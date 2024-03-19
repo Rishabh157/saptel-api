@@ -95,6 +95,8 @@ const moneyBackRequestRoute = require("./src/moneyBackRequest/MoneyBackRequestRo
 const moneyBackRequestLogRoute = require("./src/moneyBackRequestLog/MoneyBackRequestLogRoute");
 const prodyctReplacementRequestRoute = require("./src/productReplacementRequest/ProductReplacementRequestRoute");
 const prodyctReplacementRequestLogRoute = require("./src/productReplacementRequestLog/ProductReplacementRequestLogRoute");
+const houseArrestRequestRoute = require("./src/houseArrestRequest/HouseArrestRequestRoute");
+const houseArrestRequestLogsRoute = require("./src/houseArrestRequestLogs/HouseArrestRequestLogsRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -488,6 +490,14 @@ const defaultRoutes = [
   {
     path: "/product-replacement-logs",
     route: prodyctReplacementRequestLogRoute,
+  },
+  {
+    path: "/house-arrest",
+    route: houseArrestRequestRoute,
+  },
+  {
+    path: "/house-arrest-logs",
+    route: houseArrestRequestLogsRoute,
   },
 ];
 // orderRoute;

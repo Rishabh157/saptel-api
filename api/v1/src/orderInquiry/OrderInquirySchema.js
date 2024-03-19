@@ -18,6 +18,10 @@ const OrderInquirySchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    orderMBKNumber: {
+      type: Number,
+      default: null,
+    },
     inquiryNumber: {
       type: Number,
       required: true,

@@ -53,7 +53,6 @@ const update = {
     icOneLabel: Joi.string().required(),
     icTwoLabel: Joi.string().required(),
     icThreeLabel: Joi.string().required(),
-
     remark: Joi.string().lowercase().required(),
   }),
 };

@@ -28,6 +28,7 @@ let {
   OTHER_RED_FLAG_IC3,
   ORANGE_FLAG_DISPOSITION,
   OTHER_ORANGE_FLAG,
+  HOUSE_ARREST_CASE_DISPOSITION,
 } = process.env;
 
 let envObj = {
@@ -55,6 +56,7 @@ let envObj = {
   OTHER_RED_FLAG_IC3,
   ORANGE_FLAG_DISPOSITION,
   OTHER_ORANGE_FLAG,
+  HOUSE_ARREST_CASE_DISPOSITION,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -101,6 +103,9 @@ const envVarsSchema = Joi.object().keys({
   OTHER_ORANGE_FLAG: Joi.string()
     .required()
     .label("OTHER ORANGE FLAG is required"),
+  HOUSE_ARREST_CASE_DISPOSITION: Joi.string()
+    .required()
+    .label("HOUSE ARREST CASE DISPOSITION is required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -143,6 +148,7 @@ module.exports = {
   otherRedFlagIc3: envVars.OTHER_RED_FLAG_IC3,
   orangeFlags: envVars.ORANGE_FLAG_DISPOSITION,
   otherOrangeFlags: envVars.OTHER_ORANGE_FLAG,
+  houseArrestCaseDisposition: envVars.HOUSE_ARREST_CASE_DISPOSITION,
   base_url:
     envVars.NODE_ENV === "development"
       ? envVars.BASEURL_LOCAL + ":" + envVars.PORT + "/"

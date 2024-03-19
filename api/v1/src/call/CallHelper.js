@@ -7,6 +7,7 @@ const wareHouseService = require("../wareHouse/WareHouseService");
 const InquiryService = require("../inquiry/InquiryService");
 const orderService = require("../orderInquiry/OrderInquiryService");
 const complaintService = require("../complain/ComplainService");
+const houseArrestService = require("../houseArrestRequest/HouseArrestRequestService");
 const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 
 const { default: mongoose } = require("mongoose");
@@ -79,6 +80,22 @@ exports.getComplaintNumber = async () => {
     complaintNumber = 1;
   }
   return complaintNumber;
+};
+
+exports.getMBKNumber = async () => {
+  let mbkNumber = 0;
+
+  let lastObject = await houseArrestService.aggregateQuery([
+    { $sort: { _id: -1 } },
+    { $limit: 1 },
+  ]);
+
+  if (lastObject.length) {
+    mbkNumber = parseInt(lastObject[0].mbkNumber) + 1;
+  } else {
+    mbkNumber = 1;
+  }
+  return mbkNumber;
 };
 
 exports.isOrder = async (applicableCriteriaList) => {
