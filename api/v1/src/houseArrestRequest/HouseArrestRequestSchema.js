@@ -68,6 +68,10 @@ const HouseArrestRequestSchema = new mongoose.Schema(
     },
     ccApproval: {
       type: Boolean,
+      default: false,
+    },
+    ccInfoAddById: {
+      type: ObjectId,
       default: null,
     },
     ccApprovalDate: {
@@ -77,11 +81,10 @@ const HouseArrestRequestSchema = new mongoose.Schema(
     ccRemark: {
       type: String,
       default: "",
-
       trim: true,
       lowercase: true,
     },
-    setteldAmount: {
+    settledAmount: {
       type: String,
       default: "",
     },
@@ -93,6 +96,10 @@ const HouseArrestRequestSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    managerFirstUserId: {
+      type: ObjectId,
+      default: null,
+    },
     managerFirstRemark: {
       type: String,
       default: "",
@@ -102,7 +109,7 @@ const HouseArrestRequestSchema = new mongoose.Schema(
     },
     dealerApproval: {
       type: Boolean,
-      default: null,
+      default: false,
     },
     dealerApprovalDate: {
       type: String,
@@ -116,8 +123,12 @@ const HouseArrestRequestSchema = new mongoose.Schema(
       lowercase: true,
     },
     returnItemBarcode: {
-      type: String,
-      default: "",
+      type: [String],
+      default: [],
+    },
+    orignalBarcode: {
+      type: [String],
+      required: true,
     },
     managerSecondApproval: {
       type: Boolean,
@@ -126,6 +137,10 @@ const HouseArrestRequestSchema = new mongoose.Schema(
     managerSecondApprovalDate: {
       type: String,
       default: "",
+    },
+    managerSecondUserId: {
+      type: ObjectId,
+      default: null,
     },
     managerSecondRemark: {
       type: String,
@@ -145,6 +160,10 @@ const HouseArrestRequestSchema = new mongoose.Schema(
     requestResolveDate: {
       type: String,
       default: "",
+    },
+    accoutUserId: {
+      type: ObjectId,
+      default: null,
     },
     companyId: {
       type: ObjectId,

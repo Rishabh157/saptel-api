@@ -3,13 +3,16 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const houseArrestRequestService = require("./HouseArrestRequestService");
+const houseArrestRequestLogService = require("../houseArrestRequestLogs/HouseArrestRequestLogsService");
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const initialCallTwoService = require("../initialCallTwo/InitialCallTwoService");
 const schemeService = require("../scheme/SchemeService");
 const complaintService = require("../complain/ComplainService");
 const complainLogsService = require("../complainLogs/ComplainLogsService");
 const initialCallThreeService = require("../initialCallThree/InitialCallThreeService");
+const ledgerService = require("../ledger/LedgerService");
 const initialCallOneService = require("../initialCallOne/InitialCallOneService");
+const barcodeService = require("../barCode/BarCodeService");
 const houseArrestLogsService = require("../houseArrestRequestLogs/HouseArrestRequestLogsService");
 const { searchKeys } = require("./HouseArrestRequestSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -28,8 +31,11 @@ const { getComplaintNumber, getMBKNumber } = require("../call/CallHelper");
 const {
   complainCallTypeEnum,
   complainStatusEnum,
+  orderStatusEnum,
+  ledgerType,
 } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
+const { getBalance, getDealerFromLedger } = require("../ledger/LedgerHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -62,6 +68,7 @@ exports.add = async (req, res) => {
      */
     const orderData = await orderInquiryService?.getOneByMultiField({
       orderNumber: parseInt(orderNumber),
+      status: orderStatusEnum.delivered,
     });
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "Invalid order number");
@@ -153,8 +160,21 @@ exports.add = async (req, res) => {
         },
       }
     );
+    let barcodeLabels = await Promise.all(
+      orderData?.barcodeId.map(async (ele) => {
+        let barcodeData = await barcodeService?.getOneByMultiField({
+          _id: ele,
+          isDeleted: false,
+          isActive: true,
+          isUsed: true,
+        });
+        if (barcodeData) {
+          return barcodeData?.barcodeNumber;
+        }
+      })
+    );
 
-    console.log(orderData, "orderData");
+    console.log(barcodeLabels, "barcodeLabels");
 
     //------------------create data-------------------
     let dataCreated = await houseArrestRequestService.createNewData({
@@ -175,14 +195,12 @@ exports.add = async (req, res) => {
       customerNumber: orderData?.mobileNo,
       alternateNumber: orderData?.alternateNo,
       companyId: req?.userData?.companyId,
+      orignalBarcode: barcodeLabels,
     });
 
     await houseArrestLogsService.createNewData({
-      orderNumber,
       houseArrestId: dataCreated?._id,
       complaintNumber: dataCreated?.complaintNumber,
-      requestCreatedBy: dataCreated?.requestCreatedBy,
-      mbkNumber: dataCreated?.mbkNumber,
     });
 
     if (dataCreated) {
@@ -397,6 +415,203 @@ exports.allFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// pagination API for dealer
+
+exports.allFilterPaginationForDealer = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let searchValue = req.body.searchValue;
+    let dealerId = req.userData.Id;
+    let searchIn = req.body.params;
+    let filterBy = req.body.filterBy;
+    let rangeFilterBy = req.body.rangeFilterBy;
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+    let matchQuery = {
+      $and: [
+        { isDeleted: false, dealerId: new mongoose.Types.ObjectId(dealerId) },
+      ],
+    };
+    /**
+     * to send only active data on web
+     */
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    //----------------------------
+
+    /**
+     * check search keys valid
+     **/
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+    const rangeQuery = getRangeQuery(rangeFilterBy);
+    if (rangeQuery && rangeQuery.length) {
+      matchQuery.$and.push(...rangeQuery);
+    }
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = [
+      "ccApproval",
+      "managerFirstApproval",
+      "dealerApproval",
+      "managerSecondApproval",
+      "accountApproval",
+    ];
+    let numberFileds = [];
+    let objectIdFields = [
+      "requestCreatedBy",
+      "schemeId",
+      "stateId",
+      "districtId",
+      "tehsilId",
+      "pincodeId",
+      "areaId",
+    ];
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+    //----------------------------
+    //calander filter
+    /**
+     * ToDo : for date filter
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    //calander filter
+    //----------------------------
+
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "requestCreatedBy",
+          foreignField: "_id",
+          as: "requestCrBy",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          requestCreatedByLabel: {
+            $concat: [
+              { $arrayElemAt: ["$requestCrBy.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$requestCrBy.lastName", 0] },
+            ],
+          },
+        },
+      },
+
+      {
+        $unset: ["requestCrBy"],
+      },
+    ];
+
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+
+    //-----------------------------------
+    let dataFound = await houseArrestRequestService.aggregateQuery(
+      finalAggregateQuery
+    );
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
+    let result = await houseArrestRequestService.aggregateQuery(
+      finalAggregateQuery
+    );
+    if (result.length) {
+      return res.status(200).send({
+        data: result,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //get api
 exports.get = async (req, res) => {
   try {
@@ -590,6 +805,306 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist[0],
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.ccInfoUpdate = async (req, res) => {
+  try {
+    let { settledAmount, ccRemark, id } = req.body;
+
+    let dataExist = await houseArrestRequestService.findCount({
+      _id: id,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    let updatedData = await houseArrestRequestService.getOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          settledAmount,
+          ccApproval: true,
+          ccApprovalDate: new Date(),
+          ccInfoAddById: req?.userData?.Id,
+        },
+      }
+    );
+    if (!updatedData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong!");
+    } else {
+      await houseArrestRequestLogService.createNewData({
+        houseArrestId: updatedData?._id,
+        complaintNumber: updatedData?.complaintNumber,
+        ccRemark: ccRemark,
+        ccApprovalDate: updatedData?.ccApprovalDate,
+        ccInfoAddById: req?.userData?.Id,
+      });
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: updatedData,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// update manager approval
+exports.updateManager = async (req, res) => {
+  try {
+    let { id, level, approve, remark, complaintNumber } = req.body;
+
+    let dataExist = await houseArrestRequestService.findCount({
+      _id: id,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    if (level === "FIRST") {
+      let firstUpdatedData = await houseArrestRequestService.getOneAndUpdate(
+        { _id: id },
+        {
+          $set: {
+            managerFirstApproval: approve,
+            managerFirstRemark: remark,
+            managerFirstApprovalDate: new Date(),
+            managerFirstUserId: req?.userData.Id,
+          },
+        }
+      );
+      if (!firstUpdatedData) {
+        throw new ApiError(httpStatus.OK, "Something went wrong!");
+      } else {
+        if (approve === false) {
+          await complaintService?.getOneAndUpdate(
+            { complaintNumber: complaintNumber },
+            {
+              $set: {
+                status: complainStatusEnum.closed,
+                remark: remark,
+              },
+            }
+          );
+        }
+        await houseArrestRequestLogService.createNewData({
+          houseArrestId: firstUpdatedData?._id,
+          complaintNumber: firstUpdatedData?.complaintNumber,
+          managerFirstRemark: remark,
+          managerFirstApprovalDate: firstUpdatedData?.managerFirstApprovalDate,
+
+          managerFirstUserId: firstUpdatedData?.managerFirstUserId,
+        });
+        return res.status(httpStatus.OK).send({
+          message: "Successfull.",
+          status: true,
+          data: firstUpdatedData,
+          code: null,
+          issue: null,
+        });
+      }
+    } else {
+      let secondUpdatedData = await houseArrestRequestService.getOneAndUpdate(
+        { _id: id },
+        {
+          $set: {
+            managerSecondApproval: approve,
+            managerSecondRemark: remark,
+            managerSecondApprovalDate: new Date(),
+            managerSecondUserId: req?.userData.Id,
+          },
+        }
+      );
+      if (!secondUpdatedData) {
+        throw new ApiError(httpStatus.OK, "Something went wrong!");
+      } else {
+        if (approve === false) {
+          await complaintService?.getOneAndUpdate(
+            { complaintNumber: complaintNumber },
+            {
+              $set: {
+                status: complainStatusEnum.closed,
+                remark: remark,
+              },
+            }
+          );
+        }
+        await houseArrestRequestLogService.createNewData({
+          houseArrestId: secondUpdatedData?._id,
+          complaintNumber: secondUpdatedData?.complaintNumber,
+          managerSecondRemark: remark,
+          managerSecondApprovalDate:
+            secondUpdatedData?.managerSecondApprovalDate,
+
+          managerSecondUserId: secondUpdatedData?.managerSecondUserId,
+        });
+        return res.status(httpStatus.OK).send({
+          message: "Successfull.",
+          status: true,
+          data: secondUpdatedData,
+          code: null,
+          issue: null,
+        });
+      }
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//account approval
+exports.accountApproval = async (req, res) => {
+  try {
+    let {
+      id,
+      accountRemark,
+      accountApproval,
+      complaintNumber,
+      dealerId,
+      creditAmount,
+    } = req.body;
+
+    let dataExist = await houseArrestRequestService.findCount({
+      _id: id,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    let updatedData = await houseArrestRequestService.getOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          accountRemark,
+          accountApproval,
+          requestResolveDate: new Date(),
+          accountApprovalDate: new Date(),
+          accoutUserId: req?.userData?.Id,
+        },
+      }
+    );
+    if (!updatedData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong!");
+    } else {
+      if (accountApproval === false) {
+        await complaintService?.getOneAndUpdate(
+          { complaintNumber: complaintNumber },
+          {
+            $set: {
+              status: complainStatusEnum.closed,
+              remark: accountRemark,
+            },
+          }
+        );
+      }
+      const dealerExitsId = await getDealerFromLedger(dealerId);
+
+      const balance = await getBalance(dealerExitsId, creditAmount, 0);
+      await ledgerService.createNewData({
+        noteType: ledgerType.credit,
+        creditAmount: creditAmount,
+        debitAmount: 0,
+        remark: accountRemark,
+        companyId: req?.userData.companyId,
+        dealerId,
+        balance: balance,
+      });
+
+      await houseArrestRequestLogService.createNewData({
+        houseArrestId: updatedData?._id,
+        complaintNumber: updatedData?.complaintNumber,
+        accountRemark: accountRemark,
+        accountApprovalDate: updatedData?.accountApprovalDate,
+
+        accoutUserId: req?.userData?.Id,
+      });
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: updatedData,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// dealer Approval
+exports.dealerApproval = async (req, res) => {
+  try {
+    let { id, dealerRemark, returnItemBarcode } = req.body;
+
+    let dataExist = await houseArrestRequestService.findCount({
+      _id: id,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    let updatedData = await houseArrestRequestService.getOneAndUpdate(
+      { _id: id },
+      {
+        $set: {
+          dealerRemark,
+          dealerApproval: true,
+          returnItemBarcode,
+          dealerApprovalDate: new Date(),
+        },
+      }
+    );
+    if (!updatedData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong!");
+    } else {
+      await houseArrestRequestLogService.createNewData({
+        houseArrestId: updatedData?._id,
+        dealerRemark,
+        dealerApproval: true,
+        dealerApprovalDate: new Date(),
+      });
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: updatedData,
         code: null,
         issue: null,
       });

@@ -6,6 +6,7 @@ const houseArrestRequestValidation = require("./HouseArrestRequestValidation");
 const {
   authCheckMiddleware,
   otpVerifyToken,
+  authCheckDealerMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -32,6 +33,17 @@ router.post(
 );
 
 /**
+ * get all houseArrestRequest pagination filter
+ */
+
+router.post(
+  "/dealer-list",
+  authCheckDealerMiddleware,
+  validate(houseArrestRequestValidation.getAllFilter),
+  houseArrestRequestController.allFilterPaginationForDealer
+);
+
+/**
  * create new document
  */
 router.post(
@@ -40,6 +52,48 @@ router.post(
   authCheckMiddleware,
   validate(houseArrestRequestValidation.create),
   houseArrestRequestController.add
+);
+
+/**
+ * customer care details update
+ */
+router.put(
+  "/cc-info-update",
+  authCheckMiddleware,
+  validate(houseArrestRequestValidation.ccInfoUpdate),
+  houseArrestRequestController.ccInfoUpdate
+);
+
+/**
+ * manager approval
+ */
+router.put(
+  "/manager-approval",
+  authCheckMiddleware,
+  validate(houseArrestRequestValidation.updateManager),
+  houseArrestRequestController.updateManager
+);
+
+//acounts update approval
+/**
+ * create new document
+ */
+router.put(
+  "/account-approval",
+  authCheckMiddleware,
+  validate(houseArrestRequestValidation.accountApproval),
+  houseArrestRequestController.accountApproval
+);
+
+//dealer update approval
+/**
+ * create new document
+ */
+router.put(
+  "/dealer-approval",
+  authCheckDealerMiddleware,
+  validate(houseArrestRequestValidation.dealerApproval),
+  houseArrestRequestController.dealerApproval
 );
 
 /**

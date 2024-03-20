@@ -586,7 +586,7 @@ exports.updateManager = async (req, res) => {
             managerSecondApproval: approve,
             managerSecondRemark: remark,
             managerSecondApprovalDate: new Date(),
-            manageSecondUserId: req?.userData.Id,
+            managerSecondUserId: req?.userData.Id,
           },
         }
       );
@@ -611,7 +611,7 @@ exports.updateManager = async (req, res) => {
           managerSecondApprovalDate:
             secondUpdatedData?.managerSecondApprovalDate,
           companyId: req.userData.companyId,
-          manageSecondUserId: secondUpdatedData?.manageSecondUserId,
+          managerSecondUserId: secondUpdatedData?.managerSecondUserId,
         });
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
@@ -737,15 +737,18 @@ exports.accountApproval = async (req, res) => {
     if (!updatedData) {
       throw new ApiError(httpStatus.OK, "Something went wrong!");
     } else {
-      await complaintService?.getOneAndUpdate(
-        { complaintNumber: complaintNumber },
-        {
-          $set: {
-            status: complainStatusEnum.closed,
-            remark: accountRemark,
-          },
-        }
-      );
+      if (accountApproval === false) {
+        await complaintService?.getOneAndUpdate(
+          { complaintNumber: complaintNumber },
+          {
+            $set: {
+              status: complainStatusEnum.closed,
+              remark: accountRemark,
+            },
+          }
+        );
+      }
+
       await moneyBackRequestLogService.createNewData({
         moneyBackRequestId: updatedData?._id,
         complaintNumber: updatedData?.complaintNumber,

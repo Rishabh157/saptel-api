@@ -2,26 +2,11 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const HouseArrestRequestLogsSchema = new mongoose.Schema(
   {
-    orderNumber: {
-      type: String,
-      required: true,
-    },
     houseArrestId: {
       type: ObjectId,
       required: true,
     },
-    complaintNumber: {
-      type: String,
-      required: true,
-    },
-    requestCreatedBy: {
-      type: ObjectId,
-      required: true,
-    },
-    mbkNumber: {
-      type: Number,
-      required: true,
-    },
+
     ccApprovalDate: {
       type: String,
       default: "",
@@ -30,9 +15,25 @@ const HouseArrestRequestLogsSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    ccInfoAddById: {
+      type: ObjectId,
+      default: null,
+    },
+    accoutUserId: {
+      type: ObjectId,
+      default: null,
+    },
+    managerFirstUserId: {
+      type: ObjectId,
+      default: null,
+    },
     managerFirstApprovalDate: {
       type: String,
       default: "",
+    },
+    managerSecondUserId: {
+      type: ObjectId,
+      default: null,
     },
     managerFirstRemark: {
       type: String,
@@ -72,7 +73,7 @@ const HouseArrestRequestLogsSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["orderNumber", "complaintNumber", "mbkNumber"];
+const searchKeys = ["orderNumber", "complaintNumber"];
 module.exports = mongoose.model(
   "HouseArrestRequestLogs",
   HouseArrestRequestLogsSchema

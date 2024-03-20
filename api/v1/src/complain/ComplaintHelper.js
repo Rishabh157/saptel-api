@@ -31,7 +31,11 @@ exports.addMoneyBackRequest = async (
     complaintNumber: complaintNumber,
     companyId: userData.companyId,
   });
-  return moneyBackData;
+  if (moneyBackData) {
+    return moneyBackData;
+  } else {
+    return false;
+  }
 };
 
 exports.addProductReplacementRequest = async (
@@ -64,5 +68,9 @@ exports.addProductReplacementRequest = async (
     complaintNumber: complaintNumber,
     companyId: userData.companyId,
   });
-  return productReplacementData;
+  if (productReplacementData) {
+    return productReplacementData;
+  } else {
+    return false;
+  }
 };

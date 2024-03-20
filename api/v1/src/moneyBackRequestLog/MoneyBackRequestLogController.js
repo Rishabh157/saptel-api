@@ -43,7 +43,7 @@ exports.get = async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "manageSecondUserId",
+          localField: "managerSecondUserId",
           foreignField: "_id",
           as: "managerSecondData",
           pipeline: [{ $project: { firstName: 1, lastName: 1 } }],

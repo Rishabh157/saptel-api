@@ -149,7 +149,7 @@ const MoneyBackRequestSchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
-    manageSecondUserId: {
+    managerSecondUserId: {
       type: ObjectId,
       default: null,
     },

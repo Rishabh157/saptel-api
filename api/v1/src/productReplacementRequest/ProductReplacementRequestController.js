@@ -586,7 +586,7 @@ exports.updateManager = async (req, res) => {
               managerSecondApproval: approve,
               managerSecondRemark: remark,
               managerSecondApprovalDate: new Date(),
-              manageSecondUserId: req.userData.Id,
+              managerSecondUserId: req.userData.Id,
             },
           }
         );
@@ -611,7 +611,7 @@ exports.updateManager = async (req, res) => {
           managerSecondApprovalDate:
             secondUpdatedData?.managerSecondApprovalDate,
           companyId: req.userData.companyId,
-          managerFirstUserId: secondUpdatedData?.manageSecondUserId,
+          managerFirstUserId: secondUpdatedData?.managerSecondUserId,
         });
         return res.status(httpStatus.OK).send({
           message: "Successfull.",

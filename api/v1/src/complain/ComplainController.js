@@ -51,6 +51,7 @@ exports.add = async (req, res) => {
       remark,
       customerNumber,
     } = req.body;
+    let rollbackNeeded = false; // Flag to determine if rollback is needed
     /**
      * check duplicate exist
      */
@@ -108,6 +109,10 @@ exports.add = async (req, res) => {
           complaintNumber,
           req.userData
         );
+        if (!moneyBackData) {
+          rollbackNeeded = true;
+          throw new Error("Something went wrong!");
+        }
       }
       if (
         config.product_replacement_disposition === icOneData.initialCallName
@@ -117,6 +122,10 @@ exports.add = async (req, res) => {
           complaintNumber,
           req.userData
         );
+        if (!productReplacementkData) {
+          rollbackNeeded = true;
+          throw new Error("Something went wrong!");
+        }
       }
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -129,6 +138,13 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
+    if (rollbackNeeded) {
+      // Rollback changes
+      await complainService.getOneAndDelete({ _id: dataCreated._id }); // You need to implement this method in complainService
+      await complainLogsService.getOneAndDelete({
+        complainId: dataCreated._id,
+      }); // You need to implement this method in complainService
+    }
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
@@ -155,7 +171,7 @@ exports.update = async (req, res) => {
       icThree,
       remark,
     } = req.body;
-
+    let rollbackNeeded = false; // Flag to determine if rollback is needed
     let idToBeSearch = req.params.id;
     let dataExist = await complainService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
@@ -211,6 +227,10 @@ exports.update = async (req, res) => {
           dataUpdated.complaintNumber,
           req.userData
         );
+        if (!moneyBackData) {
+          rollbackNeeded = true;
+          throw new Error("Something went wrong!");
+        }
       }
       if (
         config.product_replacement_disposition === icOneData.initialCallName
@@ -220,6 +240,10 @@ exports.update = async (req, res) => {
           dataUpdated.complaintNumber,
           req.userData
         );
+        if (!productReplacementkData) {
+          rollbackNeeded = true;
+          throw new Error("Something went wrong!");
+        }
       }
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
@@ -232,6 +256,12 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
   } catch (err) {
+    if (rollbackNeeded) {
+      // Rollback changes
+      await complainLogsService.getOneAndDelete({
+        complainId: dataUpdated._id,
+      });
+    }
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;

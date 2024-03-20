@@ -15,6 +15,26 @@ const create = {
   }),
 };
 
+// cc info update
+const ccInfoUpdate = {
+  body: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId).required(),
+    settledAmount: Joi.string().required(),
+    ccRemark: Joi.string().required(),
+  }),
+};
+
+// manager approval
+const updateManager = {
+  body: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+    level: Joi.string().valid("FIRST", "SECOND"),
+    approve: Joi.boolean(),
+    remark: Joi.string().required(),
+    complaintNumber: Joi.number().required(),
+  }),
+};
+
 /**
  * filter and pagination api
  */
@@ -59,6 +79,8 @@ const getAllFilter = {
   }),
 };
 
+//for dealer
+
 /**
  * get either all data or single document
  */
@@ -68,6 +90,27 @@ const get = {
       _id: Joi.string().custom(commonValidation.objectId).optional(),
     })
     .optional(),
+};
+
+// accounts approval
+const accountApproval = {
+  body: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId).required(),
+    dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    creditAmount: Joi.number().required(),
+    accountRemark: Joi.string().required(),
+    accountApproval: Joi.boolean(),
+    complaintNumber: Joi.number().required(),
+  }),
+};
+
+// dealer approval
+const dealerApproval = {
+  body: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+    dealerRemark: Joi.string().required(),
+    returnItemBarcode: Joi.array().items(Joi.string().required()).required(),
+  }),
 };
 
 /**
@@ -83,6 +126,9 @@ module.exports = {
   create,
   getAllFilter,
   get,
-
+  ccInfoUpdate,
   getById,
+  updateManager,
+  accountApproval,
+  dealerApproval,
 };
