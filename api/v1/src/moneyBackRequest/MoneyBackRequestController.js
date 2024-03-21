@@ -737,17 +737,15 @@ exports.accountApproval = async (req, res) => {
     if (!updatedData) {
       throw new ApiError(httpStatus.OK, "Something went wrong!");
     } else {
-      if (accountApproval === false) {
-        await complaintService?.getOneAndUpdate(
-          { complaintNumber: complaintNumber },
-          {
-            $set: {
-              status: complainStatusEnum.closed,
-              remark: accountRemark,
-            },
-          }
-        );
-      }
+      await complaintService?.getOneAndUpdate(
+        { complaintNumber: complaintNumber },
+        {
+          $set: {
+            status: complainStatusEnum.closed,
+            remark: accountRemark,
+          },
+        }
+      );
 
       await moneyBackRequestLogService.createNewData({
         moneyBackRequestId: updatedData?._id,

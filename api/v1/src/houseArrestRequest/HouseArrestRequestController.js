@@ -68,7 +68,7 @@ exports.add = async (req, res) => {
      */
     const orderData = await orderInquiryService?.getOneByMultiField({
       orderNumber: parseInt(orderNumber),
-      status: orderStatusEnum.delivered,
+      //   status: orderStatusEnum.delivered,
     });
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "Invalid order number");
@@ -160,21 +160,6 @@ exports.add = async (req, res) => {
         },
       }
     );
-    let barcodeLabels = await Promise.all(
-      orderData?.barcodeId.map(async (ele) => {
-        let barcodeData = await barcodeService?.getOneByMultiField({
-          _id: ele,
-          isDeleted: false,
-          isActive: true,
-          isUsed: true,
-        });
-        if (barcodeData) {
-          return barcodeData?.barcodeNumber;
-        }
-      })
-    );
-
-    console.log(barcodeLabels, "barcodeLabels");
 
     //------------------create data-------------------
     let dataCreated = await houseArrestRequestService.createNewData({
@@ -195,7 +180,7 @@ exports.add = async (req, res) => {
       customerNumber: orderData?.mobileNo,
       alternateNumber: orderData?.alternateNo,
       companyId: req?.userData?.companyId,
-      orignalBarcode: barcodeLabels,
+      //   orignalBarcode: barcodeLabels,
     });
 
     await houseArrestLogsService.createNewData({
@@ -821,8 +806,8 @@ exports.getById = async (req, res) => {
 
 exports.ccInfoUpdate = async (req, res) => {
   try {
-    let { settledAmount, ccRemark, id } = req.body;
-
+    let { settledAmount, ccRemark, id, oldOrderNumber } = req.body;
+    console.log(typeof oldOrderNumber, "oldOrderNumber");
     let dataExist = await houseArrestRequestService.findCount({
       _id: id,
       isDeleted: false,
@@ -831,7 +816,29 @@ exports.ccInfoUpdate = async (req, res) => {
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-
+    if (oldOrderNumber !== null) {
+      var orderData = await orderInquiryService?.getOneByMultiField({
+        orderNumber: parseInt(oldOrderNumber),
+        status: orderStatusEnum.delivered,
+      });
+      if (!orderData) {
+        throw new ApiError(httpStatus.OK, "Invalid order number");
+      }
+      var barcodeLabels = await Promise.all(
+        orderData?.barcodeId.map(async (ele) => {
+          let barcodeData = await barcodeService?.getOneByMultiField({
+            _id: ele,
+            isDeleted: false,
+            isActive: true,
+            isUsed: true,
+          });
+          if (barcodeData) {
+            return barcodeData?.barcodeNumber;
+          }
+        })
+      );
+    }
+    console.log(orderData, "orderData");
     let updatedData = await houseArrestRequestService.getOneAndUpdate(
       { _id: id },
       {
@@ -840,6 +847,13 @@ exports.ccInfoUpdate = async (req, res) => {
           ccApproval: true,
           ccApprovalDate: new Date(),
           ccInfoAddById: req?.userData?.Id,
+          oldOrderNumber: orderData ? orderData.orderNumber : "",
+          oldCustomerNumber: orderData ? orderData.mobileNo : "",
+          oldCustomerName: orderData ? orderData.customerName : "",
+          oldCustomerAddress: orderData
+            ? orderData.autoFillingShippingAddress
+            : "",
+          orignalBarcode: barcodeLabels?.length ? barcodeLabels : [],
         },
       }
     );
@@ -1017,17 +1031,16 @@ exports.accountApproval = async (req, res) => {
     if (!updatedData) {
       throw new ApiError(httpStatus.OK, "Something went wrong!");
     } else {
-      if (accountApproval === false) {
-        await complaintService?.getOneAndUpdate(
-          { complaintNumber: complaintNumber },
-          {
-            $set: {
-              status: complainStatusEnum.closed,
-              remark: accountRemark,
-            },
-          }
-        );
-      }
+      await complaintService?.getOneAndUpdate(
+        { complaintNumber: complaintNumber },
+        {
+          $set: {
+            status: complainStatusEnum.closed,
+            remark: accountRemark,
+          },
+        }
+      );
+
       const dealerExitsId = await getDealerFromLedger(dealerId);
 
       const balance = await getBalance(dealerExitsId, creditAmount, 0);
@@ -1070,7 +1083,7 @@ exports.accountApproval = async (req, res) => {
 // dealer Approval
 exports.dealerApproval = async (req, res) => {
   try {
-    let { id, dealerRemark, returnItemBarcode } = req.body;
+    let { id, dealerRemark, returnItemBarcode, oldOrderNumber } = req.body;
 
     let dataExist = await houseArrestRequestService.findCount({
       _id: id,
@@ -1079,6 +1092,28 @@ exports.dealerApproval = async (req, res) => {
     });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    if (oldOrderNumber !== null) {
+      var orderData = await orderInquiryService?.getOneByMultiField({
+        orderNumber: parseInt(oldOrderNumber),
+        status: orderStatusEnum.delivered,
+      });
+      if (!orderData) {
+        throw new ApiError(httpStatus.OK, "Invalid order number");
+      }
+      var barcodeLabels = await Promise.all(
+        orderData?.barcodeId.map(async (ele) => {
+          let barcodeData = await barcodeService?.getOneByMultiField({
+            _id: ele,
+            isDeleted: false,
+            isActive: true,
+            isUsed: true,
+          });
+          if (barcodeData) {
+            return barcodeData?.barcodeNumber;
+          }
+        })
+      );
     }
 
     let updatedData = await houseArrestRequestService.getOneAndUpdate(
@@ -1089,6 +1124,13 @@ exports.dealerApproval = async (req, res) => {
           dealerApproval: true,
           returnItemBarcode,
           dealerApprovalDate: new Date(),
+          oldOrderNumber: orderData ? orderData.orderNumber : "",
+          oldCustomerNumber: orderData ? orderData.mobileNo : "",
+          oldCustomerName: orderData ? orderData.customerName : "",
+          oldCustomerAddress: orderData
+            ? orderData.autoFillingShippingAddress
+            : "",
+          orignalBarcode: barcodeLabels?.length ? barcodeLabels : [],
         },
       }
     );

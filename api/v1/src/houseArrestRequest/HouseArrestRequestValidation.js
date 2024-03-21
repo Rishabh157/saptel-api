@@ -19,6 +19,7 @@ const create = {
 const ccInfoUpdate = {
   body: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId).required(),
+    oldOrderNumber: Joi.string().allow(null),
     settledAmount: Joi.string().required(),
     ccRemark: Joi.string().required(),
   }),
@@ -109,7 +110,8 @@ const dealerApproval = {
   body: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
     dealerRemark: Joi.string().required(),
-    returnItemBarcode: Joi.array().items(Joi.string().required()).required(),
+    returnItemBarcode: Joi.array().items(Joi.string()).allow(),
+    oldOrderNumber: Joi.string().allow(null),
   }),
 };
 

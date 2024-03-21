@@ -95,6 +95,24 @@ router.get(
   orderController.getByIdForDealer
 );
 
+// get by order number
+//===============get document by id for dealer===============
+router.get(
+  "/get-by-order-number/:ordernumber",
+  authCheckMiddleware,
+  //   validate(orderValidation),
+  orderController.getByOrderNumber
+);
+
+// get by order number for dealer
+//===============get document by id for dealer===============
+router.get(
+  "/dealer/get-by-order-number/:ordernumber",
+  authCheckDealerMiddleware,
+  //   validate(orderValidation),
+  orderController.getByOrderNumber
+);
+
 // get order data by number unauth
 router.get(
   "/unauth/:phno/get-by-phnumber",

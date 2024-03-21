@@ -53,6 +53,7 @@ const {
   productStatus,
   userEnum,
   callPageTabType,
+  orderStatusEnum,
 } = require("../../helper/enumUtils");
 const { getCustomerReputation } = require("./OrderInquiryHelper");
 
@@ -2791,6 +2792,51 @@ exports.getByIdForDealer = async (req, res) => {
           "agentDistrictData",
           "product_group",
         ],
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist[0]) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get by order number
+exports.getByOrderNumber = async (req, res) => {
+  try {
+    let ordernumber = req.params.ordernumber;
+    let additionalQuery = [
+      {
+        $match: {
+          orderNumber: parseInt(ordernumber),
+          isDeleted: false,
+          status: orderStatusEnum.delivered,
+        },
+      },
+      {
+        $project: {
+          customerName: 1,
+          mobileNo: 1,
+          autoFillingShippingAddress: 1,
+          orderNumber: 1,
+        },
       },
     ];
 

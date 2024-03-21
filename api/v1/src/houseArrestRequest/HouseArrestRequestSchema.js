@@ -6,6 +6,23 @@ const HouseArrestRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    oldOrderNumber: {
+      type: String,
+      default: "",
+    },
+    oldCustomerNumber: {
+      type: String,
+      default: "",
+    },
+    oldCustomerName: {
+      type: String,
+      default: "",
+    },
+    oldCustomerAddress: {
+      type: String,
+      default: "",
+    },
+
     mbkNumber: {
       type: Number,
       required: true,
@@ -128,7 +145,7 @@ const HouseArrestRequestSchema = new mongoose.Schema(
     },
     orignalBarcode: {
       type: [String],
-      required: true,
+      required: [],
     },
     managerSecondApproval: {
       type: Boolean,
