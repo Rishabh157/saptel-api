@@ -208,6 +208,7 @@ const getAllFilter = {
       })
     ),
     isPaginationRequired: Joi.boolean().default(true).optional(),
+    getBatchData: Joi.boolean().optional(),
   }),
 };
 

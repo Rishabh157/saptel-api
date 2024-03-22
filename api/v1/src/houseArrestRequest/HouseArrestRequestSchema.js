@@ -170,6 +170,10 @@ const HouseArrestRequestSchema = new mongoose.Schema(
       type: Boolean,
       default: null,
     },
+    accountRemark: {
+      type: String,
+      default: "",
+    },
     accountApprovalDate: {
       type: String,
       default: "",

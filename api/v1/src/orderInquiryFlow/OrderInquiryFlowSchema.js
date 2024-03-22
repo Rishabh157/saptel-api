@@ -34,9 +34,14 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+
     assignWarehouseId: {
       type: ObjectId,
       trim: true,
+      default: null,
+    },
+    batchId: {
+      type: ObjectId,
       default: null,
     },
     agentId: {

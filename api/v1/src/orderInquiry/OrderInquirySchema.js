@@ -88,7 +88,14 @@ const OrderInquirySchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
-
+    isOrderAssigned: {
+      type: Boolean,
+      default: false,
+    },
+    batchId: {
+      type: ObjectId,
+      default: null,
+    },
     autoFillingShippingAddress: {
       type: String,
       required: false,

@@ -125,7 +125,7 @@ exports.isPrepaid = async (applicableCriteriaList) => {
 
 exports.dealerSurvingPincode = async (pincodeName, companyId, schemeId) => {
   let matchQuery = {
-    pincodes: pincodeName,
+    pincodes: { $in: pincodeName },
     schemeId: schemeId,
     companyId: companyId,
     isDeleted: false,

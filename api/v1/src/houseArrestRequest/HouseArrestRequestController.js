@@ -847,6 +847,7 @@ exports.ccInfoUpdate = async (req, res) => {
           ccApproval: true,
           ccApprovalDate: new Date(),
           ccInfoAddById: req?.userData?.Id,
+          ccRemark: ccRemark,
           oldOrderNumber: orderData ? orderData.orderNumber : "",
           oldCustomerNumber: orderData ? orderData.mobileNo : "",
           oldCustomerName: orderData ? orderData.customerName : "",

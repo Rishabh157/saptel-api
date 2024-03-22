@@ -2866,7 +2866,9 @@ exports.getByOrderNumber = async (req, res) => {
 // =============all filter pagination api start================
 exports.allFilterPagination = async (req, res) => {
   try {
+    console.log("yhaadhjashdjkashdjkhas");
     const { Id } = req.userData;
+    let getBatchData = req.body.getBatchData;
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.searchIn;
@@ -2982,6 +2984,7 @@ exports.allFilterPagination = async (req, res) => {
       "areaId",
       "channel",
       "agentDistrictId",
+      "batchId",
     ];
 
     const filterQuery = getFilterQuery(
@@ -2994,12 +2997,15 @@ exports.allFilterPagination = async (req, res) => {
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
-
+    if (getBatchData) {
+      matchQuery.$and.push({ batchId: null });
+    }
     //----------------------------
     //calander filter
     /**
      * ToDo : for date filter
      */
+    console.log(matchQuery, "matchQuery");
 
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 

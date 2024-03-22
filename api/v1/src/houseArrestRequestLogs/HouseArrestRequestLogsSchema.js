@@ -23,6 +23,10 @@ const HouseArrestRequestLogsSchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
+    accountRemark: {
+      type: String,
+      default: "",
+    },
     managerFirstUserId: {
       type: ObjectId,
       default: null,

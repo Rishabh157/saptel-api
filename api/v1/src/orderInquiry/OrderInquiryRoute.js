@@ -121,7 +121,12 @@ router.get(
 );
 
 //===============get all pagination filter===============
-router.post("/", authCheckMiddleware, orderController.allFilterPagination);
+router.post(
+  "/",
+  authCheckMiddleware,
+  validate(orderValidation.getAllFilter),
+  orderController.allFilterPagination
+);
 
 router.post(
   "/get-dileveryboy-order",

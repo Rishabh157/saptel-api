@@ -97,6 +97,7 @@ const prodyctReplacementRequestRoute = require("./src/productReplacementRequest/
 const prodyctReplacementRequestLogRoute = require("./src/productReplacementRequestLog/ProductReplacementRequestLogRoute");
 const houseArrestRequestRoute = require("./src/houseArrestRequest/HouseArrestRequestRoute");
 const houseArrestRequestLogsRoute = require("./src/houseArrestRequestLogs/HouseArrestRequestLogsRoute");
+const batchRoute = require("./src/batch/BatchRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -498,6 +499,10 @@ const defaultRoutes = [
   {
     path: "/house-arrest-logs",
     route: houseArrestRequestLogsRoute,
+  },
+  {
+    path: "/batch",
+    route: batchRoute,
   },
 ];
 // orderRoute;

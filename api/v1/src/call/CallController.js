@@ -353,9 +353,10 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Area.");
     }
 
-    const isPincodeExists = await pincodeService.findCount({
+    const isPincodeExists = await pincodeService.getOneByMultiField({
       _id: pincodeId,
       isDeleted: false,
+      isActive: true,
     });
     if (!isPincodeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
@@ -390,6 +391,18 @@ exports.update = async (req, res) => {
       dispositionThreeData[0]?.applicableCriteria
     );
 
+    // dealers who serves on this pincode
+    const dealerServingPincode = await dealerSurvingPincode(
+      isPincodeExists?.pincode,
+      companyId,
+      schemeId
+    );
+
+    // getting warehouse ID
+    const servingWarehouse = await getAssignWarehouse(pincodeId, companyId);
+
+    console.log(dealerServingPincode, "dealerServingPincode");
+    console.log(servingWarehouse, "servingWarehouse");
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
 
@@ -400,8 +413,13 @@ exports.update = async (req, res) => {
         status: flag ? status : orderStatusEnum.inquiry,
         orderNumber: flag ? orderNumber : null,
         inquiryNumber: inquiryNumber,
-        assignDealerId: null,
-        assignWarehouseId: null,
+        isOrderAssigned: dealerServingPincode.length > 1 ? false : true,
+        assignDealerId:
+          dealerServingPincode.length === 1
+            ? dealerServingPincode[0]?.dealerId
+            : null,
+        assignWarehouseId:
+          dealerServingPincode.length === 0 ? servingWarehouse : null,
         approved: flag ? true : prepaidOrderFlag ? false : true,
         agentId: agentId,
         agentName: agentName,
