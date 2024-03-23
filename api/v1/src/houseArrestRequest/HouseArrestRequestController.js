@@ -726,6 +726,42 @@ exports.getById = async (req, res) => {
           ],
         },
       },
+      {
+        $lookup: {
+          from: "users",
+          localField: "ccInfoAddById",
+          foreignField: "_id",
+          as: "ccUser",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "managerFirstUserId",
+          foreignField: "_id",
+          as: "managerFirst",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "managerSecondUserId",
+          foreignField: "_id",
+          as: "managerSecond",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "accoutUserId",
+          foreignField: "_id",
+          as: "accountUser",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
 
       {
         $addFields: {
@@ -765,6 +801,34 @@ exports.getById = async (req, res) => {
           dealerFirmName: {
             $arrayElemAt: ["$dealerData.firmName", 0],
           },
+          ccUserLabel: {
+            $concat: [
+              { $arrayElemAt: ["$ccUser.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$ccUser.lastName", 0] },
+            ],
+          },
+          managerFirstLabel: {
+            $concat: [
+              { $arrayElemAt: ["$managerFirst.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$managerFirst.lastName", 0] },
+            ],
+          },
+          managerSecondUser: {
+            $concat: [
+              { $arrayElemAt: ["$managerSecond.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$managerSecond.lastName", 0] },
+            ],
+          },
+          accountUserLabel: {
+            $concat: [
+              { $arrayElemAt: ["$accountUser.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$accountUser.lastName", 0] },
+            ],
+          },
         },
       },
       {
@@ -776,6 +840,10 @@ exports.getById = async (req, res) => {
           "pincodeData",
           "schemeData",
           "dealerData",
+          "ccUser",
+          "managerFirst",
+          "managerSecond",
+          "accountUser",
         ],
       },
     ];

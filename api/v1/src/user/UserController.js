@@ -702,6 +702,52 @@ exports.get = async (req, res) => {
   }
 };
 
+// get batch assigne users
+
+exports.getBatchAssignes = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    console.log(req.userData.companyId);
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+      userRole: userRoleType.srManagerDistribution,
+      // {
+      //   $in: [userRoleType.srManagerDistribution, userRoleType.managerArea],
+      // }
+      isDeleted: false,
+      isActive: true,
+    };
+
+    let additionalQuery = [{ $match: matchQuery }];
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.user,
+    //   userRoleData,
+    //   actionType.listAll
+    // );
+    let dataExist = await userService.aggregateQuery(additionalQuery);
+    // let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //single view api
 exports.getById = async (req, res) => {
   try {

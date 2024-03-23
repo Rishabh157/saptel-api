@@ -393,6 +393,7 @@ exports.assignOrder = async (req, res) => {
           $set: {
             assignDealerId: dealerId,
             assignWarehouseId: warehouseId,
+            isOrderAssigned: true,
           },
         }
       )
@@ -1964,6 +1965,21 @@ exports.getById = async (req, res) => {
       },
       {
         $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
           from: "dispositionthrees",
           localField: "dispositionLevelThreeId",
           foreignField: "_id",
@@ -2124,6 +2140,39 @@ exports.getById = async (req, res) => {
           ],
         },
       },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
 
       {
         $addFields: {
@@ -2153,6 +2202,16 @@ exports.getById = async (req, res) => {
           },
           areaLabel: {
             $arrayElemAt: ["$areaData.area", 0],
+          },
+          assignWarehouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          assignDealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
           },
           // channelLabel: {
           //   $arrayElemAt: ["$channelData.channelName", 0],

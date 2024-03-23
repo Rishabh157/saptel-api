@@ -399,7 +399,7 @@ exports.update = async (req, res) => {
     );
 
     // getting warehouse ID
-    const servingWarehouse = await getAssignWarehouse(pincodeId, companyId);
+    const servingWarehouse = await getAssignWarehouse(companyId);
 
     console.log(dealerServingPincode, "dealerServingPincode");
     console.log(servingWarehouse, "servingWarehouse");
@@ -413,7 +413,10 @@ exports.update = async (req, res) => {
         status: flag ? status : orderStatusEnum.inquiry,
         orderNumber: flag ? orderNumber : null,
         inquiryNumber: inquiryNumber,
-        isOrderAssigned: dealerServingPincode.length > 1 ? false : true,
+        isOrderAssigned:
+          dealerServingPincode.length > 1 || servingWarehouse === undefined
+            ? false
+            : true,
         assignDealerId:
           dealerServingPincode.length === 1
             ? dealerServingPincode[0]?.dealerId

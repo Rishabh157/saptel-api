@@ -4,7 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const batchService = require("./BatchService");
 const orderService = require("../orderInquiry/OrderInquiryService");
-const userService = require("../orderInquiry/OrderInquiryService");
+const userService = require("../user/UserService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const { searchKeys } = require("./BatchSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -21,6 +21,8 @@ const {
 } = require("../../helper/paginationFilterHelper");
 const { getInquiryNumber } = require("./BatchHelper");
 const { default: axios } = require("axios");
+const { userEnum } = require("../../helper/enumUtils");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -29,11 +31,13 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let isUserExists = await userService?.findCount({
+    console.log(batchAssignedTo, "batchAssignedTo");
+    let isUserExists = await userService?.getOneByMultiField({
       _id: batchAssignedTo,
       isActive: true,
       isDeleted: false,
     });
+    console.log(isUserExists, "isUserExists");
     if (!isUserExists) {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Invalid user`);
     }
@@ -166,6 +170,11 @@ exports.allFilterPagination = async (req, res) => {
       req.body.orderByValue
     );
 
+    if (req.userData.role !== userEnum.admin) {
+      matchQuery.$and.push({
+        batchAssignedTo: new mongoose.Types.ObjectId(req.userData.Id),
+      });
+    }
     //----------------------------
 
     /**
@@ -385,11 +394,83 @@ exports.getBatchOrder = async (req, res) => {
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Something went wrong");
     }
+    let matchQuery = {
+      _id: { $in: dataExist?.orders },
+      isDeleted: false,
+      isActive: true,
+    };
+
     let allOrders = await orderService?.aggregateQuery([
       {
-        _id: { $in: dataExist?.orders },
-        isDeleted: false,
-        isActive: true,
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          assignWarehouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          assignDealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $unset: ["pincodeData", "warehouse_data", "dealer_data"],
       },
     ]);
 

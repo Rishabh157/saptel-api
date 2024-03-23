@@ -20,6 +20,16 @@ router.get(
 );
 
 /**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/get-batch-assignes",
+  authCheckMiddleware,
+  // validate(userValidation.get),
+  userController.getBatchAssignes
+);
+
+/**
  * get all zonal EXECUTIVE of distribution department
  */
 router.get(

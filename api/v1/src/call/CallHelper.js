@@ -158,15 +158,15 @@ exports.dealerSurvingPincode = async (pincodeName, companyId, schemeId) => {
   return valiDdealerServingInPincode;
 };
 
-exports.getAssignWarehouse = async (pincodeId, companyId) => {
+exports.getAssignWarehouse = async (companyId) => {
   let matchQuery = {
     isDeleted: false,
     companyId: companyId,
     isActive: true,
   };
-  matchQuery["registrationAddress.pincodeId"] = new mongoose.Types.ObjectId(
-    pincodeId
-  );
+  // matchQuery["registrationAddress.pincodeId"] = new mongoose.Types.ObjectId(
+  //   pincodeId
+  // );
   matchQuery = getQuery(matchQuery);
 
   let warehouseServingInPincode = await wareHouseService.findAllWithQuery(
