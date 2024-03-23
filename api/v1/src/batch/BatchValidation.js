@@ -11,6 +11,7 @@ const create = {
     orders: Joi.array()
       .items(Joi.required().custom(commonValidation.objectId))
       .required(),
+    batchAssignedTo: Joi.required().custom(commonValidation.objectId),
   }),
 };
 
@@ -25,6 +26,7 @@ const update = {
     orders: Joi.array()
       .items(Joi.required().custom(commonValidation.objectId))
       .required(),
+    batchAssignedTo: Joi.required().custom(commonValidation.objectId),
   }),
 };
 

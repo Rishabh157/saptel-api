@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const batchService = require("./BatchService");
 const orderService = require("../orderInquiry/OrderInquiryService");
+const userService = require("../orderInquiry/OrderInquiryService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const { searchKeys } = require("./BatchSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -24,17 +25,25 @@ const { default: axios } = require("axios");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { orders } = req.body;
+    let { orders, batchAssignedTo } = req.body;
     /**
      * check duplicate exist
      */
-
+    let isUserExists = await userService?.findCount({
+      _id: batchAssignedTo,
+      isActive: true,
+      isDeleted: false,
+    });
+    if (!isUserExists) {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Invalid user`);
+    }
     let batchNumber = await getInquiryNumber();
     //------------------create data-------------------
     let dataCreated = await batchService.createNewData({
       orders,
       batchCreatedBy: req.userData.Id,
       batchNumber: batchNumber,
+      batchAssignedTo: batchAssignedTo,
     });
     if (dataCreated) {
       // Map over orders and create an array of promises
@@ -368,7 +377,7 @@ exports.getById = async (req, res) => {
 // get batch orders
 exports.getBatchOrder = async (req, res) => {
   try {
-    let batchid = req.params.id;
+    let batchid = req.params.batchid;
     let dataExist = await batchService.getOneByMultiField({
       _id: batchid,
       isDeleted: false,

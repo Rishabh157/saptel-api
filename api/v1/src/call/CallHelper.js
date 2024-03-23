@@ -136,7 +136,26 @@ exports.dealerSurvingPincode = async (pincodeName, companyId, schemeId) => {
   let dealerServingInPincode = await dealerSchemeService.findAllWithQuery(
     matchQuery
   );
-  return dealerServingInPincode;
+
+  let valiDdealerServingInPincode = await Promise.all(
+    dealerServingInPincode?.map(async (ele) => {
+      let dealerData = await dealerService?.findCount({
+        _id: ele?.dealerId,
+        isActive: true,
+        isDeleted: false,
+      });
+      if (dealerData) {
+        return ele;
+      }
+    })
+  );
+
+  // Filter out undefined values
+  valiDdealerServingInPincode = valiDdealerServingInPincode.filter(
+    (ele) => ele !== undefined
+  );
+
+  return valiDdealerServingInPincode;
 };
 
 exports.getAssignWarehouse = async (pincodeId, companyId) => {

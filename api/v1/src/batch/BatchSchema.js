@@ -4,6 +4,7 @@ const BatchSchema = new mongoose.Schema(
   {
     batchNumber: { type: Number, required: true },
     batchCreatedBy: { type: ObjectId, required: true },
+    batchAssignedTo: { type: ObjectId, required: true },
     orders: { type: [ObjectId], required: true },
     isDeleted: {
       type: Boolean,
