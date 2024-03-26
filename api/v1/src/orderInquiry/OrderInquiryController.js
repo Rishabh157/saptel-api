@@ -54,6 +54,7 @@ const {
   userEnum,
   callPageTabType,
   orderStatusEnum,
+  userRoleType,
 } = require("../../helper/enumUtils");
 const { getCustomerReputation } = require("./OrderInquiryHelper");
 
@@ -304,7 +305,6 @@ exports.updateOrderStatus = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
-    console.log(datafound, "datafound");
 
     let dataUpdated = await orderService
       .getOneAndUpdate(
@@ -323,7 +323,6 @@ exports.updateOrderStatus = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        console.log(ress);
         await orderInquiryFlowService.createNewData({
           ...ress,
           orderId: orderId,
@@ -398,7 +397,6 @@ exports.assignOrder = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        console.log(ress);
         await orderInquiryFlowService.createNewData({
           ...ress,
           orderId: orderId,
@@ -428,7 +426,6 @@ exports.assignOrder = async (req, res) => {
 exports.assignOrderToDeliveryBoy = async (req, res) => {
   try {
     let { deliveryBoyId, orderId } = req.body;
-    console.log(deliveryBoyId, orderId, "iii");
     const isDeliveryBoyExists = await deliveryBoyService.findCount({
       _id: deliveryBoyId,
       isDeleted: false,
@@ -1586,7 +1583,6 @@ exports.getUnAuth = async (req, res) => {
     } else {
       var dataExist = await orderService.aggregateQuery(additionalQuery);
     }
-    console.log(dataExist, "dataExist");
 
     return res.status(httpStatus.OK).send({
       message: "Successfull.",
@@ -2313,7 +2309,6 @@ exports.getByMobileNumber = async (req, res) => {
       }
     }
 
-    console.log(matchQuery, "matchQuery");
     const isEmpty = (obj) => {
       return Object.keys(obj).length === 0;
     };
@@ -2607,7 +2602,7 @@ exports.getByMobileNumber = async (req, res) => {
 exports.getByIdForDealer = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    console.log(idToBeSearch, "idToBeSearch");
+
     let additionalQuery = [
       {
         $match: {
@@ -2925,7 +2920,6 @@ exports.getByOrderNumber = async (req, res) => {
 // =============all filter pagination api start================
 exports.allFilterPagination = async (req, res) => {
   try {
-    console.log("yhaadhjashdjkashdjkhas");
     const { Id } = req.userData;
     let getBatchData = req.body.getBatchData;
     var dateFilter = req.body.dateFilter;
@@ -2951,6 +2945,35 @@ exports.allFilterPagination = async (req, res) => {
       $and: [{ isDeleted: false }],
     };
 
+    let dealersOfZonalManager = [];
+    if (
+      req.userData.userRole === userRoleType.srManagerDistribution ||
+      req.userData.userRole === userRoleType.managerArea
+    ) {
+      let allDealers = await dealerService.findAllWithQuery({
+        isActive: true,
+        isDeleted: false,
+        zonalManagerId: req.userData.Id,
+      });
+      allDealers?.forEach((ele) => {
+        dealersOfZonalManager?.push(ele?._id.toString());
+      });
+    }
+    let dealersOfZonalExicutive = [];
+    if (
+      req.userData.userRole === userRoleType.srEXECUTIVEArea ||
+      req.userData.userRole === userRoleType.EXECUTIVEArea
+    ) {
+      let allDealers = await dealerService.findAllWithQuery({
+        isActive: true,
+        isDeleted: false,
+        zonalExecutiveId: req.userData.Id,
+      });
+      allDealers?.forEach((ele) => {
+        dealersOfZonalExicutive?.push(ele?._id.toString());
+      });
+    }
+
     if (isUserExists?.isAgent) {
       matchQuery.$and.push({ agentId: new mongoose.Types.ObjectId(Id) });
       matchQuery.$and.push({
@@ -2967,17 +2990,12 @@ exports.allFilterPagination = async (req, res) => {
         branchId: new mongoose.Types.ObjectId(isUserExists?.branchId),
       });
     }
-    console.log(
-      isUserExists?.userType,
-      isUserExists?.isAgent,
-      isUserExists?.callCenterId
-    );
+
     if (
       isUserExists?.userType !== userEnum.admin &&
       isUserExists?.isAgent === false &&
       isUserExists?.callCenterId !== null
     ) {
-      console.log("yhaa ");
       matchQuery.$and.push({
         callCenterId: new mongoose.Types.ObjectId(isUserExists?.callCenterId),
       });
@@ -3064,7 +3082,6 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * ToDo : for date filter
      */
-    console.log(matchQuery, "matchQuery");
 
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
@@ -3454,9 +3471,10 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-
+    console.log(matchQuery, "matchQuery");
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    console.log(dataFound, "dataFound");
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -3483,9 +3501,47 @@ exports.allFilterPagination = async (req, res) => {
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
 
-    if (allowedFields?.length) {
+    let finalData = [];
+    // check for zonal manager and zonal exicutive
+    console.log(dealersOfZonalManager, "dealersOfZonalManager");
+    if (
+      req.userData.userRole === userRoleType.srManagerDistribution ||
+      req.userData.userRole === userRoleType.managerArea
+    ) {
+      allowedFields?.forEach((ele) => {
+        console.log(ele?.assignDealerId, "ele?.assignDealerId");
+        if (
+          ele?.assignDealerId !== null &&
+          dealersOfZonalManager.includes(ele?.assignDealerId?.toString())
+        ) {
+          finalData.push(ele);
+        }
+      });
+    }
+    if (
+      req.userData.userRole === userRoleType.srEXECUTIVEArea ||
+      req.userData.userRole === userRoleType.EXECUTIVEArea
+    ) {
+      allowedFields?.forEach((ele) => {
+        if (
+          ele?.assignDealerId !== null &&
+          dealersOfZonalExicutive.includes(ele?.assignDealerId?.toString())
+        ) {
+          finalData.push(ele);
+        }
+      });
+    }
+    let dataToShow =
+      req.userData.userRole === userRoleType.srManagerDistribution ||
+      req.userData.userRole === userRoleType.managerArea ||
+      req.userData.userRole === userRoleType.srEXECUTIVEArea ||
+      req.userData.userRole === userRoleType.EXECUTIVEArea
+        ? finalData
+        : allowedFields;
+
+    if (dataToShow?.length) {
       return res.status(200).send({
-        data: allowedFields,
+        data: dataToShow,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -3519,7 +3575,6 @@ exports.allFilterPaginationDileveryBoy = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
-    console.log(req.userData, "req.userData.Id");
     let matchQuery = {
       $and: [
         {
@@ -3954,7 +4009,6 @@ exports.allFilterPaginationDileveryBoyForDealerPanel = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
-    console.log(req.userData, "req.userData.Id");
     let matchQuery = {
       $and: [
         {
@@ -4388,7 +4442,6 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
-    console.log(dealerId, "dealerId");
     let matchQuery = {
       $and: [
         {

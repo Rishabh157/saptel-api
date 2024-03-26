@@ -23,6 +23,7 @@ const {
   ledgerType,
   moduleType,
   actionType,
+  userRoleType,
 } = require("../../helper/enumUtils");
 
 const {
@@ -392,6 +393,24 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
+
+    if (
+      req.userData.userRole === userRoleType.srManagerDistribution ||
+      req.userData.userRole === userRoleType.managerArea
+    ) {
+      matchQuery.$and.push({
+        zonalManagerId: new mongoose.Types.ObjectId(req.userData.Id),
+      });
+    }
+    if (
+      req.userData.userRole === userRoleType.srEXECUTIVEArea ||
+      req.userData.userRole === userRoleType.EXECUTIVEArea
+    ) {
+      matchQuery.$and.push({
+        zonalExecutiveId: new mongoose.Types.ObjectId(req.userData.Id),
+      });
+    }
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }

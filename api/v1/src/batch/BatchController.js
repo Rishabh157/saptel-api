@@ -169,8 +169,7 @@ exports.allFilterPagination = async (req, res) => {
       req.body.orderBy,
       req.body.orderByValue
     );
-
-    if (req.userData.role !== userEnum.admin) {
+    if (req.userData.userRole !== userEnum.admin) {
       matchQuery.$and.push({
         batchAssignedTo: new mongoose.Types.ObjectId(req.userData.Id),
       });
@@ -280,6 +279,7 @@ exports.allFilterPagination = async (req, res) => {
 
     //-----------------------------------
     let dataFound = await batchService.aggregateQuery(finalAggregateQuery);
+
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
