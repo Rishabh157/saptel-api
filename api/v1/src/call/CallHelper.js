@@ -164,6 +164,7 @@ exports.getAssignWarehouse = async (companyId) => {
     companyId: companyId,
     isActive: true,
     dealerId: null,
+    isDefault: true,
   };
   // matchQuery["registrationAddress.pincodeId"] = new mongoose.Types.ObjectId(
   //   pincodeId

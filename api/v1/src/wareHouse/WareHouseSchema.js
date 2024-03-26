@@ -151,6 +151,10 @@ const WareHouseSchema = new mongoose.Schema(
     },
     companyId: { type: ObjectId, required: true, trim: true },
     dealerId: { type: ObjectId, default: null },
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
