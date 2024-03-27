@@ -2960,14 +2960,22 @@ exports.allFilterPagination = async (req, res) => {
       });
     }
     let dealersOfZonalExicutive = [];
-    if (
-      req.userData.userRole === userRoleType.srEXECUTIVEArea ||
-      req.userData.userRole === userRoleType.EXECUTIVEArea
-    ) {
+    if (req.userData.userRole === userRoleType.srEXECUTIVEArea) {
       let allDealers = await dealerService.findAllWithQuery({
         isActive: true,
         isDeleted: false,
         zonalExecutiveId: req.userData.Id,
+      });
+      allDealers?.forEach((ele) => {
+        dealersOfZonalExicutive?.push(ele?._id.toString());
+      });
+    }
+    if (req.userData.userRole === userRoleType.EXECUTIVEArea) {
+      console.log("in...")
+      let allDealers = await dealerService.findAllWithQuery({
+        isActive: true,
+        isDeleted: false,
+        zonalExecutiveAreaId: { $in: [req.userData.Id] },
       });
       allDealers?.forEach((ele) => {
         dealersOfZonalExicutive?.push(ele?._id.toString());

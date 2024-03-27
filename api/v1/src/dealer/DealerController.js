@@ -402,12 +402,16 @@ exports.allFilterPagination = async (req, res) => {
         zonalManagerId: new mongoose.Types.ObjectId(req.userData.Id),
       });
     }
-    if (
-      req.userData.userRole === userRoleType.srEXECUTIVEArea ||
-      req.userData.userRole === userRoleType.EXECUTIVEArea
-    ) {
+    if (req.userData.userRole === userRoleType.srEXECUTIVEArea) {
       matchQuery.$and.push({
         zonalExecutiveId: new mongoose.Types.ObjectId(req.userData.Id),
+      });
+    }
+    if (req.userData.userRole === userRoleType.EXECUTIVEArea) {
+      matchQuery.$and.push({
+        zonalExecutiveAreaId: {
+          $in: [new mongoose.Types.ObjectId(req.userData.Id)],
+        },
       });
     }
 

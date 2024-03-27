@@ -30,6 +30,25 @@ router.get(
 );
 
 /**
+ * get sr zonal exicutive via zonala manager
+ */
+router.get(
+  "/get-sr-exicutive/:zmid",
+  authCheckMiddleware,
+  // validate(userValidation.get),
+  userController.getSrExicutive
+);
+
+/**
+ * get sr zonal exicutive via zonala manager
+ */
+router.get(
+  "/get-jr-exicutive/:zeid",
+  authCheckMiddleware,
+  // validate(userValidation.get),
+  userController.getJrExicutive
+);
+/**
  * get all zonal EXECUTIVE of distribution department
  */
 router.get(

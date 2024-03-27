@@ -244,6 +244,10 @@ const DealerSchema = new mongoose.Schema(
       type: ObjectId,
       trim: true,
     },
+    zonalExecutiveAreaId: {
+      type: [ObjectId],
+      trim: true,
+    },
     ratio: {
       type: Number,
       required: false,

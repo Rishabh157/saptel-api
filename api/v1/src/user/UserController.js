@@ -702,6 +702,116 @@ exports.get = async (req, res) => {
   }
 };
 
+// get sr exicutive via zonal manager
+
+exports.getSrExicutive = async (req, res) => {
+  try {
+    let zmid = req.params.zmid;
+
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+      isDeleted: false,
+    };
+
+    let userData = await userService?.getOneByMultiField({
+      isDeleted: false,
+      isActive: true,
+      _id: zmid,
+    });
+    if (!userData) {
+      throw new ApiError(httpStatus.OK, "Invalid zonal manager");
+    }
+    let flag = false;
+    if (userData?.userRole === userRoleType.managerArea) {
+      console.log("in...", zmid);
+      flag = true;
+      var jrUsers = await userService?.aggregateQuery([
+        {
+          $match: {
+            isDeleted: false,
+            isActive: true,
+            userRole: userRoleType.srEXECUTIVEArea,
+            mySenior: new mongoose.Types.ObjectId(zmid),
+          },
+        },
+      ]);
+    }
+    console.log(jrUsers, "jrUsers");
+    let additionalQuery = [{ $match: matchQuery }];
+
+    let dataExist = await userService.aggregateQuery(additionalQuery);
+
+    if (!jrUsers?.length && !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: flag ? jrUsers : dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get jr exicutive via sr exicutive
+
+exports.getJrExicutive = async (req, res) => {
+  try {
+    let zeid = req.params.zeid;
+
+    //if no default query then pass {}
+
+    let userData = await userService?.getOneByMultiField({
+      isDeleted: false,
+      isActive: true,
+      _id: zeid,
+    });
+    if (!userData) {
+      throw new ApiError(httpStatus.OK, "Invalid zonal Exicutive");
+    }
+
+    let jrUsers = await userService?.aggregateQuery([
+      {
+        $match: {
+          isDeleted: false,
+          isActive: true,
+          userRole: userRoleType.EXECUTIVEArea,
+          mySenior: new mongoose.Types.ObjectId(zeid),
+        },
+      },
+    ]);
+
+    if (!jrUsers?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: jrUsers,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // get batch assigne users
 
 exports.getBatchAssignes = async (req, res) => {

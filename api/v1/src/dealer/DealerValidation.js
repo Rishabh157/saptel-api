@@ -61,6 +61,9 @@ const create = {
     zonalExecutiveId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    zonalExecutiveAreaId: Joi.array()
+      .items(Joi.string().custom(commonValidation.objectId))
+      .allow(),
     ratio: Joi.number().allow(null),
     priority: Joi.number().allow(null),
   }),
@@ -125,6 +128,9 @@ const update = {
     zonalExecutiveId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    zonalExecutiveAreaId: Joi.array()
+      .items(Joi.string().custom(commonValidation.objectId))
+      .allow(),
     openingBalance: Joi.number().allow(),
     ratio: Joi.number().allow(null),
     priority: Joi.number().allow(null),
