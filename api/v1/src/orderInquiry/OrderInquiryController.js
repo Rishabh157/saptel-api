@@ -55,6 +55,7 @@ const {
   callPageTabType,
   orderStatusEnum,
   userRoleType,
+  firstCallDispositions,
 } = require("../../helper/enumUtils");
 const { getCustomerReputation } = require("./OrderInquiryHelper");
 
@@ -248,6 +249,195 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//approve first call directly without call
+
+exports.approveFirstCallDirectly = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+    let status = req.body.status;
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+    await orderInquiryFlowService.createNewData({
+      ...datafound,
+      orderId: idToBeSearch,
+      firstCallState: status,
+      firstCallApproval:
+        status === firstCallDispositions.approved ? true : false,
+      firstCallApprovedBy: req.userData?.userName,
+    });
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          firstCallState: status,
+          firstCallApproval:
+            status === firstCallDispositions.approved ? true : false,
+          firstCallApprovedBy: req.userData?.userName,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//first call confirmation
+exports.firstCallConfirmation = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+    let { address, remark, callbackDate, status } = req.body;
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+    let approveStatus = status === firstCallDispositions.approved;
+    await orderInquiryFlowService.createNewData({
+      ...datafound,
+      orderId: idToBeSearch,
+      firstCallState: status,
+      firstCallApproval: approveStatus,
+      autoFillingShippingAddress: address,
+      firstCallRemark: remark,
+
+      firstCallCallBackDate: callbackDate,
+      firstCallApprovedBy: req.userData?.userName,
+    });
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          firstCallState: status,
+          firstCallApproval: approveStatus,
+          autoFillingShippingAddress: address,
+          firstCallRemark: remark,
+
+          firstCallCallBackDate: callbackDate,
+          firstCallApprovedBy: req.userData?.userName,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//first call confirmation unauth
+exports.firstCallConfirmationUnauth = async (req, res) => {
+  try {
+    let idToBeSearch = req.params.id;
+    let { address, remark, callbackDate, status, approvedBy } = req.body;
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+    let approveStatus = status === firstCallDispositions.approved;
+    await orderInquiryFlowService.createNewData({
+      ...datafound,
+      orderId: idToBeSearch,
+      firstCallState: status,
+      firstCallApproval: approveStatus,
+      autoFillingShippingAddress: address,
+      firstCallRemark: remark,
+
+      firstCallCallBackDate: callbackDate,
+      firstCallApprovedBy: approvedBy,
+    });
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          firstCallState: status,
+          firstCallApproval: approveStatus,
+          autoFillingShippingAddress: address,
+          firstCallRemark: remark,
+
+          firstCallCallBackDate: callbackDate,
+          firstCallApprovedBy: approvedBy,
         },
       }
     );
@@ -1932,6 +2122,356 @@ exports.getUnAuthGetByPhNumber = async (req, res) => {
   }
 };
 
+//get acttive order of a number
+exports.getActiveOrder = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    const { phno } = req.params;
+    let matchQuery = {
+      isDeleted: false,
+      mobileNo: phno,
+      assignDealerId: null,
+      firstCallApproval: false,
+      firstCallState: {
+        $ne: [firstCallDispositions.cancel, firstCallDispositions.approved],
+      },
+      status: {
+        $ne: [
+          orderStatusEnum.doorCancelled,
+          orderStatusEnum.delivered,
+          orderStatusEnum.inquiry,
+          orderStatusEnum.rto,
+        ],
+      },
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                schemeCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                wareHouseCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          dealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+          "product_group",
+          "dealer_data",
+          "warehouse_data",
+        ],
+      },
+    ];
+    let allComplaints = await complaintService.findAllWithQuery({
+      customerNumber: phno,
+    });
+    let customerReputation = await getCustomerReputation(allComplaints);
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        customerReputation: customerReputation,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============get DispositionTwo by Id start================
 exports.getById = async (req, res) => {
   try {
@@ -2029,6 +2569,7 @@ exports.getById = async (req, res) => {
             {
               $project: {
                 schemeName: 1,
+                schemeCode: 1,
               },
             },
           ],
@@ -2186,6 +2727,9 @@ exports.getById = async (req, res) => {
           },
           schemeLabel: {
             $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
           },
           districtLabel: {
             $arrayElemAt: ["$districtData.districtName", 0],
@@ -2971,7 +3515,7 @@ exports.allFilterPagination = async (req, res) => {
       });
     }
     if (req.userData.userRole === userRoleType.EXECUTIVEArea) {
-      console.log("in...")
+      console.log("in...");
       let allDealers = await dealerService.findAllWithQuery({
         isActive: true,
         isDeleted: false,
@@ -3054,7 +3598,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = [];
+    let booleanFields = ["firstCallApproval"];
     let numberFileds = ["orderNumber", "inquiryNumber"];
     let objectIdFields = [
       "dispositionLevelTwoId",
@@ -3070,6 +3614,8 @@ exports.allFilterPagination = async (req, res) => {
       "channel",
       "agentDistrictId",
       "batchId",
+      "assignDealerId",
+      "assignWarehouseId",
     ];
 
     const filterQuery = getFilterQuery(

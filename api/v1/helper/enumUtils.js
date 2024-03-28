@@ -434,6 +434,13 @@ const actionMethodEnum = Object.freeze({
   view: "get",
 });
 
+const firstCallDispositions = Object.freeze({
+  callBack: "CALLBACK",
+  approved: "APPROVED",
+  languageBarrier: "LANGUAGEBARRIER",
+  cancel: "CANCEL",
+});
+
 const reasonNotShowSlot = Object.freeze({
   scrollOnNumbers: "SCROLL ON NUMBERS",
   audioWasNotProper: "AUDIO WAS NOT PROPER",
@@ -487,4 +494,5 @@ module.exports = {
   ndrRtoAttemptEnum,
   callPageTabType,
   customerReputationColor,
+  firstCallDispositions,
 };

@@ -6,6 +6,7 @@ const {
   orderStatusEnum,
   paymentModeType,
   productStatus,
+  firstCallDispositions,
 } = require("../../helper/enumUtils");
 
 const OrderInquirySchema = new mongoose.Schema(
@@ -359,6 +360,34 @@ const OrderInquirySchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
+    firstCallApproval: {
+      type: Boolean,
+      default: false,
+    },
+    firstCallRemark: {
+      type: String,
+      default: "",
+    },
+    firstCallCallBackDate: {
+      type: String,
+      default: "",
+    },
+    firstCallApprovedBy: {
+      type: String,
+      default: null,
+    },
+    firstCallState: {
+      type: String,
+      enum: [
+        firstCallDispositions.cancel,
+        firstCallDispositions.approved,
+        firstCallDispositions.callBack,
+        firstCallDispositions.languageBarrier,
+        "",
+      ],
+      default: "",
+    },
+
     isDeleted: {
       type: Boolean,
       default: false,

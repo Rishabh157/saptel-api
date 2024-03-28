@@ -79,6 +79,14 @@ router.get(
   orderController.getById
 );
 
+//===============get document by id===============
+router.get(
+  "/unauth/:id",
+  // authCheckMiddleware,
+  //   validate(orderValidation),
+  orderController.getById
+);
+
 //===============get document by mobile number===============
 router.post(
   "/get-customer-info",
@@ -118,6 +126,13 @@ router.get(
   "/unauth/:phno/get-by-phnumber",
 
   orderController.getUnAuthGetByPhNumber
+);
+
+// get active order data by number
+router.get(
+  "/get-active-order/:phno",
+  authCheckMiddleware,
+  orderController.getActiveOrder
 );
 
 //===============get all pagination filter===============
@@ -173,6 +188,28 @@ router.put(
   orderController.update
 );
 
+// approve first call confirmation directly
+router.put(
+  "/approve-first-call/:id",
+  authCheckMiddleware,
+  validate(orderValidation.approveFirstCallDirectly),
+  orderController.approveFirstCallDirectly
+);
+
+// approve first call confirmation
+router.put(
+  "/first-call-confirmation/:id",
+  authCheckMiddleware,
+  validate(orderValidation.firstCallConfirmation),
+  orderController.firstCallConfirmation
+);
+
+// approve first call confirmation
+router.put(
+  "/unauth/first-call-confirmation/:id",
+  validate(orderValidation.firstCallConfirmationUnauth),
+  orderController.firstCallConfirmationUnauth
+);
 //===============update status document===============
 // router.put(
 //   "/status-change/:id",

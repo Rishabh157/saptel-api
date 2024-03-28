@@ -322,6 +322,39 @@ const ecomValidation = {
   }),
 };
 
+const firstCallConfirmation = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    address: Joi.string().required(),
+    remark: Joi.string().required(),
+    callbackDate: Joi.string().allow(""),
+    status: Joi.string().required(),
+  }),
+};
+
+const firstCallConfirmationUnauth = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    approvedBy: Joi.string().required(),
+    address: Joi.string().required(),
+    remark: Joi.string().required(),
+    callbackDate: Joi.string().allow(""),
+    status: Joi.string().required(),
+  }),
+};
+
+const approveFirstCallDirectly = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    status: Joi.string().required(),
+  }),
+};
 /**
  * delete a document
  */
@@ -389,4 +422,7 @@ module.exports = {
   dealerApprove,
   getGlobalSearch,
   dealerOrderStatusChange,
+  firstCallConfirmation,
+  approveFirstCallDirectly,
+  firstCallConfirmationUnauth,
 };
