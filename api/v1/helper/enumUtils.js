@@ -441,6 +441,13 @@ const firstCallDispositions = Object.freeze({
   cancel: "CANCEL",
 });
 
+const orderTypeEnum = Object.freeze({
+  inbound: "INBOUND",
+  website: "WEBSITE",
+  amazone: "AMAZONE",
+  customerCare: "CUSTOMERCARE",
+});
+
 const reasonNotShowSlot = Object.freeze({
   scrollOnNumbers: "SCROLL ON NUMBERS",
   audioWasNotProper: "AUDIO WAS NOT PROPER",
@@ -495,4 +502,5 @@ module.exports = {
   callPageTabType,
   customerReputationColor,
   firstCallDispositions,
+  orderTypeEnum,
 };

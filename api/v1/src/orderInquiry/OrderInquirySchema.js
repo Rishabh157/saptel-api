@@ -7,6 +7,7 @@ const {
   paymentModeType,
   productStatus,
   firstCallDispositions,
+  orderTypeEnum,
 } = require("../../helper/enumUtils");
 
 const OrderInquirySchema = new mongoose.Schema(
@@ -386,6 +387,17 @@ const OrderInquirySchema = new mongoose.Schema(
         "",
       ],
       default: "",
+    },
+
+    orderType: {
+      type: String,
+      enum: [
+        orderTypeEnum.inbound,
+        orderTypeEnum.website,
+        orderTypeEnum.amazone,
+        orderTypeEnum.customerCare,
+      ],
+      default: orderTypeEnum.inbound,
     },
 
     isDeleted: {

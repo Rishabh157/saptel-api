@@ -57,7 +57,11 @@ const {
   userRoleType,
   firstCallDispositions,
 } = require("../../helper/enumUtils");
-const { getCustomerReputation } = require("./OrderInquiryHelper");
+const {
+  getCustomerReputation,
+  getDateFilterQueryCallBackDate,
+} = require("./OrderInquiryHelper");
+const { default: axios } = require("axios");
 
 exports.add = async (req, res) => {
   try {
@@ -402,7 +406,8 @@ exports.firstCallConfirmation = async (req, res) => {
 exports.firstCallConfirmationUnauth = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let { address, remark, callbackDate, status, approvedBy } = req.body;
+    let { address, remark, callbackDate, status, approvedBy, mobileNo } =
+      req.body;
 
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
@@ -443,6 +448,21 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
     );
 
     if (dataUpdated) {
+      await axios.post(
+        "https://uat.onetelemart.com/agent/v2/click-2-hangup",
+        {
+          user: approvedBy + config.dialer_domain,
+          phone_number: mobileNo,
+          unique_id: mobileNo,
+          disposition: `DEFAULT:${status}`,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            XAuth: config.server_auth_key,
+          },
+        }
+      );
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
@@ -3467,6 +3487,7 @@ exports.allFilterPagination = async (req, res) => {
     const { Id } = req.userData;
     let getBatchData = req.body.getBatchData;
     var dateFilter = req.body.dateFilter;
+    var callbackDateFilter = req.body.callbackDateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
@@ -3645,6 +3666,17 @@ exports.allFilterPagination = async (req, res) => {
     );
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
+    }
+
+    let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
+
+    const datefilterCallbackQuery = await getDateFilterQueryCallBackDate(
+      callbackDateFilter,
+      allowedCallbackDateFiletrKeys
+    );
+    console.log(matchQuery, "matchQuery");
+    if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
+      matchQuery.$and.push(...datefilterCallbackQuery);
     }
 
     //calander filter
@@ -4025,10 +4057,8 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    console.log(matchQuery, "matchQuery");
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
-    console.log(dataFound, "dataFound");
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
