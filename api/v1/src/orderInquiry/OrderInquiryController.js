@@ -3492,7 +3492,6 @@ exports.allFilterPagination = async (req, res) => {
     let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
-    let callCenterId = req.body.callCenterId;
 
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -3511,13 +3510,6 @@ exports.allFilterPagination = async (req, res) => {
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
-
-    // if callCenterId givin
-    if (callCenterId !== null) {
-      matchQuery.$and.push({
-        callCenterId: new mongoose.Types.ObjectId(callCenterId),
-      });
-    }
 
     let dealersOfZonalManager = [];
     if (
@@ -3683,7 +3675,7 @@ exports.allFilterPagination = async (req, res) => {
       callbackDateFilter,
       allowedCallbackDateFiletrKeys
     );
-    console.log(matchQuery, "matchQuery");
+    // console.log(matchQuery, "matchQuery");
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
@@ -4066,9 +4058,11 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
+    console.log(matchQuery, "matchQuery");
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
+      console.log("herere....");
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
@@ -4131,10 +4125,613 @@ exports.allFilterPagination = async (req, res) => {
       req.userData.userRole === userRoleType.EXECUTIVEArea
         ? finalData
         : allowedFields;
-
+    console.log(finalData, "finalData");
     if (dataToShow?.length) {
       return res.status(200).send({
         data: dataToShow,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// =============all filter pagination api start================
+exports.allFilterPaginationFirstCall = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+    let getBatchData = req.body.getBatchData;
+    var dateFilter = req.body.dateFilter;
+    var callbackDateFilter = req.body.callbackDateFilter;
+    let searchValue = req.body.searchValue;
+    let searchIn = req.body.searchIn;
+    let filterBy = req.body.filterBy;
+    let rangeFilterBy = req.body.rangeFilterBy;
+    let callCenterId = req.body.callCenterId;
+
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+
+    const isUserExists = await userService.getOneByMultiField({
+      _id: Id,
+      isDeleted: false,
+      isActive: true,
+    });
+
+    if (!isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent ");
+    }
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+
+    // if callCenterId givin
+    if (callCenterId !== null) {
+      matchQuery.$and.push({
+        callCenterId: new mongoose.Types.ObjectId(callCenterId),
+      });
+    }
+
+    if (isUserExists?.isAgent) {
+      matchQuery.$and.push({ agentId: new mongoose.Types.ObjectId(Id) });
+      matchQuery.$and.push({
+        callCenterId: new mongoose.Types.ObjectId(isUserExists?.callCenterId),
+      });
+    }
+
+    if (
+      isUserExists?.userType !== userEnum.admin &&
+      isUserExists?.isAgent === false &&
+      isUserExists?.callCenterId === null
+    ) {
+      matchQuery.$and.push({
+        branchId: new mongoose.Types.ObjectId(isUserExists?.branchId),
+      });
+    }
+
+    if (
+      isUserExists?.userType !== userEnum.admin &&
+      isUserExists?.isAgent === false &&
+      isUserExists?.callCenterId !== null
+    ) {
+      matchQuery.$and.push({
+        callCenterId: new mongoose.Types.ObjectId(isUserExists?.callCenterId),
+      });
+    }
+
+    /**
+     * to send only active data on web
+     */
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    //----------------------------
+
+    /**
+     * check search keys valid
+     **/
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+    const rangeQuery = getRangeQuery(rangeFilterBy);
+    if (rangeQuery && rangeQuery.length) {
+      matchQuery.$and.push(...rangeQuery);
+    }
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = ["firstCallApproval"];
+    let numberFileds = ["orderNumber", "inquiryNumber"];
+    let objectIdFields = [
+      "dispositionLevelTwoId",
+      "dispositionLevelThreeId",
+      "countryId",
+      "companyId",
+      "stateId",
+      "schemeId",
+      "districtId",
+      "tehsilId",
+      "pincodeId",
+      "areaId",
+      "channel",
+      "agentDistrictId",
+      "batchId",
+      "assignDealerId",
+      "assignWarehouseId",
+    ];
+
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+    if (getBatchData) {
+      matchQuery.$and.push({ batchId: null });
+    }
+    //----------------------------
+    //calander filter
+    /**
+     * ToDo : for date filter
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
+
+    const datefilterCallbackQuery = await getDateFilterQueryCallBackDate(
+      callbackDateFilter,
+      allowedCallbackDateFiletrKeys
+    );
+    // console.log(matchQuery, "matchQuery");
+    if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
+      matchQuery.$and.push(...datefilterCallbackQuery);
+    }
+
+    //calander filter
+    //----------------------------
+
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterdata",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                schemeCode: 1,
+                deliveryCharges: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
+          foreignField: "_id",
+          as: "deleivery_by_data",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "didmanagements",
+          localField: "didNo",
+          foreignField: "didNumber",
+          as: "did_data",
+          pipeline: [
+            {
+              $lookup: {
+                from: "channelmasters",
+                localField: "channelId",
+                foreignField: "_id",
+                as: "channel_data",
+                pipeline: [
+                  {
+                    $project: {
+                      channelName: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          channelLabel: {
+            $arrayElemAt: ["$did_data.channel_data.channelName", 0],
+          },
+
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
+          },
+          deliveryCharges: {
+            $arrayElemAt: ["$schemeData.deliveryCharges", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
+          assignWarehouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
+          },
+          callCenterLabel: {
+            $arrayElemAt: ["$callcenterdata.callCenterName", 0],
+          },
+
+          assignDealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $unset: [
+          "channel_data",
+          "did_data",
+          "dispositionLevelTwoData",
+          "callcenterdata",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          "channelData",
+          "agentDistrictData",
+          "product_group",
+          "deleivery_by_data",
+          "dealer_data",
+          "warehouse_data",
+        ],
+      },
+    ];
+
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    console.log(finalAggregateQuery, "finalAggregateQuery");
+    //-----------------------------------
+    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    if (dataFound.length === 0) {
+      console.log("herere....");
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.pagination
+    );
+    let result = await orderService.aggregateQuery(finalAggregateQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
+      return res.status(200).send({
+        data: allowedFields,
         totalPage: totalpages,
         status: true,
         currentPage: page,

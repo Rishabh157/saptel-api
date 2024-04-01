@@ -142,6 +142,13 @@ router.post(
   validate(orderValidation.getAllFilter),
   orderController.allFilterPagination
 );
+//===============get all pagination filter===============
+router.post(
+  "/warehouse-first-call",
+  authCheckMiddleware,
+  validate(orderValidation.getAllFilter),
+  orderController.allFilterPaginationFirstCall
+);
 
 router.post(
   "/get-dileveryboy-order",
