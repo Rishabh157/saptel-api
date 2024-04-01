@@ -330,6 +330,34 @@ const ecomValidation = {
   }),
 };
 
+const updateDealerNdr = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    alternateNumber: Joi.string().allow(""),
+
+    ndrRemark: Joi.string().required(),
+    ndrDiscountApplicable: Joi.boolean(),
+    reAttemptDate: Joi.string().required(),
+  }),
+};
+
+const updateCourierNdr = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    alternateNumber: Joi.string().allow(""),
+
+    dispositionTwoId: Joi.string().custom(commonValidation.objectId).required(),
+    dispositionThreeId: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    ndrRemark: Joi.string().required(),
+  }),
+};
+
 const firstCallConfirmation = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
@@ -434,4 +462,6 @@ module.exports = {
   firstCallConfirmation,
   approveFirstCallDirectly,
   firstCallConfirmationUnauth,
+  updateDealerNdr,
+  updateCourierNdr,
 };

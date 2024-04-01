@@ -329,6 +329,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
         orderStatusEnum.urgent,
         orderStatusEnum.nonAction,
         orderStatusEnum.inquiry,
+        orderStatusEnum.reattempt,
       ],
       default: orderStatusEnum.fresh,
     },
@@ -371,6 +372,14 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
         "",
       ],
       default: "",
+    },
+    ndrRemark: {
+      type: String,
+      default: "",
+    },
+    ndrDiscountApplicable: {
+      type: Boolean,
+      default: false,
     },
 
     isDeleted: {

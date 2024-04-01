@@ -237,13 +237,6 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
-    await orderInquiryFlowService.createNewData({
-      ...req.body,
-      orderId: idToBeSearch,
-      approved: approved,
-      dispositionLevelTwoId,
-      dispositionLevelThreeId,
-    });
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
@@ -258,6 +251,178 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
+      await orderInquiryFlowService.createNewData({
+        ...req.body,
+        orderId: idToBeSearch,
+        approved: approved,
+        dispositionLevelTwoId,
+        dispositionLevelThreeId,
+      });
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//====================== Dealer NDR update ===================
+
+exports.updateDealerNdr = async (req, res) => {
+  try {
+    let {
+      alternateNumber,
+
+      ndrRemark,
+      ndrDiscountApplicable,
+    } = req.body;
+
+    let idToBeSearch = req.params.id;
+    let dataExist = await orderService.isExists([]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+
+          alternateNo: alternateNumber,
+          ndrRemark,
+          ndrDiscountApplicable,
+          status: orderStatusEnum.reattempt,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      await orderInquiryFlowService.createNewData({
+        ...req.body,
+        orderId: idToBeSearch,
+
+        alternateNo: alternateNumber,
+        ndrRemark,
+        ndrDiscountApplicable,
+        status: orderStatusEnum.reattempt,
+      });
+
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//====================== Courier NDR update ===================
+
+exports.updateCourierNdr = async (req, res) => {
+  try {
+    let {
+      alternateNumber,
+      address,
+      dispositionTwoId,
+      dispositionThreeId,
+      ndrRemark,
+      reAttemptDate,
+    } = req.body;
+
+    let idToBeSearch = req.params.id;
+    let dataExist = await orderService.isExists([]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isDispositionTwoExists = await dispositionTwoService.findCount({
+      _id: dispositionTwoId,
+      isDeleted: false,
+    });
+    if (!isDispositionTwoExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
+    }
+
+    const isDispositionThreeExists = await dispositionThreeService.findCount({
+      _id: dispositionThreeId,
+      isDeleted: false,
+    });
+    if (!isDispositionThreeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+    }
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+          dispositionLevelTwoId: dispositionTwoId,
+          dispositionLevelThreeId: dispositionThreeId,
+          alternateNo: alternateNumber,
+          ndrRemark,
+          status: orderStatusEnum.reattempt,
+          deliveryTimeAndDate: reAttemptDate,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      await orderInquiryFlowService.createNewData({
+        ...req.body,
+        orderId: idToBeSearch,
+        dispositionLevelTwoId: dispositionTwoId,
+        dispositionLevelThreeId: dispositionThreeId,
+        alternateNo: alternateNumber,
+        ndrRemark,
+        status: orderStatusEnum.reattempt,
+        deliveryTimeAndDate: reAttemptDate,
+      });
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
@@ -2477,6 +2642,685 @@ exports.getActiveOrder = async (req, res) => {
         message: "Successfull.",
         status: true,
         customerReputation: customerReputation,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get dealaer NDR  order
+exports.getDealerNDROrder = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    const { phno } = req.params;
+    let matchQuery = {
+      isDeleted: false,
+      mobileNo: phno,
+      assignWarehouseId: null,
+      isOrderAssigned: true,
+      status: orderStatusEnum.psc,
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                schemeCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                wareHouseCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          dealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+          "product_group",
+          "dealer_data",
+          "warehouse_data",
+        ],
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get warehouse NDR order
+
+exports.getWarehouseNDROrder = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    const { phno } = req.params;
+    let matchQuery = {
+      isDeleted: false,
+      mobileNo: phno,
+      assignDealerId: null,
+      isOrderAssigned: true,
+      status: {
+        $ne: [
+          orderStatusEnum.delivered,
+          orderStatusEnum.doorCancelled,
+          orderStatusEnum.rto,
+        ],
+      },
+    };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+      {
+        $lookup: {
+          from: "dispositiontwos",
+          localField: "dispositionLevelTwoId",
+          foreignField: "_id",
+          as: "dispositionLevelTwoData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dispositionthrees",
+          localField: "dispositionLevelThreeId",
+          foreignField: "_id",
+          as: "dispositionthreesData",
+          pipeline: [
+            {
+              $project: {
+                dispositionName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "countryId",
+          foreignField: "_id",
+          as: "countrieData",
+          pipeline: [
+            {
+              $project: {
+                countryName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "stateId",
+          foreignField: "_id",
+          as: "stateData",
+          pipeline: [
+            {
+              $project: {
+                stateName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "schemeData",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                schemeCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "districtId",
+          foreignField: "_id",
+          as: "districtData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "tehsils",
+          localField: "tehsilId",
+          foreignField: "_id",
+          as: "tehsilData",
+          pipeline: [
+            {
+              $project: {
+                tehsilName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "pincodeId",
+          foreignField: "_id",
+          as: "pincodeData",
+          pipeline: [
+            {
+              $project: {
+                pincode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "areas",
+          localField: "areaId",
+          foreignField: "_id",
+          as: "areaData",
+          pipeline: [
+            {
+              $project: {
+                area: 1,
+              },
+            },
+          ],
+        },
+      },
+      // {
+      //   $lookup: {
+      //     from: "channelmasters",
+      //     localField: "channelId",
+      //     foreignField: "_id",
+      //     as: "channelData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           channelName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "agentDistrictId",
+          foreignField: "_id",
+          as: "agentDistrictData",
+          pipeline: [
+            {
+              $project: {
+                districtName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "assignDealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+                dealerCode: 1,
+                isActive: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                wareHouseCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          dispositionLevelTwo: {
+            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+          },
+          dispositionLevelThree: {
+            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+          },
+          countryLabel: {
+            $arrayElemAt: ["$countrieData.countryName", 0],
+          },
+          stateLabel: {
+            $arrayElemAt: ["$stateData.stateName", 0],
+          },
+          schemeLabel: {
+            $arrayElemAt: ["$schemeData.schemeName", 0],
+          },
+          schemeCode: {
+            $arrayElemAt: ["$schemeData.schemeCode", 0],
+          },
+          districtLabel: {
+            $arrayElemAt: ["$districtData.districtName", 0],
+          },
+          tehsilLabel: {
+            $arrayElemAt: ["$tehsilData.tehsilName", 0],
+          },
+          pincodeLabel: {
+            $arrayElemAt: ["$pincodeData.pincode", 0],
+          },
+          areaLabel: {
+            $arrayElemAt: ["$areaData.area", 0],
+          },
+          // channelLabel: {
+          //   $arrayElemAt: ["$channelData.channelName", 0],
+          // },
+          agentDistrictLabel: {
+            $arrayElemAt: ["$agentDistrictData.districtName", 0],
+          },
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          dealerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerStatus: {
+            $arrayElemAt: ["$dealer_data.isActive", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dispositionLevelTwoData",
+          "dispositionthreesData",
+          "countrieData",
+          "stateData",
+          "schemeData",
+          "districtData",
+          "tehsilData",
+          "pincodeData",
+          "areaData",
+          // "channelData",
+          "agentDistrictData",
+          "product_group",
+          "dealer_data",
+          "warehouse_data",
+        ],
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
         data: dataExist[0],
         code: "OK",
         issue: null,

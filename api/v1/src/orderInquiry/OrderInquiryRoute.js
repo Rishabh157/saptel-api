@@ -135,6 +135,12 @@ router.get(
   orderController.getActiveOrder
 );
 
+// get dealer NDR order
+router.get("/get-dealer-ndr/:phno", orderController.getDealerNDROrder);
+
+// get warehouse NDR order
+router.get("/get-warehouse-ndr/:phno", orderController.getWarehouseNDROrder);
+
 //===============get all pagination filter===============
 router.post(
   "/",
@@ -193,6 +199,22 @@ router.put(
   authCheckMiddleware,
   // validate(orderValidation.update),
   orderController.update
+);
+
+//===============update Dealer NDR===============
+
+router.put(
+  "/update-dealer-ndr/:id",
+  validate(orderValidation.updateDealerNdr),
+  orderController.updateDealerNdr
+);
+
+//===============update Courier NDR===============
+
+router.put(
+  "/update-courier-ndr/:id",
+  validate(orderValidation.updateCourierNdr),
+  orderController.updateCourierNdr
 );
 
 // approve first call confirmation directly

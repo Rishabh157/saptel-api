@@ -350,6 +350,7 @@ const OrderInquirySchema = new mongoose.Schema(
         orderStatusEnum.urgent,
         orderStatusEnum.nonAction,
         orderStatusEnum.inquiry,
+        orderStatusEnum.reattempt,
       ],
       default: orderStatusEnum.fresh,
     },
@@ -398,6 +399,15 @@ const OrderInquirySchema = new mongoose.Schema(
         orderTypeEnum.customerCare,
       ],
       default: orderTypeEnum.inbound,
+    },
+
+    ndrRemark: {
+      type: String,
+      default: "",
+    },
+    ndrDiscountApplicable: {
+      type: Boolean,
+      default: false,
     },
 
     isDeleted: {

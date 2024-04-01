@@ -179,6 +179,7 @@ const orderStatusEnum = Object.freeze({
   nonAction: "NON_ACTION",
   rto: "RTO",
   inquiry: "INQUIRY",
+  reattempt: "REATTEMPT",
 });
 
 const customerReputationColor = Object.freeze({
