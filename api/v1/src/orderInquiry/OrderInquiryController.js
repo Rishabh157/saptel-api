@@ -3492,6 +3492,8 @@ exports.allFilterPagination = async (req, res) => {
     let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
+    let callCenterId = req.body.callCenterId;
+
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
       : true;
@@ -3509,6 +3511,13 @@ exports.allFilterPagination = async (req, res) => {
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
+
+    // if callCenterId givin
+    if (callCenterId !== null) {
+      matchQuery.$and.push({
+        callCenterId: new mongoose.Types.ObjectId(callCenterId),
+      });
+    }
 
     let dealersOfZonalManager = [];
     if (
