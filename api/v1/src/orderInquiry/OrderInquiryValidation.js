@@ -434,9 +434,11 @@ const dealerOrderStatusChange = {
       .valid(
         orderStatusEnum.delivered,
         orderStatusEnum.doorCancelled,
-        orderStatusEnum.hold
+        orderStatusEnum.hold,
+        orderStatusEnum.psc
       )
       .required(),
+    remark: Joi.string().required(),
   }),
 };
 

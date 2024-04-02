@@ -7108,14 +7108,14 @@ exports.orderStatusChange = async (req, res) => {
 exports.dealerOrderStatusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let { status } = req.body;
+    let { status, remark } = req.body;
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
     let orderUpdated = await orderService.getOneAndUpdate(
       { _id },
-      { status: status }
+      { status: status, remark }
     );
     if (!orderUpdated) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
