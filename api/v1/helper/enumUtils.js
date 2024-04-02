@@ -43,11 +43,22 @@ const slotType = Object.freeze({
 });
 
 const ndrRtoAttemptEnum = Object.freeze({
-  customerWillConnect: "CUSTOMER_WILL_CONNECT",
-  attempt: "ATTEMPT",
-  rto: "RTO",
-  hold: "HOLD",
   cancel: "CANCEL",
+  adtm: "ADTM",
+  adoth: "ADOTH",
+  notReachable: "NOTREACHABLE",
+  numberBusy: "NUMBERBUSY",
+  ringingNoResponse: "RINGINGNORESPONSE",
+  switchOff: "SWITCHOFF",
+  notConnected: "NOTCONNECTED",
+  notInterested: "NOTINTERESTED",
+  callBack: "CALLBACK",
+  other: "OTHER",
+  dnc: "DNC",
+  dcFOR: "DCFOR",
+  dcUCR: "DCUCR",
+  schemeOffered: "SCHEMEOFFERED",
+  webReattempt: "WEBREATTEMPT",
 });
 
 const slotDaysType = Object.freeze({
@@ -186,6 +197,12 @@ const customerReputationColor = Object.freeze({
   red: "RED",
   orange: "ORANGE",
   green: "GREEN",
+});
+
+const validDealerRemark = Object.freeze({
+  correct: "CORRECT",
+  incorrect: "INCORRECT",
+  notapplicable: "NOTAPPLICABLE",
 });
 
 const apiAppEnum = Object.freeze({
@@ -504,4 +521,5 @@ module.exports = {
   customerReputationColor,
   firstCallDispositions,
   orderTypeEnum,
+  validDealerRemark,
 };

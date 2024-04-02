@@ -2,7 +2,7 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-
+const moment = require("moment");
 // ----service---------
 const orderService = require("./OrderInquiryService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
@@ -20,7 +20,7 @@ const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
 const barcodeService = require("../barCode/BarCodeService");
-const channelService = require("../channelMaster/ChannelMasterService");
+const ndrDispositionService = require("../ndrDisposition/NdrDispositionService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
 // ----service---------
@@ -284,9 +284,13 @@ exports.updateDealerNdr = async (req, res) => {
   try {
     let {
       alternateNumber,
-
+      dealerValidRemark,
       ndrRemark,
       ndrDiscountApplicable,
+      ndrApprovedBy,
+      reAttemptDate,
+      ndrCallDisposition,
+      ndrRtoReattemptReason,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -303,6 +307,15 @@ exports.updateDealerNdr = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
 
+    let ndrDispositionFound = await ndrDispositionService.getOneByMultiField({
+      _id: ndrCallDisposition,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!ndrDispositionFound) {
+      throw new ApiError(httpStatus.OK, `Invalid NDR call disposition`);
+    }
+
     let dataUpdated = await orderService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -311,20 +324,24 @@ exports.updateDealerNdr = async (req, res) => {
       {
         $set: {
           ...req.body,
-
+          dealerValidRemark: dealerValidRemark,
           alternateNo: alternateNumber,
           ndrRemark,
           ndrDiscountApplicable,
           status: orderStatusEnum.reattempt,
+          ndrApprovedBy: ndrApprovedBy,
+          preffered_delivery_date: reAttemptDate,
+          ndrCallDisposition,
+          ndrRtoReattemptReason,
         },
       }
     );
 
     if (dataUpdated) {
       await orderInquiryFlowService.createNewData({
-        ...req.body,
+        ...dataUpdated,
         orderId: idToBeSearch,
-
+        dealerValidRemark: dealerValidRemark,
         alternateNo: alternateNumber,
         ndrRemark,
         ndrDiscountApplicable,
@@ -357,11 +374,11 @@ exports.updateCourierNdr = async (req, res) => {
   try {
     let {
       alternateNumber,
-      address,
       dispositionTwoId,
       dispositionThreeId,
       ndrRemark,
       reAttemptDate,
+      ndrApprovedBy,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -408,13 +425,14 @@ exports.updateCourierNdr = async (req, res) => {
           ndrRemark,
           status: orderStatusEnum.reattempt,
           deliveryTimeAndDate: reAttemptDate,
+          ndrApprovedBy: ndrApprovedBy,
         },
       }
     );
 
     if (dataUpdated) {
       await orderInquiryFlowService.createNewData({
-        ...req.body,
+        ...dataUpdated,
         orderId: idToBeSearch,
         dispositionLevelTwoId: dispositionTwoId,
         dispositionLevelThreeId: dispositionThreeId,
@@ -422,6 +440,76 @@ exports.updateCourierNdr = async (req, res) => {
         ndrRemark,
         status: orderStatusEnum.reattempt,
         deliveryTimeAndDate: reAttemptDate,
+      });
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: dataUpdated,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// =============== change scheme ===========
+
+exports.changeScheme = async (req, res) => {
+  try {
+    let { schemeId, ndrRemark } = req.body;
+
+    let idToBeSearch = req.params.id;
+    let dataExist = await orderService.isExists([]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    const isschemeExists = await schemeService.getOneByMultiField({
+      _id: schemeId,
+      isDeleted: false,
+    });
+    if (!isschemeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Scheme");
+    }
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+          schemeId: idToBeSearch,
+          schemeName: isschemeExists?.schemeName,
+          price: isschemeExists?.schemePrice,
+          ndrRemark,
+          ndrDiscountApplicable: false,
+        },
+      }
+    );
+
+    if (dataUpdated) {
+      await orderInquiryFlowService.createNewData({
+        ...dataUpdated,
+        orderId: idToBeSearch,
       });
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -4871,6 +4959,23 @@ exports.allFilterPagination = async (req, res) => {
           },
         },
       },
+      // {
+      //   $match: {
+      //     $or: [
+      //       { status: { $ne: "REATTEMPT" } },
+      //       {
+      //         $and: [
+      //           { status: "REATTEMPT" },
+      //           {
+      //             preffered_delivery_date: {
+      //               $lte: moment().subtract(1, "day").toDate(),
+      //             },
+      //           },
+      //         ],
+      //       },
+      //     ],
+      //   },
+      // },
       {
         $unset: [
           "channel_data",

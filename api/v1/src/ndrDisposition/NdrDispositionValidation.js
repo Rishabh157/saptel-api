@@ -12,7 +12,7 @@ const create = {
     priority: Joi.string(),
     smsType: Joi.string().allow(""),
     emailType: Joi.string().allow(""),
-    rtoAttempt: Joi.string(),
+    rtoAttempt: Joi.array().items(Joi.string().required()),
   }),
 };
 
@@ -28,7 +28,7 @@ const update = {
     priority: Joi.string(),
     smsType: Joi.string().allow(""),
     emailType: Joi.string().allow(""),
-    rtoAttempt: Joi.string(),
+    rtoAttempt: Joi.array().items(Joi.string().required()),
   }),
 };
 

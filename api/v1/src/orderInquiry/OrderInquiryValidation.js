@@ -336,10 +336,15 @@ const updateDealerNdr = {
   }),
   body: Joi.object().keys({
     alternateNumber: Joi.string().allow(""),
-
+    dealerValidRemark: Joi.string().required(),
     ndrRemark: Joi.string().required(),
     ndrDiscountApplicable: Joi.boolean(),
     reAttemptDate: Joi.string().required(),
+    ndrApprovedBy: Joi.string().required(),
+    ndrCallDisposition: Joi.string()
+      .custom(commonValidation.objectId)
+      .required(),
+    ndrRtoReattemptReason: Joi.string().required(),
   }),
 };
 
@@ -349,11 +354,21 @@ const updateCourierNdr = {
   }),
   body: Joi.object().keys({
     alternateNumber: Joi.string().allow(""),
-
+    ndrApprovedBy: Joi.string().required(),
     dispositionTwoId: Joi.string().custom(commonValidation.objectId).required(),
     dispositionThreeId: Joi.string()
       .custom(commonValidation.objectId)
       .required(),
+    ndrRemark: Joi.string().required(),
+  }),
+};
+
+const changeScheme = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    schemeId: Joi.string().required(),
     ndrRemark: Joi.string().required(),
   }),
 };
@@ -464,4 +479,5 @@ module.exports = {
   firstCallConfirmationUnauth,
   updateDealerNdr,
   updateCourierNdr,
+  changeScheme,
 };

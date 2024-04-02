@@ -8,6 +8,7 @@ const {
   productStatus,
   firstCallDispositions,
   orderTypeEnum,
+  validDealerRemark,
 } = require("../../helper/enumUtils");
 
 const OrderInquirySchema = new mongoose.Schema(
@@ -405,11 +406,32 @@ const OrderInquirySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
     ndrDiscountApplicable: {
       type: Boolean,
       default: false,
     },
-
+    ndrApprovedBy: {
+      type: String,
+      default: "",
+    },
+    dealerValidRemark: {
+      type: String,
+      enum: [
+        validDealerRemark.correct,
+        validDealerRemark.incorrect,
+        validDealerRemark.notapplicable,
+      ],
+      default: validDealerRemark.notapplicable,
+    },
+    ndrCallDisposition: {
+      type: ObjectId,
+      default: null,
+    },
+    ndrRtoReattemptReason: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

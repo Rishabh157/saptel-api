@@ -217,6 +217,14 @@ router.put(
   orderController.updateCourierNdr
 );
 
+//===============update Courier NDR===============
+
+router.put(
+  "/change-scheme/:id",
+  validate(orderValidation.changeScheme),
+  orderController.changeScheme
+);
+
 // approve first call confirmation directly
 router.put(
   "/approve-first-call/:id",
