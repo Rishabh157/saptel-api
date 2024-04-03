@@ -19,6 +19,17 @@ router.get(
   validate(ndrDispositionValidation.get),
   ndrDispositionController.get
 );
+
+//-----------------------------------------------------
+/**
+ * get one document (if query) / all documents unauth
+ */
+router.get(
+  "/unauth",
+
+  validate(ndrDispositionValidation.get),
+  ndrDispositionController.get
+);
 /**
  * get all ndrDisposition pagination filter
  */
