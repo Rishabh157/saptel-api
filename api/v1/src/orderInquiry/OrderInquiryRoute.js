@@ -129,11 +129,7 @@ router.get(
 );
 
 // get active order data by number
-router.get(
-  "/get-active-order/:phno",
-  authCheckMiddleware,
-  orderController.getActiveOrder
-);
+router.get("/unauth/get-active-order/:phno", orderController.getActiveOrder);
 
 // get dealer NDR order
 router.get("/get-dealer-ndr/:phno", orderController.getDealerNDROrder);
