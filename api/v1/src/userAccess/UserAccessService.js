@@ -64,6 +64,10 @@ const getOneAndDelete = async (matchObj) => {
     { new: true }
   );
 };
+
+const getOneByIdAndDelete = async (matchObj) => {
+  return UserAccess.deleteOne({ ...matchObj });
+};
 //-------------------------------------------
 const updateMany = async (matchObj, updateBody) => {
   return UserAccess.updateMany(
@@ -158,4 +162,5 @@ module.exports = {
   findCount,
   isExists,
   updateMany,
+  getOneByIdAndDelete,
 };

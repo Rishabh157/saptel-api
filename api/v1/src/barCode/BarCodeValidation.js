@@ -310,6 +310,8 @@ const checkBarcode = {
     barcode: Joi.string().required(),
     orderId: Joi.string().custom(commonValidation.objectId).required(),
     status: Joi.string().required(),
+    latitude: Joi.string().required(),
+    longitude: Joi.string().required(),
     // dealerId: Joi.string().custom(commonValidation.objectId).required,
   }),
 };

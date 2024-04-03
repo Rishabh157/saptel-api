@@ -404,6 +404,14 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    latitude: {
+      type: String,
+      default: "",
+    },
+    longitude: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -702,7 +702,7 @@ exports.checkBarcode = async (req, res) => {
   try {
     //if no default query then pass {}
     console.log("here");
-    let { barcode, orderId, status } = req.body;
+    let { barcode, orderId, status, latitude, longitude } = req.body;
     console.log(req.body, "body");
     let additionalQuery = [
       {
@@ -741,6 +741,8 @@ exports.checkBarcode = async (req, res) => {
         {
           $set: {
             status,
+            latitude,
+            longitude,
           },
           $push: {
             barcodeId: dataExist[0]?._id,

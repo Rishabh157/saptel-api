@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("./UserService");
+const userAccessService = require("../userAccess/UserAccessService");
 const companyService = require("../company/CompanyService");
 const branchService = require("../companyBranch/CompanyBranchService");
 const callCenterService = require("../callCenterMaster/CallCenterMasterService");
@@ -319,7 +320,8 @@ exports.update = async (req, res) => {
 //update start
 exports.updateUser = async (req, res) => {
   try {
-    let { userName, mobile, companyId, branchId } = req.body;
+    let { userName, mobile, companyId, branchId, userDepartment, userRole } =
+      req.body;
     let deviceId = req.headers["device-id"];
 
     // if (req.userData.userType !== userEnum.user) {
@@ -361,6 +363,32 @@ exports.updateUser = async (req, res) => {
       throw new ApiError(httpStatus.OK, `User not found.`);
     }
 
+    // if department and roll same
+
+    if (
+      datafound?.userDepartment !== userDepartment ||
+      datafound?.userRole !== userRole
+    ) {
+      try {
+        await userAccessService?.getOneByIdAndDelete({
+          userId: datafound?._id,
+        });
+        const tokenKey = `${datafound?._id}*`;
+        console.log(tokenKey, "tokenKey");
+        const allRedisValue = await redisClient.keys(tokenKey);
+        console.log(allRedisValue, "allRedisValue");
+
+        const deletePromises = allRedisValue?.map(
+          async (key) => await redisClient.del(key)
+        );
+        await Promise.all(deletePromises);
+        console.log(deletePromises, "deletePromises");
+      } catch (error) {
+        console.error("Error deleting keys:", error);
+        // Handle error here, such as logging or sending alerts
+      }
+    }
+    console.log("here>...");
     if (mobile.length) {
       req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
     } else {
@@ -385,7 +413,6 @@ exports.updateUser = async (req, res) => {
       lastName,
       email,
       companyId: newCompanyId,
-      userRole,
     } = dataUpdated;
     let token = await tokenCreate(dataUpdated);
     if (!token) {
@@ -724,7 +751,6 @@ exports.getSrExicutive = async (req, res) => {
     }
     let flag = false;
     if (userData?.userRole === userRoleType.managerArea) {
-      console.log("in...", zmid);
       flag = true;
       var jrUsers = await userService?.aggregateQuery([
         {
@@ -737,7 +763,6 @@ exports.getSrExicutive = async (req, res) => {
         },
       ]);
     }
-    console.log(jrUsers, "jrUsers");
     let additionalQuery = [{ $match: matchQuery }];
 
     let dataExist = await userService.aggregateQuery(additionalQuery);
@@ -817,7 +842,6 @@ exports.getJrExicutive = async (req, res) => {
 exports.getBatchAssignes = async (req, res) => {
   try {
     //if no default query then pass {}
-    console.log(req.userData.companyId);
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(req.userData.companyId),
       userRole: userRoleType.srManagerDistribution,
@@ -1081,12 +1105,10 @@ exports.getAllUsers = async (req, res) => {
     for (let i = 0; i <= 10; i++) {
       let seniorUserRole = await getSeniorUserRole(tempRole);
       tempRole = seniorUserRole;
-      console.log(tempRole, "tempRole");
       if (seniorUserRole) {
         allSeniorRoles.push(seniorUserRole);
       }
     }
-    console.log(allSeniorRoles, companyId, "allSeniorRoles");
     allSeniorRoles.push(userEnum.admin);
     let matchQuery = {
       companyId: companyId,
@@ -1096,7 +1118,6 @@ exports.getAllUsers = async (req, res) => {
     };
 
     let dataExist = await userService.findAllWithQuery(matchQuery);
-    console.log(dataExist, "dataExist");
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
