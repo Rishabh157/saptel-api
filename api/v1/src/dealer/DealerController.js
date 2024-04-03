@@ -395,7 +395,7 @@ exports.allFilterPagination = async (req, res) => {
      */
 
     if (
-      req.userData.userRole === userRoleType.srManagerDistribution ||
+      // req.userData.userRole === userRoleType.srManagerDistribution ||
       req.userData.userRole === userRoleType.managerArea
     ) {
       matchQuery.$and.push({
