@@ -3,6 +3,7 @@ const {
   emailType,
   ndrRtoAttemptEnum,
   smsType,
+  subDispositionNDR,
 } = require("../../helper/enumUtils");
 const NdrDispositionSchema = new mongoose.Schema(
   {
@@ -77,6 +78,17 @@ const NdrDispositionSchema = new mongoose.Schema(
       default: "",
     },
     rtoAttempt: {
+      type: String,
+      enum: [
+        subDispositionNDR.cancel,
+        subDispositionNDR.hold,
+        subDispositionNDR.rto,
+        subDispositionNDR.attempt,
+        subDispositionNDR.customerWillConnect,
+      ],
+      required: true,
+    },
+    subDispositions: {
       type: [String],
       enum: [
         ndrRtoAttemptEnum.cancel,
@@ -112,7 +124,7 @@ const NdrDispositionSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["ndrDisposition"];
+const searchKeys = ["ndrDisposition", "subDispositions", "rtoAttempt"];
 module.exports = mongoose.model("NdrDisposition", NdrDispositionSchema);
 module.exports.searchKeys = [...searchKeys];
 

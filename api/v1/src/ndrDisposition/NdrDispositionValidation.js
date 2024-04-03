@@ -12,7 +12,8 @@ const create = {
     priority: Joi.string(),
     smsType: Joi.string().allow(""),
     emailType: Joi.string().allow(""),
-    rtoAttempt: Joi.array().items(Joi.string().required()),
+    subDispositions: Joi.array().items(Joi.string().required()),
+    rtoAttempt: Joi.string().required(),
   }),
 };
 
@@ -28,7 +29,8 @@ const update = {
     priority: Joi.string(),
     smsType: Joi.string().allow(""),
     emailType: Joi.string().allow(""),
-    rtoAttempt: Joi.array().items(Joi.string().required()),
+    subDispositions: Joi.array().items(Joi.string().required()),
+    rtoAttempt: Joi.string().required(),
   }),
 };
 

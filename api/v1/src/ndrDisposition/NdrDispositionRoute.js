@@ -46,7 +46,6 @@ router.post(
  */
 router.put(
   "/:id",
-
   authCheckMiddleware,
   validate(ndrDispositionValidation.update),
   ndrDispositionController.update

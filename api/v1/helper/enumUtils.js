@@ -42,6 +42,14 @@ const slotType = Object.freeze({
   flexible: "FLEXIBLE",
 });
 
+const subDispositionNDR = Object.freeze({
+  cancel: "CANCEL",
+  attempt: "ATTEMPT",
+  rto: "RTO",
+  hold: "HOLD",
+  customerWillConnect: "CUSTOMERWILLCONNECT",
+});
+
 const ndrRtoAttemptEnum = Object.freeze({
   cancel: "CANCEL",
   adtm: "ADTM",
@@ -522,4 +530,5 @@ module.exports = {
   firstCallDispositions,
   orderTypeEnum,
   validDealerRemark,
+  subDispositionNDR,
 };
