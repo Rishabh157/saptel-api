@@ -56,12 +56,14 @@ const {
   orderStatusEnum,
   userRoleType,
   firstCallDispositions,
+  preferredCourierPartner,
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
   getDateFilterQueryCallBackDate,
 } = require("./OrderInquiryHelper");
 const { default: axios } = require("axios");
+const { getEstTime } = require("../../third-party-services/courierAPIFunction");
 
 exports.add = async (req, res) => {
   try {
@@ -604,17 +606,6 @@ exports.firstCallConfirmation = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
     let approveStatus = status === firstCallDispositions.approved;
-    await orderInquiryFlowService.createNewData({
-      ...datafound,
-      orderId: idToBeSearch,
-      firstCallState: status,
-      firstCallApproval: approveStatus,
-      autoFillingShippingAddress: address,
-      firstCallRemark: remark,
-
-      firstCallCallBackDate: callbackDate,
-      firstCallApprovedBy: req.userData?.userName,
-    });
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
@@ -635,6 +626,57 @@ exports.firstCallConfirmation = async (req, res) => {
     );
 
     if (dataUpdated) {
+      await orderInquiryFlowService.createNewData({
+        ...dataUpdated,
+        orderId: idToBeSearch,
+        firstCallState: status,
+        firstCallApproval: approveStatus,
+        autoFillingShippingAddress: address,
+        firstCallRemark: remark,
+
+        firstCallCallBackDate: callbackDate,
+        firstCallApprovedBy: req.userData?.userName,
+      });
+      // getting prefered courier partner
+      let pincodeData = await pincodeService?.getOneByMultiField({
+        _id: dataUpdated?.pincodeId,
+      });
+      let wareHouseData = await warehouseService?.getOneByMultiField({
+        _id: dataUpdated?.assignWarehouseId,
+      });
+      if (!wareHouseData) {
+        throw new ApiError(
+          httpStatus.NOT_IMPLEMENTED,
+          `Something went wrong. Warehouse not assigned to this order`
+        );
+      }
+      let fromPincodeIs = wareHouseData?.registrationAddress?.pincodeId;
+      let fromPincodeData = await pincodeService?.getOneByMultiField({
+        _id: fromPincodeIs,
+      });
+      let schemeData = await schemeService.getOneByMultiField({
+        _id: dataUpdated?.schemeId,
+      });
+
+      let preferredCourier = pincodeData?.preferredCourier;
+      let orderData = {
+        pickup_pincode: parseInt(fromPincodeData?.pincode),
+        delivery_pincode: parseInt(pincodeData?.pincode),
+        weight: schemeData?.weight,
+        paymentmode: "COD",
+        invoicevalue: schemeData?.schemePrice,
+        length: schemeData?.depth,
+        width: schemeData?.dimension?.width,
+        height: schemeData?.weight,
+        weight: schemeData?.weight,
+      };
+
+      let isCourierAvailable = await getEstTime(orderData, preferredCourier);
+
+      // if true the hit shipment API else GPO
+      console.log(isCourierAvailable);
+
+      // geting deleverable courier partner
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,

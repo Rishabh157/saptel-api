@@ -467,6 +467,10 @@ const firstCallDispositions = Object.freeze({
   cancel: "CANCEL",
 });
 
+const preferredCourierPartner = Object.freeze({
+  shipyaari: "SHIPYAARI",
+});
+
 const orderTypeEnum = Object.freeze({
   inbound: "INBOUND",
   website: "WEBSITE",
@@ -531,4 +535,5 @@ module.exports = {
   orderTypeEnum,
   validDealerRemark,
   subDispositionNDR,
+  preferredCourierPartner,
 };

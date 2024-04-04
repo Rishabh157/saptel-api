@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { preferredCourierPartner } = require("../../helper/enumUtils");
 const PincodeSchema = new mongoose.Schema(
   {
     pincode: { type: String, required: true, trim: true, lowercase: true },
@@ -8,6 +9,10 @@ const PincodeSchema = new mongoose.Schema(
     stateId: { type: ObjectId, required: true, trim: true, lowercase: true },
     countryId: { type: ObjectId, required: true, trim: true, lowercase: true },
     companyId: { type: ObjectId, required: true, trim: true },
+    preferredCourier: {
+      type: String,
+      default: preferredCourierPartner.shipyaari,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

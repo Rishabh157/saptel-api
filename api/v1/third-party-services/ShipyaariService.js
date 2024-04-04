@@ -23,7 +23,7 @@ const getEstTimeFromShipYaari = async (data) => {
       { headers: HEADER }
     );
     if (response) {
-      return response.data;
+      return response?.data?.length ? true : false;
     }
   } catch (err) {
     return err;
