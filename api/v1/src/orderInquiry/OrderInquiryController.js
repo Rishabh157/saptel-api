@@ -497,7 +497,7 @@ exports.changeScheme = async (req, res) => {
       {
         $set: {
           ...req.body,
-          schemeId: idToBeSearch,
+          schemeId: schemeId,
           schemeName: isschemeExists?.schemeName,
           price: isschemeExists?.schemePrice,
           ndrRemark,

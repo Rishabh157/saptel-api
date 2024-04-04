@@ -73,6 +73,7 @@ exports.add = async (req, res) => {
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "Invalid order number");
     }
+    console.log(orderData, "orderData");
 
     // valid IC 2
     const isIc2Exists = await initialCallTwoService?.getOneByMultiField({
@@ -101,6 +102,11 @@ exports.add = async (req, res) => {
       isDeleted: false,
       isActive: true,
     });
+
+    if (!schemeData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong");
+    }
+
     // creating a complaint
     let complaint = await complaintService.createNewData({
       complaintNumber: complaintNumber,

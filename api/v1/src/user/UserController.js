@@ -952,22 +952,22 @@ exports.getById = async (req, res) => {
 
 exports.getAllDistributionUser = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
+    let companyId = req.userData.companyId;
     let role = req.params.role;
     let userRole = [];
     if (role === "manager") {
-      userRole.push("SR_MANAGER_DISTRIBUTION");
-      userRole.push("MANAGER_AREA");
+      // userRole.push("SR_MANAGER_DISTRIBUTION");
+      userRole.push(userRoleType.managerArea);
     }
     if (role === "executive") {
-      userRole.push("SR_EXECUTIVE_AREA");
-      userRole.push("EXECUTIVE_AREA");
+      userRole.push(userRoleType.srEXECUTIVEArea);
+      userRole.push(userRoleType.EXECUTIVEArea);
     }
     //if no default query then pass {}
     let matchQuery = {
       companyId: companyId,
       isDeleted: false,
-      userDepartment: "DISTRIBUTION_DEPARTMENT",
+      userDepartment: userDepartmentType.distributionDepartment,
       userRole: { $in: userRole },
     };
     // if (req.userData.userType === userEnum.user) {

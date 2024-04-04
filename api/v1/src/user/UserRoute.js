@@ -52,7 +52,7 @@ router.get(
  * get all zonal EXECUTIVE of distribution department
  */
 router.get(
-  "/company/:companyid/distribution/:role",
+  "/distribution/:role",
   authCheckMiddleware,
   validate(userValidation.getAllDistribution),
   userController.getAllDistributionUser

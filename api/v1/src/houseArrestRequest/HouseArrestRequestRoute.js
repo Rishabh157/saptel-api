@@ -48,7 +48,6 @@ router.post(
  */
 router.post(
   "/add",
-
   authCheckMiddleware,
   validate(houseArrestRequestValidation.create),
   houseArrestRequestController.add
