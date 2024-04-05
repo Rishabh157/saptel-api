@@ -4,6 +4,7 @@ const validate = require("../../middleware/validate");
 const dealerUserValidation = require("./DealerUserValidation");
 const {
   authCheckDealerMiddleware,
+  authCheckMiddleware,
 } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
@@ -16,6 +17,7 @@ router.get(
   validate(dealerUserValidation.get),
   dealerUserController.get
 );
+
 /**
  * get all dealerUser pagination filter
  */

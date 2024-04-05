@@ -5153,6 +5153,128 @@ exports.allFilterPagination = async (req, res) => {
   }
 };
 
+// agent dashboard data
+
+exports.getAgentDashboardData = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+
+    var dateFilter = req.body.dateFilter;
+
+    const isUserExists = await userService.getOneByMultiField({
+      _id: Id,
+      isDeleted: false,
+      isActive: true,
+    });
+
+    if (!isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent ");
+    }
+    let matchQuery = {
+      $and: [{ isDeleted: false, agentId: new mongoose.Types.ObjectId(Id) }],
+    };
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    console.log(matchQuery, "matchQuery");
+    //-----------------------------------
+    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    if (dataFound.length === 0) {
+      console.log("herere....");
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
+    let complainAggrigation = finalAggregateQuery;
+    let inquiryAggrigation = finalAggregateQuery;
+    let orderAggrigation = finalAggregateQuery;
+
+    complainAggrigation.push({
+      $match: {
+        isDeleted: false,
+        isActive: true,
+        complaintById: Id,
+      },
+    });
+    let numberOfComplaintCalls = await complaintService.findAllWithQuery(
+      complainAggrigation
+    );
+
+    let noOfInquiryCalls = await orderService.findAllWithQuery({
+      agentId: Id,
+      isActive: true,
+      isDeleted: false,
+      status: orderStatusEnum.inquiry,
+    });
+
+    let noOfOrdersCalls = await orderService.findAllWithQuery({
+      agentId: Id,
+      isActive: true,
+      isDeleted: false,
+      status: orderStatusEnum.inquiry,
+    });
+
+    let result = await orderService.aggregateQuery(finalAggregateQuery);
+
+    if (result?.length) {
+      return res.status(200).send({
+        data: result,
+        numberOfComplaintCalls: numberOfComplaintCalls.length
+          ? numberOfComplaintCalls.length
+          : 0,
+        noOfInquiryCalls: noOfInquiryCalls?.length
+          ? noOfInquiryCalls?.length
+          : 0,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============all filter pagination api start================
 exports.allFilterPaginationFirstCall = async (req, res) => {
   try {
@@ -7161,7 +7283,7 @@ exports.orderStatusChange = async (req, res) => {
 exports.dealerOrderStatusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let { status, remark } = req.body;
+    let { status, remark, dealerReason, dealerFirstCaller } = req.body;
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
@@ -7169,7 +7291,15 @@ exports.dealerOrderStatusChange = async (req, res) => {
     console.log(pscDate, "pscDate");
     let orderUpdated = await orderService.getOneAndUpdate(
       { _id },
-      { status: status, remark, preShipCancelationDate: pscDate }
+      {
+        $set: {
+          status: status,
+          remark,
+          preShipCancelationDate: pscDate,
+          dealerReason,
+          dealerFirstCaller,
+        },
+      }
     );
     if (!orderUpdated) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
@@ -7177,6 +7307,7 @@ exports.dealerOrderStatusChange = async (req, res) => {
     await orderInquiryFlowService.createNewData({
       ...orderUpdated,
       orderId: _id,
+      dealerReason,
     });
 
     return res.status(httpStatus.OK).send({

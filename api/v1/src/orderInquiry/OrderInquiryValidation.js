@@ -220,6 +220,17 @@ const getAllFilter = {
   }),
 };
 
+const getAgentDashboardData = {
+  body: Joi.object().keys({
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+  }),
+};
 /**
  * filter and pagination api
  */
@@ -441,6 +452,10 @@ const dealerOrderStatusChange = {
       )
       .required(),
     remark: Joi.string().required(),
+    dealerReason: Joi.string().required(),
+    dealerFirstCaller: Joi.string()
+      .custom(commonValidation.objectId)
+      .allow(null),
   }),
 };
 
@@ -484,4 +499,5 @@ module.exports = {
   updateDealerNdr,
   updateCourierNdr,
   changeScheme,
+  getAgentDashboardData,
 };
