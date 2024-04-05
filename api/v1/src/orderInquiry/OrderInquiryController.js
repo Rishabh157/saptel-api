@@ -596,7 +596,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
 exports.firstCallConfirmation = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let { address, remark, callbackDate, status } = req.body;
+    let { address, remark, callbackDate, status, alternateNo } = req.body;
 
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
@@ -618,7 +618,7 @@ exports.firstCallConfirmation = async (req, res) => {
           firstCallApproval: approveStatus,
           autoFillingShippingAddress: address,
           firstCallRemark: remark,
-
+          alternateNo: alternateNo,
           firstCallCallBackDate: callbackDate,
           firstCallApprovedBy: req.userData?.userName,
         },
@@ -701,8 +701,15 @@ exports.firstCallConfirmation = async (req, res) => {
 exports.firstCallConfirmationUnauth = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let { address, remark, callbackDate, status, approvedBy, mobileNo } =
-      req.body;
+    let {
+      address,
+      remark,
+      callbackDate,
+      status,
+      approvedBy,
+      mobileNo,
+      alternateNo,
+    } = req.body;
 
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
@@ -712,17 +719,6 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
     let approveStatus = status === firstCallDispositions.approved;
-    await orderInquiryFlowService.createNewData({
-      ...datafound,
-      orderId: idToBeSearch,
-      firstCallState: status,
-      firstCallApproval: approveStatus,
-      autoFillingShippingAddress: address,
-      firstCallRemark: remark,
-
-      firstCallCallBackDate: callbackDate,
-      firstCallApprovedBy: approvedBy,
-    });
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
@@ -735,7 +731,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
           firstCallApproval: approveStatus,
           autoFillingShippingAddress: address,
           firstCallRemark: remark,
-
+          alternateNo: alternateNo,
           firstCallCallBackDate: callbackDate,
           firstCallApprovedBy: approvedBy,
         },
@@ -743,6 +739,18 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
     );
 
     if (dataUpdated) {
+      await orderInquiryFlowService.createNewData({
+        ...dataUpdated,
+        orderId: idToBeSearch,
+        firstCallState: status,
+        firstCallApproval: approveStatus,
+        autoFillingShippingAddress: address,
+        firstCallRemark: remark,
+        alternateNo: alternateNo,
+        firstCallCallBackDate: callbackDate,
+        firstCallApprovedBy: approvedBy,
+      });
+
       await axios.post(
         "https://uat.onetelemart.com/agent/v2/click-2-hangup",
         {
@@ -811,6 +819,8 @@ exports.updateOrderStatus = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
 
+    let pscDate = status === orderStatusEnum.psc ? new Date() : "";
+    console.log(pscDate, "pscDate");
     let dataUpdated = await orderService
       .getOneAndUpdate(
         {
@@ -824,6 +834,7 @@ exports.updateOrderStatus = async (req, res) => {
             remark,
             dispositionLevelTwoId: dispositionOne,
             dispositionLevelThreeId: dispositionTwo,
+            preShipCancelationDate: pscDate,
           },
         }
       )
@@ -7154,14 +7165,19 @@ exports.dealerOrderStatusChange = async (req, res) => {
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-
+    let pscDate = status === orderStatusEnum.psc ? new Date() : "";
+    console.log(pscDate, "pscDate");
     let orderUpdated = await orderService.getOneAndUpdate(
       { _id },
-      { status: status, remark }
+      { status: status, remark, preShipCancelationDate: pscDate }
     );
     if (!orderUpdated) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
+    await orderInquiryFlowService.createNewData({
+      ...orderUpdated,
+      orderId: _id,
+    });
 
     return res.status(httpStatus.OK).send({
       message: "Updated successfully!",

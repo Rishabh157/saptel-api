@@ -412,6 +412,10 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    preShipCancelationDate: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

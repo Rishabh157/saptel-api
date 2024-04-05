@@ -433,6 +433,11 @@ const OrderInquirySchema = new mongoose.Schema(
       default: "",
     },
 
+    preShipCancelationDate: {
+      type: String,
+      default: "",
+    },
+
     latitude: {
       type: String,
       default: "",

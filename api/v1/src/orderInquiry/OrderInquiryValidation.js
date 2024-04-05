@@ -382,6 +382,7 @@ const firstCallConfirmation = {
     remark: Joi.string().required(),
     callbackDate: Joi.string().allow(""),
     status: Joi.string().required(),
+    alternateNo: Joi.string().required(),
   }),
 };
 
@@ -396,6 +397,7 @@ const firstCallConfirmationUnauth = {
     callbackDate: Joi.string().allow(""),
     status: Joi.string().required(),
     mobileNo: Joi.string().required(),
+    alternateNo: Joi.string().required(),
   }),
 };
 
