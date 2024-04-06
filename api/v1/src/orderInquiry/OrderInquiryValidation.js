@@ -220,17 +220,6 @@ const getAllFilter = {
   }),
 };
 
-const getAgentDashboardData = {
-  body: Joi.object().keys({
-    dateFilter: Joi.object()
-      .keys({
-        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
-        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
-        dateFilterKey: Joi.string().allow(""),
-      })
-      .default({}),
-  }),
-};
 /**
  * filter and pagination api
  */
@@ -499,5 +488,4 @@ module.exports = {
   updateDealerNdr,
   updateCourierNdr,
   changeScheme,
-  getAgentDashboardData,
 };

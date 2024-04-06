@@ -457,8 +457,9 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
         dealerReasonEnum.nonServiceableArea,
         dealerReasonEnum.outOfAssignedArea,
         dealerReasonEnum.pickByCourier,
+        "",
       ],
-      required: true,
+      default: "",
     },
     dealerFirstCaller: {
       type: ObjectId,
