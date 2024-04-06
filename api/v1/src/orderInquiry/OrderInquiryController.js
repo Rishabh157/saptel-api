@@ -57,6 +57,7 @@ const {
   userRoleType,
   firstCallDispositions,
   preferredCourierPartner,
+  subDispositionNDR,
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
@@ -318,6 +319,34 @@ exports.updateDealerNdr = async (req, res) => {
     if (!ndrDispositionFound) {
       throw new ApiError(httpStatus.OK, `Invalid NDR call disposition`);
     }
+    let orderStatusIs = "";
+    console.log(
+      ndrDispositionFound.rtoAttempt,
+      "ndrDispositionFound.rtoAttempt"
+    );
+    switch (ndrDispositionFound.rtoAttempt) {
+      case subDispositionNDR.attempt:
+        orderStatusIs = orderStatusEnum.reattempt;
+        break;
+      case subDispositionNDR.rto:
+        orderStatusIs = orderStatusEnum.rto;
+        break;
+      case subDispositionNDR.cancel:
+        console.log("in");
+        orderStatusIs = orderStatusEnum.cancel;
+        break;
+      case subDispositionNDR.hold:
+        orderStatusIs = orderStatusEnum.hold;
+        break;
+      case subDispositionNDR.customerWillConnect:
+        orderStatusIs = orderStatusEnum.hold;
+        break;
+      default:
+        console.log("nothing");
+        break;
+    }
+
+    console.log(orderStatusIs, "orderStatusIs");
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
@@ -331,7 +360,7 @@ exports.updateDealerNdr = async (req, res) => {
           alternateNo: alternateNumber,
           ndrRemark,
           ndrDiscountApplicable,
-          status: orderStatusEnum.reattempt,
+          status: orderStatusIs,
           ndrApprovedBy: ndrApprovedBy,
           preffered_delivery_date: reAttemptDate,
           ndrCallDisposition,
@@ -351,13 +380,14 @@ exports.updateDealerNdr = async (req, res) => {
         status: orderStatusEnum.reattempt,
         ndrRtoReattemptReason,
       });
+
       await axios.post(
         "https://uat.onetelemart.com/agent/v2/click-2-hangup",
         {
           user: ndrApprovedBy + config.dialer_domain,
           phone_number: mobileNo,
           unique_id: mobileNo,
-          disposition: `DEFAULT:${ndrCallDisposition}`,
+          disposition: `DEFAULT:${ndrDispositionFound.ndrDisposition}`,
         },
         {
           headers: {

@@ -17,6 +17,15 @@ const {
   getLimitAndTotalCount,
 } = require("../../helper/paginationFilterHelper");
 const { orderStatusEnum } = require("../../helper/enumUtils");
+const {
+  getQuery,
+  getQueryForComplaint,
+  getQueryForhouseArrest,
+  getQueryFormoneyBack,
+  getQueryForreplacement,
+  getQueryForinquiry,
+  getQueryFororder,
+} = require("./DashBoardHelper");
 
 //get api
 exports.get = async (req, res) => {
@@ -27,9 +36,9 @@ exports.get = async (req, res) => {
       assignDealerId: new mongoose.Types.ObjectId(Id),
       isDeleted: false,
     };
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
+    // if (req.query && Object.keys(req.query).length) {
+    //   matchQuery = getQuery(matchQuery, req.query);
+    // }
     let additionalQuery = [
       { $match: matchQuery },
       {
@@ -98,7 +107,6 @@ exports.getAgentDashboardData = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    console.log(matchQuery, "matchQuery");
 
     let complainAggrigation = [...finalAggregateQuery];
     let houseArrestAggrigation = [...finalAggregateQuery];
@@ -108,86 +116,97 @@ exports.getAgentDashboardData = async (req, res) => {
     let orderAggrigation = [...finalAggregateQuery];
 
     // complaint
-    complainAggrigation.push({
-      $match: {
-        // isDeleted: false,
-        isActive: true,
-        complaintById: new mongoose.Types.ObjectId(Id),
-      },
-    });
-    let numberOfComplaintCalls = await complaintService.aggregateQuery(
-      complainAggrigation
+    let complainAggrigationNewQuery = await getQueryForComplaint(
+      isUserExists?.userRole,
+      Id
     );
+    console.log(complainAggrigationNewQuery, "complainAggrigationNewQuery");
 
+    if (complainAggrigationNewQuery) {
+      complainAggrigation = [
+        ...complainAggrigation,
+        ...complainAggrigationNewQuery,
+      ];
+      console.log(complainAggrigation, "complainAggrigation");
+      var numberOfComplaintCalls = await complaintService.aggregateQuery(
+        complainAggrigation
+      );
+    }
     //houseArrest
-    houseArrestAggrigation.push({
-      $match: {
-        isDeleted: false,
-        isActive: true,
-        requestCreatedBy: new mongoose.Types.ObjectId(Id),
-      },
-    });
-    let numberOfHouseArrestCase = await houseArrestService.aggregateQuery(
-      houseArrestAggrigation
+
+    let houseArrestAggrigationNewQuery = await getQueryForhouseArrest(
+      isUserExists?.userRole,
+      Id
     );
+    if (houseArrestAggrigationNewQuery) {
+      houseArrestAggrigation = [
+        ...houseArrestAggrigation,
+        ...houseArrestAggrigationNewQuery,
+      ];
+      var numberOfHouseArrestCase = await houseArrestService.aggregateQuery(
+        houseArrestAggrigation
+      );
+    }
 
     //money back
-    moneyBackAggrigation.push({
-      $match: {
-        isDeleted: false,
-        isActive: true,
-        requestCreatedById: new mongoose.Types.ObjectId(Id),
-      },
-    });
-    let numberOfMoneyBackCase = await moneyBackService.aggregateQuery(
-      moneyBackAggrigation
+
+    let moneyBackAggrigationNewQuery = await getQueryFormoneyBack(
+      isUserExists?.userRole,
+      Id
     );
+    if (moneyBackAggrigationNewQuery) {
+      moneyBackAggrigation = [
+        ...moneyBackAggrigation,
+        ...moneyBackAggrigationNewQuery,
+      ];
+      var numberOfMoneyBackCase = await moneyBackService.aggregateQuery(
+        moneyBackAggrigation
+      );
+    }
 
     // product replacement
 
-    replacementAggrigation.push({
-      $match: {
-        isDeleted: false,
-        isActive: true,
-        requestCreatedById: new mongoose.Types.ObjectId(Id),
-      },
-    });
-    let numberOfProductReplacementCase =
-      await productReplacementService.aggregateQuery(replacementAggrigation);
-
-    // inquiry
-    inquiryAggrigation.push({
-      $match: {
-        agentId: new mongoose.Types.ObjectId(Id),
-        isActive: true,
-        isDeleted: false,
-        status: orderStatusEnum.inquiry,
-      },
-    });
-    console.log(inquiryAggrigation, "inquiryAggrigation");
-    let noOfInquiryCalls = await orderService.aggregateQuery(
-      inquiryAggrigation
+    let replacementAggrigationNewQuery = await getQueryForreplacement(
+      isUserExists?.userRole,
+      Id
     );
+    if (replacementAggrigationNewQuery) {
+      replacementAggrigation = [
+        ...replacementAggrigation,
+        ...replacementAggrigationNewQuery,
+      ];
+      var numberOfProductReplacementCase =
+        await productReplacementService.aggregateQuery(replacementAggrigation);
+    }
+    // inquiry
 
-    orderAggrigation.push({
-      $match: {
-        agentId: new mongoose.Types.ObjectId(Id),
-        isActive: true,
-        isDeleted: false,
-        status: {
-          $in: [
-            orderStatusEnum.fresh,
-            orderStatusEnum.urgent,
-            orderStatusEnum.prepaid,
-          ],
-        },
-      },
-    });
-    let noOfOrdersCalls = await orderService.aggregateQuery(orderAggrigation);
+    let inquiryAggrigationNewQuery = await getQueryForinquiry(
+      isUserExists?.userRole,
+      Id
+    );
+    if (inquiryAggrigationNewQuery) {
+      inquiryAggrigation = [
+        ...inquiryAggrigation,
+        ...inquiryAggrigationNewQuery,
+      ];
+      var noOfInquiryCalls = await orderService.aggregateQuery(
+        inquiryAggrigation
+      );
+    }
 
+    // total orders
+
+    let orderAggrigationNewQuery = await getQueryFororder(
+      isUserExists?.userRole,
+      Id
+    );
+    if (orderAggrigationNewQuery) {
+      orderAggrigation = [...orderAggrigation, ...orderAggrigationNewQuery];
+      var noOfOrdersCalls = await orderService.aggregateQuery(orderAggrigation);
+    }
     return res.status(200).send({
-      numberOfComplaintCalls: numberOfComplaintCalls.length
-        ? numberOfComplaintCalls.length
+      numberOfComplaintCalls: numberOfComplaintCalls?.length
+        ? numberOfComplaintCalls?.length
         : 0,
       noOfInquiryCalls: noOfInquiryCalls?.length ? noOfInquiryCalls?.length : 0,
       noOfOrdersCalls: noOfOrdersCalls?.length ? noOfOrdersCalls?.length : 0,

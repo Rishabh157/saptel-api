@@ -24,6 +24,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
+    ndrDisposition = ndrDisposition.replaceAll(" ", "");
     let dataExist = await ndrDispositionService.isExists([{ ndrDisposition }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
@@ -31,6 +32,7 @@ exports.add = async (req, res) => {
     //------------------create data-------------------
     let dataCreated = await ndrDispositionService.createNewData({
       ...req.body,
+      ndrDisposition,
     });
 
     if (dataCreated) {
@@ -58,6 +60,7 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let { ndrDisposition } = req.body;
+    ndrDisposition = ndrDisposition.replaceAll(" ", "");
 
     let idToBeSearch = req.params.id;
     let dataExist = await ndrDispositionService.isExists(
@@ -83,6 +86,7 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
+          ndrDisposition,
         },
       }
     );

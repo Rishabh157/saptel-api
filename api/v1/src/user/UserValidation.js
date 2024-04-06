@@ -11,7 +11,7 @@ const create = {
   body: Joi.object().keys({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    userName: Joi.string().required(),
+    userName: Joi.string().lowercase().required(),
     mobile: Joi.string()
 
       .custom(commonValidation.indianMobile)
@@ -59,7 +59,7 @@ const update = {
   body: Joi.object().keys({
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    userName: Joi.string().required(),
+    userName: Joi.string().lowercase().required(),
     mobile: Joi.string()
 
       .custom(commonValidation.indianMobile)

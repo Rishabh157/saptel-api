@@ -1232,6 +1232,7 @@ exports.login = async (req, res) => {
     const userIP =
       req.headers["x-forwarded-for"] || req.connection.remoteAddress;
     const userNewIp = userIP.replace("::ffff:", "");
+    userName = userName.toLowerCase();
     let userFound = await userService.getOneByMultiField({ userName });
     let userAllowedIp = userFound?.allowedIp;
     let isUserAllowed = false;
