@@ -336,6 +336,7 @@ const updateDealerNdr = {
   }),
   body: Joi.object().keys({
     alternateNumber: Joi.string().allow(""),
+    mobileNo: Joi.string().required(),
     dealerValidRemark: Joi.string().required(),
     ndrRemark: Joi.string().required(),
     ndrDiscountApplicable: Joi.boolean(),
@@ -354,6 +355,8 @@ const updateCourierNdr = {
   }),
   body: Joi.object().keys({
     alternateNumber: Joi.string().allow(""),
+    mobileNo: Joi.string().required(),
+
     ndrApprovedBy: Joi.string().required(),
     dispositionTwoId: Joi.string().custom(commonValidation.objectId).required(),
     dispositionThreeId: Joi.string()

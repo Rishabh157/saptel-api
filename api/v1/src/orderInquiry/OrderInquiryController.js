@@ -293,6 +293,7 @@ exports.updateDealerNdr = async (req, res) => {
       reAttemptDate,
       ndrCallDisposition,
       ndrRtoReattemptReason,
+      mobileNo,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -350,6 +351,21 @@ exports.updateDealerNdr = async (req, res) => {
         status: orderStatusEnum.reattempt,
         ndrRtoReattemptReason,
       });
+      await axios.post(
+        "https://uat.onetelemart.com/agent/v2/click-2-hangup",
+        {
+          user: ndrApprovedBy + config.dialer_domain,
+          phone_number: mobileNo,
+          unique_id: mobileNo,
+          disposition: `DEFAULT:${ndrCallDisposition}`,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            XAuth: config.server_auth_key,
+          },
+        }
+      );
 
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -382,6 +398,7 @@ exports.updateCourierNdr = async (req, res) => {
       ndrRemark,
       reAttemptDate,
       ndrApprovedBy,
+      mobileNo,
     } = req.body;
 
     let idToBeSearch = req.params.id;
@@ -444,6 +461,22 @@ exports.updateCourierNdr = async (req, res) => {
         status: orderStatusEnum.reattempt,
         deliveryTimeAndDate: reAttemptDate,
       });
+      // await axios.post(
+      //   "https://uat.onetelemart.com/agent/v2/click-2-hangup",
+      //   {
+      //     user: ndrApprovedBy + config.dialer_domain,
+      //     phone_number: mobileNo,
+      //     unique_id: mobileNo,
+      //     disposition: `DEFAULT:${ndrCallDisposition}`,
+      //   },
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       XAuth: config.server_auth_key,
+      //     },
+      //   }
+      // );
+
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,

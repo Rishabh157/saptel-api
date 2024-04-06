@@ -5,6 +5,9 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const orderService = require("../orderInquiry/OrderInquiryService");
 const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
+const houseArrestService = require("../houseArrestRequest/HouseArrestRequestService");
+const moneyBackService = require("../moneyBackRequest/MoneyBackRequestService");
+const productReplacementService = require("../productReplacementRequest/ProductReplacementRequestService");
 
 const { errorRes } = require("../../../utils/resError");
 
@@ -13,6 +16,7 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
 } = require("../../helper/paginationFilterHelper");
+const { orderStatusEnum } = require("../../helper/enumUtils");
 
 //get api
 exports.get = async (req, res) => {
@@ -96,53 +100,111 @@ exports.getAgentDashboardData = async (req, res) => {
     });
     console.log(matchQuery, "matchQuery");
 
-    // let complainAggrigation = finalAggregateQuery;
-    // let inquiryAggrigation = finalAggregateQuery;
-    // let orderAggrigation = finalAggregateQuery;
-    // complainAggrigation.push({
-    //   $match: {
-    //     // isDeleted: false,
-    //     isActive: true,
-    //     complaintById: new mongoose.Types.ObjectId(Id),
-    //   },
-    // });
-    console.log(finalAggregateQuery, "finalAggregateQuery");
-    let numberOfComplaintCalls = await complaintService.findAllWithQuery(
-      finalAggregateQuery
+    let complainAggrigation = [...finalAggregateQuery];
+    let houseArrestAggrigation = [...finalAggregateQuery];
+    let moneyBackAggrigation = [...finalAggregateQuery];
+    let replacementAggrigation = [...finalAggregateQuery];
+    let inquiryAggrigation = [...finalAggregateQuery];
+    let orderAggrigation = [...finalAggregateQuery];
+
+    // complaint
+    complainAggrigation.push({
+      $match: {
+        // isDeleted: false,
+        isActive: true,
+        complaintById: new mongoose.Types.ObjectId(Id),
+      },
+    });
+    let numberOfComplaintCalls = await complaintService.aggregateQuery(
+      complainAggrigation
     );
 
-    // inquiryAggrigation.push({
-    //   agentId: Id,
-    //   isActive: true,
-    //   isDeleted: false,
-    //   status: orderStatusEnum.inquiry,
-    // })
-    // let noOfInquiryCalls = await orderService.findAllWithQuery(inquiryAggrigation);
+    //houseArrest
+    houseArrestAggrigation.push({
+      $match: {
+        isDeleted: false,
+        isActive: true,
+        requestCreatedBy: new mongoose.Types.ObjectId(Id),
+      },
+    });
+    let numberOfHouseArrestCase = await houseArrestService.aggregateQuery(
+      houseArrestAggrigation
+    );
 
-    // orderAggrigation.push({
-    //   agentId: Id,
-    //   isActive: true,
-    //   isDeleted: false,
-    //   status: orderStatusEnum.inquiry,
-    // })
-    // let noOfOrdersCalls = await orderService.findAllWithQuery(orderAggrigation);
+    //money back
+    moneyBackAggrigation.push({
+      $match: {
+        isDeleted: false,
+        isActive: true,
+        requestCreatedById: new mongoose.Types.ObjectId(Id),
+      },
+    });
+    let numberOfMoneyBackCase = await moneyBackService.aggregateQuery(
+      moneyBackAggrigation
+    );
 
-    if (numberOfComplaintCalls?.length) {
-      return res.status(200).send({
-        numberOfComplaintCalls: numberOfComplaintCalls.length
-          ? numberOfComplaintCalls.length
-          : 0,
-        // noOfInquiryCalls: noOfInquiryCalls?.length
-        //   ? noOfInquiryCalls?.length
-        //   : 0,
-        status: true,
-        message: "Data Found",
-        code: "OK",
-        issue: null,
-      });
-    } else {
-      throw new ApiError(httpStatus.OK, `No data Found`);
-    }
+    // product replacement
+
+    replacementAggrigation.push({
+      $match: {
+        isDeleted: false,
+        isActive: true,
+        requestCreatedById: new mongoose.Types.ObjectId(Id),
+      },
+    });
+    let numberOfProductReplacementCase =
+      await productReplacementService.aggregateQuery(replacementAggrigation);
+
+    // inquiry
+    inquiryAggrigation.push({
+      $match: {
+        agentId: new mongoose.Types.ObjectId(Id),
+        isActive: true,
+        isDeleted: false,
+        status: orderStatusEnum.inquiry,
+      },
+    });
+    console.log(inquiryAggrigation, "inquiryAggrigation");
+    let noOfInquiryCalls = await orderService.aggregateQuery(
+      inquiryAggrigation
+    );
+
+    orderAggrigation.push({
+      $match: {
+        agentId: new mongoose.Types.ObjectId(Id),
+        isActive: true,
+        isDeleted: false,
+        status: {
+          $in: [
+            orderStatusEnum.fresh,
+            orderStatusEnum.urgent,
+            orderStatusEnum.prepaid,
+          ],
+        },
+      },
+    });
+    let noOfOrdersCalls = await orderService.aggregateQuery(orderAggrigation);
+
+    return res.status(200).send({
+      numberOfComplaintCalls: numberOfComplaintCalls.length
+        ? numberOfComplaintCalls.length
+        : 0,
+      noOfInquiryCalls: noOfInquiryCalls?.length ? noOfInquiryCalls?.length : 0,
+      noOfOrdersCalls: noOfOrdersCalls?.length ? noOfOrdersCalls?.length : 0,
+      numberOfHouseArrestCase: numberOfHouseArrestCase?.length
+        ? numberOfHouseArrestCase?.length
+        : 0,
+      numberOfMoneyBackCase: numberOfMoneyBackCase?.length
+        ? numberOfMoneyBackCase?.length
+        : 0,
+      numberOfProductReplacementCase: numberOfProductReplacementCase?.length
+        ? numberOfProductReplacementCase?.length
+        : 0,
+      status: true,
+      message: "Data Found",
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
