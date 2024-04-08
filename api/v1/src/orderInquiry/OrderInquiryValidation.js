@@ -309,6 +309,14 @@ const dealerApprove = {
     orderid: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+const getMultipleOrder = {
+  body: Joi.object().keys({
+    mobileNumbers: Joi.array().items(Joi.string()).allow(),
+    orderNumbers: Joi.array().items(Joi.number()).allow(),
+  }),
+};
+
 const getComplainData = {
   body: Joi.object().keys({
     barcode: Joi.string().allow(""),
@@ -448,6 +456,7 @@ const dealerOrderStatusChange = {
     dealerFirstCaller: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    callBackDate: Joi.string().allow(""),
   }),
 };
 
@@ -491,4 +500,5 @@ module.exports = {
   updateDealerNdr,
   updateCourierNdr,
   changeScheme,
+  getMultipleOrder,
 };

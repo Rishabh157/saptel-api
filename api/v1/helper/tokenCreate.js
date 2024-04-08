@@ -18,6 +18,7 @@ exports.tokenCreate = async (tokenData) => {
       email: tokenData.email,
       mobile: tokenData.mobile,
       userRole: tokenData.userRole,
+      userDepartment: tokenData.userDepartment,
       userType: tokenData.userType,
       companyId: tokenData.companyId,
       tokenType: tokenEnum.login,
@@ -39,6 +40,8 @@ exports.refreshTokenCreate = async (tokenData) => {
       email: tokenData.email,
       mobile: tokenData.mobile,
       userRole: tokenData.userRole,
+      userDepartment: tokenData.userDepartment,
+
       userType: tokenData.userType,
       companyId: tokenData.companyId,
 

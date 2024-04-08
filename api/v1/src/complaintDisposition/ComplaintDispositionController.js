@@ -28,7 +28,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 exports.add = async (req, res) => {
   try {
     let { dispositionName, smsType, emailType, priority, companyId } = req.body;
-
+    let displayName = dispositionName;
+    dispositionName = dispositionName.replaceAll(" ", "");
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -48,6 +49,8 @@ exports.add = async (req, res) => {
     // ----------------------create data-------------------------
     let dataCreated = await complaintDispositionService.createNewData({
       ...req.body,
+      displayName,
+      dispositionName,
     });
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -75,7 +78,8 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     let { dispositionName, smsType, emailType, priority, companyId } = req.body;
-
+    let displayName = dispositionName;
+    dispositionName = dispositionName.replaceAll(" ", "");
     let idToBeSearch = req.params.id;
 
     let dataExist = await complaintDispositionService.isExists(
@@ -111,6 +115,8 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
+          dispositionName,
+          displayName,
         },
       }
     );

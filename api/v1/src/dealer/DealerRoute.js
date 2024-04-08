@@ -19,6 +19,16 @@ router.get(
 );
 
 /**
+ * get all dealer of zonal manager and exicutive
+ */
+router.get(
+  "/get-zme-dealers",
+  authCheckMiddleware,
+  // validate(dealerValidation.get),
+  dealerController.getZmeDealers
+);
+
+/**
  * get one document (if query) / all documents
  */
 router.get(

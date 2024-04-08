@@ -8,7 +8,12 @@ const complaintDispositionSchema = mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
+      uppercase: true,
+    },
+    displayName: {
+      type: String,
+      required: true,
+      trim: true,
     },
     priority: {
       type: String,

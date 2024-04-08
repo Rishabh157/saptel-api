@@ -716,6 +716,7 @@ exports.allFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //get api
 exports.get = async (req, res) => {
   try {
@@ -900,6 +901,234 @@ exports.get = async (req, res) => {
       userRoleData,
       actionType.listAll
     );
+    let dataExist = await dealerService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields || !allowedFields?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: allowedFields,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get ZME dealrs
+exports.getZmeDealers = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+      isDeleted: false,
+    };
+
+    if (
+      // req.userData.userRole === userRoleType.srManagerDistribution ||
+      req.userData.userRole === userRoleType.managerArea
+    ) {
+      matchQuery.$and.push({
+        zonalManagerId: new mongoose.Types.ObjectId(req.userData.Id),
+      });
+    }
+    if (req.userData.userRole === userRoleType.srEXECUTIVEArea) {
+      matchQuery.$and.push({
+        zonalExecutiveId: new mongoose.Types.ObjectId(req.userData.Id),
+      });
+    }
+    if (req.userData.userRole === userRoleType.EXECUTIVEArea) {
+      matchQuery.$and.push({
+        zonalExecutiveAreaId: {
+          $in: [new mongoose.Types.ObjectId(req.userData.Id)],
+        },
+      });
+    }
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "dealerscategories",
+          localField: "dealerCategoryId",
+          foreignField: "_id",
+          as: "dealerCategory_name",
+          pipeline: [{ $project: { dealersCategory: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "registrationAddress.countryId",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "registrationAddress.stateId",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "registrationAddress.districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "registrationAddress.pincodeId",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      // billing section start
+      {
+        $lookup: {
+          from: "countries",
+          localField: "billingAddress.countryId",
+          foreignField: "_id",
+          as: "b_country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "billingAddress.stateId",
+          foreignField: "_id",
+          as: "b_state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "billingAddress.districtId",
+          foreignField: "_id",
+          as: "b_district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "billingAddress.pincodeId",
+          foreignField: "_id",
+          as: "b_pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "zonalManagerId",
+          foreignField: "_id",
+          as: "zonalManager",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "zonalExecutiveId",
+          foreignField: "_id",
+          as: "zonalExecutive",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          zonalManagerLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalManager.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalManager.lastName", 0] },
+            ],
+          },
+          zonalExecutiveLabel: {
+            $concat: [
+              { $arrayElemAt: ["$zonalExecutive.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$zonalExecutive.lastName", 0] },
+            ],
+          },
+          dealersCategoryName: {
+            $arrayElemAt: ["$dealerCategory_name.dealersCategory", 0],
+          },
+          registrationCountryName: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          registrationStateName: {
+            $arrayElemAt: ["$state_name.stateName", 0],
+          },
+          registrationDistrictName: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          registrationPincodeName: {
+            $arrayElemAt: ["$pincode_name.pincode", 0],
+          },
+          //billing start
+          billingAddressCountryName: {
+            $arrayElemAt: ["$b_country_name.countryName", 0],
+          },
+          billingAddressStateName: {
+            $arrayElemAt: ["$b_state_name.stateName", 0],
+          },
+          billingAddressDistrictName: {
+            $arrayElemAt: ["$b_district_name.districtName", 0],
+          },
+          billingAddressPincodeName: {
+            $arrayElemAt: ["$b_pincode_name.pincode", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "zonalExecutive",
+          "zonalManager",
+          "dealerCategory_name",
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "b_country_name",
+          "b_state_name",
+          "b_district_name",
+          "b_pincode_name",
+        ],
+      },
+    ];
+
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.wareHouse,
+      userRoleData,
+      actionType.listAll
+    );
+    console.log(additionalQuery, "additionalQuery");
     let dataExist = await dealerService.aggregateQuery(additionalQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 

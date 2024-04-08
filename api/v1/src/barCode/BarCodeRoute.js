@@ -119,12 +119,21 @@ router.post(
   validate(barCodeValidation.getInventoryByStatus),
   barCodeController.getInventoryByStatus
 );
+/**
+ * get dealer inventory for ZEH
+ */
+router.post(
+  "/get-dealer-inventory",
+  authCheckMiddleware,
+  validate(barCodeValidation.getAllFilter),
+  barCodeController.getDealerInventoryForZEH
+);
 
 // dealer inventory
 router.post(
-  "/dealer/inventory/companyid/:cid/status/:status",
+  "/dealer-inventory",
   authCheckDealerMiddleware,
-  validate(barCodeValidation.getInventory),
+  validate(barCodeValidation.getAllFilter),
   barCodeController.getDealerInventory
 );
 /**

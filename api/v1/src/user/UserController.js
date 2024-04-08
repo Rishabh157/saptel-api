@@ -1276,6 +1276,7 @@ exports.login = async (req, res) => {
       email,
       companyId,
       userRole,
+      userDepartment,
       branchId,
     } = userFound;
 
@@ -1311,6 +1312,7 @@ exports.login = async (req, res) => {
           userName: userName,
           userType: userType,
           userRole: userRole ? userRole : "ADMIN",
+          userDepartment: userDepartment,
           companyId: companyId,
           branchId: branchId,
         },

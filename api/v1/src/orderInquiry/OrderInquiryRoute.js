@@ -57,6 +57,14 @@ router.get(
   orderController.get
 );
 
+//===============get one document (if query) / all document===============
+router.post(
+  "/get-multiple-orders",
+  authCheckMiddleware,
+  validate(orderValidation.getMultipleOrder),
+  orderController.getMultipleOrder
+);
+
 //=============== Global search order===============
 router.post(
   "/global-search",
