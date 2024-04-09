@@ -929,9 +929,12 @@ exports.get = async (req, res) => {
 exports.getZmeDealers = async (req, res) => {
   try {
     //if no default query then pass {}
+
     let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
-      isDeleted: false,
+      $and: [
+        { isDeleted: false },
+        { companyId: new mongoose.Types.ObjectId(req.userData.companyId) },
+      ],
     };
 
     if (

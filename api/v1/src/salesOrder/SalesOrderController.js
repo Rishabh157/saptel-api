@@ -1428,7 +1428,7 @@ exports.getById = async (req, res) => {
           localField: "companyWareHouseId",
           foreignField: "_id",
           as: "companyWarehouseName",
-          pipeline: [{ $project: { wareHouseName: 1 } }],
+          pipeline: [{ $project: { wareHouseName: 1, billingAddress: 1 } }],
         },
       },
       {
@@ -1437,7 +1437,7 @@ exports.getById = async (req, res) => {
           localField: "dealerWareHouseId",
           foreignField: "_id",
           as: "warehouses_name",
-          pipeline: [{ $project: { wareHouseName: 1 } }],
+          pipeline: [{ $project: { wareHouseName: 1, billingAddress: 1 } }],
         },
       },
       {
@@ -1468,8 +1468,15 @@ exports.getById = async (req, res) => {
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
           },
+          companyWarehouseBillingAddress: {
+            $arrayElemAt: ["$companyWarehouseName.billingAddress", 0],
+          },
+
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          warehouseBillingAddress: {
+            $arrayElemAt: ["$warehouses_name.billingAddress", 0],
           },
           "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],

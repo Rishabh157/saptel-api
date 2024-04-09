@@ -10,6 +10,7 @@ const {
   orderTypeEnum,
   validDealerRemark,
   dealerReasonEnum,
+  preferredCourierPartner,
 } = require("../../helper/enumUtils");
 
 const OrderInquirySchema = new mongoose.Schema(
@@ -494,6 +495,15 @@ const OrderInquirySchema = new mongoose.Schema(
     dealerFirstCaller: {
       type: ObjectId,
       default: null,
+    },
+    isGPO: {
+      type: Boolean,
+      default: false,
+    },
+    orderAssignedToCourier: {
+      type: String,
+      enum: [preferredCourierPartner.shipyaari, ""],
+      default: "",
     },
     isDeleted: {
       type: Boolean,

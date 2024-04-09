@@ -43,6 +43,7 @@ const {
   moduleType,
   actionType,
   orderStatusEnum,
+  paymentModeType,
 } = require("../../helper/enumUtils");
 
 const {
@@ -410,8 +411,12 @@ exports.update = async (req, res) => {
     try {
       const orderInquiry = await orderService.createNewData({
         ...req.body,
-        status: flag ? status : orderStatusEnum.inquiry,
-        orderNumber: flag ? orderNumber : null,
+        status: flag
+          ? status
+          : prepaidOrderFlag
+          ? orderStatusEnum.prepaid
+          : orderStatusEnum.inquiry,
+        orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
         inquiryNumber: inquiryNumber,
         isOrderAssigned:
           dealerServingPincode.length > 1 || servingWarehouse === undefined
@@ -430,6 +435,9 @@ exports.update = async (req, res) => {
         recordingEndTime: recordingEndTime,
         callCenterId: isUserExists?.callCenterId,
         branchId: isUserExists?.branchId,
+        paymentMode: prepaidOrderFlag
+          ? paymentModeType.UPI_ONLINE
+          : paymentModeType.COD,
         // dealerAssignedId: dealerId,
       });
 

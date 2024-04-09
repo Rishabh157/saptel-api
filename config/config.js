@@ -29,6 +29,9 @@ let {
   ORANGE_FLAG_DISPOSITION,
   OTHER_ORANGE_FLAG,
   HOUSE_ARREST_CASE_DISPOSITION,
+  SHIPYAARI_BASE_URL,
+  SHIPYAARI_EMAIL,
+  SHIPYAARI_PASSWORD,
 } = process.env;
 
 let envObj = {
@@ -57,6 +60,9 @@ let envObj = {
   ORANGE_FLAG_DISPOSITION,
   OTHER_ORANGE_FLAG,
   HOUSE_ARREST_CASE_DISPOSITION,
+  SHIPYAARI_BASE_URL,
+  SHIPYAARI_EMAIL,
+  SHIPYAARI_PASSWORD,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -106,6 +112,13 @@ const envVarsSchema = Joi.object().keys({
   HOUSE_ARREST_CASE_DISPOSITION: Joi.string()
     .required()
     .label("HOUSE ARREST CASE DISPOSITION is required"),
+  SHIPYAARI_BASE_URL: Joi.string()
+    .required()
+    .label("Shipyaari base url required"),
+  SHIPYAARI_EMAIL: Joi.string().required().label("Shipyaari email required"),
+  SHIPYAARI_PASSWORD: Joi.string()
+    .required()
+    .label("Shipyaari password required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -153,4 +166,7 @@ module.exports = {
     envVars.NODE_ENV === "development"
       ? envVars.BASEURL_LOCAL + ":" + envVars.PORT + "/"
       : envVars.BASEURL_LIVE + "/",
+  shipyaari_baseurl: envVars.SHIPYAARI_BASE_URL,
+  shipyaari_email: envVars.SHIPYAARI_EMAIL,
+  shipyaari_password: envVars.SHIPYAARI_PASSWORD,
 };

@@ -7,9 +7,13 @@ const port = config.port || 3004;
 const server = http.createServer(app);
 const cron = require("node-cron");
 const { addSlotEveryDayFun } = require("./api/v1/cron-functions");
+const {
+  getShipyaariToken,
+} = require("./api/v1/third-party-services/ShipyaariService");
 
 // cron for slot add
 cron.schedule("0 12 * * *", async () => {
+  await getShipyaariToken();
   await addSlotEveryDayFun();
 });
 //-------------------------------

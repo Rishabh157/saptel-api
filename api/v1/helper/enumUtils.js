@@ -484,6 +484,8 @@ const barcodeStatusType = Object.freeze({
   wtw: "WTW",
   dtw: "DTW",
   delivered: "DELIVERED",
+  damage: "DAMAGE",
+  missing: "MISSING",
 });
 
 /**

@@ -16,6 +16,7 @@ const deliveryBoyService = require("../deliveryBoy/DeliveryBoyService");
 const tehsilService = require("../tehsil/TehsilService");
 const warehouseService = require("../wareHouse/WareHouseService");
 const pincodeService = require("../pincode/PincodeService");
+const productCategoryService = require("../productCategory/ProductCategoryService");
 const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
@@ -64,7 +65,10 @@ const {
   getDateFilterQueryCallBackDate,
 } = require("./OrderInquiryHelper");
 const { default: axios } = require("axios");
-const { getEstTime } = require("../../third-party-services/courierAPIFunction");
+const {
+  getEstTime,
+  assignOrderToCourier,
+} = require("../../third-party-services/courierAPIFunction");
 
 exports.add = async (req, res) => {
   try {
@@ -634,6 +638,76 @@ exports.approveFirstCallDirectly = async (req, res) => {
         },
       }
     );
+    // getting prefered courier partner
+    let toPincodeData = await pincodeService?.getOneByMultiField({
+      _id: dataUpdated?.pincodeId,
+    });
+    let wareHouseData = await warehouseService?.getOneByMultiField({
+      _id: dataUpdated?.assignWarehouseId,
+    });
+    if (!wareHouseData) {
+      throw new ApiError(
+        httpStatus.NOT_IMPLEMENTED,
+        `Something went wrong. Warehouse not assigned to this order`
+      );
+    }
+    let fromPincodeIs = wareHouseData?.registrationAddress?.pincodeId;
+    let fromPincodeData = await pincodeService?.getOneByMultiField({
+      _id: fromPincodeIs,
+    });
+    let schemeData = await schemeService.getOneByMultiField({
+      _id: dataUpdated?.schemeId,
+    });
+
+    let preferredCourier = toPincodeData?.preferredCourier;
+    let categorydata = await productCategoryService?.getOneByMultiField({
+      _id: schemeData?.category,
+    });
+
+    let isOrderAssignedToCourier = await assignOrderToCourier(
+      toPincodeData,
+      fromPincodeData,
+      schemeData,
+      dataUpdated,
+      preferredCourier,
+      wareHouseData,
+      categorydata
+    );
+
+    // if true the hit shipment API else GPO
+    if (isOrderAssignedToCourier) {
+      let orderUpdateCourier = await orderService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            orderAssignedToCourier: preferredCourier,
+          },
+        }
+      );
+      await orderInquiryFlowService.createNewData({
+        ...orderUpdateCourier,
+        orderId: idToBeSearch,
+      });
+    } else {
+      let orderUpdateGPO = await orderService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            isGPO: true,
+          },
+        }
+      );
+      await orderInquiryFlowService.createNewData({
+        ...orderUpdateGPO,
+        orderId: idToBeSearch,
+      });
+    }
 
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
@@ -702,7 +776,7 @@ exports.firstCallConfirmation = async (req, res) => {
         firstCallApprovedBy: req.userData?.userName,
       });
       // getting prefered courier partner
-      let pincodeData = await pincodeService?.getOneByMultiField({
+      let toPincodeData = await pincodeService?.getOneByMultiField({
         _id: dataUpdated?.pincodeId,
       });
       let wareHouseData = await warehouseService?.getOneByMultiField({
@@ -722,24 +796,55 @@ exports.firstCallConfirmation = async (req, res) => {
         _id: dataUpdated?.schemeId,
       });
 
-      let preferredCourier = pincodeData?.preferredCourier;
-      let orderData = {
-        pickup_pincode: parseInt(fromPincodeData?.pincode),
-        delivery_pincode: parseInt(pincodeData?.pincode),
-        weight: schemeData?.weight,
-        paymentmode: "COD",
-        invoicevalue: schemeData?.schemePrice,
-        length: schemeData?.depth,
-        width: schemeData?.dimension?.width,
-        height: schemeData?.weight,
-        weight: schemeData?.weight,
-      };
+      let preferredCourier = toPincodeData?.preferredCourier;
+      let categorydata = await productCategoryService?.getOneByMultiField({
+        _id: schemeData?.category,
+      });
 
-      let isCourierAvailable = await getEstTime(orderData, preferredCourier);
+      let isOrderAssignedToCourier = await assignOrderToCourier(
+        toPincodeData,
+        fromPincodeData,
+        schemeData,
+        dataUpdated,
+        preferredCourier,
+        wareHouseData,
+        categorydata
+      );
 
       // if true the hit shipment API else GPO
-      console.log(isCourierAvailable);
-
+      if (isOrderAssignedToCourier) {
+        let orderUpdateCourier = await orderService.getOneAndUpdate(
+          {
+            _id: idToBeSearch,
+            isDeleted: false,
+          },
+          {
+            $set: {
+              orderAssignedToCourier: preferredCourier,
+            },
+          }
+        );
+        await orderInquiryFlowService.createNewData({
+          ...orderUpdateCourier,
+          orderId: idToBeSearch,
+        });
+      } else {
+        let orderUpdateGPO = await orderService.getOneAndUpdate(
+          {
+            _id: idToBeSearch,
+            isDeleted: false,
+          },
+          {
+            $set: {
+              isGPO: true,
+            },
+          }
+        );
+        await orderInquiryFlowService.createNewData({
+          ...orderUpdateGPO,
+          orderId: idToBeSearch,
+        });
+      }
       // geting deleverable courier partner
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -801,6 +906,76 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         },
       }
     );
+    // getting prefered courier partner
+    let toPincodeData = await pincodeService?.getOneByMultiField({
+      _id: dataUpdated?.pincodeId,
+    });
+    let wareHouseData = await warehouseService?.getOneByMultiField({
+      _id: dataUpdated?.assignWarehouseId,
+    });
+    if (!wareHouseData) {
+      throw new ApiError(
+        httpStatus.NOT_IMPLEMENTED,
+        `Something went wrong. Warehouse not assigned to this order`
+      );
+    }
+    let fromPincodeIs = wareHouseData?.registrationAddress?.pincodeId;
+    let fromPincodeData = await pincodeService?.getOneByMultiField({
+      _id: fromPincodeIs,
+    });
+    let schemeData = await schemeService.getOneByMultiField({
+      _id: dataUpdated?.schemeId,
+    });
+
+    let preferredCourier = toPincodeData?.preferredCourier;
+    let categorydata = await productCategoryService?.getOneByMultiField({
+      _id: schemeData?.category,
+    });
+
+    let isOrderAssignedToCourier = await assignOrderToCourier(
+      toPincodeData,
+      fromPincodeData,
+      schemeData,
+      dataUpdated,
+      preferredCourier,
+      wareHouseData,
+      categorydata
+    );
+
+    // if true the hit shipment API else GPO
+    if (isOrderAssignedToCourier) {
+      let orderUpdateCourier = await orderService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            orderAssignedToCourier: preferredCourier,
+          },
+        }
+      );
+      await orderInquiryFlowService.createNewData({
+        ...orderUpdateCourier,
+        orderId: idToBeSearch,
+      });
+    } else {
+      let orderUpdateGPO = await orderService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            isGPO: true,
+          },
+        }
+      );
+      await orderInquiryFlowService.createNewData({
+        ...orderUpdateGPO,
+        orderId: idToBeSearch,
+      });
+    }
 
     if (dataUpdated) {
       await orderInquiryFlowService.createNewData({
@@ -5536,7 +5711,12 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Agent ");
     }
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [
+        { isDeleted: false },
+        { assignDealerId: null },
+        { assignWarehouseId: { $ne: null } },
+        { status: { $ne: orderStatusEnum.inquiry } },
+      ],
     };
 
     // if callCenterId givin
@@ -7569,7 +7749,10 @@ exports.dealerApprove = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    await orderService.getOneAndUpdate({ _id }, { approved: true });
+    await orderService.getOneAndUpdate(
+      { _id },
+      { approved: true, status: orderStatusEnum.fresh }
+    );
 
     return res.status(httpStatus.OK).send({
       message: "Approved!",
