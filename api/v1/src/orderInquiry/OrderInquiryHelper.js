@@ -36,7 +36,6 @@ exports.getDateFilterQueryCallBackDate = (
   allowedDateFiletrKeys
 ) => {
   let queryArray = [];
-  console.log(dateFilter, "here");
   if (
     dateFilter !== undefined &&
     dateFilter !== null &&
@@ -67,7 +66,6 @@ exports.getDateFilterQueryCallBackDate = (
       dateFilter.startDate = dateFilter.endDate;
     }
     if (dateFilter.startDate !== "" && dateFilter.endDate !== "") {
-      console.log(dateFilter, "dateFilter");
       queryArray.push({
         [dateFilter.dateFilterKey]: {
           $gte: moment(dateFilter.startDate)

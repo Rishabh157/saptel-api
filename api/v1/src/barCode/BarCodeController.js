@@ -701,9 +701,9 @@ exports.get = async (req, res) => {
 exports.checkBarcode = async (req, res) => {
   try {
     //if no default query then pass {}
-    console.log("here");
+
     let { barcode, orderId, status, latitude, longitude } = req.body;
-    console.log(req.body, "body");
+
     let additionalQuery = [
       {
         $match: {
@@ -733,7 +733,6 @@ exports.checkBarcode = async (req, res) => {
     }
 
     if (dataExist) {
-      console.log("here", orderId);
       let orderInquiry = await orderInquiryService.getOneAndUpdate(
         {
           _id: new mongoose.Types.ObjectId(orderId),
@@ -750,7 +749,6 @@ exports.checkBarcode = async (req, res) => {
         }
       );
 
-      console.log(orderInquiry, "orderInquiry");
       if (!orderInquiry) {
         throw new ApiError(
           httpStatus.OK,
@@ -805,10 +803,9 @@ exports.checkBarcode = async (req, res) => {
 exports.checkBarcodeDealerApp = async (req, res) => {
   try {
     //if no default query then pass {}
-    console.log("here");
+
     let { barcode, orderId, status } = req.body;
-    console.log(req.body, "body");
-    console.log(req.userData);
+
     let additionalQuery = [
       {
         $match: {
@@ -818,9 +815,9 @@ exports.checkBarcodeDealerApp = async (req, res) => {
         },
       },
     ];
-    console.log(additionalQuery, "additionalQuery");
+
     let dataExist = await barCodeService.aggregateQuery(additionalQuery);
-    console.log(dataExist, "dataExist");
+
     if (!dataExist.length) {
       throw new ApiError(httpStatus.OK, "Barcode not found");
     }
@@ -839,7 +836,6 @@ exports.checkBarcodeDealerApp = async (req, res) => {
     }
 
     if (dataExist) {
-      console.log("here", orderId);
       let orderInquiry = await orderInquiryService.getOneAndUpdate(
         {
           _id: new mongoose.Types.ObjectId(orderId),
@@ -853,7 +849,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
           },
         }
       );
-      console.log(orderInquiry, "orderInquiry");
+
       if (!orderInquiry) {
         throw new ApiError(
           httpStatus.OK,
@@ -3644,7 +3640,7 @@ exports.dealerOrderDispatch = async (req, res) => {
         },
       }
     );
-    console.log(updatedOrder, "updatedOrder");
+
     if (updatedOrder) {
       const { _id, mobileNo, didNo, companyId, agentName, agentId, ...rest } =
         updatedOrder;

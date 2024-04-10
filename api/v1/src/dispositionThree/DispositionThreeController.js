@@ -693,7 +693,6 @@ exports.getFilterPagination = async (req, res) => {
 exports.getByDispositionTwoId = async (req, res) => {
   try {
     dispositionTwoId = req.params.id;
-    console.log(dispositionTwoId, "dispositionTwoId");
     let additionalQuery = [
       {
         $match: {

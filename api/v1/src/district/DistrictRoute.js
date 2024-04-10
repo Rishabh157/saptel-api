@@ -2,7 +2,10 @@ const router = require("express").Router();
 const districtController = require("./DistrictController");
 const validate = require("../../middleware/validate");
 const districtValidation = require("./DistrictValidation");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -11,6 +14,16 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 router.get(
   "/",
   authCheckMiddleware,
+  validate(districtValidation.get),
+  districtController.get
+);
+//-----------------------------------------------------
+/**
+ * get one document (if query) / all documents for dealer panel
+ */
+router.get(
+  "/dealer/get-disticts",
+  authCheckDealerMiddleware,
   validate(districtValidation.get),
   districtController.get
 );

@@ -127,7 +127,6 @@ exports.testingIp = async (req, res) => {
 
   rp(requestOptions)
     .then((response) => {
-      console.log("Response:", response);
       return res.status(httpStatus.OK).send({
         message: `Logout successfull!`,
         data: response.data,

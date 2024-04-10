@@ -59,6 +59,7 @@ const {
   firstCallDispositions,
   preferredCourierPartner,
   subDispositionNDR,
+  paymentModeType,
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
@@ -69,40 +70,96 @@ const {
   getEstTime,
   assignOrderToCourier,
 } = require("../../third-party-services/courierAPIFunction");
+const { getOrderNumber, getInquiryNumber } = require("../call/CallHelper");
 
 exports.add = async (req, res) => {
   try {
-    let { fullName, mobile, email, pincode, address } = req.body;
+    async function createOrders() {
+      try {
+        const promises = [];
+        for (let i = 11; i <= 20; i++) {
+          promises.push(createOrder(i));
+        }
+        const orderInquiries = await Promise.all(promises);
 
-    let dataCreated = await orderService.createNewData({
-      customerName: fullName,
-      mobileNo: mobile,
-      emailId: email,
-      pincodeId: pincode,
-      address: address,
-    });
+        for (const orderInquiry of orderInquiries) {
+          if (!orderInquiry) {
+            throw new Error("Something went wrong.");
+          }
+        }
 
-    if (dataCreated) {
-      await orderInquiryFlowService.createNewData({
-        customerName: fullName,
-        mobileNo: mobile,
-        emailId: email,
-        pincodeId: pincode,
-        address: address,
-      });
+        return orderInquiries;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
 
+    async function createOrder(number) {
+      try {
+        // let orderNumber = await getOrderNumber();
+        // let inquiryNumber = await getInquiryNumber();
+
+        // const [orderNumber, inquiryNumber] = await Promise.all([
+        //   orderNumberPromise,
+        //   inquiryNumberPromise,
+        // ]);
+
+        const orderInquiry = await orderService.createNewData({
+          status: orderStatusEnum.fresh,
+          orderNumber: number,
+          inquiryNumber: number,
+          isOrderAssigned: false,
+          assignDealerId: null,
+          assignWarehouseId: null,
+          approved: true,
+          agentId: new mongoose.Types.ObjectId("654498d3ec8e20a0d5839cc2"),
+          agentName: "rishabh.gour",
+          recordingStartTime: "",
+          recordingEndTime: "",
+          callCenterId: new mongoose.Types.ObjectId("659e42b7bff59102efc2610f"),
+          branchId: new mongoose.Types.ObjectId("65449836ec8e20a0d5839ca8"),
+          paymentMode: paymentModeType.COD,
+          companyId: new mongoose.Types.ObjectId("65449733ec8e20a0d5839c80"),
+          didNo: "6629300",
+          mobileNo: number,
+          autoFillingShippingAddress:
+            "452009 madhya pradesh indore gopur indore juni indore 48 satydev gopur square",
+          campaign: "DHUANDHAAR",
+          customerName: `67895698${number}`,
+          stateId: new mongoose.Types.ObjectId("6544f2efec8e20a0d583a706"),
+          districtId: new mongoose.Types.ObjectId("6544f2f6ec8e20a0d583a711"),
+          tehsilId: new mongoose.Types.ObjectId("6544f2ffec8e20a0d583a71d"),
+          schemeId: new mongoose.Types.ObjectId("65a226098498855e300a9da5"),
+          pincodeId: new mongoose.Types.ObjectId("6615152ea1573d5c6d368435"),
+          areaId: new mongoose.Types.ObjectId("66151546a1573d5c6d368447"),
+          dispositionLevelTwoId: new mongoose.Types.ObjectId(
+            "65657c9abeb786fdae16ac3d"
+          ),
+          dispositionLevelThreeId: new mongoose.Types.ObjectId(
+            "66151546a1573d5c6d368447"
+          ),
+        });
+
+        return orderInquiry;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    try {
+      const orderInquiries = await createOrders();
       return res.status(httpStatus.OK).send({
-        message: "Updated successfully.",
-        data: dataCreated,
+        message: "created successfully.",
+        data: orderInquiries,
         status: true,
         code: "OK",
         issue: null,
       });
-    } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    } catch (error) {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
     }
   } catch (err) {
-    let errData = errorRes(err);
+    let errData = errorResponse(err); // Assuming it's errorResponse instead of errorRes
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
     return res
@@ -110,6 +167,7 @@ exports.add = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 // =============update  start================
 exports.update = async (req, res) => {
   try {
@@ -324,10 +382,7 @@ exports.updateDealerNdr = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Invalid NDR call disposition`);
     }
     let orderStatusIs = "";
-    console.log(
-      ndrDispositionFound.rtoAttempt,
-      "ndrDispositionFound.rtoAttempt"
-    );
+
     switch (ndrDispositionFound.rtoAttempt) {
       case subDispositionNDR.attempt:
         orderStatusIs = orderStatusEnum.reattempt;
@@ -336,7 +391,6 @@ exports.updateDealerNdr = async (req, res) => {
         orderStatusIs = orderStatusEnum.rto;
         break;
       case subDispositionNDR.cancel:
-        console.log("in");
         orderStatusIs = orderStatusEnum.cancel;
         break;
       case subDispositionNDR.hold:
@@ -346,11 +400,8 @@ exports.updateDealerNdr = async (req, res) => {
         orderStatusIs = orderStatusEnum.hold;
         break;
       default:
-        console.log("nothing");
         break;
     }
-
-    console.log(orderStatusIs, "orderStatusIs");
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
@@ -1059,7 +1110,7 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     let pscDate = status === orderStatusEnum.psc ? new Date() : "";
-    console.log(pscDate, "pscDate");
+
     let dataUpdated = await orderService
       .getOneAndUpdate(
         {
@@ -1533,7 +1584,7 @@ exports.getMultipleOrder = async (req, res) => {
         orderNumber: { $in: orderNumbers },
       });
     }
-    console.log(matchQuery, "matchQuery");
+
     let additionalQuery = [
       {
         $match: matchQuery,
@@ -4359,6 +4410,7 @@ exports.getByMobileNumber = async (req, res) => {
       matchQuery.$or = [
         { mobileNo: contactNumber },
         { alternateNo: contactNumber },
+        // { alternateNo: complaintNumber },
       ];
     }
 
@@ -5052,7 +5104,6 @@ exports.allFilterPagination = async (req, res) => {
       });
     }
     if (req.userData.userRole === userRoleType.EXECUTIVEArea) {
-      console.log("in...");
       let allDealers = await dealerService.findAllWithQuery({
         isActive: true,
         isDeleted: false,
@@ -5135,7 +5186,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = ["firstCallApproval"];
+    let booleanFields = ["firstCallApproval", "isUrgentOrder"];
     let numberFileds = ["orderNumber", "inquiryNumber"];
     let objectIdFields = [
       "dispositionLevelTwoId",
@@ -5190,7 +5241,7 @@ exports.allFilterPagination = async (req, res) => {
       callbackDateFilter,
       allowedCallbackDateFiletrKeys
     );
-    // console.log(matchQuery, "matchQuery");
+    //
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
@@ -5582,7 +5633,7 @@ exports.allFilterPagination = async (req, res) => {
         ],
       },
     ];
-
+    // let additionalQuery = [];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
@@ -5590,11 +5641,10 @@ exports.allFilterPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    console.log(matchQuery, "matchQuery");
+
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
-      console.log("herere....");
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
@@ -5622,13 +5672,12 @@ exports.allFilterPagination = async (req, res) => {
 
     let finalData = [];
     // check for zonal manager and zonal exicutive
-    console.log(dealersOfZonalManager, "dealersOfZonalManager");
+
     if (
       req.userData.userRole === userRoleType.srManagerDistribution ||
       req.userData.userRole === userRoleType.managerArea
     ) {
       allowedFields?.forEach((ele) => {
-        console.log(ele?.assignDealerId, "ele?.assignDealerId");
         if (
           ele?.assignDealerId !== null &&
           dealersOfZonalManager.includes(ele?.assignDealerId?.toString())
@@ -5657,7 +5706,7 @@ exports.allFilterPagination = async (req, res) => {
       req.userData.userRole === userRoleType.EXECUTIVEArea
         ? finalData
         : allowedFields;
-    console.log(finalData, "finalData");
+
     if (dataToShow?.length) {
       return res.status(200).send({
         data: dataToShow,
@@ -5853,7 +5902,7 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
       callbackDateFilter,
       allowedCallbackDateFiletrKeys
     );
-    // console.log(matchQuery, "matchQuery");
+    //
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
@@ -6236,11 +6285,10 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    console.log(finalAggregateQuery, "finalAggregateQuery");
+
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
-      console.log("herere....");
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
@@ -7702,7 +7750,7 @@ exports.dealerOrderStatusChange = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let pscDate = status === orderStatusEnum.psc ? new Date() : "";
-    console.log(pscDate, "pscDate");
+
     let orderUpdated = await orderService.getOneAndUpdate(
       { _id },
       {

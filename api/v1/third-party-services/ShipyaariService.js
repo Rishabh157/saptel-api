@@ -58,7 +58,6 @@ const confirmOrderShipYaari = async (data) => {
 
 const getShipyaariToken = async () => {
   try {
-    console.log("innn", config.shipyaari_email, config.shipyaari_password);
     const HEADER = {
       "Content-Type": "application/json",
     };

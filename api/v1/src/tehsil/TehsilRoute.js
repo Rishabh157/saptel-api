@@ -2,7 +2,10 @@ const router = require("express").Router();
 const tehsilController = require("./TehsilController");
 const validate = require("../../middleware/validate");
 const tehsilValidation = require("./TehsilValidation");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -25,6 +28,15 @@ router.get("/inbound", validate(tehsilValidation.get), tehsilController.get);
 router.get(
   "/get-district-tehsil/:id",
   authCheckMiddleware,
+  validate(tehsilValidation.get),
+  tehsilController.getTehsilByDistrict
+);
+/**
+ * get all tehsil of a district for dealer panel
+ */
+router.get(
+  "/dealer/get-district-tehsil/:id",
+  authCheckDealerMiddleware,
   validate(tehsilValidation.get),
   tehsilController.getTehsilByDistrict
 );

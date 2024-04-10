@@ -4,7 +4,7 @@ const validate = require("../../middleware/validate");
 const deliveryBoyValidation = require("./DeliveryBoyValidation");
 const {
   authCheckDealerMiddleware,
-
+  authCheckMiddleware,
   otpVerifyToken,
 } = require("../../middleware/authenticationCheck");
 
@@ -15,6 +15,16 @@ const {
 router.get(
   "/",
   authCheckDealerMiddleware,
+  validate(deliveryBoyValidation.get),
+  deliveryBoyController.get
+);
+
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/get-delivery-boy",
+  authCheckMiddleware,
   validate(deliveryBoyValidation.get),
   deliveryBoyController.get
 );

@@ -185,8 +185,8 @@ router.post(
 //===============create new document===============
 // router.post(
 //   "/add",
-//   authCheckMiddleware,
-//   validate(orderValidation.create),
+//   // authCheckMiddleware,
+//   // validate(orderValidation.create),
 //   orderController.add
 // );
 

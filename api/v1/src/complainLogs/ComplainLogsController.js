@@ -445,7 +445,6 @@ exports.getLogs = async (req, res) => {
   try {
     //if no default query then pass {}
     let complaintId = req.params.complaintId;
-    console.log(complaintId, "complaintId");
     let matchQuery = {
       isDeleted: false,
       complainId: new mongoose.Types.ObjectId(complaintId),

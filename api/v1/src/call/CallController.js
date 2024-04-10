@@ -387,7 +387,6 @@ exports.update = async (req, res) => {
 
     // ---------map for order-------
     let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
-    console.log("flagflagflagflag", flag);
     let prepaidOrderFlag = await isPrepaid(
       dispositionThreeData[0]?.applicableCriteria
     );
@@ -402,12 +401,9 @@ exports.update = async (req, res) => {
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
 
-    console.log(dealerServingPincode, "dealerServingPincode");
-    console.log(servingWarehouse, "servingWarehouse");
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
 
-    console.log(isUserExists, "isUserExists");
     try {
       const orderInquiry = await orderService.createNewData({
         ...req.body,
@@ -438,6 +434,9 @@ exports.update = async (req, res) => {
         paymentMode: prepaidOrderFlag
           ? paymentModeType.UPI_ONLINE
           : paymentModeType.COD,
+        isUrgentOrder:
+          dispositionThreeData[0]?.applicableCriteria ===
+          applicableCriteria.isUrgent,
         // dealerAssignedId: dealerId,
       });
 
@@ -471,11 +470,6 @@ exports.update = async (req, res) => {
       );
 
       if (dataUpdated) {
-        console.log(
-          agentName,
-          mobileNo,
-          isDispositionThreeExists?.dispositionName
-        );
         await axios.post(
           "https://uat.onetelemart.com/agent/v2/click-2-hangup",
           {

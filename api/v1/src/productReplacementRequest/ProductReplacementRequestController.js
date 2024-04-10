@@ -100,7 +100,6 @@ exports.add = async (req, res) => {
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {
-    console.log("ioduf");
     var dateFilter = req.body.dateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;

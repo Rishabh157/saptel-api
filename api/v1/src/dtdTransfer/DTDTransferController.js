@@ -2,11 +2,8 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const batchService = require("./BatchService");
-const orderService = require("../orderInquiry/OrderInquiryService");
-const userService = require("../user/UserService");
-const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
-const { searchKeys } = require("./BatchSchema");
+const dtdTransferService = require("./DTDTransferService");
+const { searchKeys } = require("./DTDTransferSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -19,55 +16,21 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { getInquiryNumber } = require("./BatchHelper");
-const { default: axios } = require("axios");
-const { userEnum } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { orders, batchAssignedTo } = req.body;
+    let { dtdNumber } = req.body;
     /**
      * check duplicate exist
      */
-    let isUserExists = await userService?.getOneByMultiField({
-      _id: batchAssignedTo,
-      isActive: true,
-      isDeleted: false,
-    });
-    if (!isUserExists) {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Invalid user`);
+    let dataExist = await dtdTransferService.isExists([{ dtdNumber }]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    let batchNumber = await getInquiryNumber();
     //------------------create data-------------------
-    let dataCreated = await batchService.createNewData({
-      orders,
-      batchCreatedBy: req.userData.Id,
-      batchNumber: batchNumber,
-      batchAssignedTo: batchAssignedTo,
-    });
-    if (dataCreated) {
-      // Map over orders and create an array of promises
-      let orderPromises = orders?.map(async (ele) => {
-        let updatedOrder = await orderService?.getOneAndUpdate(
-          { _id: ele },
-          {
-            $set: {
-              batchId: dataCreated?._id,
-            },
-          }
-        );
-        await orderInquiryFlowService.createNewData({
-          ...updatedOrder, // Assuming updatedOrder is not undefined
-          orderId: updatedOrder?._id,
-          batchId: dataCreated?._id,
-        });
-      });
-
-      // Await all the promises
-      await Promise.all(orderPromises);
-    }
+    let dataCreated = await dtdTransferService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -93,22 +56,22 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { batchNumber, batchCreatedBy, orders } = req.body;
+    let { dtdNumber } = req.body;
 
     let idToBeSearch = req.params.id;
-    let dataExist = await batchService.isExists([{ batchNumber }]);
+    let dataExist = await dtdTransferService.isExists([{ dtdNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------Find data-------------------
-    let datafound = await batchService.getOneByMultiField({
+    let datafound = await dtdTransferService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Batch not found.`);
+      throw new ApiError(httpStatus.OK, `DtdTransfer not found.`);
     }
 
-    let dataUpdated = await batchService.getOneAndUpdate(
+    let dataUpdated = await dtdTransferService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
@@ -167,11 +130,7 @@ exports.allFilterPagination = async (req, res) => {
       req.body.orderBy,
       req.body.orderByValue
     );
-    if (req.userData.userRole !== userEnum.admin) {
-      matchQuery.$and.push({
-        batchAssignedTo: new mongoose.Types.ObjectId(req.userData.Id),
-      });
-    }
+
     //----------------------------
 
     /**
@@ -205,9 +164,15 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = [];
-    let numberFileds = ["batchNumber"];
-    let objectIdFields = ["batchCreatedBy"];
+    let booleanFields = ["requestApproved"];
+    let numberFileds = [];
+    let objectIdFields = [
+      "fromDealerId",
+      "toDealerId",
+      "requestCreatedBy",
+      "requestApprovedBy",
+      "companyId",
+    ];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -243,27 +208,79 @@ exports.allFilterPagination = async (req, res) => {
       {
         $lookup: {
           from: "users",
-          localField: "batchCreatedBy",
+          localField: "requestCreatedBy",
           foreignField: "_id",
-          as: "batchCreatedData",
+          as: "req_created_data",
           pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
         },
       },
-
+      {
+        $lookup: {
+          from: "users",
+          localField: "requestApprovedBy",
+          foreignField: "_id",
+          as: "req_approved_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "fromDealerId",
+          foreignField: "_id",
+          as: "from_dealer_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "toDealerId",
+          foreignField: "_id",
+          as: "to_dealer_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
       {
         $addFields: {
-          batchCreatedByLabel: {
+          requestCreatedByLabel: {
             $concat: [
-              { $arrayElemAt: ["$batchCreatedData.firstName", 0] },
+              { $arrayElemAt: ["$req_created_data.firstName", 0] },
               " ",
-              { $arrayElemAt: ["$batchCreatedData.lastName", 0] },
+              { $arrayElemAt: ["$req_created_data.lastName", 0] },
+            ],
+          },
+          requestApprovedByLabel: {
+            $concat: [
+              { $arrayElemAt: ["$req_approved_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$req_approved_data.lastName", 0] },
+            ],
+          },
+          fromDealerLabelLabel: {
+            $concat: [
+              { $arrayElemAt: ["$from_dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$from_dealer_data.lastName", 0] },
+            ],
+          },
+          toDealerLabelLabel: {
+            $concat: [
+              { $arrayElemAt: ["$to_dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$to_dealer_data.lastName", 0] },
             ],
           },
         },
       },
 
       {
-        $unset: ["batchCreatedData"],
+        $unset: [
+          "req_created_data",
+          "req_approved_data",
+          "from_dealer_data",
+          "to_dealer_data",
+        ],
       },
     ];
 
@@ -276,8 +293,9 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await batchService.aggregateQuery(finalAggregateQuery);
-
+    let dataFound = await dtdTransferService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -296,7 +314,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await batchService.aggregateQuery(finalAggregateQuery);
+    let result = await dtdTransferService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -327,8 +345,88 @@ exports.get = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "users",
+          localField: "requestCreatedBy",
+          foreignField: "_id",
+          as: "req_created_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "requestApprovedBy",
+          foreignField: "_id",
+          as: "req_approved_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "fromDealerId",
+          foreignField: "_id",
+          as: "from_dealer_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "toDealerId",
+          foreignField: "_id",
+          as: "to_dealer_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $addFields: {
+          requestCreatedByLabel: {
+            $concat: [
+              { $arrayElemAt: ["$req_created_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$req_created_data.lastName", 0] },
+            ],
+          },
+          requestApprovedByLabel: {
+            $concat: [
+              { $arrayElemAt: ["$req_approved_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$req_approved_data.lastName", 0] },
+            ],
+          },
+          fromDealerLabelLabel: {
+            $concat: [
+              { $arrayElemAt: ["$from_dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$from_dealer_data.lastName", 0] },
+            ],
+          },
+          toDealerLabelLabel: {
+            $concat: [
+              { $arrayElemAt: ["$to_dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$to_dealer_data.lastName", 0] },
+            ],
+          },
+        },
+      },
 
-    let dataExist = await batchService.findAllWithQuery(matchQuery);
+      {
+        $unset: [
+          "req_created_data",
+          "req_approved_data",
+          "from_dealer_data",
+          "to_dealer_data",
+        ],
+      },
+    ];
+
+    let dataExist = await dtdTransferService.aggregateQuery(additionalQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -355,130 +453,101 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await batchService.getOneByMultiField({
-      _id: idToBeSearch,
-      isDeleted: false,
-    });
 
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist,
-        code: null,
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-// get batch orders
-exports.getBatchOrder = async (req, res) => {
-  try {
-    let batchid = req.params.batchid;
-    let dataExist = await batchService.getOneByMultiField({
-      _id: batchid,
-      isDeleted: false,
-    });
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Something went wrong");
-    }
-    let matchQuery = {
-      _id: { $in: dataExist?.orders },
-      isDeleted: false,
-      isActive: true,
-    };
-
-    let allOrders = await orderService?.aggregateQuery([
+    let additionalQuery = [
       {
-        $match: matchQuery,
+        $match: {
+          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          isDeleted: false,
+        },
       },
       {
         $lookup: {
-          from: "pincodes",
-          localField: "pincodeId",
+          from: "users",
+          localField: "requestCreatedBy",
           foreignField: "_id",
-          as: "pincodeData",
-          pipeline: [
-            {
-              $project: {
-                pincode: 1,
-              },
-            },
-          ],
+          as: "req_created_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "requestApprovedBy",
+          foreignField: "_id",
+          as: "req_approved_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
         },
       },
       {
         $lookup: {
           from: "dealers",
-          localField: "assignDealerId",
+          localField: "fromDealerId",
           foreignField: "_id",
-          as: "dealer_data",
-          pipeline: [
-            {
-              $project: {
-                firstName: 1,
-                lastName: 1,
-                dealerCode: 1,
-                isActive: 1,
-              },
-            },
-          ],
+          as: "from_dealer_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
         },
       },
       {
         $lookup: {
-          from: "warehouses",
-          localField: "assignWarehouseId",
+          from: "dealers",
+          localField: "toDealerId",
           foreignField: "_id",
-          as: "warehouse_data",
-          pipeline: [
-            {
-              $project: {
-                wareHouseName: 1,
-              },
-            },
-          ],
+          as: "to_dealer_data",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
         },
       },
       {
         $addFields: {
-          pincodeLabel: {
-            $arrayElemAt: ["$pincodeData.pincode", 0],
-          },
-          assignWarehouseLabel: {
-            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
-          },
-          assignDealerLabel: {
+          requestCreatedByLabel: {
             $concat: [
-              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              { $arrayElemAt: ["$req_created_data.firstName", 0] },
               " ",
-              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+              { $arrayElemAt: ["$req_created_data.lastName", 0] },
+            ],
+          },
+          requestApprovedByLabel: {
+            $concat: [
+              { $arrayElemAt: ["$req_approved_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$req_approved_data.lastName", 0] },
+            ],
+          },
+          fromDealerLabelLabel: {
+            $concat: [
+              { $arrayElemAt: ["$from_dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$from_dealer_data.lastName", 0] },
+            ],
+          },
+          toDealerLabelLabel: {
+            $concat: [
+              { $arrayElemAt: ["$to_dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$to_dealer_data.lastName", 0] },
             ],
           },
         },
       },
-      {
-        $unset: ["pincodeData", "warehouse_data", "dealer_data"],
-      },
-    ]);
 
-    if (!allOrders) {
+      {
+        $unset: [
+          "req_created_data",
+          "req_approved_data",
+          "from_dealer_data",
+          "to_dealer_data",
+        ],
+      },
+    ];
+    let dataExist = await dtdTransferService.aggregateQuery(additionalQuery);
+
+    if (!dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allOrders,
+        data: dataExist[0],
         code: null,
         issue: null,
       });
@@ -497,10 +566,10 @@ exports.getBatchOrder = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await batchService.getOneByMultiField({ _id }))) {
+    if (!(await dtdTransferService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await batchService.getOneAndDelete({ _id });
+    let deleted = await dtdTransferService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -524,13 +593,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await batchService.getOneByMultiField({ _id });
+    let dataExist = await dtdTransferService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await batchService.getOneAndUpdate(
+    let statusChanged = await dtdTransferService.getOneAndUpdate(
       { _id },
       { isActive }
     );

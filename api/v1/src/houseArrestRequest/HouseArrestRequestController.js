@@ -73,7 +73,6 @@ exports.add = async (req, res) => {
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "Invalid order number");
     }
-    console.log(orderData, "orderData");
 
     // valid IC 2
     const isIc2Exists = await initialCallTwoService?.getOneByMultiField({
@@ -881,7 +880,7 @@ exports.getById = async (req, res) => {
 exports.ccInfoUpdate = async (req, res) => {
   try {
     let { settledAmount, ccRemark, id, oldOrderNumber } = req.body;
-    console.log(typeof oldOrderNumber, "oldOrderNumber");
+
     let dataExist = await houseArrestRequestService.findCount({
       _id: id,
       isDeleted: false,
@@ -912,7 +911,7 @@ exports.ccInfoUpdate = async (req, res) => {
         })
       );
     }
-    console.log(orderData, "orderData");
+
     let updatedData = await houseArrestRequestService.getOneAndUpdate(
       { _id: id },
       {

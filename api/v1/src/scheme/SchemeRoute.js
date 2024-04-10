@@ -2,15 +2,28 @@ const router = require("express").Router();
 const schemeController = require("./SchemeController");
 const validate = require("../../middleware/validate");
 const schemeValidation = require("./SchemeValidation");
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
  * get one document (if query) / all documents
  */
 router.get(
-  "/company/:companyid",
+  "/",
   authCheckMiddleware,
+  validate(schemeValidation.get),
+  schemeController.get
+);
+
+/**
+ * get all for dealer panel
+ */
+router.get(
+  "/get-scheme-data",
+  authCheckDealerMiddleware,
   validate(schemeValidation.get),
   schemeController.get
 );

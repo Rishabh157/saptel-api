@@ -197,7 +197,7 @@ exports.schemeToDealer = async (req, res) => {
           let allDealerPincodes = dealerPincodes?.map((dpin) => {
             return dpin.pincode;
           });
-          console.log(allDealerPincodes, "allDealerPincodes");
+
           if (allDealerPincodes.length) {
             return {
               dealerId: dealer,
@@ -210,7 +210,7 @@ exports.schemeToDealer = async (req, res) => {
       })
     );
     const filteredOutput = output.filter((item) => item !== undefined);
-    console.log(filteredOutput, "filteredOutput");
+
     let dataCreated = await dealerSchemeService.createMany(filteredOutput);
     await dealerSchemeService.deleteMany(delaerSchemeToDelete);
     if (dataCreated) {
@@ -294,7 +294,6 @@ exports.DealerToscheme = async (req, res) => {
       return dpin.pincode;
     });
 
-    console.log(isSchemeToRemoveExists, "isSchemeToRemoveExists");
     // schemes to remove
     const delaerSchemeToDelete = await Promise.all(
       schemesToRemove?.map(async (scheme) => {
@@ -310,8 +309,6 @@ exports.DealerToscheme = async (req, res) => {
         }
       })
     );
-
-    console.log(delaerSchemeToDelete, "delaerSchemeToDelete");
 
     //------------------create data-------------------
     const output = await Promise.all(
@@ -906,7 +903,7 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
   try {
     let { pid, sid } = req.params;
     let cid = req.userData.companyId;
-    console.log(req.userData, "userData", pid, cid, sid);
+
     //if no default query then pass {}
     let matchQuery = {
       isDeleted: false,
@@ -956,15 +953,13 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
     let getAllScheme = await dealerSchemeService.aggregateQuery(
       additionalQuery
     );
-    console.log(getAllScheme, "getAllScheme");
+
     let newAllSchemes = getAllScheme?.filter((ele) => {
       if (ele?.dealerName) {
         return ele;
       }
     });
-    console.log(newAllSchemes, "newAllSchemes");
 
-    console.log(cid);
     let getAllCompanyWarehouse = await warehouseService.aggregateQuery([
       {
         $match: {

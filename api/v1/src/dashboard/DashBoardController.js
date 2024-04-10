@@ -120,14 +120,12 @@ exports.getAgentDashboardData = async (req, res) => {
       isUserExists?.userRole,
       Id
     );
-    console.log(complainAggrigationNewQuery, "complainAggrigationNewQuery");
 
     if (complainAggrigationNewQuery) {
       complainAggrigation = [
         ...complainAggrigation,
         ...complainAggrigationNewQuery,
       ];
-      console.log(complainAggrigation, "complainAggrigation");
       var numberOfComplaintCalls = await complaintService.aggregateQuery(
         complainAggrigation
       );

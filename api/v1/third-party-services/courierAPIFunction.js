@@ -53,7 +53,6 @@ const assignOrderToCourier = async (
 ) => {
   try {
     let orderAssigned = false;
-    console.log(schemeData, "schemeData");
     switch (preferredCourier) {
       case preferredCourierPartner.shipyaari:
         let shipYaariOrderData = {
@@ -87,7 +86,7 @@ const assignOrderToCourier = async (
                 {
                   name: schemeData?.schemeName,
                   category: categorydata?.categoryName,
-                  sku: "abc", // to be discuss
+                  sku: "abc", // schem code
                   qty: orderData?.shcemeQuantity,
                   unitPrice: orderData?.price,
                   unitTax: 0, // to be discuss
@@ -114,7 +113,7 @@ const assignOrderToCourier = async (
           orderType: "B2C",
           transit: "FORWARD",
           courierPartner: "",
-          pickupDate: convertEpochTime(orderData?.preffered_delivery_date), // to be discuss
+          pickupDate: convertEpochTime(orderData?.preffered_delivery_date), // today date
           gstNumber: "",
           orderId: "",
           eWayBillNo: 0,

@@ -259,7 +259,7 @@ exports.login = async (req, res) => {
     }
     let matched = await bcrypt.compare(password, dataFound.password);
     if (!matched) {
-      throw new ApiError(httpStatus.OK, `Invalid Pasword!`);
+      throw new ApiError(httpStatus.OK, `Invalid Password!`);
     }
     let {
       _id: dealerId,
@@ -1131,7 +1131,6 @@ exports.getZmeDealers = async (req, res) => {
       userRoleData,
       actionType.listAll
     );
-    console.log(additionalQuery, "additionalQuery");
     let dataExist = await dealerService.aggregateQuery(additionalQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 

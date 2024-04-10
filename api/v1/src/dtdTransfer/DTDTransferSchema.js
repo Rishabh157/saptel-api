@@ -1,44 +1,31 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const { productStatus } = require("../../helper/enumUtils");
-const WtwMasterSchema = new mongoose.Schema(
+const DtdTransferSchema = new mongoose.Schema(
   {
-    wtNumber: { type: String, required: false, trim: true },
-    fromWarehouseId: { type: ObjectId, required: true },
-    toWarehouseId: { type: ObjectId, required: true },
-    firstApprovedById: {
+    dtdNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      uppercase: true,
+    },
+    fromDealerId: {
       type: ObjectId,
-      default: null,
+      required: true,
+      trim: true,
     },
-    firstApproved: {
-      type: Boolean,
-      default: null,
-    },
-    firstApprovedActionBy: {
-      type: String,
-      default: "",
-    },
-    firstApprovedAt: {
-      type: String,
-      default: "",
-    },
-    secondApprovedById: {
+    toDealerId: {
       type: ObjectId,
-      default: null,
+      required: true,
+      trim: true,
     },
-    secondApproved: {
-      type: Boolean,
-      default: null,
-    },
-    secondApprovedActionBy: {
+    remark: {
       type: String,
       default: "",
+      trim: true,
+      lowercase: true,
     },
-    secondApprovedAt: {
-      type: String,
-      default: "",
-    },
-    productSalesOrder: {
+    productDetails: {
       type: {
         productGroupId: {
           type: ObjectId,
@@ -66,12 +53,10 @@ const WtwMasterSchema = new mongoose.Schema(
       ],
       default: productStatus.notDispatched,
     },
-    remark: { type: String, default: "", trim: true, lowercase: true },
-    companyId: {
-      type: ObjectId,
-      required: true,
-      trim: true,
-    },
+    requestCreatedBy: { type: ObjectId, required: true, trim: true },
+    requestApprovedBy: { type: ObjectId, default: null },
+    requestApproved: { type: Boolean, default: false },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -87,13 +72,16 @@ const WtwMasterSchema = new mongoose.Schema(
 );
 
 const searchKeys = [
-  "wtNumber",
-  "fromWarehouseId",
-  "toWarehouseId",
-  "productGroupId",
+  "dtdNumber",
+  "fromDealerId",
+  "toDealerId",
   "remark",
+  "productDetails",
+  "status",
+  "requestCreatedBy",
+  "requestApprovedBy",
+  "requestApproved",
+  "companyId",
 ];
-module.exports = mongoose.model("WtwMaster", WtwMasterSchema);
+module.exports = mongoose.model("DtdTransfer", DtdTransferSchema);
 module.exports.searchKeys = [...searchKeys];
-
-// model schema ends here

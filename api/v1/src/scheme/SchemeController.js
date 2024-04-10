@@ -390,8 +390,8 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
-
+    let companyId = req.userData.companyId;
+    console.log(req.userData, "companyId");
     //if no default query then pass {}
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -437,22 +437,22 @@ exports.get = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.scheme,
-      userRoleData,
-      actionType.listAll
-    );
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.scheme,
+    //   userRoleData,
+    //   actionType.listAll
+    // );
     let dataExist = await schemeService.aggregateQuery(additionalQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    // let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields?.length) {
+    if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields,
+        data: dataExist,
         code: "OK",
         issue: null,
       });

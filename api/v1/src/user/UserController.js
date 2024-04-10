@@ -330,7 +330,6 @@ exports.updateUser = async (req, res) => {
     //     `You do not have authority to access this.`
     //   );
     // }
-    console.log("ye wali");
 
     let idToBeSearch = req.params.id;
 
@@ -374,21 +373,19 @@ exports.updateUser = async (req, res) => {
           userId: datafound?._id,
         });
         const tokenKey = `${datafound?._id}*`;
-        console.log(tokenKey, "tokenKey");
+
         const allRedisValue = await redisClient.keys(tokenKey);
-        console.log(allRedisValue, "allRedisValue");
 
         const deletePromises = allRedisValue?.map(
           async (key) => await redisClient.del(key)
         );
         await Promise.all(deletePromises);
-        console.log(deletePromises, "deletePromises");
       } catch (error) {
         console.error("Error deleting keys:", error);
         // Handle error here, such as logging or sending alerts
       }
     }
-    console.log("here>...");
+
     if (mobile.length) {
       req.body.maskedPhoneNo = "******" + req.body.mobile.substring(6);
     } else {

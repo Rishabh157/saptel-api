@@ -500,6 +500,10 @@ const OrderInquirySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isUrgentOrder: {
+      type: Boolean,
+      default: false,
+    },
     orderAssignedToCourier: {
       type: String,
       enum: [preferredCourierPartner.shipyaari, ""],
@@ -519,18 +523,7 @@ const OrderInquirySchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = [
-  "didNo",
-  "schemeLabel",
-  "alternateNo",
-  "mobileNo",
-  "callType",
-  "campaign",
-  "paymentMode",
-  "whatsappNo",
-  "dispositionLevelTwoId",
-  "dispositionLevelThreeId",
-];
+const searchKeys = ["schemeLabel", "mobileNo", "callType", "campaign"];
 
 module.exports = mongoose.model("OrderInquiry", OrderInquirySchema);
 module.exports.searchKeys = [...searchKeys];

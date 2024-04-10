@@ -62,6 +62,7 @@ exports.dealerTokenCreate = async (tokenData) => {
       firstName: tokenData.firstName,
       lastName: tokenData.lastName,
       email: tokenData.email,
+      companyId: tokenData.companyId,
 
       tokenType: tokenEnum.login,
     },
@@ -80,6 +81,8 @@ exports.dealerRefreshTokenCreate = async (tokenData) => {
       firstName: tokenData.firstName,
       lastName: tokenData.lastName,
       email: tokenData.email,
+      companyId: tokenData.companyId,
+
       tokenType: tokenEnum.login,
     },
     config.jwt_dealer_secret_refresh,

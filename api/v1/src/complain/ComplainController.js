@@ -71,7 +71,6 @@ exports.add = async (req, res) => {
       orderNumber,
       icOne: new mongoose.Types.ObjectId(icOne),
     });
-    console.log(dataExist, "dataExist");
     if (dataExist) {
       throw new ApiError(
         httpStatus.OK,

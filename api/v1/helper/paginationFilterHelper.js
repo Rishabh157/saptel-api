@@ -110,7 +110,6 @@ const getFilterQuery = (
   numberFileds,
   objectIdFields
 ) => {
-  console.log(filterBy, "filterBy");
   let queryArray = [];
   objectIdFields =
     objectIdFields && Array.isArray(objectIdFields) ? objectIdFields : [];
@@ -215,7 +214,7 @@ const getFilterQuery = (
 };
 const getDateFilterQuery = (dateFilter, allowedDateFiletrKeys) => {
   let queryArray = [];
-  console.log(dateFilter, "here");
+
   if (
     dateFilter !== undefined &&
     dateFilter !== null &&
@@ -246,7 +245,6 @@ const getDateFilterQuery = (dateFilter, allowedDateFiletrKeys) => {
       dateFilter.startDate = dateFilter.endDate;
     }
     if (dateFilter.startDate !== "" && dateFilter.endDate !== "") {
-      console.log(dateFilter, "dateFilter");
       queryArray.push({
         [dateFilter.dateFilterKey]: {
           $gte: new Date(`${moment(dateFilter.startDate).startOf("day")}`),

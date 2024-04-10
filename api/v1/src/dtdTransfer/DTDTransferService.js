@@ -1,13 +1,13 @@
-const OrderSchema = require("./OrderInquirySchema");
+const DtdTransfer = require("./DTDTransferSchema");
 const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return OrderSchema.findOne({ [fieldName]: fieldValue, isDeleted: false });
+  return DtdTransfer.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
 
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return OrderSchema.findOne(
+  return DtdTransfer.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
@@ -16,17 +16,17 @@ const getOneByMultiField = async (matchObj, projectObj) => {
 //-------------------------------------------
 
 const createNewData = async (bodyData) => {
-  return OrderSchema.create({ ...bodyData });
+  return DtdTransfer.create({ ...bodyData });
 };
 //-------------------------------------------
 
 const getById = async (id) => {
-  return OrderSchema.findById(id);
+  return DtdTransfer.findById(id);
 };
 //-------------------------------------------
 
 const getByIdAndUpdate = async (id, updateBody) => {
-  return OrderSchema.findByIdAndUpdate(
+  return DtdTransfer.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -35,7 +35,7 @@ const getByIdAndUpdate = async (id, updateBody) => {
 //-------------------------------------------
 
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return OrderSchema.findOneAndUpdate(
+  return DtdTransfer.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -44,7 +44,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return OrderSchema.updateOne(
+  return DtdTransfer.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -53,12 +53,12 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const getByIdAndDelete = async (id) => {
-  return OrderSchema.findByIdAndDelete(id);
+  return DtdTransfer.findByIdAndDelete(id);
 };
 //-------------------------------------------
 
 const getOneAndDelete = async (matchObj) => {
-  return OrderSchema.findOneAndUpdate(
+  return DtdTransfer.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -67,31 +67,27 @@ const getOneAndDelete = async (matchObj) => {
 //-------------------------------------------
 
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return OrderSchema.find({ ...matchObj, isDeleted: false }, { ...projectObj });
+  return DtdTransfer.find({ ...matchObj, isDeleted: false }, { ...projectObj });
 };
 //-------------------------------------------
 
 const findAll = async () => {
-  return OrderSchema.find();
+  return DtdTransfer.find();
 };
 //-------------------------------------------
 
 const aggregateQuery = async (aggregateQueryArray) => {
-  return OrderSchema.aggregate(aggregateQueryArray, { maxTimeMS: 3000 })
-    .allowDiskUse(true)
-    .cursor({ batchSize: 1000 })
-    .toArray();
+  return DtdTransfer.aggregate(aggregateQueryArray);
 };
-
 //-------------------------------------------
 
 const createMany = async (insertDataArray) => {
-  return OrderSchema.insertMany(insertDataArray);
+  return DtdTransfer.insertMany(insertDataArray);
 };
 //-------------------------------------------
 
 const findCount = async (matchObj) => {
-  return OrderSchema.find({ ...matchObj, isDeleted: false }).count();
+  return DtdTransfer.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
 
