@@ -5,6 +5,7 @@ const dtdTransferValidation = require("./DTDTransferValidation");
 
 const {
   authCheckMiddleware,
+  authCheckDealerMiddleware,
   otpVerifyToken,
 } = require("../../middleware/authenticationCheck");
 
@@ -31,6 +32,25 @@ router.post(
   dtdTransferController.allFilterPagination
 );
 
+// grooup by
+router.post(
+  "/groupby",
+  authCheckMiddleware,
+  validate(dtdTransferValidation.getAllFilter),
+  dtdTransferController.allFilterGroupPagination
+);
+
+// grooup by for dealer panel
+router.post(
+  "/dealer/groupby",
+  authCheckDealerMiddleware,
+  validate(dtdTransferValidation.getAllFilter),
+  dtdTransferController.allFilterGroupPagination
+);
+/**
+ * get all dtdTransfer pagination filter for dealer panel
+ */
+
 /**
  * create new document
  */
@@ -45,7 +65,7 @@ router.post(
  * update document
  */
 router.put(
-  "/:id",
+  "/update-dtd",
 
   authCheckMiddleware,
   validate(dtdTransferValidation.update),
@@ -56,7 +76,7 @@ router.put(
  * get by id
  */
 router.get(
-  "/:id",
+  "/:dtdNo",
 
   authCheckMiddleware,
   validate(dtdTransferValidation.getById),
@@ -72,12 +92,21 @@ router.put(
   validate(dtdTransferValidation.changeStatus),
   dtdTransferController.statusChange
 );
+
+/**
+ * update approve
+ */
+router.put(
+  "/approve-dtd/:dtdNo/status/:status",
+  authCheckMiddleware,
+  validate(dtdTransferValidation.approveStatus),
+  dtdTransferController.updateApprove
+);
 /**
  * delete document
  */
 router.delete(
-  "/:id",
-
+  "/:dtdNo",
   authCheckMiddleware,
   validate(dtdTransferValidation.deleteDocument),
   dtdTransferController.deleteDocument

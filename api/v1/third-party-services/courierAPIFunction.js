@@ -71,15 +71,15 @@ const assignOrderToCourier = async (
               name: orderData?.customerName,
               mobileNo: orderData?.mobileNo,
             },
-            gstNumber: "",
+            gstNumber: "", // warehuse gst number
           },
           boxInfo: [
             {
               name: "box_1", // to be discuss
               weightUnit: "Kg",
-              deadWeight: schemeData?.weight,
-              length: schemeData?.dimension?.depth,
-              breadth: schemeData?.dimension?.width,
+              deadWeight: schemeData?.weight, // multiply by quantity
+              length: schemeData?.dimension?.depth, // multiply by quantity
+              breadth: schemeData?.dimension?.width, // multiply by quantity
               height: schemeData?.dimension?.height,
               measureUnit: "cm",
               products: [
@@ -91,7 +91,7 @@ const assignOrderToCourier = async (
                   unitPrice: orderData?.price,
                   unitTax: 0, // to be discuss
                   weightUnit: "kg",
-                  deadWeight: schemeData?.weight,
+                  deadWeight: schemeData?.weight, // convert to kg
                   length: schemeData?.dimension?.depth,
                   breadth: schemeData?.dimension?.width,
                   height: schemeData?.dimension?.height,
@@ -100,8 +100,8 @@ const assignOrderToCourier = async (
               ],
               codInfo: {
                 isCod: orderData?.paymentmode === paymentModeType.COD,
-                collectableAmount: orderData?.price, // to be discuss
-                invoiceValue: orderData?.price, //to be discuss
+                collectableAmount: orderData?.price, // multiply be quantity
+                invoiceValue: orderData?.price, //multiply be quantity
               },
               podInfo: {
                 isPod: false, // to be discuss
@@ -115,10 +115,10 @@ const assignOrderToCourier = async (
           courierPartner: "",
           pickupDate: convertEpochTime(orderData?.preffered_delivery_date), // today date
           gstNumber: "",
-          orderId: "",
+          orderId: "", // order number
           eWayBillNo: 0,
-          brandName: "Telemart", // to be discuss
-          brandLogo: "", // to be discuss
+          brandName: "Telemart",
+          brandLogo: "", // telemart image
         };
 
         let orderAssignedToShipYaari = await confirmOrderShipYaari(

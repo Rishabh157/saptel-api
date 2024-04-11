@@ -55,7 +55,7 @@ const DtdTransferSchema = new mongoose.Schema(
     },
     requestCreatedBy: { type: ObjectId, required: true, trim: true },
     requestApprovedBy: { type: ObjectId, default: null },
-    requestApproved: { type: Boolean, default: false },
+    requestApproved: { type: Boolean, default: null },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
@@ -71,17 +71,6 @@ const DtdTransferSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = [
-  "dtdNumber",
-  "fromDealerId",
-  "toDealerId",
-  "remark",
-  "productDetails",
-  "status",
-  "requestCreatedBy",
-  "requestApprovedBy",
-  "requestApproved",
-  "companyId",
-];
+const searchKeys = ["dtdNumber", "fromDealerLabel", "toDealerLabel"];
 module.exports = mongoose.model("DtdTransfer", DtdTransferSchema);
 module.exports.searchKeys = [...searchKeys];

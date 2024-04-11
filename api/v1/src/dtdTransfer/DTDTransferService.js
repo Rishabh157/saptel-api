@@ -13,6 +13,14 @@ const getOneByMultiField = async (matchObj, projectObj) => {
   );
 };
 
+const updateMany = async (matchObj, updateBody) => {
+  return DtdTransfer.updateMany(
+    { ...matchObj },
+    { ...updateBody },
+    { new: true }
+  );
+};
+
 //-------------------------------------------
 
 const createNewData = async (bodyData) => {
@@ -148,4 +156,5 @@ module.exports = {
   createMany,
   findCount,
   isExists,
+  updateMany,
 };

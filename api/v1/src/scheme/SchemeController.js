@@ -540,7 +540,7 @@ exports.getDealerWiseScheme = async (req, res) => {
 //get api
 exports.getByProductGroup = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
+    let companyId = req.userData.companyId;
     let pgid = req.params.pgid;
     //if no default query then pass {}
     let matchQuery = {

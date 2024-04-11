@@ -17,11 +17,6 @@ const create = {
       rate: Joi.number().required(),
       quantity: Joi.number().required(),
     }),
-    status: Joi.string().lowercase().required(),
-    requestCreatedBy: Joi.required().custom(commonValidation.objectId),
-    requestApprovedBy: Joi.custom(commonValidation.objectId).allow(null),
-    requestApproved: Joi.boolean(),
-    companyId: Joi.required().custom(commonValidation.objectId),
   }),
 };
 
@@ -29,24 +24,21 @@ const create = {
  * update existing document
  */
 const update = {
-  params: Joi.object().keys({
-    id: Joi.required().custom(commonValidation.objectId),
-  }),
   body: Joi.object().keys({
-    dtdNumber: Joi.string().uppercase().required(),
-    fromDealerId: Joi.required().custom(commonValidation.objectId),
-    toDealerId: Joi.required().custom(commonValidation.objectId),
-    remark: Joi.string().lowercase().allow(""),
-    productDetails: Joi.array().items({
-      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
-      rate: Joi.number().required(),
-      quantity: Joi.number().required(),
+    dtdData: Joi.array().items({
+      id: Joi.string().allow(""),
+      dtdNumber: Joi.string().uppercase().required(),
+      fromDealerId: Joi.required().custom(commonValidation.objectId),
+      toDealerId: Joi.required().custom(commonValidation.objectId),
+      remark: Joi.string().lowercase().allow(""),
+      productDetails: Joi.object().keys({
+        productGroupId: Joi.string()
+          .custom(commonValidation.objectId)
+          .required(),
+        rate: Joi.number().required(),
+        quantity: Joi.number().required(),
+      }),
     }),
-    status: Joi.string().lowercase().required(),
-    requestCreatedBy: Joi.required().custom(commonValidation.objectId),
-    requestApprovedBy: Joi.custom(commonValidation.objectId).allow(null),
-    requestApproved: Joi.boolean(),
-    companyId: Joi.required().custom(commonValidation.objectId),
   }),
 };
 
@@ -111,7 +103,7 @@ const get = {
  */
 const deleteDocument = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
+    dtdNo: Joi.string(),
   }),
 };
 
@@ -120,7 +112,7 @@ const deleteDocument = {
  */
 const getById = {
   params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
+    dtdNo: Joi.string(),
   }),
 };
 
@@ -132,6 +124,14 @@ const changeStatus = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+const approveStatus = {
+  params: Joi.object().keys({
+    dtdNo: Joi.string(),
+    status: Joi.boolean(),
+  }),
+};
+
 module.exports = {
   create,
   getAllFilter,
@@ -140,4 +140,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  approveStatus,
 };

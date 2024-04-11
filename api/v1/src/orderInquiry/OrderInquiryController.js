@@ -5225,7 +5225,13 @@ exports.allFilterPagination = async (req, res) => {
      * ToDo : for date filter
      */
 
-    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+    let allowedDateFiletrKeys = [
+      "createdAt",
+      "updatedAt",
+      "preffered_delivery_date",
+    ];
+
+    console.log("allowedDateFiletrKeys", allowedDateFiletrKeys);
 
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
@@ -7301,12 +7307,18 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
      * ToDo : for date filter
      */
 
-    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+    let allowedDateFiletrKeys = [
+      "createdAt",
+      "updatedAt",
+      "preffered_delivery_date",
+      "firstCallCallBackDate",
+    ];
 
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
       allowedDateFiletrKeys
     );
+    console.log(datefilterQuery, "datefilterQuery");
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
