@@ -85,7 +85,7 @@ router.post(
 );
 
 router.get(
-  "/companyid/:cid/productgroupid/:productgroupid/barcode/:barcode/status/:status",
+  "/productgroupid/:productgroupid/barcode/:barcode/status/:status",
   authCheckMiddleware,
   validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcode
@@ -93,7 +93,7 @@ router.get(
 
 // barcode scan at dealer warehouse
 router.get(
-  "/dealer/companyid/:cid/productgroupid/:productgroupid/barcode/:barcode/status/:status",
+  "/dealer/productgroupid/:productgroupid/barcode/:barcode/status/:status",
   authCheckDealerMiddleware,
   validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcodeAtDealerWarehouse
@@ -111,6 +111,14 @@ router.post(
   authCheckMiddleware,
   validate(barCodeValidation.getInventory),
   barCodeController.getInventory
+);
+// for dealer
+
+router.post(
+  "/dealer/inventory/status/:status",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.getInventoryByStatus),
+  barCodeController.getInventoryByStatusForDealer
 );
 
 router.post(
@@ -154,6 +162,16 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.updateWarehouseInventory),
   barCodeController.updateWarehouseInventory
+);
+
+/**
+ * dealer inward DTD transfer
+ */
+router.put(
+  "/dealer/warehouse/inwardinventory",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.updateWarehouseInventoryDealer),
+  barCodeController.updateWarehouseInventoryDealer
 );
 
 /**
@@ -212,6 +230,14 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.wtwOutwardInventory),
   barCodeController.wtwOutwardInventory
+);
+
+// outward inventory from dtd
+router.put(
+  "/dealer/dtd/outwardinventory",
+  authCheckDealerMiddleware,
+  validate(barCodeValidation.dtdOutwardInventory),
+  barCodeController.dtdOutwardInventory
 );
 
 // outward inventory from dtw

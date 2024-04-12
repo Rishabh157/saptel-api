@@ -410,10 +410,24 @@ exports.allFilterGroupPagination = async (req, res) => {
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
       : true;
+    let myRequestId = req.body.myRequestId;
+
     let finalAggregateQuery = [];
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
+
+    if (myRequestId) {
+      matchQuery.$and.push({
+        $or: [
+          {
+            fromDealerId: new mongoose.Types.ObjectId(myRequestId),
+          },
+          { toDealerId: new mongoose.Types.ObjectId(myRequestId) },
+        ],
+      });
+    }
+
     /**
      * to send only active data on web
      */

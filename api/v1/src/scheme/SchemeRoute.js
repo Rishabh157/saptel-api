@@ -41,7 +41,7 @@ router.get(
  * get all documents without token for inbound calls
  */
 router.get(
-  "/product-group/:pgid",
+  "/product-group/:pgid/company/:companyid",
   validate(schemeValidation.getByProductGroup),
   schemeController.getByProductGroup
 );

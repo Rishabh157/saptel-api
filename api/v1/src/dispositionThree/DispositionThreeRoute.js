@@ -15,6 +15,13 @@ router.get(
   validate(dispositionThreeValidation.get),
   dispositionThreeController.get
 );
+//===============get one document (if query) / all document for dealer panel===============
+router.get(
+  "/dealer/get-all-disposition-three",
+  authCheckDealerMiddleware,
+  validate(dispositionThreeValidation.get),
+  dispositionThreeController.getAllForDealer
+);
 
 //===============get one document (if query) / all document  (without token)===============
 router.get(

@@ -83,6 +83,7 @@ const getAllFilter = {
       })
     ),
     isPaginationRequired: Joi.boolean().default(true).optional(),
+    myRequestId: Joi.string().custom(commonValidation.objectId).optional(),
   }),
 };
 

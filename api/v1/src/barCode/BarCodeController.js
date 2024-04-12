@@ -8,6 +8,8 @@ const barcodeFlowService = require("../barCodeFlow/BarCodeFlowService");
 const salesOrderService = require("../salesOrder/SalesOrderService");
 const WarehouseService = require("../wareHouse/WareHouseService");
 const wtwMasterService = require("../warehouseToWarehouse/wtwMasterService");
+const dtdMasterService = require("../dtdTransfer/DTDTransferService");
+
 const wtcMasterService = require("../warehouseToCompany/wtcMasterService");
 const wtsMasterService = require("../warehouseToSample/wtsMasterService");
 const dtwMasterService = require("../dealerToWarehouse/dtwMasterService");
@@ -1057,7 +1059,7 @@ exports.getByBarcode = async (req, res) => {
     const barcodeToBeSearch = req.params.barcode;
     const productGroupId = req.params.productgroupid;
     const status = req.params.status;
-    const cid = req.params.cid;
+    const cid = req.userData.companyId;
 
     let additionalQueryForAll = [
       {
@@ -1207,7 +1209,7 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
     const barcodeToBeSearch = req.params.barcode;
     const productGroupId = req.params.productgroupid;
     const status = req.params.status;
-    const cid = req.params.cid;
+    const cid = req.userData.companyId;
     let additionalQueryForAll = [
       {
         $match: {
@@ -1327,7 +1329,7 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
       ResponseData = dataExist[0];
     }
 
-    if (ResponseData.length === 0) {
+    if (ResponseData?.length === 0) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
@@ -1895,6 +1897,247 @@ exports.getInventoryByStatus = async (req, res) => {
     if (allowedFields?.length) {
       return res.status(httpStatus.OK).send({
         data: allowedFields,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// for dealer
+exports.getInventoryByStatusForDealer = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let searchValue = req.body.searchValue;
+    let searchIn = req.body.params;
+    let filterBy = req.body.filterBy;
+    let rangeFilterBy = req.body.rangeFilterBy;
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+    let matchQuery = {
+      $and: [
+        {
+          isDeleted: false,
+          dealerId: new mongoose.Types.ObjectId(req.userData.Id),
+        },
+      ],
+    };
+    const cid = req.userData.companyId;
+    const status = req.params.status;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: cid,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    //----------------------------
+
+    /**
+     * check search keys valid
+     **/
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+    const rangeQuery = getRangeQuery(rangeFilterBy);
+    if (rangeQuery && rangeQuery.length) {
+      matchQuery.$and.push(...rangeQuery);
+    }
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = [];
+    let numberFileds = [];
+    let objectIdFields = [
+      "productGroupId",
+      "companyId",
+      "wareHouseId",
+      "vendorId",
+    ];
+
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+    //----------------------------
+    //calander filter
+    /**
+     * ToDo : for date filter
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    //calander filter
+    //----------------------------
+
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+      {
+        $match: {
+          isUsed: true, // You can add any additional match criteria here if needed
+          status: status,
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $group: {
+          _id: {
+            productGroupId: `$productGroupId`,
+          },
+          productGroupLabel: { $first: "$productGroupLabel" },
+          count: { $sum: 1 }, // Count the documents in each group
+          firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          // wareHouseId: "$_id.wareHouseId",
+          productGroupId: "$_id.productGroupId",
+          count: 1, // Include the count field
+          firstDocument: 1, // Include the firstDocument field
+          productGroupLabel: 1,
+          wareHouseLabel: 1,
+        },
+      },
+    ];
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    //-----------------------------------
+    let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
+
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found .`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
+    let result = await barCodeService.aggregateQuery(finalAggregateQuery);
+
+    if (result?.length) {
+      return res.status(httpStatus.OK).send({
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -2599,6 +2842,20 @@ exports.updateWarehouseInventory = async (req, res) => {
             }
           );
         });
+      } else if (from === barcodeStatusType.dtd) {
+        wId?.forEach(async (dtdid) => {
+          await dtdMasterService.getOneAndUpdate(
+            {
+              _id: new mongoose.Types.ObjectId(dtdid),
+              isDeleted: false,
+            },
+            {
+              $set: {
+                status: productStatus.complete,
+              },
+            }
+          );
+        });
       }
 
       await barcodeFlowService.createNewData({
@@ -2638,6 +2895,82 @@ exports.updateWarehouseInventory = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// dealer inward
+
+exports.updateWarehouseInventoryDealer = async (req, res) => {
+  try {
+    let { barcodedata, dtdRequestIds } = req.body;
+
+    const promises = barcodedata?.map(async (ele) => {
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(ele?._id),
+          isDeleted: false,
+          isUsed: true,
+        },
+        {
+          $set: {
+            status: barcodeStatusType.atDealerWarehouse,
+            wareHouseId: ele?.wareHouseId,
+            dealerId: req.userData.Id,
+            companyId: req.userData?.companyId,
+          },
+        }
+      );
+
+      dtdRequestIds?.forEach(async (dtdid) => {
+        await dtdMasterService.getOneAndUpdate(
+          {
+            _id: new mongoose.Types.ObjectId(dtdid),
+            isDeleted: false,
+          },
+          {
+            $set: {
+              status: productStatus.complete,
+            },
+          }
+        );
+      });
+
+      await barcodeFlowService.createNewData({
+        productGroupId: dataUpdated.productGroupId,
+        barcodeNumber: dataUpdated.barcodeNumber,
+        cartonBoxId: dataUpdated.cartonBoxId,
+        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+        outerBoxbarCodeNumber: dataUpdated.outerBoxbarCodeNumber,
+        lotNumber: dataUpdated.lotNumber,
+        isUsed: dataUpdated.isUsed,
+        wareHouseId: dataUpdated.wareHouseId,
+        status: dataUpdated.status,
+        companyId: dataUpdated.companyId,
+      });
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+
+    if (updatedDataArray.length > 0) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: updatedDataArray[0],
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // dealer outward api
 
 exports.outwardInventory = async (req, res) => {
@@ -2967,6 +3300,132 @@ exports.wtwOutwardInventory = async (req, res) => {
         await wtwMasterService.getOneAndUpdate(
           {
             _id: new mongoose.Types.ObjectId(wtwid),
+            isDeleted: false,
+          },
+          {
+            $set: {
+              status: productStatus.dispatched,
+            },
+          }
+        );
+      });
+      await barcodeFlowService.createNewData({
+        productGroupId: dataUpdated.productGroupId,
+        barcodeNumber: dataUpdated.barcodeNumber,
+        cartonBoxId: dataUpdated.cartonBoxId,
+        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
+        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
+        lotNumber: dataUpdated.lotNumber,
+        isUsed: dataUpdated.isUsed,
+        wareHouseId: dataUpdated.wareHouseId,
+        status: dataUpdated.status,
+        companyId: dataUpdated.companyId,
+      });
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+
+    if (updatedDataArray.length > 0) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: null,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//dtd outward
+
+exports.dtdOutwardInventory = async (req, res) => {
+  try {
+    let { barcodedata, dtdId } = req.body;
+    const groupedData = barcodedata.reduce((result, item) => {
+      const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
+
+      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
+      if (!result[outerBoxbarCodeNumber]) {
+        // If it doesn't exist, create an array for that key
+        result[outerBoxbarCodeNumber] = [];
+      }
+
+      // Push the current item into the array associated with the outerBoxbarCodeNumber key
+      result[outerBoxbarCodeNumber].push(item);
+
+      return result;
+    }, {});
+
+    // Convert the grouped data into an array of objects (if needed)
+    const groupedArray = Object.keys(groupedData).map((key) => ({
+      outerBoxbarCodeNumber: key,
+      items: groupedData[key],
+    }));
+    const promises = barcodedata?.map(async (ele) => {
+      let allOuterBoxBarcode = await barCodeService.findCount({
+        outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+        isUsed: true,
+      });
+      let foundObj = groupedArray?.find((fele) => {
+        if (fele?.outerBoxbarCodeNumber !== null) {
+          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
+        }
+      });
+
+      if (foundObj?.items?.length !== allOuterBoxBarcode) {
+        await barCodeService.updateMany(
+          {
+            outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+            isUsed: true,
+          },
+          {
+            $set: {
+              outerBoxbarCodeNumber: null,
+            },
+          }
+        );
+        await barcodeFlowService.createNewData({
+          productGroupId: ele.productGroupId,
+          barcodeNumber: ele.barcodeNumber,
+          cartonBoxId: null,
+          barcodeGroupNumber: ele.barcodeGroupNumber,
+          outerBoxbarCodeNumber: null,
+          lotNumber: ele.lotNumber,
+          isUsed: ele.isUsed,
+          wareHouseId: ele.wareHouseId,
+          status: barcodeStatusType.inTransit,
+          companyId: ele.companyId,
+        });
+      }
+
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          _id: new mongoose.Types.ObjectId(ele?._id),
+          isUsed: true,
+        },
+        {
+          $set: {
+            status: barcodeStatusType.dtd,
+            wareHouseId: null,
+            dealerId: null,
+          },
+        }
+      );
+      dtdId?.forEach(async (dtdid) => {
+        await dtdMasterService.getOneAndUpdate(
+          {
+            _id: new mongoose.Types.ObjectId(dtdid),
             isDeleted: false,
           },
           {

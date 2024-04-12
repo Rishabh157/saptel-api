@@ -188,6 +188,13 @@ const getAllFilter = {
         dateFilterKey: Joi.string().allow(""),
       })
       .default({}),
+    prefferedDeliveryDate: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
     rangeFilterBy: Joi.object()
       .keys({
         rangeFilterKey: Joi.string().allow(""),

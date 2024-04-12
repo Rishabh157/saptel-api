@@ -77,21 +77,27 @@ const assignOrderToCourier = async (
             {
               name: "box_1", // to be discuss
               weightUnit: "Kg",
-              deadWeight: schemeData?.weight, // multiply by quantity
-              length: schemeData?.dimension?.depth, // multiply by quantity
-              breadth: schemeData?.dimension?.width, // multiply by quantity
+              deadWeight: parseFloat(
+                (schemeData?.weight * orderData?.shcemeQuantity) / 1000
+              ), // multiply by quantity
+              length: parseFloat(
+                schemeData?.dimension?.depth * orderData?.shcemeQuantity
+              ), // multiply by quantity
+              breadth: parseFloat(
+                schemeData?.dimension?.width * orderData?.shcemeQuantity
+              ), // multiply by quantity
               height: schemeData?.dimension?.height,
               measureUnit: "cm",
               products: [
                 {
                   name: schemeData?.schemeName,
                   category: categorydata?.categoryName,
-                  sku: "abc", // schem code
+                  sku: schemeData?.schemeCode, // schem code
                   qty: orderData?.shcemeQuantity,
                   unitPrice: orderData?.price,
                   unitTax: 0, // to be discuss
                   weightUnit: "kg",
-                  deadWeight: schemeData?.weight, // convert to kg
+                  deadWeight: schemeData?.weight / 1000, // convert to kg
                   length: schemeData?.dimension?.depth,
                   breadth: schemeData?.dimension?.width,
                   height: schemeData?.dimension?.height,
@@ -100,8 +106,8 @@ const assignOrderToCourier = async (
               ],
               codInfo: {
                 isCod: orderData?.paymentmode === paymentModeType.COD,
-                collectableAmount: orderData?.price, // multiply be quantity
-                invoiceValue: orderData?.price, //multiply be quantity
+                collectableAmount: orderData?.price * orderData?.shcemeQuantity, // multiply be quantity
+                invoiceValue: orderData?.price * orderData?.shcemeQuantity, //multiply be quantity
               },
               podInfo: {
                 isPod: false, // to be discuss
@@ -113,9 +119,9 @@ const assignOrderToCourier = async (
           orderType: "B2C",
           transit: "FORWARD",
           courierPartner: "",
-          pickupDate: convertEpochTime(orderData?.preffered_delivery_date), // today date
+          pickupDate: convertEpochTime(new Date()), // today date
           gstNumber: "",
-          orderId: "", // order number
+          orderId: orderData?.orderNumber,
           eWayBillNo: 0,
           brandName: "Telemart",
           brandLogo: "", // telemart image

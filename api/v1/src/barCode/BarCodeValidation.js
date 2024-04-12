@@ -80,6 +80,16 @@ const updateWarehouseInventory = {
   }),
 };
 
+const updateWarehouseInventoryDealer = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+    }),
+    dtdRequestIds: Joi.array().items(Joi.string().required()).required(),
+  }),
+};
+
 const outwardInventory = {
   body: Joi.object().keys({
     barcodedata: Joi.array().items({
@@ -137,6 +147,26 @@ const wtwOutwardInventory = {
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
     wtwId: Joi.array().items(Joi.string().required()),
+  }),
+};
+
+// dtd
+const dtdOutwardInventory = {
+  body: Joi.object().keys({
+    barcodedata: Joi.array().items({
+      _id: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeGroupNumber: Joi.string().required(),
+      // cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),
+      outerBoxbarCodeNumber: Joi.string().allow(null),
+      lotNumber: Joi.string().required(),
+      isUsed: Joi.boolean(),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      barcodeNumber: Joi.string().required(),
+      companyId: Joi.string().custom(commonValidation.objectId).required(),
+    }),
+    dtdId: Joi.array().items(Joi.string().required()),
   }),
 };
 
@@ -339,7 +369,7 @@ const getBarcode = {
 const getBarcodeForOutward = {
   params: Joi.object().keys({
     barcode: Joi.string(),
-    cid: Joi.string(),
+
     productgroupid: Joi.string(),
     status: Joi.string(),
   }),
@@ -477,4 +507,6 @@ module.exports = {
   dtwOutwardInventory,
   checkBarcode,
   assignDeliveryBoy,
+  dtdOutwardInventory,
+  updateWarehouseInventoryDealer,
 };

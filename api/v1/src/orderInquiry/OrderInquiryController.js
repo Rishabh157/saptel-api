@@ -63,7 +63,7 @@ const {
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
-  getDateFilterQueryCallBackDate,
+  getDateFilterQueryCallBackAndPreferedDate,
 } = require("./OrderInquiryHelper");
 const { default: axios } = require("axios");
 const {
@@ -702,7 +702,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
         `Something went wrong. Warehouse not assigned to this order`
       );
     }
-    let fromPincodeIs = wareHouseData?.registrationAddress?.pincodeId;
+    let fromPincodeIs = wareHouseData?.billingAddress?.pincodeId;
     let fromPincodeData = await pincodeService?.getOneByMultiField({
       _id: fromPincodeIs,
     });
@@ -839,7 +839,7 @@ exports.firstCallConfirmation = async (req, res) => {
           `Something went wrong. Warehouse not assigned to this order`
         );
       }
-      let fromPincodeIs = wareHouseData?.registrationAddress?.pincodeId;
+      let fromPincodeIs = wareHouseData?.billingAddress?.pincodeId;
       let fromPincodeData = await pincodeService?.getOneByMultiField({
         _id: fromPincodeIs,
       });
@@ -970,7 +970,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         `Something went wrong. Warehouse not assigned to this order`
       );
     }
-    let fromPincodeIs = wareHouseData?.registrationAddress?.pincodeId;
+    let fromPincodeIs = wareHouseData?.billingAddress?.pincodeId;
     let fromPincodeData = await pincodeService?.getOneByMultiField({
       _id: fromPincodeIs,
     });
@@ -5054,8 +5054,9 @@ exports.allFilterPagination = async (req, res) => {
     const { Id } = req.userData;
     let getBatchData = req.body.getBatchData;
     var dateFilter = req.body.dateFilter;
-    var callbackDateFilter = req.body.callbackDateFilter;
     let searchValue = req.body.searchValue;
+    var callbackDateFilter = req.body.callbackDateFilter;
+    var prefferedDeliveryDate = req.body.prefferedDeliveryDate;
     let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
@@ -5225,11 +5226,7 @@ exports.allFilterPagination = async (req, res) => {
      * ToDo : for date filter
      */
 
-    let allowedDateFiletrKeys = [
-      "createdAt",
-      "updatedAt",
-      "preffered_delivery_date",
-    ];
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
     console.log("allowedDateFiletrKeys", allowedDateFiletrKeys);
 
@@ -5240,14 +5237,27 @@ exports.allFilterPagination = async (req, res) => {
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
+    //
+    let allowedPrefferedDeliveryDate = ["preffered_delivery_date"];
+    const prefferedDeliverydatefilterQuery =
+      await getDateFilterQueryCallBackAndPreferedDate(
+        prefferedDeliveryDate,
+        allowedPrefferedDeliveryDate
+      );
+    if (
+      prefferedDeliverydatefilterQuery &&
+      prefferedDeliverydatefilterQuery.length
+    ) {
+      matchQuery.$and.push(...prefferedDeliverydatefilterQuery);
+    }
 
     let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
 
-    const datefilterCallbackQuery = await getDateFilterQueryCallBackDate(
-      callbackDateFilter,
-      allowedCallbackDateFiletrKeys
-    );
-    //
+    const datefilterCallbackQuery =
+      await getDateFilterQueryCallBackAndPreferedDate(
+        callbackDateFilter,
+        allowedCallbackDateFiletrKeys
+      );
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
@@ -5904,10 +5914,11 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
 
     let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
 
-    const datefilterCallbackQuery = await getDateFilterQueryCallBackDate(
-      callbackDateFilter,
-      allowedCallbackDateFiletrKeys
-    );
+    const datefilterCallbackQuery =
+      await getDateFilterQueryCallBackAndPreferedDate(
+        callbackDateFilter,
+        allowedCallbackDateFiletrKeys
+      );
     //
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
@@ -7214,6 +7225,8 @@ exports.allFilterPaginationDileveryBoyForDealerPanel = async (req, res) => {
 exports.allFilterDealerOrderPagination = async (req, res) => {
   try {
     var dateFilter = req.body.dateFilter;
+    var callbackDateFilter = req.body.callbackDateFilter;
+    var prefferedDeliveryDate = req.body.prefferedDeliveryDate;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
@@ -7290,6 +7303,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       "areaId",
       "channel",
       "agentDistrictId",
+      "delivery_boy_id",
     ];
 
     const filterQuery = getFilterQuery(
@@ -7307,12 +7321,7 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
      * ToDo : for date filter
      */
 
-    let allowedDateFiletrKeys = [
-      "createdAt",
-      "updatedAt",
-      "preffered_delivery_date",
-      "firstCallCallBackDate",
-    ];
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
@@ -7322,7 +7331,34 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
+    let allowedPrefferedDeliveryDate = ["preffered_delivery_date"];
+    console.log(prefferedDeliveryDate, "prefferedDeliveryDate");
+    const prefferedDeliverydatefilterQuery =
+      await getDateFilterQueryCallBackAndPreferedDate(
+        prefferedDeliveryDate,
+        allowedPrefferedDeliveryDate
+      );
+    console.log(
+      prefferedDeliverydatefilterQuery,
+      "prefferedDeliverydatefilterQuery"
+    );
+    if (
+      prefferedDeliverydatefilterQuery &&
+      prefferedDeliverydatefilterQuery.length
+    ) {
+      matchQuery.$and.push(...prefferedDeliverydatefilterQuery);
+    }
 
+    let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
+
+    const datefilterCallbackQuery =
+      await getDateFilterQueryCallBackAndPreferedDate(
+        callbackDateFilter,
+        allowedCallbackDateFiletrKeys
+      );
+    if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
+      matchQuery.$and.push(...datefilterCallbackQuery);
+    }
     //calander filter
     //----------------------------
 

@@ -179,6 +179,7 @@ router.post(
 router.post(
   "/dealer/:dealerId/orders",
   authCheckDealerMiddleware,
+  validate(orderValidation.getAllFilter),
   orderController.allFilterDealerOrderPagination
 );
 

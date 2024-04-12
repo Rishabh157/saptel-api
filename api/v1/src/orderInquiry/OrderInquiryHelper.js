@@ -31,7 +31,7 @@ exports.getCustomerReputation = (data) => {
   return color;
 };
 
-exports.getDateFilterQueryCallBackDate = (
+exports.getDateFilterQueryCallBackAndPreferedDate = (
   dateFilter,
   allowedDateFiletrKeys
 ) => {
