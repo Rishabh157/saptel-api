@@ -391,7 +391,6 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     let companyId = req.userData.companyId;
-    console.log(req.userData, "companyId");
     //if no default query then pass {}
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),

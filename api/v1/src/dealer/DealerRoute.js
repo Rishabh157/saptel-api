@@ -17,6 +17,15 @@ router.get(
   validate(dealerValidation.get),
   dealerController.get
 );
+/**
+ * get one document (if query) / all documents for dealer panel
+ */
+router.get(
+  "/get-all-dealer",
+  authCheckDealerMiddleware,
+  validate(dealerValidation.get),
+  dealerController.getAllDealer
+);
 
 /**
  * get all dealer of zonal manager and exicutive

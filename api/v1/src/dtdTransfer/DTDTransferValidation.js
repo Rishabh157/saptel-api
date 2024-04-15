@@ -9,7 +9,7 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     dtdNumber: Joi.string().uppercase().required(),
-    fromDealerId: Joi.required().custom(commonValidation.objectId),
+    // fromDealerId: Joi.required().custom(commonValidation.objectId),
     toDealerId: Joi.required().custom(commonValidation.objectId),
     remark: Joi.string().lowercase().allow(""),
     productDetails: Joi.array().items({

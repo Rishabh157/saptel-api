@@ -5228,8 +5228,6 @@ exports.allFilterPagination = async (req, res) => {
 
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
-    console.log("allowedDateFiletrKeys", allowedDateFiletrKeys);
-
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
       allowedDateFiletrKeys
@@ -7327,21 +7325,16 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
-    console.log(datefilterQuery, "datefilterQuery");
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
     let allowedPrefferedDeliveryDate = ["preffered_delivery_date"];
-    console.log(prefferedDeliveryDate, "prefferedDeliveryDate");
     const prefferedDeliverydatefilterQuery =
       await getDateFilterQueryCallBackAndPreferedDate(
         prefferedDeliveryDate,
         allowedPrefferedDeliveryDate
       );
-    console.log(
-      prefferedDeliverydatefilterQuery,
-      "prefferedDeliverydatefilterQuery"
-    );
+
     if (
       prefferedDeliverydatefilterQuery &&
       prefferedDeliverydatefilterQuery.length

@@ -513,7 +513,6 @@ exports.update = async (req, res) => {
       );
 
       // Handle error response
-      console.error("API call failed:", error);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
         message: "Something went wrong!",
         data: null,

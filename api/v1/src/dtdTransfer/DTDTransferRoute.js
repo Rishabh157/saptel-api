@@ -57,7 +57,7 @@ router.post(
 router.post(
   "/add",
 
-  authCheckMiddleware,
+  authCheckDealerMiddleware,
   validate(dtdTransferValidation.create),
   dtdTransferController.add
 );

@@ -214,7 +214,6 @@ const getFilterQuery = (
 };
 const getDateFilterQuery = (dateFilter, allowedDateFiletrKeys) => {
   let queryArray = [];
-  console.log(dateFilter, "dateFilter");
   if (
     dateFilter !== undefined &&
     dateFilter !== null &&

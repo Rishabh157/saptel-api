@@ -129,7 +129,12 @@ const NdrDispositionSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["ndrDisposition", "subDispositions", "rtoAttempt"];
+const searchKeys = [
+  "ndrDisposition",
+  "subDispositions",
+  "rtoAttempt",
+  "displayName",
+];
 module.exports = mongoose.model("NdrDisposition", NdrDispositionSchema);
 module.exports.searchKeys = [...searchKeys];
 

@@ -21,8 +21,7 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dtdNumber, fromDealerId, toDealerId, remark, productDetails } =
-      req.body;
+    let { dtdNumber, toDealerId, remark, productDetails } = req.body;
     /**
      * check duplicate exist
      */
@@ -35,7 +34,7 @@ exports.add = async (req, res) => {
     const output = productDetails.map((po) => {
       return {
         dtdNumber: dtdNumber,
-        fromDealerId: fromDealerId,
+        fromDealerId: req.userData.Id,
         toDealerId: toDealerId,
         remark: remark,
         productDetails: {
@@ -75,7 +74,6 @@ exports.add = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { dtdData } = req.body;
-    console.log(dtdData, "dtdData");
     const dtdIds = dtdData?.map((ele) => ele?.id);
     const alldtdOfThisNumber = await dtdTransferService?.findAllWithQuery({
       dtdNumber: dtdData[0]?.dtdNumber,
