@@ -12,14 +12,14 @@ const {
  * get one document (if query) / all documents
  */
 router.get(
-  "/company/:companyid",
+  "/",
   authCheckMiddleware,
   validate(productGroupValidation.get),
   productGroupController.get
 );
 
 router.get(
-  "/dealer/company/:companyid",
+  "/dealer/get-all-product-group",
   authCheckDealerMiddleware,
   validate(productGroupValidation.get),
   productGroupController.getForDealer
