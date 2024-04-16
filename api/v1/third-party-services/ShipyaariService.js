@@ -47,6 +47,7 @@ const confirmOrderShipYaari = async (data) => {
       data,
       { headers: HEADER }
     );
+    console.log(response, "response");
     if (response) {
       return response?.data?.success;
     }

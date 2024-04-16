@@ -21,14 +21,26 @@ const { default: mongoose } = require("mongoose");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { dtdNumber, toDealerId, remark, productDetails } = req.body;
+    let { toDealerId, remark, productDetails } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await dtdTransferService.isExists([{ dtdNumber }]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    async function generateUniqueDtdNumber() {
+      const allChars = "abcdefghijklmnopqrstuvwxyz0123456789";
+      let dtdNumber = "";
+      for (let i = 0; i < 4; i++) {
+        const randomIndex = Math.floor(Math.random() * allChars.length);
+        dtdNumber += allChars[randomIndex];
+      }
+
+      const dataExist = await dtdTransferService.isExists([{ dtdNumber }]);
+      if (dataExist.exists && dataExist.existsSummary) {
+        return generateUniqueDtdNumber(); // Recursive call if duplicate found
+      }
+      return dtdNumber;
     }
+    let dtdNumber = await generateUniqueDtdNumber();
+
     //------------------create data-------------------
 
     const output = productDetails.map((po) => {
@@ -100,7 +112,6 @@ exports.update = async (req, res) => {
         }
       })
     );
-
     // inserting new
     await Promise.all(
       dtdData?.map(async (ele) => {
@@ -111,6 +122,8 @@ exports.update = async (req, res) => {
             ...rest,
             companyId: req?.userData.companyId,
             requestCreatedBy: req?.userData?.Id,
+            fromDealerId: req.userData.Id,
+            // dtdNumber: alldtdOfThisNumber[0]?.dtdNumber,
           });
         }
       })

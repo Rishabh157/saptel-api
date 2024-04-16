@@ -66,8 +66,7 @@ router.post(
  */
 router.put(
   "/update-dtd",
-
-  authCheckMiddleware,
+  authCheckDealerMiddleware,
   validate(dtdTransferValidation.update),
   dtdTransferController.update
 );
@@ -78,7 +77,7 @@ router.put(
 router.get(
   "/:dtdNo",
 
-  authCheckMiddleware,
+  authCheckDealerMiddleware,
   validate(dtdTransferValidation.getById),
   dtdTransferController.getById
 );

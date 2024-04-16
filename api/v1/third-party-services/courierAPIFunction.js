@@ -121,7 +121,7 @@ const assignOrderToCourier = async (
           courierPartner: "",
           pickupDate: convertEpochTime(new Date()), // today date
           gstNumber: "",
-          orderId: orderData?.orderNumber,
+          orderId: orderData?.orderNumber.toString(),
           eWayBillNo: 0,
           brandName: "Telemart",
           brandLogo: "", // telemart image
@@ -130,6 +130,7 @@ const assignOrderToCourier = async (
         let orderAssignedToShipYaari = await confirmOrderShipYaari(
           shipYaariOrderData
         );
+        console.log(orderAssignedToShipYaari, "orderAssignedToShipYaari");
 
         orderAssigned = orderAssignedToShipYaari;
 

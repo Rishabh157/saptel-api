@@ -405,6 +405,8 @@ exports.update = async (req, res) => {
     const inquiryNumber = await getInquiryNumber();
 
     try {
+      const isOrder = flag || prepaidOrderFlag;
+      console.log(isOrder, flag, prepaidOrderFlag, "pp");
       const orderInquiry = await orderService.createNewData({
         ...req.body,
         status: flag
@@ -418,12 +420,16 @@ exports.update = async (req, res) => {
           dealerServingPincode.length > 1 || servingWarehouse === undefined
             ? false
             : true,
-        assignDealerId:
-          dealerServingPincode.length === 1
-            ? dealerServingPincode[0]?.dealerId
-            : null,
-        assignWarehouseId:
-          dealerServingPincode.length === 0 ? servingWarehouse : null,
+        assignDealerId: !isOrder
+          ? null
+          : dealerServingPincode.length === 1
+          ? dealerServingPincode[0]?.dealerId
+          : null,
+        assignWarehouseId: !isOrder
+          ? null
+          : dealerServingPincode.length === 0
+          ? servingWarehouse
+          : null,
         approved: flag ? true : prepaidOrderFlag ? false : true,
         agentId: agentId,
         agentName: agentName,
@@ -439,13 +445,33 @@ exports.update = async (req, res) => {
           applicableCriteria.isUrgent,
         // dealerAssignedId: dealerId,
       });
+      console.log(orderInquiry, "orderInquiry");
 
       const orderInquiryFlow = await orderInquiryFlowService.createNewData({
         ...req.body,
-        status: inquiryNumber ? orderStatusEnum.inquiry : status,
+
         orderId: orderInquiry?._id,
-        assignDealerId: null,
-        assignWarehouseId: null,
+        status: flag
+          ? status
+          : prepaidOrderFlag
+          ? orderStatusEnum.prepaid
+          : orderStatusEnum.inquiry,
+        orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
+        inquiryNumber: inquiryNumber,
+        isOrderAssigned:
+          dealerServingPincode.length > 1 || servingWarehouse === undefined
+            ? false
+            : true,
+        assignDealerId: !isOrder
+          ? null
+          : dealerServingPincode.length === 1
+          ? dealerServingPincode[0]?.dealerId
+          : null,
+        assignWarehouseId: !isOrder
+          ? null
+          : dealerServingPincode.length === 0
+          ? servingWarehouse
+          : null,
         approved: flag ? true : prepaidOrderFlag ? false : true,
         agentId: agentId,
         agentName: agentName,
@@ -453,7 +479,12 @@ exports.update = async (req, res) => {
         recordingEndTime: recordingEndTime,
         callCenterId: isUserExists?.callCenterId,
         branchId: isUserExists?.branchId,
-        // dealerAssignedId: dealerId,
+        paymentMode: prepaidOrderFlag
+          ? paymentModeType.UPI_ONLINE
+          : paymentModeType.COD,
+        isUrgentOrder:
+          dispositionThreeData[0]?.applicableCriteria ===
+          applicableCriteria.isUrgent,
       });
 
       const dataUpdated = await callService.getOneAndUpdate(
@@ -495,6 +526,7 @@ exports.update = async (req, res) => {
         });
       }
     } catch (error) {
+      console.log("errr");
       // Rollback logic
       if (orderInquiry) {
         // Delete created order inquiry
