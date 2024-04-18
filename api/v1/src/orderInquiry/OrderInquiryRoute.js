@@ -184,12 +184,12 @@ router.post(
 );
 
 //===============create new document===============
-// router.post(
-//   "/add",
-//   // authCheckMiddleware,
-//   // validate(orderValidation.create),
-//   orderController.add
-// );
+router.post(
+  "/add",
+  authCheckMiddleware,
+  // validate(orderValidation.create),
+  orderController.add
+);
 
 // order add for e-commerce
 router.put(

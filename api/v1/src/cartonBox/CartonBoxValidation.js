@@ -88,9 +88,9 @@ const getAllFilter = {
  * get either all data or single document
  */
 const get = {
-  params: Joi.object().keys({
-    companyid: Joi.string().custom(commonValidation.objectId),
-  }),
+  // params: Joi.object().keys({
+  //   companyid: Joi.string().custom(commonValidation.objectId),
+  // }),
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),

@@ -9,7 +9,7 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  * get one document (if query) / all documents
  */
 router.get(
-  "/company/:companyid",
+  "/",
   authCheckMiddleware,
   validate(vendorValidation.get),
   vendorController.get

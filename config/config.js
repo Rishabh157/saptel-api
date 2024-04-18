@@ -32,6 +32,7 @@ let {
   SHIPYAARI_BASE_URL,
   SHIPYAARI_EMAIL,
   SHIPYAARI_PASSWORD,
+  ORDER_QUEUE_URL,
 } = process.env;
 
 let envObj = {
@@ -63,6 +64,7 @@ let envObj = {
   SHIPYAARI_BASE_URL,
   SHIPYAARI_EMAIL,
   SHIPYAARI_PASSWORD,
+  ORDER_QUEUE_URL,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -119,6 +121,7 @@ const envVarsSchema = Joi.object().keys({
   SHIPYAARI_PASSWORD: Joi.string()
     .required()
     .label("Shipyaari password required"),
+  ORDER_QUEUE_URL: Joi.string().required().label("Order queue url required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -169,4 +172,5 @@ module.exports = {
   shipyaari_baseurl: envVars.SHIPYAARI_BASE_URL,
   shipyaari_email: envVars.SHIPYAARI_EMAIL,
   shipyaari_password: envVars.SHIPYAARI_PASSWORD,
+  order_queue_url: envVars.ORDER_QUEUE_URL,
 };

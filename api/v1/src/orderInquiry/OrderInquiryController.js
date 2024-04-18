@@ -21,6 +21,7 @@ const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
 const barcodeService = require("../barCode/BarCodeService");
+const callService = require("../call/CallService");
 const ndrDispositionService = require("../ndrDisposition/NdrDispositionService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
@@ -74,83 +75,41 @@ const { getOrderNumber, getInquiryNumber } = require("../call/CallHelper");
 
 exports.add = async (req, res) => {
   try {
-    async function createOrders() {
-      try {
-        const promises = [];
-        for (let i = 11; i <= 20; i++) {
-          promises.push(createOrder(i));
-        }
-        const orderInquiries = await Promise.all(promises);
-
-        for (const orderInquiry of orderInquiries) {
-          if (!orderInquiry) {
-            throw new Error("Something went wrong.");
-          }
-        }
-
-        return orderInquiries;
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    }
-
-    async function createOrder(number) {
-      try {
-        // let orderNumber = await getOrderNumber();
-        // let inquiryNumber = await getInquiryNumber();
-
-        // const [orderNumber, inquiryNumber] = await Promise.all([
-        //   orderNumberPromise,
-        //   inquiryNumberPromise,
-        // ]);
-
-        const orderInquiry = await orderService.createNewData({
-          status: orderStatusEnum.fresh,
-          orderNumber: number,
-          inquiryNumber: number,
-          isOrderAssigned: false,
-          assignDealerId: null,
-          assignWarehouseId: null,
-          approved: true,
-          agentId: new mongoose.Types.ObjectId("654498d3ec8e20a0d5839cc2"),
-          agentName: "rishabh.gour",
-          recordingStartTime: "",
-          recordingEndTime: "",
-          callCenterId: new mongoose.Types.ObjectId("659e42b7bff59102efc2610f"),
-          branchId: new mongoose.Types.ObjectId("65449836ec8e20a0d5839ca8"),
-          paymentMode: paymentModeType.COD,
-          companyId: new mongoose.Types.ObjectId("65449733ec8e20a0d5839c80"),
-          didNo: "6629300",
-          mobileNo: number,
-          autoFillingShippingAddress:
-            "452009 madhya pradesh indore gopur indore juni indore 48 satydev gopur square",
-          campaign: "DHUANDHAAR",
-          customerName: `67895698${number}`,
-          stateId: new mongoose.Types.ObjectId("6544f2efec8e20a0d583a706"),
-          districtId: new mongoose.Types.ObjectId("6544f2f6ec8e20a0d583a711"),
-          tehsilId: new mongoose.Types.ObjectId("6544f2ffec8e20a0d583a71d"),
-          schemeId: new mongoose.Types.ObjectId("65a226098498855e300a9da5"),
-          pincodeId: new mongoose.Types.ObjectId("6615152ea1573d5c6d368435"),
-          areaId: new mongoose.Types.ObjectId("66151546a1573d5c6d368447"),
-          dispositionLevelTwoId: new mongoose.Types.ObjectId(
-            "65657c9abeb786fdae16ac3d"
-          ),
-          dispositionLevelThreeId: new mongoose.Types.ObjectId(
-            "66151546a1573d5c6d368447"
-          ),
-        });
-
-        return orderInquiry;
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    }
-
+    console.log("innnn");
+    const orderNumber = await getOrderNumber();
+    const inquiryNumber = await getInquiryNumber();
+    console.log(orderNumber, inquiryNumber, "pp");
+    const { idToBeSearch, isOrder, ...rest } = req.body;
+    console.log(idToBeSearch, rest, "datattatat");
     try {
-      const orderInquiries = await createOrders();
+      const orderInquiry = await orderService.createNewData({
+        ...rest,
+        orderNumber: isOrder ? orderNumber : null,
+        inquiryNumber: inquiryNumber,
+      });
+      console.log(orderInquiry, "orderInquiry");
+
+      const orderInquiryFlow = await orderInquiryFlowService.createNewData({
+        ...rest,
+
+        orderId: orderInquiry?._id,
+      });
+
+      const dataUpdated = await callService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+          isDeleted: false,
+        },
+        {
+          $set: {
+            status: rest.status,
+          },
+        }
+      );
+
       return res.status(httpStatus.OK).send({
         message: "created successfully.",
-        data: orderInquiries,
+        data: null,
         status: true,
         code: "OK",
         issue: null,
@@ -159,7 +118,7 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
     }
   } catch (err) {
-    let errData = errorResponse(err); // Assuming it's errorResponse instead of errorRes
+    let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
     return res
@@ -4439,6 +4398,7 @@ exports.getByMobileNumber = async (req, res) => {
         matchQuery.orderNumber = complaintData.orderNumber;
       }
     }
+    matchQuery.orderNumber = { $ne: null };
 
     const isEmpty = (obj) => {
       return Object.keys(obj).length === 0;

@@ -309,7 +309,7 @@ exports.allFilterPagination = async (req, res) => {
 //get api
 exports.get = async (req, res) => {
   try {
-    let companyId = req.params.companyid;
+    let companyId = req.userData.companyId;
 
     //if no default query then pass {}
     let matchQuery = {
