@@ -34,6 +34,7 @@ const {
 
 //add start
 exports.add = async (req, res) => {
+  let rollbackNeeded = false; // Flag to determine if rollback is needed
   try {
     let {
       orderNumber,
@@ -51,7 +52,7 @@ exports.add = async (req, res) => {
       remark,
       customerNumber,
     } = req.body;
-    let rollbackNeeded = false; // Flag to determine if rollback is needed
+
     /**
      * check duplicate exist
      */
@@ -155,6 +156,7 @@ exports.add = async (req, res) => {
 
 //update start
 exports.update = async (req, res) => {
+  let rollbackNeeded = false; // Flag to determine if rollback is needed
   try {
     let {
       orderNumber,
@@ -170,7 +172,7 @@ exports.update = async (req, res) => {
       icThree,
       remark,
     } = req.body;
-    let rollbackNeeded = false; // Flag to determine if rollback is needed
+
     let idToBeSearch = req.params.id;
     let dataExist = await complainService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {

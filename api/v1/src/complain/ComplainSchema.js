@@ -14,6 +14,7 @@ const ComplainSchema = new mongoose.Schema(
     schemeName: { type: String, required: true, trim: true },
     schemeCode: { type: String, required: true, trim: true },
     orderStatus: { type: String, required: true, trim: true },
+    images: { type: [String], default: [] },
     courierStatus: {
       type: String,
       required: true,

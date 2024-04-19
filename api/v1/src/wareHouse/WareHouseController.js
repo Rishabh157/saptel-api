@@ -780,7 +780,7 @@ exports.allFilterPaginationWarehouse = async (req, res) => {
 //get api
 exports.getWarehouse = async (req, res) => {
   try {
-    let companyId = req.userdata.companyId;
+    let companyId = req.userData.companyId;
 
     //if no default query then pass {}
     let matchQuery = {

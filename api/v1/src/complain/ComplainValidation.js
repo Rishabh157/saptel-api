@@ -24,7 +24,7 @@ const create = {
     icOneLabel: Joi.string().required(),
     icTwoLabel: Joi.string().required(),
     icThreeLabel: Joi.string().required(),
-
+    images: Joi.array().items(Joi.string()).allow(),
     remark: Joi.string().lowercase().required(),
   }),
 };
@@ -53,6 +53,8 @@ const update = {
     icOneLabel: Joi.string().required(),
     icTwoLabel: Joi.string().required(),
     icThreeLabel: Joi.string().required(),
+    images: Joi.array().items(Joi.string()).allow(),
+
     remark: Joi.string().lowercase().required(),
   }),
 };
