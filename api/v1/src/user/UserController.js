@@ -932,7 +932,7 @@ exports.getById = async (req, res) => {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields,
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

@@ -15,7 +15,20 @@ const getAgentDashboardData = {
       .default({}),
   }),
 };
+const getZmDashboardData = {
+  body: Joi.object().keys({
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+    schemeId: Joi.string().custom(commonValidation.objectId).allow(null),
+  }),
+};
 
 module.exports = {
   getAgentDashboardData,
+  getZmDashboardData,
 };

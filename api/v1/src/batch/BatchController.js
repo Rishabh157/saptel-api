@@ -145,6 +145,7 @@ exports.update = async (req, res) => {
 exports.allFilterPagination = async (req, res) => {
   try {
     var dateFilter = req.body.dateFilter;
+    var callbackDateFilter = req.body.callbackDateFilter;
     let searchValue = req.body.searchValue;
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
@@ -233,6 +234,16 @@ exports.allFilterPagination = async (req, res) => {
       matchQuery.$and.push(...datefilterQuery);
     }
 
+    let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
+
+    const datefilterCallbackQuery =
+      await getDateFilterQueryCallBackAndPreferedDate(
+        callbackDateFilter,
+        allowedCallbackDateFiletrKeys
+      );
+    if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
+      matchQuery.$and.push(...datefilterCallbackQuery);
+    }
     //calander filter
     //----------------------------
 

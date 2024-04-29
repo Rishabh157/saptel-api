@@ -257,6 +257,12 @@ exports.login = async (req, res) => {
     if (!dataFound) {
       throw new ApiError(httpStatus.OK, `Dealer not found.`);
     }
+    if (!dataFound.isActive) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Account deactivated please contact to higher authorities to activate your account!`
+      );
+    }
     let matched = await bcrypt.compare(password, dataFound.password);
     if (!matched) {
       throw new ApiError(httpStatus.OK, `Invalid Password!`);

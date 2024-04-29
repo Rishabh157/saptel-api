@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const orderService = require("../orderInquiry/OrderInquiryService");
+const dealerService = require("../dealer/DealerService");
 const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
 const houseArrestService = require("../houseArrestRequest/HouseArrestRequestService");
@@ -16,7 +17,10 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
 } = require("../../helper/paginationFilterHelper");
-const { orderStatusEnum } = require("../../helper/enumUtils");
+const {
+  orderStatusEnum,
+  barcodeStatusType,
+} = require("../../helper/enumUtils");
 const {
   getQuery,
   getQueryForComplaint,
@@ -219,6 +223,434 @@ exports.getAgentDashboardData = async (req, res) => {
         : 0,
       status: true,
       message: "Data Found",
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get zm order summary
+
+exports.getZmDashboard = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+    var dateFilter = req.body.dateFilter;
+    let schemeId = req.body.schemeId;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+
+    let allDealersOfZm = await dealerService.aggregateQuery([
+      {
+        $match: {
+          zonalManagerId: { $in: [new mongoose.Types.ObjectId(Id)] },
+          isDeleted: false,
+        },
+      },
+    ]);
+    console.log(datefilterQuery, "datefilterQuery");
+    let matchQuery = {
+      $and: [],
+    };
+    if (schemeId !== null) {
+      matchQuery.$and.push({ schemeId: new mongoose.Types.ObjectId(schemeId) });
+    }
+
+    if (allDealersOfZm?.length) {
+      let allDealersID = allDealersOfZm?.map((ele) => {
+        return new mongoose.Types.ObjectId(ele?._id);
+      });
+      let assignedOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let backDatesOrder = 0;
+      let deliveredOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.delivered,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let deliveryOutOfNetwork = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.deliveryOutOfNetwork,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let holdOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.hold,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let inTransitOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.intransit,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let ndrOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.ndr,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let newOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.fresh,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let pndOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.pnd,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let postDatesOrderOrder = 0;
+      let pscOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.psc,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let reAtteptOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.reattempt,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let unaOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.una,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      let urgentOrder = await orderService?.aggregateQuery([
+        {
+          $match: {
+            assignDealerId: { $in: allDealersID },
+            status: orderStatusEnum.urgent,
+            ...datefilterQuery[0],
+          },
+        },
+      ]);
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: {
+          assignedOrder: assignedOrder?.length,
+          backDatesOrder: backDatesOrder?.length,
+          deliveredOrder: deliveredOrder?.length,
+          deliveryOutOfNetwork: deliveryOutOfNetwork?.length,
+          holdOrder: holdOrder?.length,
+          inTransitOrder: inTransitOrder?.length,
+          ndrOrder: ndrOrder?.length,
+          newOrder: newOrder?.length,
+          pndOrder: pndOrder?.length,
+          postDatesOrderOrder: postDatesOrderOrder?.length,
+          pscOrder: pscOrder?.length,
+          reAtteptOrder: reAtteptOrder?.length,
+          unaOrder: unaOrder?.length,
+          urgentOrder: urgentOrder?.length,
+        },
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: null,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get zm dealer summary]
+
+exports.getZmDealerSummaray = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+    let matchQuery = {
+      $and: [
+        { isDeleted: false },
+        { zonalManagerId: new mongoose.Types.ObjectId(Id) },
+      ],
+    };
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    let allDealersOfZm = await dealerService.aggregateQuery([
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "orderinquiries", // Assuming the name of the order collection is "orderInquiry"
+          localField: "_id",
+          foreignField: "assignDealerId",
+          as: "orders",
+        },
+      },
+      {
+        $addFields: {
+          lastAssignedOrder: {
+            $arrayElemAt: ["$orders.createdAt", -1], // Get the last element of the "date" array
+          },
+          totalOrders: {
+            $size: {
+              $filter: {
+                input: "$orders",
+                as: "order",
+                cond: {
+                  $in: [
+                    "$$order.status",
+                    [
+                      orderStatusEnum.delivered,
+                      orderStatusEnum.doorCancelled,
+                      orderStatusEnum.hold,
+                    ],
+                  ],
+                },
+              },
+            },
+          },
+          holdOrders: {
+            $reduce: {
+              input: "$orders",
+              initialValue: 0,
+              in: {
+                $cond: {
+                  if: { $eq: ["$$this.status", orderStatusEnum.hold] },
+                  then: { $add: ["$$value", 1] },
+                  else: "$$value",
+                },
+              },
+            },
+          },
+          deliveredOrders: {
+            $sum: {
+              $cond: [
+                { $eq: ["$orders.status", orderStatusEnum.delivered] },
+                1,
+                0,
+              ],
+            },
+          },
+          cancelOrders: {
+            $sum: {
+              $cond: [
+                { $eq: ["$orders.status", orderStatusEnum.doorCancelled] },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          lastAssignedOrder: {
+            $subtract: [
+              new Date(),
+              { $ifNull: ["$lastAssignedOrder", new Date()] }, // If no orders found, return today's date
+            ],
+          },
+          lastAssignedOrderInDays: {
+            $round: {
+              $divide: [
+                {
+                  $subtract: [
+                    new Date(),
+                    { $ifNull: ["$lastAssignedOrder", new Date()] },
+                  ],
+                },
+                1000 * 60 * 60 * 24, // Convert milliseconds to days
+              ],
+            },
+          },
+          deliveryPercent: {
+            $cond: [
+              { $gt: ["$totalOrders", 0] }, // Check if totalOrders is greater than 0
+              {
+                $multiply: [
+                  { $divide: ["$deliveredOrders", "$totalOrders"] },
+                  100,
+                ],
+              },
+              0, // If totalOrders is 0, set deliveryPercent to 0
+            ],
+          },
+          holdPercent: {
+            $cond: [
+              { $gt: ["$totalOrders", 0] }, // Check if totalOrders is greater than 0
+              {
+                $multiply: [{ $divide: ["$holdOrders", "$totalOrders"] }, 100],
+              },
+              0, // If totalOrders is 0, set holdPercent to 0
+            ],
+          },
+          cancelPercent: {
+            $cond: [
+              { $gt: ["$totalOrders", 0] }, // Check if totalOrders is greater than 0
+              {
+                $multiply: [
+                  { $divide: ["$cancelOrders", "$totalOrders"] },
+                  100,
+                ],
+              },
+              0, // If totalOrders is 0, set cancelPercent to 0
+            ],
+          },
+        },
+      },
+      {
+        $project: {
+          lastAssignedOrderInDays: 1,
+
+          totalOrders: 1,
+          holdOrders: 1,
+          deliveredOrders: 1,
+          cancelOrders: 1,
+          deliveryPercent: 1,
+          holdPercent: 1,
+          cancelPercent: 1,
+          dealerCode: 1,
+        },
+      },
+    ]);
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: allDealersOfZm,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get zm dealer stock
+
+exports.getZmDealerStock = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+    let matchQuery = {
+      $and: [
+        { isDeleted: false },
+        { zonalManagerId: { $in: [new mongoose.Types.ObjectId(Id)] } },
+      ],
+    };
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    let allDealersStocks = await dealerService.aggregate([
+      {
+        $match: matchQuery,
+      },
+      {
+        $lookup: {
+          from: "barcode", // Assuming the name of the barcode collection is "barcode"
+          localField: "_id",
+          foreignField: "dealerId",
+          as: "stock",
+        },
+      },
+      {
+        $addFields: {
+          stockAvailable: {
+            $size: {
+              $filter: {
+                input: "$stock",
+                as: "barcode",
+                cond: {
+                  $eq: ["$$barcode.status", barcodeStatusType.atWarehouse],
+                },
+              },
+            },
+          },
+        },
+      },
+    ]);
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: allDealersStocks,
       code: "OK",
       issue: null,
     });

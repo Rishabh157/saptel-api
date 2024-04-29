@@ -27,4 +27,27 @@ router.post(
   DashBoardController.getAgentDashboardData
 );
 
+// =============== ZM Dashboard API =================
+router.post(
+  "/zm-dashboard/order-summary",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getZmDashboardData),
+  DashBoardController.getZmDashboard
+);
+
+// =============== ZM Dashboard API =================
+router.post(
+  "/zm-dashboard/dealer-summary",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getZmDashboardData),
+  DashBoardController.getZmDealerSummaray
+);
+// =============== ZM Dashboard API =================
+router.post(
+  "/zm-dashboard/dealer-stock",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getZmDashboardData),
+  DashBoardController.getZmDealerStock
+);
+
 module.exports = router;
