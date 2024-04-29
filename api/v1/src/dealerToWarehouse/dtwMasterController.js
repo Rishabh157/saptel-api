@@ -86,6 +86,7 @@ exports.add = async (req, res) => {
           quantity: po.quantity,
         },
         companyId: companyId,
+        dealerId: req.userData.Id,
       };
     });
     //------------------create data-------------------

@@ -16,6 +16,12 @@ router.put(
   orderController.updateOrderStatus
 );
 
+router.get(
+  "/get-all-order-status-count",
+  authCheckMiddleware,
+  orderController.getAllOrderStatusCount
+);
+
 // dealer app deliver order
 
 router.put(

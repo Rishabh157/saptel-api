@@ -483,7 +483,7 @@ exports.getById = async (req, res) => {
     let additionalQuery = [
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(idToBeSearch),
+          orderId: new mongoose.Types.ObjectId(idToBeSearch),
           isDeleted: false,
         },
       },
@@ -716,13 +716,13 @@ exports.getById = async (req, res) => {
     );
     let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields[0]) {
+    if (!allowedFields) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields[0],
+        data: allowedFields,
         code: "OK",
         issue: null,
       });

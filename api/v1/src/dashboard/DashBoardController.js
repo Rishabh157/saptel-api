@@ -20,6 +20,7 @@ const {
 const {
   orderStatusEnum,
   barcodeStatusType,
+  userRoleType,
 } = require("../../helper/enumUtils");
 const {
   getQuery,
@@ -240,7 +241,7 @@ exports.getAgentDashboardData = async (req, res) => {
 
 exports.getZmDashboard = async (req, res) => {
   try {
-    const { Id } = req.userData;
+    const { Id, userRole } = req.userData;
     var dateFilter = req.body.dateFilter;
     let schemeId = req.body.schemeId;
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
@@ -249,16 +250,36 @@ exports.getZmDashboard = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
+    let dealerMatchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+    if (userRole === userRoleType.EXECUTIVEArea) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveAreaId: { $in: [new mongoose.Types.ObjectId(Id)] },
+      });
+    }
+    if (userRole === userRoleType.srEXECUTIVEArea) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveId: new mongoose.Types.ObjectId(Id),
+      });
+    }
+
+    if (
+      userRole === userRoleType.srManagerDistribution ||
+      userRole === userRoleType.avpDistribution ||
+      userRole === userRoleType.managerArea
+    ) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveId: { $ne: null },
+        zonalManagerId: { $ne: null },
+      });
+    }
 
     let allDealersOfZm = await dealerService.aggregateQuery([
       {
-        $match: {
-          zonalManagerId: { $in: [new mongoose.Types.ObjectId(Id)] },
-          isDeleted: false,
-        },
+        $match: dealerMatchQuery,
       },
     ]);
-    console.log(datefilterQuery, "datefilterQuery");
     let matchQuery = {
       $and: [],
     };
@@ -424,26 +445,46 @@ exports.getZmDashboard = async (req, res) => {
 
 exports.getZmDealerSummaray = async (req, res) => {
   try {
-    const { Id } = req.userData;
+    const { Id, userRole } = req.userData;
     var dateFilter = req.body.dateFilter;
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
-    let matchQuery = {
-      $and: [
-        { isDeleted: false },
-        { zonalManagerId: new mongoose.Types.ObjectId(Id) },
-      ],
+    let dealerMatchQuery = {
+      $and: [{ isDeleted: false }],
     };
+    if (userRole === userRoleType.EXECUTIVEArea) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveAreaId: { $in: [new mongoose.Types.ObjectId(Id)] },
+      });
+    }
+    if (userRole === userRoleType.srEXECUTIVEArea) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveId: new mongoose.Types.ObjectId(Id),
+      });
+    }
+
+    if (
+      userRole === userRoleType.srManagerDistribution ||
+      userRole === userRoleType.avpDistribution ||
+      userRole === userRoleType.managerArea
+    ) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveId: { $ne: null },
+        zonalManagerId: { $ne: null },
+      });
+    }
+
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
       allowedDateFiletrKeys
     );
     if (datefilterQuery && datefilterQuery.length) {
-      matchQuery.$and.push(...datefilterQuery);
+      dealerMatchQuery.$and.push(...datefilterQuery);
     }
+    console.log(dealerMatchQuery, "dealerMatchQuery");
 
     let allDealersOfZm = await dealerService.aggregateQuery([
       {
-        $match: matchQuery,
+        $match: dealerMatchQuery,
       },
       {
         $lookup: {
@@ -580,7 +621,7 @@ exports.getZmDealerSummaray = async (req, res) => {
         },
       },
     ]);
-
+    console.log(allDealersOfZm, "allDealersOfZm");
     return res.status(httpStatus.OK).send({
       message: "Successfull.",
       status: true,
@@ -602,33 +643,67 @@ exports.getZmDealerSummaray = async (req, res) => {
 
 exports.getZmDealerStock = async (req, res) => {
   try {
-    const { Id } = req.userData;
+    const { Id, userRole } = req.userData;
     var dateFilter = req.body.dateFilter;
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
-    let matchQuery = {
-      $and: [
-        { isDeleted: false },
-        { zonalManagerId: { $in: [new mongoose.Types.ObjectId(Id)] } },
-      ],
+    let dealerMatchQuery = {
+      $and: [{ isDeleted: false }],
     };
+    if (userRole === userRoleType.EXECUTIVEArea) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveAreaId: { $in: [new mongoose.Types.ObjectId(Id)] },
+      });
+    }
+    if (userRole === userRoleType.srEXECUTIVEArea) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveId: new mongoose.Types.ObjectId(Id),
+      });
+    }
+
+    if (
+      userRole === userRoleType.srManagerDistribution ||
+      userRole === userRoleType.avpDistribution ||
+      userRole === userRoleType.managerArea
+    ) {
+      dealerMatchQuery.$and.push({
+        zonalExecutiveId: { $ne: null },
+        zonalManagerId: { $ne: null },
+      });
+    }
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
       allowedDateFiletrKeys
     );
     if (datefilterQuery && datefilterQuery.length) {
-      matchQuery.$and.push(...datefilterQuery);
+      dealerMatchQuery.$and.push(...datefilterQuery);
     }
 
-    let allDealersStocks = await dealerService.aggregate([
+    let allDealersStocks = await dealerService.aggregateQuery([
       {
-        $match: matchQuery,
+        $match: dealerMatchQuery,
       },
       {
         $lookup: {
-          from: "barcode", // Assuming the name of the barcode collection is "barcode"
+          from: "barcodes", // Assuming the name of the barcode collection is "barcode"
           localField: "_id",
           foreignField: "dealerId",
           as: "stock",
+        },
+      },
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "_id",
+          foreignField: "dealerId",
+          as: "salesOrder",
+        },
+      },
+      {
+        $lookup: {
+          from: "dtwmasters",
+          localField: "_id",
+          foreignField: "dealerId",
+          as: "dtwData",
         },
       },
       {
@@ -639,11 +714,52 @@ exports.getZmDealerStock = async (req, res) => {
                 input: "$stock",
                 as: "barcode",
                 cond: {
-                  $eq: ["$$barcode.status", barcodeStatusType.atWarehouse],
+                  $eq: [
+                    "$$barcode.status",
+                    barcodeStatusType.atDealerWarehouse,
+                  ],
                 },
               },
             },
           },
+          intransiteStock: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: "$salesOrder",
+                    as: "order",
+                    cond: { $eq: ["$$order.status", "DISPATCHED"] }, // Filter sales orders with status COMPLETE
+                  },
+                },
+                as: "order",
+                in: { $sum: "$$order.productSalesOrder.quantity" }, // Sum the quantities of productSalesOrder
+              },
+            },
+          },
+          rtoStock: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: "$dtwData",
+                    as: "dtw",
+                    cond: { $eq: ["$$dtw.status", "COMPLETE"] }, // Filter sales dtws with status COMPLETE
+                  },
+                },
+                as: "dtw",
+                in: { $sum: "$$dtw.productSalesOrder.quantity" }, // Sum the quantities of productSalesOrder
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          dealerCode: 1,
+          stockAvailable: 1,
+          intransiteStock: 1,
+          rtoStock: 1,
         },
       },
     ]);

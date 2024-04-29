@@ -4017,6 +4017,265 @@ exports.getWarehouseNDROrder = async (req, res) => {
   }
 };
 
+//get all orders status count
+
+exports.getAllOrderStatusCount = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    console.log("here");
+    let additionalQuery = [
+      {
+        $facet: {
+          freshOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.fresh,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          allOrders: [
+            {
+              $count: "count",
+            },
+          ],
+          prepaidOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.prepaid,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          deliveredOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.delivered,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          doorCancelledOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.doorCancelled,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          holdOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.hold,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          pscOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.psc,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          unaOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.una,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          pndOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.pnd,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          urgentOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.urgent,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          nonActionOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.nonAction,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          rtoOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.rto,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          inquiryOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.inquiry,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          reattemptOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.reattempt,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          deliveryOutOfNetworkOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.deliveryOutOfNetwork,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          intransitOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.intransit,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          ndrOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.ndr,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          freshOrders: {
+            $ifNull: [{ $arrayElemAt: ["$freshOrders.count", 0] }, 0],
+          },
+          allOrders: {
+            $ifNull: [{ $arrayElemAt: ["$allOrders.count", 0] }, 0],
+          },
+          prepaidOrders: {
+            $ifNull: [{ $arrayElemAt: ["$prepaidOrders.count", 0] }, 0],
+          },
+          deliveredOrders: {
+            $ifNull: [{ $arrayElemAt: ["$deliveredOrders.count", 0] }, 0],
+          },
+          doorCancelledOrders: {
+            $ifNull: [{ $arrayElemAt: ["$doorCancelledOrders.count", 0] }, 0],
+          },
+          holdOrders: {
+            $ifNull: [{ $arrayElemAt: ["$holdOrders.count", 0] }, 0],
+          },
+          pscOrders: {
+            $ifNull: [{ $arrayElemAt: ["$pscOrders.count", 0] }, 0],
+          },
+          unaOrders: {
+            $ifNull: [{ $arrayElemAt: ["$unaOrders.count", 0] }, 0],
+          },
+          pndOrders: {
+            $ifNull: [{ $arrayElemAt: ["$pndOrders.count", 0] }, 0],
+          },
+          urgentOrders: {
+            $ifNull: [{ $arrayElemAt: ["$urgentOrders.count", 0] }, 0],
+          },
+          nonActionOrders: {
+            $ifNull: [{ $arrayElemAt: ["$nonActionOrders.count", 0] }, 0],
+          },
+          rtoOrders: {
+            $ifNull: [{ $arrayElemAt: ["$rtoOrders.count", 0] }, 0],
+          },
+          inquiryOrders: {
+            $ifNull: [{ $arrayElemAt: ["$inquiryOrders.count", 0] }, 0],
+          },
+          reattemptOrders: {
+            $ifNull: [{ $arrayElemAt: ["$reattemptOrders.count", 0] }, 0],
+          },
+          deliveryOutOfNetworkOrders: {
+            $ifNull: [
+              { $arrayElemAt: ["$deliveryOutOfNetworkOrders.count", 0] },
+              0,
+            ],
+          },
+          intransitOrders: {
+            $ifNull: [{ $arrayElemAt: ["$intransitOrders.count", 0] }, 0],
+          },
+          ndrOrders: {
+            $ifNull: [{ $arrayElemAt: ["$ndrOrders.count", 0] }, 0],
+          },
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    console.log(dataExist, "dataExist");
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============get DispositionTwo by Id start================
 exports.getById = async (req, res) => {
   try {

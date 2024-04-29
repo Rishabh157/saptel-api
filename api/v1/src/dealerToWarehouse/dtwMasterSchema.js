@@ -6,6 +6,7 @@ const dtwMasterSchema = new mongoose.Schema(
     dtwNumber: { type: String, required: false, trim: true },
     fromWarehouseId: { type: ObjectId, required: true },
     toWarehouseId: { type: ObjectId, required: true },
+    dealerId: { type: ObjectId, required: true },
     firstApprovedById: {
       type: ObjectId,
       default: null,
