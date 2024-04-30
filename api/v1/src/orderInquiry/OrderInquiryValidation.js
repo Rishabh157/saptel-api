@@ -467,6 +467,18 @@ const dealerOrderStatusChange = {
   }),
 };
 
+const getOrderDashboardCount = {
+  body: Joi.object().keys({
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+  }),
+};
+
 /**
  * get by id
  */
@@ -508,4 +520,5 @@ module.exports = {
   updateCourierNdr,
   changeScheme,
   getMultipleOrder,
+  getOrderDashboardCount,
 };

@@ -28,6 +28,16 @@ router.get(
   validate(salesOrderValidation.getDocument),
   salesOrderController.getById
 );
+
+/**
+ * get one document for invoice
+ */
+router.get(
+  "/get-dealer-invoice/:sonumber",
+  authCheckMiddleware,
+  validate(salesOrderValidation.getDocument),
+  salesOrderController.getDealerInvoice
+);
 /**
  * get by dealer id
  */

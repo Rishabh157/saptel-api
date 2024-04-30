@@ -50,4 +50,28 @@ router.post(
   DashBoardController.getZmDealerStock
 );
 
+// =============== Warehouse Dashboard API =================
+router.get(
+  "/warehouse-inventory/:wid",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getWhDashboardData),
+  DashBoardController.getWhDashboardInventory
+);
+
+// =============== Warehouse Dashboard API =================
+router.post(
+  "/warehouse-outward-stock/:wid",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getWhInwartOutwardData),
+  DashBoardController.getWhOutwardStock
+);
+
+// =============== Warehouse Dashboard API =================
+router.post(
+  "/warehouse-inward-stock/:wid",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getWhInwartOutwardData),
+  DashBoardController.getWhInwardStock
+);
+
 module.exports = router;

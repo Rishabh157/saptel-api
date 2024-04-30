@@ -16,9 +16,11 @@ router.put(
   orderController.updateOrderStatus
 );
 
-router.get(
+router.post(
   "/get-all-order-status-count",
   authCheckMiddleware,
+  validate(orderValidation.getOrderDashboardCount),
+
   orderController.getAllOrderStatusCount
 );
 

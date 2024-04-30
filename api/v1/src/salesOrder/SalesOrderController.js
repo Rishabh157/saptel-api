@@ -217,6 +217,7 @@ exports.updateLevel = async (req, res) => {
       accApproved,
       accApprovedActionBy,
       dhApproved,
+      invoice,
     } = req.body;
 
     let sonumberToBeSearch = req.params.sonumber;
@@ -227,11 +228,13 @@ exports.updateLevel = async (req, res) => {
         (dataToSend.accApprovedActionBy = accApprovedActionBy),
         (dataToSend.accApprovedAt = accApprovedAt);
       dataToSend.accApproved = accApproved;
+      dataToSend.invoice = invoice;
     } else {
       (dataToSend.dhApprovedById = dhApprovedById),
         (dataToSend.dhApprovedActionBy = dhApprovedActionBy),
         (dataToSend.dhApprovedAt = dhApprovedAt);
       dataToSend.dhApproved = dhApproved;
+      dataToSend.invoice = invoice;
     }
 
     //------------------Find data-------------------
@@ -1509,6 +1512,261 @@ exports.getById = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: allowedFields,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get dealer invoice
+
+exports.getDealerInvoice = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let sonumberToBeSearch = req.params.sonumber;
+
+    let additionalQuery = [
+      {
+        $match: {
+          soNumber: sonumberToBeSearch,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealer_name",
+          pipeline: [
+            {
+              $project: {
+                dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "companyWareHouseId",
+          foreignField: "_id",
+          as: "companyWarehouseName",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                billingAddress: 1,
+                email: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "companyWarehouseName.billingAddress.countryId",
+          foreignField: "_id",
+          as: "country_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "companyWarehouseName.billingAddress.stateId",
+          foreignField: "_id",
+          as: "state_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "companyWarehouseName.billingAddress.districtId",
+          foreignField: "_id",
+          as: "district_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "companyWarehouseName.billingAddress.pincodeId",
+          foreignField: "_id",
+          as: "pincode_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "dealerWareHouseId",
+          foreignField: "_id",
+          as: "warehouses_name",
+          pipeline: [
+            { $project: { wareHouseName: 1, billingAddress: 1, email: 1 } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "dealerWareHouseId.billingAddress.countryId",
+          foreignField: "_id",
+          as: "dealer_country_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "dealerWareHouseId.billingAddress.stateId",
+          foreignField: "_id",
+          as: "dealer_state_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "dealerWareHouseId.billingAddress.districtId",
+          foreignField: "_id",
+          as: "dealer_district_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "dealerWareHouseId.billingAddress.pincodeId",
+          foreignField: "_id",
+          as: "dealer_pincode_name",
+        },
+      },
+      {
+        $unwind: "$productSalesOrder",
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productGroup",
+        },
+      },
+      {
+        $addFields: {
+          "productSalesOrder.gst": { $arrayElemAt: ["$productGroup.gst", 0] },
+          "productSalesOrder.sgst": { $arrayElemAt: ["$productGroup.sgst", 0] },
+          "productSalesOrder.igst": { $arrayElemAt: ["$productGroup.igst", 0] },
+          "productSalesOrder.cgst": { $arrayElemAt: ["$productGroup.cgst", 0] },
+          "productSalesOrder.ugst": { $arrayElemAt: ["$productGroup.ugst", 0] },
+          "productSalesOrder.gstin": {
+            $arrayElemAt: ["$productGroup.gstin", 0],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          productSalesOrder: { $push: "$productSalesOrder" },
+          dealer_name: { $first: "$dealer_name" },
+          companyWarehouseName: { $first: "$companyWarehouseName" },
+          warehouses_name: { $first: "$warehouses_name" },
+          country_name: { $first: "$country_name" },
+          state_name: { $first: "$state_name" },
+          district_name: { $first: "$district_name" },
+          pincode_name: { $first: "$pincode_name" },
+          dealer_country_name: { $first: "$country_name" },
+          dealer_state_name: { $first: "$state_name" },
+          dealer_district_name: { $first: "$district_name" },
+          dealer_pincode_name: { $first: "$pincode_name" },
+        },
+      },
+      {
+        $addFields: {
+          dealerLabel: { $arrayElemAt: ["$dealer_name.dealerName", 0] },
+          companyWarehouseLabel: {
+            $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
+          },
+          companyWarehouseBillingAddress: {
+            $arrayElemAt: ["$companyWarehouseName.billingAddress", 0],
+          },
+          warehouseLabel: {
+            $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          warehouseBillingAddress: {
+            $arrayElemAt: ["$warehouses_name.billingAddress", 0],
+          },
+          wareHouseCountryName: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          companyCountryName: {
+            $arrayElemAt: ["$country_name.countryName", 0],
+          },
+          companyStateName: { $arrayElemAt: ["$state_name.stateName", 0] },
+          companyDistrictName: {
+            $arrayElemAt: ["$district_name.districtName", 0],
+          },
+          companyPincodeName: { $arrayElemAt: ["$pincode_name.pincode", 0] },
+          dealerCountryName: {
+            $arrayElemAt: ["$dealer_country_name.countryName", 0],
+          },
+          dealerStateName: {
+            $arrayElemAt: ["$dealer_state_name.stateName", 0],
+          },
+          dealerDistrictName: {
+            $arrayElemAt: ["$dealer_district_name.districtName", 0],
+          },
+          dealerPincodeName: {
+            $arrayElemAt: ["$dealer_pincode_name.pincode", 0],
+          },
+          companyEmail: {
+            $arrayElemAt: ["$companyWarehouseName.email", 0],
+          },
+          warehouseEmail: {
+            $arrayElemAt: ["$warehouses_name.email", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "dealer_name",
+          "companyWarehouseName",
+          "warehouses_name",
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+          "dealer_country_name",
+          "dealer_state_name",
+          "dealer_district_name",
+          "dealer_pincode_name",
+          "productGroup",
+        ],
+      },
+    ];
+
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.saleOrder,
+      userRoleData,
+      actionType.view
+    );
+    let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+
+    if (!allowedFields?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: allowedFields[0],
         code: "OK",
         issue: null,
       });

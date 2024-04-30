@@ -9,6 +9,13 @@ const complaintService = require("../complain/ComplainService");
 const houseArrestService = require("../houseArrestRequest/HouseArrestRequestService");
 const moneyBackService = require("../moneyBackRequest/MoneyBackRequestService");
 const productReplacementService = require("../productReplacementRequest/ProductReplacementRequestService");
+const salesOrderService = require("../salesOrder/SalesOrderService");
+const rtvService = require("../rtvMaster/RtvMasterService");
+const wtwService = require("../warehouseToWarehouse/wtwMasterService");
+const wtsService = require("../warehouseToSample/wtsMasterService");
+const wtcService = require("../warehouseToCompany/wtcMasterService");
+const dtwService = require("../dealerToWarehouse/dtwMasterService");
+const barCodeService = require("../barCode/BarCodeService");
 
 const { errorRes } = require("../../../utils/resError");
 
@@ -21,6 +28,7 @@ const {
   orderStatusEnum,
   barcodeStatusType,
   userRoleType,
+  productStatus,
 } = require("../../helper/enumUtils");
 const {
   getQuery,
@@ -767,6 +775,298 @@ exports.getZmDealerStock = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: allDealersStocks,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get warehouse inventory data
+
+exports.getWhDashboardInventory = async (req, res) => {
+  try {
+    const { wid } = req.params;
+    let additionalQuery = [
+      {
+        $match: {
+          isUsed: true, // You can add any additional match criteria here if needed
+          status: barcodeStatusType.atWarehouse,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+          wareHouseId: new mongoose.Types.ObjectId(wid),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+
+      {
+        $group: {
+          _id: {
+            wareHouseId: `$${wid}`,
+            productGroupId: `$productGroupId`,
+          },
+          productGroupLabel: { $first: "$productGroupLabel" },
+          count: { $sum: 1 }, // Count the documents in each group
+          firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          wareHouseId: "$_id.wareHouseId",
+          // productGroupId: "$_id.productGroupId",
+          count: 1, // Include the count field
+          // firstDocument: 1, // Include the firstDocument field
+          productGroupLabel: 1,
+          wareHouseLabel: 1,
+        },
+      },
+    ];
+
+    //-----------------------------------
+    let dataFound = await barCodeService.aggregateQuery(additionalQuery);
+
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found .`);
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: dataFound,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get warehouse dashboard outward stock data count
+
+exports.getWhOutwardStock = async (req, res) => {
+  try {
+    const { wid } = req.params;
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    //-----------------------------------
+    let stockToDealer = await salesOrderService.aggregateQuery([
+      {
+        $match: {
+          companyWareHouseId: new mongoose.Types.ObjectId(wid),
+          // status: productStatus.notDispatched,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockToCustomer = await orderService.aggregateQuery([
+      {
+        $match: {
+          assignWarehouseId: new mongoose.Types.ObjectId(wid),
+          firstCallApproval: true,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockTortv = await rtvService.aggregateQuery([
+      {
+        $match: {
+          warehouseId: new mongoose.Types.ObjectId(wid),
+          secondApproved: true,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockToWarehouse = await wtwService.aggregateQuery([
+      {
+        $match: {
+          fromWarehouseId: new mongoose.Types.ObjectId(wid),
+          secondApproved: true,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockToSample = await wtsService.aggregateQuery([
+      {
+        $match: {
+          fromWarehouseId: new mongoose.Types.ObjectId(wid),
+          status: productStatus.notDispatched,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockToCompany = await wtcService.aggregateQuery([
+      {
+        $match: {
+          fromWarehouseId: new mongoose.Types.ObjectId(wid),
+          secondApproved: true,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: {
+        dealer: stockToDealer?.length,
+        customer: stockToCustomer?.length,
+        rtv: stockTortv?.length,
+        warehouse: stockToWarehouse?.length,
+        sample: stockToSample?.length,
+        eCom: 0,
+        company: stockToCompany?.length,
+      },
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get warehouse dashboard inward stock data count
+
+exports.getWhInwardStock = async (req, res) => {
+  try {
+    const { wid } = req.params;
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    //-----------------------------------
+    let stockfromDealer = await dtwService.aggregateQuery([
+      {
+        $match: {
+          toWarehouseId: new mongoose.Types.ObjectId(wid),
+          // status: productStatus.notDispatched,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockFromCustomer = 0;
+
+    //-----------------------------------
+    let stockFromWarehouse = await wtwService.aggregateQuery([
+      {
+        $match: {
+          toWarehouseId: new mongoose.Types.ObjectId(wid),
+          secondApproved: true,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockFromSample = await wtsService.aggregateQuery([
+      {
+        $match: {
+          fromWarehouseId: new mongoose.Types.ObjectId(wid),
+          status: productStatus?.dispatched,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+    //-----------------------------------
+    let stockFromCompany = await wtcService.aggregateQuery([
+      {
+        $match: {
+          toWarehouseId: new mongoose.Types.ObjectId(wid),
+          secondApproved: true,
+          isDeleted: false,
+          ...datefilterQuery[0],
+        },
+      },
+    ]);
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: {
+        dealer: stockfromDealer?.length,
+        customer: stockFromCustomer,
+        warehouse: stockFromWarehouse?.length,
+        sample: stockFromSample?.length,
+        eCom: 0,
+        company: stockFromCompany?.length,
+      },
       code: "OK",
       issue: null,
     });

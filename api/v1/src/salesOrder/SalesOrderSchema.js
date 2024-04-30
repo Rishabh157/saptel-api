@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { productStatus } = require("../../helper/enumUtils");
 const SalesOrderSchema = new mongoose.Schema(
   {
     soNumber: {
@@ -75,8 +76,16 @@ const SalesOrderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["DISPATCHED", "NOT_DISPATCHED", "COMPLETE"],
-      default: "NOT_DISPATCHED",
+      enum: [
+        productStatus.dispatched,
+        productStatus.notDispatched,
+        productStatus.complete,
+      ],
+      default: productStatus.notDispatched,
+    },
+    invoice: {
+      type: String,
+      default: "",
     },
 
     companyId: {

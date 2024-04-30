@@ -51,6 +51,7 @@ const updateApproval = {
     accApprovedActionBy: Joi.string().allow(""),
     accApproved: Joi.boolean(),
     dhApproved: Joi.boolean(),
+    invoice: Joi.string().allow(""),
   }),
 };
 /**

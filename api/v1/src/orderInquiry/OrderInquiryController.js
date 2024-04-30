@@ -4021,9 +4021,20 @@ exports.getWarehouseNDROrder = async (req, res) => {
 
 exports.getAllOrderStatusCount = async (req, res) => {
   try {
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
     //if no default query then pass {}
-    console.log("here");
     let additionalQuery = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+        },
+      },
       {
         $facet: {
           freshOrders: [

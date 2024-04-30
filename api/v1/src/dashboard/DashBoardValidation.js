@@ -28,7 +28,30 @@ const getZmDashboardData = {
   }),
 };
 
+const getWhDashboardData = {
+  params: Joi.object().keys({
+    wid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+const getWhInwartOutwardData = {
+  params: Joi.object().keys({
+    wid: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+  }),
+};
+
 module.exports = {
   getAgentDashboardData,
   getZmDashboardData,
+  getWhDashboardData,
+  getWhInwartOutwardData,
 };
