@@ -87,6 +87,10 @@ const SalesOrderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    invoiceDate: {
+      type: String,
+      default: "",
+    },
 
     companyId: {
       type: ObjectId,

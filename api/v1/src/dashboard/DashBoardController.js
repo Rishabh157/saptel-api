@@ -16,6 +16,7 @@ const wtsService = require("../warehouseToSample/wtsMasterService");
 const wtcService = require("../warehouseToCompany/wtcMasterService");
 const dtwService = require("../dealerToWarehouse/dtwMasterService");
 const barCodeService = require("../barCode/BarCodeService");
+const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 
 const { errorRes } = require("../../../utils/resError");
 
@@ -1067,6 +1068,495 @@ exports.getWhInwardStock = async (req, res) => {
         eCom: 0,
         company: stockFromCompany?.length,
       },
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get all order status count for dealer
+exports.getAllOrderStatusCountForDealer = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    //if no default query then pass {}
+    let additionalQuery = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignDealerId: new mongoose.Types.ObjectId(req.userData.Id),
+        },
+      },
+      {
+        $facet: {
+          freshOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.fresh,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          allOrders: [
+            {
+              $count: "count",
+            },
+          ],
+          prepaidOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.prepaid,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          deliveredOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.delivered,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          doorCancelledOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.doorCancelled,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          holdOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.hold,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          pscOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.psc,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          unaOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.una,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          pndOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.pnd,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          urgentOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.urgent,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          nonActionOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.nonAction,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          rtoOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.rto,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          inquiryOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.inquiry,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          reattemptOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.reattempt,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          deliveryOutOfNetworkOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.deliveryOutOfNetwork,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          intransitOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.intransit,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          ndrOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.ndr,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          freshOrders: {
+            $ifNull: [{ $arrayElemAt: ["$freshOrders.count", 0] }, 0],
+          },
+          allOrders: {
+            $ifNull: [{ $arrayElemAt: ["$allOrders.count", 0] }, 0],
+          },
+          prepaidOrders: {
+            $ifNull: [{ $arrayElemAt: ["$prepaidOrders.count", 0] }, 0],
+          },
+          deliveredOrders: {
+            $ifNull: [{ $arrayElemAt: ["$deliveredOrders.count", 0] }, 0],
+          },
+          doorCancelledOrders: {
+            $ifNull: [{ $arrayElemAt: ["$doorCancelledOrders.count", 0] }, 0],
+          },
+          holdOrders: {
+            $ifNull: [{ $arrayElemAt: ["$holdOrders.count", 0] }, 0],
+          },
+          pscOrders: {
+            $ifNull: [{ $arrayElemAt: ["$pscOrders.count", 0] }, 0],
+          },
+          unaOrders: {
+            $ifNull: [{ $arrayElemAt: ["$unaOrders.count", 0] }, 0],
+          },
+          pndOrders: {
+            $ifNull: [{ $arrayElemAt: ["$pndOrders.count", 0] }, 0],
+          },
+          urgentOrders: {
+            $ifNull: [{ $arrayElemAt: ["$urgentOrders.count", 0] }, 0],
+          },
+          nonActionOrders: {
+            $ifNull: [{ $arrayElemAt: ["$nonActionOrders.count", 0] }, 0],
+          },
+          rtoOrders: {
+            $ifNull: [{ $arrayElemAt: ["$rtoOrders.count", 0] }, 0],
+          },
+          inquiryOrders: {
+            $ifNull: [{ $arrayElemAt: ["$inquiryOrders.count", 0] }, 0],
+          },
+          reattemptOrders: {
+            $ifNull: [{ $arrayElemAt: ["$reattemptOrders.count", 0] }, 0],
+          },
+          deliveryOutOfNetworkOrders: {
+            $ifNull: [
+              { $arrayElemAt: ["$deliveryOutOfNetworkOrders.count", 0] },
+              0,
+            ],
+          },
+          intransitOrders: {
+            $ifNull: [{ $arrayElemAt: ["$intransitOrders.count", 0] }, 0],
+          },
+          ndrOrders: {
+            $ifNull: [{ $arrayElemAt: ["$ndrOrders.count", 0] }, 0],
+          },
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    console.log(dataExist, "dataExist");
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get dealer pincode data (dashboard)
+exports.getDealerPincodeDashboard = async (req, res) => {
+  try {
+    const dealerid = req.userData.Id;
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    let additionalQuery = [
+      {
+        $match: {
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+          dealerId: new mongoose.Types.ObjectId(dealerid),
+          ...datefilterQuery[0],
+        },
+      },
+      {
+        $lookup: {
+          from: "orderinquiries",
+          localField: "dealerId",
+          foreignField: "assignedDealerId",
+          as: "orderInquiries",
+        },
+      },
+      {
+        $addFields: {
+          quantity: { $sum: "$orderInquiries.quantity" },
+          yetToShip: {
+            $size: {
+              $filter: {
+                input: "$orderInquiries",
+                as: "order",
+                cond: { $eq: ["$$order.status", orderStatusEnum.fresh] },
+              },
+            },
+          },
+          shipped: {
+            $size: {
+              $filter: {
+                input: "$orderInquiries",
+                as: "order",
+                cond: { $eq: ["$$order.status", orderStatusEnum.intransit] },
+              },
+            },
+          },
+          delivered: {
+            $size: {
+              $filter: {
+                input: "$orderInquiries",
+                as: "order",
+                cond: { $eq: ["$$order.status", orderStatusEnum.delivered] },
+              },
+            },
+          },
+          canceled: {
+            $size: {
+              $filter: {
+                input: "$orderInquiries",
+                as: "order",
+                cond: {
+                  $eq: ["$$order.status", orderStatusEnum.doorCancelled],
+                },
+              },
+            },
+          },
+        },
+      },
+    ];
+
+    //-----------------------------------
+    let dataFound = await dealerPincodeService.aggregateQuery(additionalQuery);
+
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found .`);
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: dataFound,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get dealer product data (dashboard)
+exports.getDealerProductDashboard = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    let additionalQuery = [
+      {
+        $match: {
+          isDeleted: false,
+          dealerId: new mongoose.Types.ObjectId(req.userData.Id),
+          ...datefilterQuery[0],
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+        },
+      },
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "productGroupId",
+          foreignField: "productSalesOrder.productGroupId",
+          as: "product_sale_order",
+        },
+      },
+      {
+        $lookup: {
+          from: "orderinquiries",
+          localField: "dealerId",
+          foreignField: "assignDealerId",
+          as: "shipping_pending_stock",
+        },
+      },
+      {
+        $addFields: {
+          productGroupLabel: { $arrayElemAt: ["$product_group.groupName", 0] },
+          productGroupPrice: {
+            $arrayElemAt: ["$product_group.dealerSalePrice", 0],
+          },
+          defectiveStock: {
+            $size: {
+              $ifNull: ["$barcode", []], // Provide an empty array if $barcode is null
+            },
+          },
+          stockReceivePending: {
+            $cond: {
+              if: { $isArray: "$product_sale_order" },
+              then: { $sum: "$product_sale_order.productSalesOrder.quantity" },
+              else: 0,
+            },
+          },
+          shippingPendingStock: { $size: "$shipping_pending_stock" },
+        },
+      },
+      {
+        $unset: ["product_group", "warehouse_data"],
+      },
+      {
+        $match: {
+          isUsed: true,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+      {
+        $group: {
+          _id: "$productGroupId",
+          productGroupLabel: { $first: "$productGroupLabel" },
+          productGroupPrice: { $first: "$productGroupPrice" },
+          stockReceivePending: { $first: "$stockReceivePending" },
+          shippingPendingStock: { $first: "$shippingPendingStock" },
+          defectiveStock: { $first: "$defectiveStock" },
+          count: { $sum: 1 },
+          firstDocument: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $project: {
+          // _id: 0,
+          // productGroupId: "$_id",
+
+          productGroupLabel: 1,
+          productGroupPrice: 1,
+          stockReceivePending: 1,
+          shippingPendingStock: 1,
+          defectiveStock: 1,
+        },
+      },
+    ];
+
+    //-----------------------------------
+    let dataFound = await barCodeService.aggregateQuery(additionalQuery);
+
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found .`);
+    }
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: dataFound,
       code: "OK",
       issue: null,
     });

@@ -74,4 +74,27 @@ router.post(
   DashBoardController.getWhInwardStock
 );
 
+// =============== dealer Dashboard API =================
+router.post(
+  "/dealer-order-status",
+  authCheckDealerMiddleware,
+  validate(DashBoardValidation.getOrderDashboardCount),
+  DashBoardController.getAllOrderStatusCountForDealer
+);
+
+// =============== dealer Dashboard API =================
+router.post(
+  "/dealer-pincode-dashboard",
+  authCheckDealerMiddleware,
+  validate(DashBoardValidation.getOrderDashboardCount),
+  DashBoardController.getDealerPincodeDashboard
+);
+// =============== dealer Dashboard API =================
+router.post(
+  "/dealer-product-dashboard",
+  authCheckDealerMiddleware,
+  validate(DashBoardValidation.getOrderDashboardCount),
+  DashBoardController.getDealerProductDashboard
+);
+
 module.exports = router;

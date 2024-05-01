@@ -229,6 +229,7 @@ exports.updateLevel = async (req, res) => {
         (dataToSend.accApprovedAt = accApprovedAt);
       dataToSend.accApproved = accApproved;
       dataToSend.invoice = invoice;
+      dataToSend.invoiceDate = new Date();
     } else {
       (dataToSend.dhApprovedById = dhApprovedById),
         (dataToSend.dhApprovedActionBy = dhApprovedActionBy),

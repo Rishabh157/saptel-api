@@ -34,6 +34,24 @@ const getWhDashboardData = {
   }),
 };
 
+const getDealerDashboardData = {
+  params: Joi.object().keys({
+    dealerid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+const getOrderDashboardCount = {
+  body: Joi.object().keys({
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+  }),
+};
+
 const getWhInwartOutwardData = {
   params: Joi.object().keys({
     wid: Joi.string().custom(commonValidation.objectId),
@@ -54,4 +72,6 @@ module.exports = {
   getZmDashboardData,
   getWhDashboardData,
   getWhInwartOutwardData,
+  getDealerDashboardData,
+  getOrderDashboardCount,
 };

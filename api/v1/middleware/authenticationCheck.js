@@ -87,6 +87,7 @@ exports.authCheckDealerMiddleware = async (req, res, next) => {
     /**
      * check token exist in req body
      */
+    console.log("uui");
 
     let isTokenExist = authHelper.checkTokenExist(req, res);
 
