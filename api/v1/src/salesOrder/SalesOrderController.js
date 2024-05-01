@@ -1751,22 +1751,30 @@ exports.getDealerInvoice = async (req, res) => {
       },
     ];
 
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.saleOrder,
-      userRoleData,
-      actionType.view
-    );
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.saleOrder,
+    //   userRoleData,
+    //   actionType.view
+    // );
     let dataExist = await salesOrderService.aggregateQuery(additionalQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    let newData = {};
+    let newProductSalesOrder = [];
+    dataExist?.map((ele) => {
+      const { productSalesOrder, ...rest } = ele;
+      newData = { ...rest };
+      newProductSalesOrder.push(...productSalesOrder);
+    });
+    newData.productSalesOrder = newProductSalesOrder;
+    // let allowedFields = getAllowedField(fieldsToDisplay, newData);
 
-    if (!allowedFields?.length) {
+    if (!newData) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields[0],
+        data: newData,
         code: "OK",
         issue: null,
       });
