@@ -97,4 +97,12 @@ router.post(
   DashBoardController.getDealerProductDashboard
 );
 
+// =============== sales Dashboard API =================
+router.post(
+  "/sales-dashboard",
+  authCheckMiddleware,
+  validate(DashBoardValidation.getOrderDashboardCount),
+  DashBoardController.getSalesDashboard
+);
+
 module.exports = router;

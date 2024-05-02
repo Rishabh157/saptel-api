@@ -1569,3 +1569,365 @@ exports.getDealerProductDashboard = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// sales dashboard
+
+exports.getSalesDashboard = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    let { Id, userRole } = req.userData;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+
+    let userDataFound = await userService.getOneByMultiField({
+      isDeleted: false,
+      _id: Id,
+    });
+
+    async function yourFunction(userRole, Id, userDataFound) {
+      switch (userRole) {
+        case userRoleType.EXECUTIVETrainee:
+          matchQuery.$and.push({
+            agentId: new mongoose.Types.ObjectId(Id),
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.executiveSalesCenter:
+          let escJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            mySenior: { $in: [new mongoose.Types.ObjectId(Id)] },
+          });
+          let escJuniorId = escJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: { $in: [new mongoose.Types.ObjectId(Id), ...escJuniorId] },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.srEXECUTIVESalesCenter:
+          let sescJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            mySenior: { $in: [new mongoose.Types.ObjectId(Id)] },
+          });
+          let sescJuniorId = sescJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...sescJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.teamLeaderOrEXECUTIVESalesCenter:
+          let tlJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            $or: [
+              { teamLeadId: new mongoose.Types.ObjectId(Id) },
+              { mySenior: new mongoose.Types.ObjectId(Id) },
+            ],
+          });
+          let tlJuniorId = tlJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...tlJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.srTeamLeaderOrSrEXECUTIVEMIS:
+          let stlJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            $or: [
+              { teamLeadId: new mongoose.Types.ObjectId(Id) },
+              { mySenior: new mongoose.Types.ObjectId(Id) },
+            ],
+          });
+          let stlJuniorId = stlJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...stlJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.managerSalesCenter:
+          let mscJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            $or: [
+              { floorManagerId: new mongoose.Types.ObjectId(Id) },
+              { mySenior: new mongoose.Types.ObjectId(Id) },
+            ],
+          });
+          let mscJuniorId = mscJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...mscJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.asstManagerSalesCenter:
+          let astmJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            $or: [
+              { floorManagerId: new mongoose.Types.ObjectId(Id) },
+              { mySenior: new mongoose.Types.ObjectId(Id) },
+            ],
+          });
+          let astmJuniorId = astmJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...astmJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.avpSales:
+          let avpJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            userRole: {
+              $in: [
+                userRoleType.EXECUTIVETrainee,
+                userRoleType.executiveSalesCenter,
+                userRoleType.srEXECUTIVESalesCenter,
+                userRoleType.teamLeaderOrEXECUTIVESalesCenter,
+                userRoleType.srTeamLeaderOrSrEXECUTIVEMIS,
+                userRoleType.asstManagerSalesCenter,
+                userRoleType.managerSalesCenter,
+              ],
+            },
+          });
+          let avpJuniorId = avpJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...avpJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        case userRoleType.agmSale:
+          let agmJunior = await userService.getOneByMultiField({
+            isDeleted: false,
+            userRole: {
+              $in: [
+                userRoleType.EXECUTIVETrainee,
+                userRoleType.executiveSalesCenter,
+                userRoleType.srEXECUTIVESalesCenter,
+                userRoleType.teamLeaderOrEXECUTIVESalesCenter,
+                userRoleType.srTeamLeaderOrSrEXECUTIVEMIS,
+                userRoleType.asstManagerSalesCenter,
+                userRoleType.managerSalesCenter,
+              ],
+            },
+          });
+          let agmJuniorId = agmJunior?.map((ele) => {
+            return ele?._id;
+          });
+          matchQuery.$and.push({
+            agentId: {
+              $in: [new mongoose.Types.ObjectId(Id), ...agmJuniorId],
+            },
+            callCenterId: new mongoose.Types.ObjectId(
+              userDataFound.callCenterId
+            ),
+          });
+          return;
+        default:
+          return;
+      }
+    }
+
+    //if no default query then pass {}
+    let additionalQuery = [
+      {
+        $match: matchQuery,
+      },
+      {
+        $facet: {
+          freshOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.fresh,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          allOrders: [
+            {
+              $count: "count",
+            },
+          ],
+
+          deliveredOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.delivered,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          doorCancelledOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.doorCancelled,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          holdOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.hold,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+
+          urgentOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.urgent,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+
+          intransitOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.intransit,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          freshOrders: {
+            $ifNull: [{ $arrayElemAt: ["$freshOrders.count", 0] }, 0],
+          },
+          allOrders: {
+            $ifNull: [{ $arrayElemAt: ["$allOrders.count", 0] }, 0],
+          },
+          prepaidOrders: {
+            $ifNull: [{ $arrayElemAt: ["$prepaidOrders.count", 0] }, 0],
+          },
+          deliveredOrders: {
+            $ifNull: [{ $arrayElemAt: ["$deliveredOrders.count", 0] }, 0],
+          },
+          doorCancelledOrders: {
+            $ifNull: [{ $arrayElemAt: ["$doorCancelledOrders.count", 0] }, 0],
+          },
+          holdOrders: {
+            $ifNull: [{ $arrayElemAt: ["$holdOrders.count", 0] }, 0],
+          },
+          pscOrders: {
+            $ifNull: [{ $arrayElemAt: ["$pscOrders.count", 0] }, 0],
+          },
+          unaOrders: {
+            $ifNull: [{ $arrayElemAt: ["$unaOrders.count", 0] }, 0],
+          },
+          pndOrders: {
+            $ifNull: [{ $arrayElemAt: ["$pndOrders.count", 0] }, 0],
+          },
+          urgentOrders: {
+            $ifNull: [{ $arrayElemAt: ["$urgentOrders.count", 0] }, 0],
+          },
+          nonActionOrders: {
+            $ifNull: [{ $arrayElemAt: ["$nonActionOrders.count", 0] }, 0],
+          },
+          rtoOrders: {
+            $ifNull: [{ $arrayElemAt: ["$rtoOrders.count", 0] }, 0],
+          },
+          inquiryOrders: {
+            $ifNull: [{ $arrayElemAt: ["$inquiryOrders.count", 0] }, 0],
+          },
+          reattemptOrders: {
+            $ifNull: [{ $arrayElemAt: ["$reattemptOrders.count", 0] }, 0],
+          },
+          deliveryOutOfNetworkOrders: {
+            $ifNull: [
+              { $arrayElemAt: ["$deliveryOutOfNetworkOrders.count", 0] },
+              0,
+            ],
+          },
+          intransitOrders: {
+            $ifNull: [{ $arrayElemAt: ["$intransitOrders.count", 0] }, 0],
+          },
+          ndrOrders: {
+            $ifNull: [{ $arrayElemAt: ["$ndrOrders.count", 0] }, 0],
+          },
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+    console.log(dataExist, "dataExist");
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
