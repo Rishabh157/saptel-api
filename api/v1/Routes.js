@@ -99,6 +99,7 @@ const houseArrestRequestRoute = require("./src/houseArrestRequest/HouseArrestReq
 const houseArrestRequestLogsRoute = require("./src/houseArrestRequestLogs/HouseArrestRequestLogsRoute");
 const batchRoute = require("./src/batch/BatchRoute");
 const DTDRoute = require("./src/dtdTransfer/DTDTransferRoute");
+const missingdamageRoute = require("./src/missingDamageStock/MissingDamageStockRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -508,6 +509,10 @@ const defaultRoutes = [
   {
     path: "/dtd-transfer",
     route: DTDRoute,
+  },
+  {
+    path: "/missing-damage",
+    route: missingdamageRoute,
   },
 ];
 // orderRoute;

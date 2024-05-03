@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const CompanyBranchSchema = new mongoose.Schema(
   {
     branchName: { type: String, required: true, trim: true },
+    branchCode: { type: String, required: true, uppercase: true, trim: true },
     companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,

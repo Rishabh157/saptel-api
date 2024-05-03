@@ -6,6 +6,7 @@ const salesOrderService = require("./SalesOrderService");
 const productGroupService = require("../productGroup/ProductGroupService");
 const wareHouseService = require("../wareHouse/WareHouseService");
 const companyService = require("../company/CompanyService");
+const branchService = require("../companyBranch/CompanyBranchService");
 const stateService = require("../state/StateService");
 const ledgerService = require("../ledger/LedgerService");
 const {
@@ -20,6 +21,7 @@ const {
   getUserRoleData,
   getFieldsToDisplay,
   getAllowedField,
+  generateInvoiceString,
 } = require("../../helper/utils");
 const {
   ledgerType,
@@ -39,6 +41,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
+const { getInvoiceNumber } = require("../call/CallHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -90,6 +93,8 @@ exports.add = async (req, res) => {
           quantity: po.quantity,
         },
         companyId: companyId,
+        createdById: req.userData.Id,
+        branchId: req.userData.branchId,
       };
     });
     //------------------create data-------------------
@@ -221,29 +226,41 @@ exports.updateLevel = async (req, res) => {
     } = req.body;
 
     let sonumberToBeSearch = req.params.sonumber;
-
-    let dataToSend = {};
-    if (type === "ACC") {
-      (dataToSend.accApprovedById = accApprovedById),
-        (dataToSend.accApprovedActionBy = accApprovedActionBy),
-        (dataToSend.accApprovedAt = accApprovedAt);
-      dataToSend.accApproved = accApproved;
-      dataToSend.invoice = invoice;
-      dataToSend.invoiceDate = new Date();
-    } else {
-      (dataToSend.dhApprovedById = dhApprovedById),
-        (dataToSend.dhApprovedActionBy = dhApprovedActionBy),
-        (dataToSend.dhApprovedAt = dhApprovedAt);
-      dataToSend.dhApproved = dhApproved;
-      dataToSend.invoice = invoice;
-    }
-
     //------------------Find data-------------------
     let datafound = await salesOrderService.getOneByMultiField({
       soNumber: sonumberToBeSearch,
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Sales order not found.`);
+    }
+
+    let branchdata = await branchService.getOneByMultiField({
+      isDeleted: false,
+      _id: datafound?.branchId,
+    });
+    if (!branchdata) {
+      throw new ApiError(httpStatus.OK, `Something went wrong invalid branch!`);
+    }
+    let dataToSend = {};
+    if (type === "ACC") {
+      let invoiceNumberIs = await getInvoiceNumber();
+      let finalInvoiceNo = await generateInvoiceString(
+        branchdata?.branchCode,
+        invoiceNumberIs
+      );
+      (dataToSend.accApprovedById = accApprovedById),
+        (dataToSend.accApprovedActionBy = accApprovedActionBy),
+        (dataToSend.accApprovedAt = accApprovedAt);
+      dataToSend.accApproved = accApproved;
+      dataToSend.invoice = invoice;
+      dataToSend.invoiceDate = new Date();
+      dataToSend.invoiceNumber = finalInvoiceNo;
+    } else {
+      (dataToSend.dhApprovedById = dhApprovedById),
+        (dataToSend.dhApprovedActionBy = dhApprovedActionBy),
+        (dataToSend.dhApprovedAt = dhApprovedAt);
+      dataToSend.dhApproved = dhApproved;
+      dataToSend.invoice = invoice;
     }
 
     const dataUpdated = await salesOrderService.updateMany(

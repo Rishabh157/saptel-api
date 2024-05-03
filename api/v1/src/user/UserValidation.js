@@ -197,6 +197,10 @@ const getAllUsers = {
   params: Joi.object().keys({
     userrole: Joi.string().required(),
   }),
+  body: Joi.object().keys({
+    department: Joi.string().allow(""),
+    callCenterId: Joi.string().allow(""),
+  }),
 };
 /**
  * refresh token

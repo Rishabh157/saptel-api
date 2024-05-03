@@ -502,6 +502,11 @@ const actionMethodEnum = Object.freeze({
   view: "get",
 });
 
+const dealerMissingDamageType = Object.freeze({
+  missing: "MISSING",
+  damage: "DAMAGE",
+});
+
 const firstCallDispositions = Object.freeze({
   callBack: "CALLBACK",
   approved: "APPROVED",
@@ -579,4 +584,5 @@ module.exports = {
   subDispositionNDR,
   preferredCourierPartner,
   dealerReasonEnum,
+  dealerMissingDamageType,
 };

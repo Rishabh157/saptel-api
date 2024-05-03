@@ -86,6 +86,28 @@ exports.generateRandomPassword = () => {
   return password;
 };
 
+exports.generateInvoiceString = async (branchCode, invoiceNumber) => {
+  // Get the current date
+  const currentDate = new Date();
+
+  // Get the current year
+  const currentYear = currentDate.getFullYear();
+
+  // Calculate the financial year based on the current date
+  const financialYear =
+    currentDate.getMonth() >= 2
+      ? `Y${(currentYear % 100) + 1}`
+      : `Y${currentYear % 100}`;
+
+  // Formatting invoice number with leading zeros
+  const formattedInvoiceNumber = invoiceNumber.toString().padStart(4, "0");
+
+  // Generating the string in the specified format
+  const invoiceString = `${branchCode}/${financialYear}/${formattedInvoiceNumber}`;
+
+  return invoiceString;
+};
+
 exports.logOut = async (req, logOutAll = false) => {
   let token = req.headers["x-access-token"];
   let deviceId = req.headers["device-id"] ? req.headers["device-id"] : "";

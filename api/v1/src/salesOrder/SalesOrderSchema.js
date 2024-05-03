@@ -54,6 +54,14 @@ const SalesOrderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    createdById: {
+      type: ObjectId,
+      default: null,
+    },
+    branchId: {
+      type: ObjectId,
+      default: null,
+    },
     productSalesOrder: {
       type: {
         productGroupId: {
@@ -88,6 +96,10 @@ const SalesOrderSchema = new mongoose.Schema(
       default: "",
     },
     invoiceDate: {
+      type: String,
+      default: "",
+    },
+    invoiceNumber: {
       type: String,
       default: "",
     },

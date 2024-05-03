@@ -9,6 +9,7 @@ const orderService = require("../orderInquiry/OrderInquiryService");
 const complaintService = require("../complain/ComplainService");
 const houseArrestService = require("../houseArrestRequest/HouseArrestRequestService");
 const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
+const salesOrderService = require("../salesOrder/SalesOrderService");
 
 const { default: mongoose } = require("mongoose");
 
@@ -64,6 +65,28 @@ exports.getInquiryNumber = async () => {
     inquiryNumber = 1;
   }
   return inquiryNumber;
+};
+
+exports.getInvoiceNumber = async () => {
+  let invoiceNumber = 0;
+
+  let lastObject = await salesOrderService.aggregateQuery([
+    { $match: { invoiceNumber: { $ne: null } } },
+    { $sort: { _id: -1 } },
+    { $limit: 1 },
+  ]);
+
+  if (lastObject.length) {
+    invoiceNumber =
+      parseInt(
+        lastObject[0]?.invoiceNumber ? lastObject[0]?.invoiceNumber : 0
+      ) + 1;
+  } else {
+    invoiceNumber = 1;
+  }
+
+  // Formatting the invoice number with leading zeros
+  return invoiceNumber.toString().padStart(4, "0");
 };
 
 exports.getComplaintNumber = async () => {

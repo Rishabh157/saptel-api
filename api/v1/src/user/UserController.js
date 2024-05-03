@@ -1096,6 +1096,7 @@ exports.getAllTeamLeads = async (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     let { userrole } = req.params;
+    let { department, callCenterId } = req.body;
     let { companyId } = req.userData;
     let allSeniorRoles = [];
     let tempRole = userrole;
@@ -1107,14 +1108,33 @@ exports.getAllUsers = async (req, res) => {
       }
     }
     allSeniorRoles.push(userEnum.admin);
+
     let matchQuery = {
-      companyId: companyId,
-      isDeleted: false,
-      isActive: true,
-      userRole: { $in: allSeniorRoles },
+      $or: [
+        {
+          companyId: new mongoose.Types.ObjectId(companyId),
+          isDeleted: false,
+          isActive: true,
+          userRole: { $in: allSeniorRoles },
+        },
+      ],
     };
 
-    let dataExist = await userService.findAllWithQuery(matchQuery);
+    if (
+      (department === userDepartmentType.customerCareDepartement ||
+        department === userDepartmentType.salesDepartment) &&
+      callCenterId
+    ) {
+      matchQuery.$or.push({
+        callCenterId: new mongoose.Types.ObjectId(callCenterId),
+        companyId: new mongoose.Types.ObjectId(companyId),
+        userRole: { $in: allSeniorRoles },
+        isDeleted: false,
+        isActive: true,
+      });
+    }
+
+    let dataExist = await userService.aggregateQuery([{ $match: matchQuery }]);
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {

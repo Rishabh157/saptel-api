@@ -21,6 +21,7 @@ exports.tokenCreate = async (tokenData) => {
       userDepartment: tokenData.userDepartment,
       userType: tokenData.userType,
       companyId: tokenData.companyId,
+      branchId: tokenData.branchId,
       tokenType: tokenEnum.login,
     },
     config.jwt_secret,
@@ -44,7 +45,7 @@ exports.refreshTokenCreate = async (tokenData) => {
 
       userType: tokenData.userType,
       companyId: tokenData.companyId,
-
+      branchId: tokenData.branchId,
       tokenType: tokenEnum.login,
     },
     config.jwt_secret_refresh,

@@ -81,7 +81,7 @@ router.get(
 /**
  * get all user by user role
  */
-router.get(
+router.post(
   "/get-all-users/user-role/:userrole",
   authCheckMiddleware,
   validate(userValidation.getAllUsers),
