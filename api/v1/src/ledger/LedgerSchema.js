@@ -47,6 +47,10 @@ const LedgerSchema = new mongoose.Schema(
       type: ObjectId,
       required: true,
     },
+    // ledgerNo: {
+    //   type: String,
+    //   required: true,
+    // },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -51,6 +51,7 @@ exports.add = async (req, res) => {
     const dealerExitsId = await getDealerFromLedger(dealerId);
     const balance = await getBalance(dealerExitsId, creditAmount, debitAmount);
 
+    // let ledgerNo =
     //------------------create data-------------------
     let dataCreated = await ledgerService.createNewData({
       ...req.body,

@@ -1110,22 +1110,23 @@ exports.getAllUsers = async (req, res) => {
     allSeniorRoles.push(userEnum.admin);
 
     let matchQuery = {
-      $or: [
-        {
-          companyId: new mongoose.Types.ObjectId(companyId),
-          isDeleted: false,
-          isActive: true,
-          userRole: { $in: allSeniorRoles },
-        },
-      ],
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+      isActive: true,
+      userRole: { $in: allSeniorRoles },
     };
 
+    let newMatchQuery = {
+      $and: [],
+    };
+    let flag = false;
     if (
       (department === userDepartmentType.customerCareDepartement ||
         department === userDepartmentType.salesDepartment) &&
       callCenterId
     ) {
-      matchQuery.$or.push({
+      flag = true;
+      newMatchQuery.$and.push({
         callCenterId: new mongoose.Types.ObjectId(callCenterId),
         companyId: new mongoose.Types.ObjectId(companyId),
         userRole: { $in: allSeniorRoles },
@@ -1133,8 +1134,10 @@ exports.getAllUsers = async (req, res) => {
         isActive: true,
       });
     }
-
-    let dataExist = await userService.aggregateQuery([{ $match: matchQuery }]);
+    console.log(matchQuery, newMatchQuery, flag);
+    let dataExist = await userService.aggregateQuery([
+      { $match: flag ? newMatchQuery : matchQuery },
+    ]);
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {

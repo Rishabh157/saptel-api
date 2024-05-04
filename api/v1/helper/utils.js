@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../../../config/config");
 const redisClient = require("../../../database/redis");
 const userAccessService = require("../src/userAccess/UserAccessService");
+const ledgerService = require("../src/ledger/LedgerService");
 
 exports.combineObjects = (objectsArray) => {
   let arra = objectsArray.reduce((acc, el) => {
@@ -70,6 +71,23 @@ exports.getAllowedField = (allowedFields, result) => {
   } else {
     return result;
   }
+};
+
+exports.getLedgerNo = async () => {
+  let ledgerNo = 0;
+  let lastObject = await ledgerService.aggregateQuery([
+    { $sort: { _id: -1 } },
+    { $limit: 1 },
+  ]);
+  if (lastObject.length) {
+    ledgerNo =
+      parseInt(lastObject[0]?.ledgerNo ? lastObject[0]?.ledgerNo : 0) + 1;
+  } else {
+    ledgerNo = 1;
+  }
+
+  // Formatting the invoice number with leading zeros
+  return ledgerNo.toString().padStart(4, "0");
 };
 
 exports.generateRandomPassword = () => {

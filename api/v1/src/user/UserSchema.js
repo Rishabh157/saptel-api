@@ -75,6 +75,7 @@ const UserSchema = new mongoose.Schema(
         userRoleType.srTeamLeaderOrSrEXECUTIVEMIS,
         userRoleType.teamLeaderOrEXECUTIVESalesCenter,
         userRoleType.srEXECUTIVESalesCenter,
+        userRoleType.executiveSalesCenter,
         userRoleType.EXECUTIVETrainee,
         userRoleType.avpHr,
         userRoleType.amgHrAndStatutoryCompliance,
