@@ -1202,6 +1202,86 @@ exports.getByBarcode = async (req, res) => {
   }
 };
 
+exports.getByOuterBoxBarcode = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+
+    let additionalQueryForAll = [
+      {
+        $match: {
+          outerBoxbarCodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
+
+    const dataExist = await barCodeService.aggregateQuery(
+      additionalQueryForAll
+    );
+
+    if (dataExist.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // scan barcode at dealer warehouse
 
 exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
@@ -2682,6 +2762,75 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//courier return products
+exports.courierReturnProduct = async (req, res) => {
+  try {
+    let barcode = req.body.barcode;
+    let condition = req.params.condition;
+    let whid = req.params.whid;
+
+    let newBarcode = barcode?.map((ele) => {
+      return new mongoose.Types.ObjectId(ele);
+    });
+    let dataExist = await barCodeService.getOneByMultiField({
+      barcodeNumber: { $in: newBarcode },
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+    const updates = await Promise.all(
+      dataExist.map(async (ele) => {
+        return barCodeService.getOneAndUpdate(
+          { barcodeNumber: ele },
+          {
+            status: condition,
+            wareHouseId: whid,
+            dealerId: null,
+          }
+        );
+      })
+    );
+
+    const updated = updates.find((update) => !update);
+
+    if (!updated) {
+      throw new ApiError(httpStatus.OK, "Something went wrong.");
+    }
+
+    const newBarcodeFlowData = await Promise.all(
+      updates.map((updated) => {
+        return barcodeFlowService.createNewData({
+          productGroupId: updated.productGroupId,
+          barcodeNumber: updated.barcodeNumber,
+          cartonBoxId: updated.cartonBoxId,
+          barcodeGroupNumber: updated.barcodeGroupNumber,
+          outerBoxbarCodeNumber: updated.outerBoxCode,
+          lotNumber: updated.lotNumber,
+          isUsed: updated.isUsed,
+          wareHouseId: updated.wareHouseId,
+          status: updated.status,
+          companyId: updated.companyId,
+        });
+      })
+    );
+
+    return res.status(httpStatus.OK).send({
+      message: "Successful.",
+      status: true,
+      data: null,
       code: "OK",
       issue: null,
     });

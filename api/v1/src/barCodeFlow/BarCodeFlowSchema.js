@@ -29,6 +29,8 @@ const BarCodeFlowSchema = new mongoose.Schema(
         barcodeStatusType.dtd,
 
         barcodeStatusType.delivered,
+        barcodeStatusType.damage,
+        barcodeStatusType.missing,
 
         "",
       ],

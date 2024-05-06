@@ -91,6 +91,13 @@ router.get(
   barCodeController.getByBarcode
 );
 
+router.get(
+  "/outer-box-barcode/:barcode",
+  authCheckMiddleware,
+  // validate(barCodeValidation.getBarcodeForOutward),
+  barCodeController.getByOuterBoxBarcode
+);
+
 // barcode scan at dealer warehouse
 router.get(
   "/dealer/productgroupid/:productgroupid/barcode/:barcode/status/:status",
@@ -275,6 +282,16 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.changeStatus),
   barCodeController.statusChange
+);
+
+/**
+ * update status
+ */
+router.put(
+  "/courier-return-product/condistion/:condition/warehouse/:whid",
+  authCheckMiddleware,
+  validate(barCodeValidation.courierReturn),
+  barCodeController.courierReturnProduct
 );
 /**
  * delete document

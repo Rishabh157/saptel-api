@@ -5290,6 +5290,8 @@ exports.allFilterPagination = async (req, res) => {
     let searchIn = req.body.searchIn;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
+    let orderNumber = req.body.orderNumber;
+    let barcodeNumber = req.body.barcodeNumber;
 
     let isPaginationRequired = req.body.isPaginationRequired
       ? req.body.isPaginationRequired
@@ -5308,6 +5310,26 @@ exports.allFilterPagination = async (req, res) => {
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
+
+    // if order number given
+    if (orderNumber) {
+      matchQuery.$and.push({ orderNumber: parseInt(orderNumber) });
+    }
+
+    if (barcodeNumber) {
+      let barcodeData = await barcodeService.getOneByMultiField({
+        isDeleted: false,
+        isUsed: true,
+        barcodeNumber: barcodeNumber,
+      });
+      console.log(barcodeData, "barcodeData", barcodeData?._id);
+      if (barcodeData) {
+        matchQuery.$and.push({
+          barcodeId: barcodeData?._id,
+        });
+      }
+    }
+    console.log(matchQuery, "matchQuery");
 
     let dealersOfZonalManager = [];
     if (
@@ -5740,6 +5762,7 @@ exports.allFilterPagination = async (req, res) => {
           ],
         },
       },
+
       {
         $lookup: {
           from: "didmanagements",

@@ -26,6 +26,8 @@ const BarCodeSchema = new mongoose.Schema(
         barcodeStatusType.dtw,
         barcodeStatusType.dtd,
         barcodeStatusType.delivered,
+        barcodeStatusType.damage,
+        barcodeStatusType.missing,
         "",
       ],
       default: "",

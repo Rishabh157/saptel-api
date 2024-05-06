@@ -222,6 +222,8 @@ const getAllFilter = {
       })
     ),
     isPaginationRequired: Joi.boolean().default(true).optional(),
+    orderNumber: Joi.string().allow(""),
+    barcodeNumber: Joi.string().allow(""),
     getBatchData: Joi.boolean().optional(),
     callCenterId: Joi.string().custom(commonValidation.objectId).allow(null),
   }),

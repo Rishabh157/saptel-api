@@ -482,6 +482,20 @@ const changeStatus = {
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
+
+const courierReturn = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+    condition: Joi.string().required(),
+    whid: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    barcode: Joi.array()
+      .items(Joi.string().custom(commonValidation.objectId))
+      .required(),
+  }),
+};
+
 module.exports = {
   create,
   getAllFilter,
@@ -509,4 +523,5 @@ module.exports = {
   assignDeliveryBoy,
   dtdOutwardInventory,
   updateWarehouseInventoryDealer,
+  courierReturn,
 };
