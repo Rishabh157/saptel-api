@@ -202,6 +202,7 @@ const orderStatusEnum = Object.freeze({
   deliveryOutOfNetwork: "DELIVERYOUTOFNETWORK",
   intransit: "INTRANSIT",
   ndr: "NDR",
+  closed: "CLOSED",
 });
 
 const dealerReasonEnum = Object.freeze({

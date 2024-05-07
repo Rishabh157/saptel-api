@@ -42,6 +42,7 @@ const {
   actionType,
   barcodeStatusType,
   productStatus,
+  orderStatusEnum,
 } = require("../../helper/enumUtils");
 
 //add start
@@ -2781,32 +2782,49 @@ exports.courierReturnProduct = async (req, res) => {
     let barcode = req.body.barcode;
     let condition = req.params.condition;
     let whid = req.params.whid;
+    let id = req.params.id;
+    console.log("here..");
 
-    let newBarcode = barcode?.map((ele) => {
-      return new mongoose.Types.ObjectId(ele);
-    });
-    let dataExist = await barCodeService.getOneByMultiField({
-      barcodeNumber: { $in: newBarcode },
-    });
+    // let newBarcode = barcode?.map((ele) => {
+    //   return new mongoose.Types.ObjectId(ele);
+    // });
+    console.log("here..");
+
+    let dataExist = await barCodeService.aggregateQuery([
+      {
+        $match: {
+          barcodeNumber: { $in: barcode },
+        },
+      },
+    ]);
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    console.log("here..");
+
+    await orderInquiryService?.getOneAndUpdate(
+      { _id: id },
+      { $set: { status: orderStatusEnum.closed } }
+    );
+    console.log("here..");
     const updates = await Promise.all(
       dataExist.map(async (ele) => {
+        console.log(ele, "ele");
         return barCodeService.getOneAndUpdate(
-          { barcodeNumber: ele },
+          { barcodeNumber: ele?.barcodeNumber },
           {
-            status: condition,
-            wareHouseId: whid,
-            dealerId: null,
+            $set: {
+              status: condition,
+              wareHouseId: whid,
+              dealerId: null,
+            },
           }
         );
       })
     );
+    console.log(updates, "updates");
 
-    const updated = updates.find((update) => !update);
-
-    if (!updated) {
+    if (!updates.length) {
       throw new ApiError(httpStatus.OK, "Something went wrong.");
     }
 

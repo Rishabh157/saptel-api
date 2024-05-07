@@ -490,9 +490,7 @@ const courierReturn = {
     whid: Joi.string().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    barcode: Joi.array()
-      .items(Joi.string().custom(commonValidation.objectId))
-      .required(),
+    barcode: Joi.array().items(Joi.string().required()).required(),
   }),
 };
 
