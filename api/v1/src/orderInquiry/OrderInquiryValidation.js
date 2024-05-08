@@ -229,6 +229,17 @@ const getAllFilter = {
   }),
 };
 
+const getOrderLabel = {
+  body: Joi.object().keys({
+    awbNumber: Joi.string().required(),
+  }),
+};
+
+const generateOrderInvoice = {
+  body: Joi.object().keys({
+    awbNumber: Joi.string().required(),
+  }),
+};
 /**
  * filter and pagination api
  */
@@ -523,4 +534,6 @@ module.exports = {
   changeScheme,
   getMultipleOrder,
   getOrderDashboardCount,
+  getOrderLabel,
+  generateOrderInvoice,
 };

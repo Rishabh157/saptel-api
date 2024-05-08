@@ -52,7 +52,7 @@ const assignOrderToCourier = async (
   categorydata
 ) => {
   try {
-    let orderAssigned = false;
+    let orderAssigned;
     switch (preferredCourier) {
       case preferredCourierPartner.shipyaari:
         let shipYaariOrderData = {

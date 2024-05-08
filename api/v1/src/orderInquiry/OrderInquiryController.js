@@ -15,6 +15,8 @@ const dealerService = require("../dealer/DealerService");
 const deliveryBoyService = require("../deliveryBoy/DeliveryBoyService");
 const tehsilService = require("../tehsil/TehsilService");
 const warehouseService = require("../wareHouse/WareHouseService");
+const CourierPartnerToken = require("../courierPartnerToken/CourierPartnerTokenService");
+
 const pincodeService = require("../pincode/PincodeService");
 const productCategoryService = require("../productCategory/ProductCategoryService");
 const userService = require("../user/UserService");
@@ -72,6 +74,7 @@ const {
   assignOrderToCourier,
 } = require("../../third-party-services/courierAPIFunction");
 const { getOrderNumber, getInquiryNumber } = require("../call/CallHelper");
+const fs = require("fs");
 
 exports.add = async (req, res) => {
   try {
@@ -116,6 +119,136 @@ exports.add = async (req, res) => {
       });
     } catch (error) {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
+    }
+  } catch (err) {
+    let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// // get label
+// exports.getOrderLabel = async (req, res) => {
+//   try {
+//     console.log("innnn");
+
+//     const { awbNumber } = req.body;
+//     try {
+//       let shipyaariToken = await CourierPartnerToken?.getOneByMultiField({
+//         courierPartnerName: preferredCourierPartner.shipyaari,
+//       });
+//       const HEADER = {
+//         "Content-Type": "application/json", // Set the content type
+//         Authorization: `Bearer ${shipyaariToken?.token}`,
+//       };
+//       const data = {
+//         awbs: [awbNumber],
+//       };
+//       let response = await axios.post(
+//         `${config.shipyaari_baseurl}/api/v1/labels/fetchLabels`,
+//         data,
+//         { headers: HEADER }
+//       );
+// if
+//       return res.status(httpStatus.OK).send({
+//         message: "created successfully.",
+//         data: response?.data,
+//         status: true,
+//         code: "OK",
+//         issue: null,
+//       });
+//     } catch (err) {
+//       throw new ApiError(httpStatus.NOT_IMPLEMENTED, err.message);
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
+exports.getOrderLabel = async (req, res) => {
+  try {
+    console.log("innnn");
+    const { awbNumber } = req.body;
+    try {
+      let shipyaariToken = await CourierPartnerToken?.getOneByMultiField({
+        courierPartnerName: preferredCourierPartner.shipyaari,
+      });
+      const HEADER = {
+        "Content-Type": "application/json", // Set the content type
+        Authorization: `Bearer ${shipyaariToken?.token}`,
+      };
+      const data = {
+        awbs: [awbNumber],
+      };
+      let response = await axios.post(
+        `${config.shipyaari_baseurl}/api/v1/labels/fetchLabels`,
+        data,
+        { headers: HEADER, responseType: "arraybuffer" }
+      );
+      // Save the response content to a file
+      fs.writeFileSync("response.pdf", response.data);
+
+      res.status(httpStatus.OK).send({
+        message: "created successfully.",
+        status: true,
+        code: "OK",
+        issue: null,
+        data: fs.readFileSync("response.pdf", "base64"), // Attach the file content as base64
+      });
+    } catch (err) {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, err.message);
+    }
+  } catch (err) {
+    let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// generate invoice
+exports.generateOrderInvoice = async (req, res) => {
+  try {
+    console.log("innnn");
+
+    const { awbNumber } = req.body;
+    try {
+      let shipyaariToken = await CourierPartnerToken?.getOneByMultiField({
+        courierPartnerName: preferredCourierPartner.shipyaari,
+      });
+      const HEADER = {
+        "Content-Type": "application/json", // Set the content type
+        Authorization: `Bearer ${shipyaariToken?.token}`,
+      };
+      const data = {
+        awbs: [awbNumber],
+      };
+      let response = await axios.post(
+        `${config.shipyaari_baseurl}/api/v1/labels/fetchTaxInvoices`,
+        data,
+        { headers: HEADER, responseType: "arraybuffer" }
+      );
+      // Save the response content to a file
+      fs.writeFileSync("response.pdf", response.data);
+
+      res.status(httpStatus.OK).send({
+        message: "created successfully.",
+        status: true,
+        code: "OK",
+        issue: null,
+        data: fs.readFileSync("response.pdf", "base64"), // Attach the file content as base64
+      });
+    } catch (err) {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, err.message);
     }
   } catch (err) {
     let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
@@ -694,6 +827,8 @@ exports.approveFirstCallDirectly = async (req, res) => {
         {
           $set: {
             orderAssignedToCourier: preferredCourier,
+            awbNumber:
+              isOrderAssignedToCourier?.data?.[0]?.awbs[0].tracking.awb,
           },
         }
       );
@@ -823,6 +958,12 @@ exports.firstCallConfirmation = async (req, res) => {
 
       // if true the hit shipment API else GPO
       if (isOrderAssignedToCourier) {
+        console.log(isOrderAssignedToCourier);
+
+        console.log(
+          isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
+          "awb number"
+        );
         let orderUpdateCourier = await orderService.getOneAndUpdate(
           {
             _id: idToBeSearch,
@@ -831,6 +972,7 @@ exports.firstCallConfirmation = async (req, res) => {
           {
             $set: {
               orderAssignedToCourier: preferredCourier,
+              awbNumber: isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
             },
           }
         );
@@ -954,6 +1096,12 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
 
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier) {
+      console.log(isOrderAssignedToCourier);
+
+      console.log(
+        isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
+        "awb number"
+      );
       let orderUpdateCourier = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
@@ -962,6 +1110,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         {
           $set: {
             orderAssignedToCourier: preferredCourier,
+            awbNumber: isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
           },
         }
       );

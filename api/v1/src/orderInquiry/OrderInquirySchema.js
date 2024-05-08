@@ -504,6 +504,10 @@ const OrderInquirySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    awbNumber: {
+      type: String,
+      default: "",
+    },
     orderAssignedToCourier: {
       type: String,
       enum: [preferredCourierPartner.shipyaari, ""],

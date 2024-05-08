@@ -2,26 +2,10 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const stateService = require("./StateService");
-const companyService = require("../company/CompanyService");
-const areaService = require("../area/AreaService");
-const districtService = require("../district/DistrictService");
-const pincodeService = require("../pincode/PincodeService");
-
-const tehsilService = require("../tehsil/TehsilService");
-const countryService = require("../country/CountryService");
-const { searchKeys } = require("./StateSchema");
+const courierPreferenceService = require("./CourierPreferenceService");
+const { searchKeys } = require("./CourierPreferenceSchema");
 const { errorRes } = require("../../../utils/resError");
-const {
-  getQuery,
-  getUserRoleData,
-  getFieldsToDisplay,
-  getAllowedField,
-} = require("../../helper/utils");
-const {
-  checkIdInCollectionsThenDelete,
-  collectionArrToMatch,
-} = require("../../helper/commonHelper");
+const { getQuery } = require("../../helper/utils");
 
 const {
   getSearchQuery,
@@ -32,50 +16,29 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
-const { moduleType, actionType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { stateName, countryId, companyId, isUnion, preferredCourier } =
-      req.body;
-
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
-
-    const isCountryExists = await countryService.findCount({
-      _id: countryId,
-      isDeleted: false,
-    });
-    if (!isCountryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Counrty");
-    }
-
+    let { courierName, priority } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await stateService.isExists(
-      [{ stateName }, { countryId }],
-      false,
-      true
-    );
+    let dataExist = await courierPreferenceService.isExists([{ courierName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await stateService.createNewData({ ...req.body });
+    let dataCreated = await courierPreferenceService.createNewData({
+      ...req.body,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
         data: dataCreated,
         status: true,
-        code: "CREATED",
+        code: null,
         issue: null,
       });
     } else {
@@ -94,66 +57,36 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { preferredCourier, isUnion, isFixed } = req.body;
+    let { priority } = req.body;
 
     let idToBeSearch = req.params.id;
 
     //------------------Find data-------------------
-    let datafound = await stateService.getOneByMultiField({
+    let datafound = await courierPreferenceService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `State not found.`);
+      throw new ApiError(httpStatus.OK, `CourierPreference not found.`);
     }
 
-    let dataUpdated = await stateService.getOneAndUpdate(
+    let dataUpdated = await courierPreferenceService.getOneAndUpdate(
       {
         _id: idToBeSearch,
         isDeleted: false,
       },
       {
         $set: {
-          preferredCourier,
-          isUnion,
-          isFixed,
-        },
-      }
-    );
-    await districtService?.updateMany(
-      { stateId: dataUpdated?._id },
-      {
-        $set: {
-          preferredCourier,
-          isFixed,
-        },
-      }
-    );
-
-    await tehsilService?.updateMany(
-      { stateId: dataUpdated?._id },
-      {
-        $set: {
-          preferredCourier,
-          isFixed,
-        },
-      }
-    );
-    await pincodeService?.updateMany(
-      { stateId: dataUpdated?._id },
-      {
-        $set: {
-          preferredCourier,
-          isFixed,
+          priority,
         },
       }
     );
 
     if (dataUpdated) {
-      return res.status(httpStatus.OK).send({
+      return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
         data: dataUpdated,
         status: true,
-        code: "OK",
+        code: null,
         issue: null,
       });
     } else {
@@ -229,15 +162,14 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = [];
+    let booleanFields = ["priority"];
     let numberFileds = [];
-    let objectIdFileds = ["countryId", "companyId"];
-
+    let objectIdFields = [];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
       numberFileds,
-      objectIdFileds
+      objectIdFields
     );
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
@@ -275,7 +207,9 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await stateService.aggregateQuery(finalAggregateQuery);
+    let dataFound = await courierPreferenceService.aggregateQuery(
+      finalAggregateQuery
+    );
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -294,27 +228,18 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.state,
-      userRoleData,
-      actionType.pagination
+    let result = await courierPreferenceService.aggregateQuery(
+      finalAggregateQuery
     );
-
-    let result = await stateService.aggregateQuery(finalAggregateQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, result);
-
-    if (allowedFields?.length) {
-      return res.status(httpStatus.OK).send({
-        data: allowedFields,
+    if (result.length) {
+      return res.status(200).send({
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
         totalItem: totalData,
         pageSize: limit,
         message: "Data Found",
-        code: "OK",
-        issue: null,
       });
     } else {
       throw new ApiError(httpStatus.OK, `No data Found`);
@@ -332,62 +257,21 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    let matchQuery = {
-      isDeleted: false,
-    };
-    if (req.query && Object.keys(req.query).length) {
-      matchQuery = getQuery(matchQuery, req.query);
-    }
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.state,
-      userRoleData,
-      actionType.listAll
-    );
-    let dataExist = await stateService.findAllWithQuery(matchQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
-
-    if (!allowedFields || !allowedFields?.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: allowedFields,
-        code: "OK",
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-// unauth
-exports.getUnauth = async (req, res) => {
-  try {
-    let matchQuery = {
-      isDeleted: false,
-    };
+    let matchQuery = { isDeleted: false };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await stateService.findAllWithQuery(matchQuery);
+    let dataExist = await courierPreferenceService.findAllWithQuery(matchQuery);
 
-    if (!dataExist || !dataExist?.length) {
+    if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: "OK",
+        code: null,
         issue: null,
       });
     }
@@ -400,134 +284,15 @@ exports.getUnauth = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-//single view api
+
+//get by id
 exports.getById = async (req, res) => {
   try {
-    //if no default query then pass {}
     let idToBeSearch = req.params.id;
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.state,
-      userRoleData,
-      actionType.view
-    );
-    let dataExist = await stateService.getOneByMultiField({
+    let dataExist = await courierPreferenceService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
-
-    if (!allowedFields) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: allowedFields,
-        code: "OK",
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-//get state by pincode
-exports.getStateByPincode = async (req, res) => {
-  try {
-    //if no default query then pass {}
-    let idToBeSearch = req.params.id;
-    let dataExist = await stateService.findAllWithQuery({
-      pincodeId: idToBeSearch,
-      isDeleted: false,
-    });
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successfull.",
-        status: true,
-        data: dataExist,
-        code: "OK",
-        issue: null,
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-// get all by pincode
-exports.getAllByPincode = async (req, res) => {
-  try {
-    //if no default query then pass {}
-    let pincodeToBeSearch = req.params.pincode;
-    let pincodedata = await pincodeService.getOneByMultiField({
-      isDeleted: false,
-      pincode: pincodeToBeSearch,
-    });
-    if (!pincodedata) {
-      throw new ApiError(httpStatus.OK, "Pincode not found");
-    }
-    let StateDataExist = await stateService.findAllWithQuery({
-      _id: pincodedata?.stateId,
-      isDeleted: false,
-    });
-    let tehsilDataExist = await tehsilService.findAllWithQuery({
-      _id: pincodedata?.tehsilId,
-      isDeleted: false,
-    });
-    let districtDataExist = await districtService.findAllWithQuery({
-      _id: pincodedata?.districtId,
-      isDeleted: false,
-    });
-    let areaDataExist = await areaService.findAllWithQuery({
-      pincodeId: pincodedata?._id,
-      isDeleted: false,
-    });
-
-    return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
-      stateData: StateDataExist,
-      tehsilData: tehsilDataExist,
-      districtData: districtDataExist,
-      areaData: areaDataExist,
-      pincodeData: pincodedata,
-      code: "OK",
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-
-//get all state by country api
-exports.getStateByCountry = async (req, res) => {
-  try {
-    //if no default query then pass {}
-    let idToBeSearch = req.params.id;
-
-    let dataExist = await stateService.findAllWithQuery({
-      countryId: idToBeSearch,
-      isDeleted: false,
-    });
 
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -536,7 +301,7 @@ exports.getStateByCountry = async (req, res) => {
         message: "Successfull.",
         status: true,
         data: dataExist,
-        code: "OK",
+        code: null,
         issue: null,
       });
     }
@@ -549,30 +314,23 @@ exports.getStateByCountry = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await stateService.getOneByMultiField({ _id }))) {
+    if (!(await courierPreferenceService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    const deleteRefCheck = await checkIdInCollectionsThenDelete(
-      collectionArrToMatch,
-      "stateId",
-      _id
-    );
-
-    if (deleteRefCheck.status === true) {
-      let deleted = await stateService.getOneAndDelete({ _id });
-      if (!deleted) {
-        throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-      }
+    let deleted = await courierPreferenceService.getOneAndDelete({ _id });
+    if (!deleted) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
     return res.status(httpStatus.OK).send({
-      message: deleteRefCheck.message,
-      status: deleteRefCheck.status,
+      message: "Successfull.",
+      status: true,
       data: null,
-      code: "OK",
+      code: null,
       issue: null,
     });
   } catch (err) {
@@ -588,13 +346,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await stateService.getOneByMultiField({ _id });
+    let dataExist = await courierPreferenceService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await stateService.getOneAndUpdate(
+    let statusChanged = await courierPreferenceService.getOneAndUpdate(
       { _id },
       { isActive }
     );
@@ -605,7 +363,7 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
-      code: "OK",
+      code: null,
       issue: null,
     });
   } catch (err) {

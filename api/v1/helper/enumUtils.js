@@ -517,6 +517,7 @@ const firstCallDispositions = Object.freeze({
 
 const preferredCourierPartner = Object.freeze({
   shipyaari: "SHIPYAARI",
+  gpo: "GPO",
 });
 
 const orderTypeEnum = Object.freeze({

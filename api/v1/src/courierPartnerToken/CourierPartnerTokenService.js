@@ -1,8 +1,5 @@
 const CourierPartnerToken = require("./CourierPartnerTokenSchema");
 const { combineObjects } = require("../../helper/utils");
-const {
-  getEstTimeFromShipYaari,
-} = require("../../third-party-services/ShipyaariService");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
   return CourierPartnerToken.findOne({
@@ -141,10 +138,6 @@ const isExists = async (filterArray, exceptIds = false, combined = false) => {
   );
 };
 
-// get est time
-const getEstTime = async (data) => {
-  return getEstTimeFromShipYaari(data);
-};
 //-------------------------------------------
 module.exports = {
   getOneBySingleField,
@@ -162,5 +155,4 @@ module.exports = {
   createMany,
   findCount,
   isExists,
-  getEstTime,
 };

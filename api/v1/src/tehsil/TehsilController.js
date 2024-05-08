@@ -7,6 +7,8 @@ const companyService = require("../company/CompanyService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
 const districtService = require("../district/DistrictService");
+const pincodeService = require("../pincode/PincodeService");
+
 const {
   checkIdInCollectionsThenDelete,
   collectionArrToMatch,
@@ -104,7 +106,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { tehsilName, districtId, stateId, countryId } = req.body;
+    let { preferredCourier, isFixed } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -123,7 +125,18 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
-          ...req.body,
+          preferredCourier,
+          isFixed,
+        },
+      }
+    );
+
+    await pincodeService?.updateMany(
+      { tehsilId: dataUpdated?._id },
+      {
+        $set: {
+          preferredCourier,
+          isFixed,
         },
       }
     );

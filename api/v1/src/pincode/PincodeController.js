@@ -118,50 +118,49 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { pincode, tehsilId, districtId, stateId, countryId, companyId } =
-      req.body;
+    let { preferredCourier, isFixed } = req.body;
 
     let idToBeSearch = req.params.id;
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    // const isCompanyExists = await companyService.findCount({
+    //   _id: companyId,
+    //   isDeleted: false,
+    // });
+    // if (!isCompanyExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Company");
+    // }
 
-    const isCountryExists = await countryService.findCount({
-      _id: countryId,
-      isDeleted: false,
-    });
-    if (!isCountryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Country");
-    }
+    // const isCountryExists = await countryService.findCount({
+    //   _id: countryId,
+    //   isDeleted: false,
+    // });
+    // if (!isCountryExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Country");
+    // }
 
-    const isStateExists = await stateService.findCount({
-      _id: stateId,
-      isDeleted: false,
-    });
-    if (!isStateExists) {
-      throw new ApiError(httpStatus.OK, "Invalid State");
-    }
+    // const isStateExists = await stateService.findCount({
+    //   _id: stateId,
+    //   isDeleted: false,
+    // });
+    // if (!isStateExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid State");
+    // }
 
-    const isDistrictExists = await districtService.findCount({
-      _id: districtId,
-      isDeleted: false,
-    });
-    if (!isDistrictExists) {
-      throw new ApiError(httpStatus.OK, "Invalid State");
-    }
+    // const isDistrictExists = await districtService.findCount({
+    //   _id: districtId,
+    //   isDeleted: false,
+    // });
+    // if (!isDistrictExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid State");
+    // }
 
-    const isTehsilExists = await tehsilService.findCount({
-      _id: tehsilId,
-      isDeleted: false,
-    });
-    if (!isTehsilExists) {
-      throw new ApiError(httpStatus.OK, "Invalid State");
-    }
+    // const isTehsilExists = await tehsilService.findCount({
+    //   _id: tehsilId,
+    //   isDeleted: false,
+    // });
+    // if (!isTehsilExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid State");
+    // }
 
     //------------------Find data-------------------
     let datafound = await pincodeService.getOneByMultiField({
@@ -178,7 +177,8 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
-          ...req.body,
+          preferredCourier,
+          isFixed,
         },
       }
     );

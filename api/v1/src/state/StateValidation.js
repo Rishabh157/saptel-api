@@ -2,6 +2,7 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
+const { preferredCourierPartner } = require("../../helper/enumUtils");
 
 /**
  * create new document
@@ -12,6 +13,10 @@ const create = {
     countryId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     isUnion: Joi.boolean(),
+    preferredCourier: Joi.string()
+      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
+      .required(),
+    isFixed: Joi.boolean(),
   }),
 };
 
@@ -23,10 +28,14 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    stateName: Joi.string().lowercase().required(),
-    countryId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    // stateName: Joi.string().lowercase().required(),
+    // countryId: Joi.string().custom(commonValidation.objectId).required(),
+    // companyId: Joi.string().custom(commonValidation.objectId).required(),
     isUnion: Joi.boolean(),
+    preferredCourier: Joi.string()
+      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
+      .required(),
+    isFixed: Joi.boolean(),
   }),
 };
 

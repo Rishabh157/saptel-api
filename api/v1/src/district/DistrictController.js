@@ -3,6 +3,9 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const districtService = require("./DistrictService");
+const pincodeService = require("../pincode/PincodeService");
+
+const tehsilService = require("../tehsil/TehsilService");
 const companyService = require("../company/CompanyService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
@@ -96,33 +99,9 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { districtName, stateId, countryId, companyId } = req.body;
+    let { preferredCourier, isFixed } = req.body;
 
     let idToBeSearch = req.params.id;
-
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
-
-    const isCountryExists = await countryService.findCount({
-      _id: countryId,
-      isDeleted: false,
-    });
-    if (!isCountryExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Country");
-    }
-
-    const isStateExists = await stateService.findCount({
-      _id: stateId,
-      isDeleted: false,
-    });
-    if (!isStateExists) {
-      throw new ApiError(httpStatus.OK, "Invalid State");
-    }
 
     //------------------Find data-------------------
     let datafound = await districtService.getOneByMultiField({
@@ -139,7 +118,27 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
-          ...req.body,
+          preferredCourier,
+          isFixed,
+        },
+      }
+    );
+
+    await tehsilService?.updateMany(
+      { districtId: dataUpdated?._id },
+      {
+        $set: {
+          preferredCourier,
+          isFixed,
+        },
+      }
+    );
+    await pincodeService?.updateMany(
+      { districtId: dataUpdated?._id },
+      {
+        $set: {
+          preferredCourier,
+          isFixed,
         },
       }
     );

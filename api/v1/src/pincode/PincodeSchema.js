@@ -9,9 +9,15 @@ const PincodeSchema = new mongoose.Schema(
     stateId: { type: ObjectId, required: true, trim: true, lowercase: true },
     countryId: { type: ObjectId, required: true, trim: true, lowercase: true },
     companyId: { type: ObjectId, required: true, trim: true },
+
     preferredCourier: {
       type: String,
+      enum: [preferredCourierPartner.shipyaari, preferredCourierPartner.gpo],
       default: preferredCourierPartner.shipyaari,
+    },
+    isFixed: {
+      type: Boolean,
+      default: false,
     },
     isDeleted: {
       type: Boolean,

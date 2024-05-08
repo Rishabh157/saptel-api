@@ -175,6 +175,22 @@ router.post(
   orderController.allFilterPaginationDileveryBoy
 );
 
+// get label of product assigned to courier by awb number
+router.post(
+  "/get-order-label",
+  authCheckMiddleware,
+  validate(orderValidation.getOrderLabel),
+  orderController.getOrderLabel
+);
+
+// generate order invoice of product assigned to courier by awb number
+router.post(
+  "/generate-order-invoice",
+  authCheckMiddleware,
+  validate(orderValidation.generateOrderInvoice),
+  orderController.generateOrderInvoice
+);
+
 // dealer app
 router.post(
   "/dealer/get-dileveryboy-order",

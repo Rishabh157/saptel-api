@@ -2,23 +2,14 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
-const { preferredCourierPartner } = require("../../helper/enumUtils");
 
 /**
  * create new document
  */
 const create = {
   body: Joi.object().keys({
-    pincode: Joi.string().lowercase().required(),
-    tehsilId: Joi.string().custom(commonValidation.objectId).required(),
-    districtId: Joi.string().custom(commonValidation.objectId).required(),
-    stateId: Joi.string().custom(commonValidation.objectId).required(),
-    countryId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
-    preferredCourier: Joi.string()
-      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
-      .required(),
-    isFixed: Joi.boolean(),
+    courierName: Joi.string().uppercase().required(),
+    priority: Joi.number().required(),
   }),
 };
 
@@ -30,10 +21,8 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    preferredCourier: Joi.string()
-      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
-      .required(),
-    isFixed: Joi.boolean(),
+    // courierName: Joi.string().uppercase().required(),
+    priority: Joi.number().required(),
   }),
 };
 
@@ -88,33 +77,24 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      pincode: Joi.string().optional(),
-      tehsilId: Joi.string().optional(),
-      districtId: Joi.string().optional(),
-      stateId: Joi.string().optional(),
-      countryId: Joi.string().optional(),
+      courierName: Joi.string().optional(),
     })
     .optional(),
-};
-/**
- * get a document
- */
-const getDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-
-const getPincode = {
-  params: Joi.object().keys({
-    pincode: Joi.string(),
-  }),
 };
 
 /**
  * delete a document
  */
 const deleteDocument = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+/**
+ * get by id
+ */
+const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
@@ -135,6 +115,5 @@ module.exports = {
   update,
   deleteDocument,
   changeStatus,
-  getDocument,
-  getPincode,
+  getById,
 };

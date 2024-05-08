@@ -1,7 +1,7 @@
 const { default: axios } = require("axios");
 const qs = require("qs");
 const config = require("../../../config/config");
-const CourierPartnerToken = require("../../v1/src/courierPartnerToken/CourierPartnerTokenService");
+const courierPartnerTokenService = require("../src/courierPartnerToken/CourierPartnerTokenService");
 const { preferredCourierPartner } = require("../helper/enumUtils");
 
 // Shipyaari Auth keys
@@ -35,7 +35,7 @@ const getEstTimeFromShipYaari = async (data) => {
 
 const confirmOrderShipYaari = async (data) => {
   try {
-    let shipyaariToken = await CourierPartnerToken?.getOneByMultiField({
+    let shipyaariToken = await courierPartnerTokenService?.getOneByMultiField({
       courierPartnerName: preferredCourierPartner.shipyaari,
     });
     const HEADER = {
@@ -49,7 +49,7 @@ const confirmOrderShipYaari = async (data) => {
     );
     console.log(response, "response");
     if (response) {
-      return response?.data?.success;
+      return response?.data;
     }
   } catch (err) {
     console.log(err, "error");
@@ -71,11 +71,11 @@ const getShipyaariToken = async () => {
       { headers: HEADER }
     );
     if (response?.data?.success) {
-      let isExists = await CourierPartnerToken?.findCount({
+      let isExists = await courierPartnerTokenService?.findCount({
         courierPartnerName: preferredCourierPartner.shipyaari,
       });
       if (isExists) {
-        await CourierPartnerToken?.getOneAndUpdate(
+        await courierPartnerTokenService?.getOneAndUpdate(
           { courierPartnerName: preferredCourierPartner.shipyaari },
           {
             $set: {
@@ -84,7 +84,7 @@ const getShipyaariToken = async () => {
           }
         );
       } else {
-        await CourierPartnerToken?.createNewData({
+        await courierPartnerTokenService?.createNewData({
           courierPartnerName: preferredCourierPartner.shipyaari,
           token: response?.data?.data?.[0]?.token,
         });

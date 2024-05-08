@@ -1,5 +1,5 @@
-const Pincode = require('./PincodeSchema')
-const { combineObjects } = require('../../helper/utils')
+const Pincode = require("./PincodeSchema");
+const { combineObjects } = require("../../helper/utils");
 
 //-------------------------------------------
 /**
@@ -9,8 +9,12 @@ const { combineObjects } = require('../../helper/utils')
  * @returns {Promise<Pincode>}
  */
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return Pincode.findOne({ [fieldName]: fieldValue, isDeleted: false })
-}
+  return Pincode.findOne({ [fieldName]: fieldValue, isDeleted: false });
+};
+
+const updateMany = async (matchObj, updateBody) => {
+  return Pincode.updateMany({ ...matchObj }, { ...updateBody }, { new: true });
+};
 //-------------------------------------------
 /**
  * Get One Pincode by multiple Fields field
@@ -19,8 +23,8 @@ const getOneBySingleField = async (fieldName, fieldValue) => {
  * @returns {Promise<Pincode>}
  */
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return Pincode.findOne({ ...matchObj, isDeleted: false }, { ...projectObj })
-}
+  return Pincode.findOne({ ...matchObj, isDeleted: false }, { ...projectObj });
+};
 
 //-------------------------------------------
 /**
@@ -28,18 +32,18 @@ const getOneByMultiField = async (matchObj, projectObj) => {
  * @param {object} bodyData
  * @returns {Promise<Pincode>}
  */
-const createNewData = async bodyData => {
-  return Pincode.create({ ...bodyData })
-}
+const createNewData = async (bodyData) => {
+  return Pincode.create({ ...bodyData });
+};
 //-------------------------------------------
 /**
  * get by id Pincode
  * @param {ObjectId} id
  * @returns {Promise<Pincode>}
  */
-const getById = async id => {
-  return Pincode.findById(id)
-}
+const getById = async (id) => {
+  return Pincode.findById(id);
+};
 //-------------------------------------------
 /**
  * Update Pincode by id
@@ -52,8 +56,8 @@ const getByIdAndUpdate = async (id, updateBody) => {
     { _id: id },
     { ...updateBody },
     { new: true }
-  )
-}
+  );
+};
 //-------------------------------------------
 /**
  * find One and update
@@ -66,8 +70,8 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
-  )
-}
+  );
+};
 //-------------------------------------------
 /**
  * find One and update
@@ -80,30 +84,30 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
-  )
-}
+  );
+};
 //-------------------------------------------
 /**
  * Delete by id
  * @param {ObjectId} id
  * @returns {Promise<Pincode>}
  */
-const getByIdAndDelete = async id => {
-  return Pincode.findByIdAndDelete(id)
-}
+const getByIdAndDelete = async (id) => {
+  return Pincode.findByIdAndDelete(id);
+};
 //-------------------------------------------
 /**
  * find one and delete
  * @param {object} matchObj
  * @returns {Promise<Pincode>}
  */
-const getOneAndDelete = async matchObj => {
+const getOneAndDelete = async (matchObj) => {
   return Pincode.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
-  )
-}
+  );
+};
 //-------------------------------------------
 /**
  * find one and delete
@@ -112,43 +116,43 @@ const getOneAndDelete = async matchObj => {
  * @returns {Promise<Pincode>}
  */
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return Pincode.find({ ...matchObj, isDeleted: false }, { ...projectObj })
-}
+  return Pincode.find({ ...matchObj, isDeleted: false }, { ...projectObj });
+};
 //-------------------------------------------
 /**
  * find one and delete
  * @returns {Promise<Pincode>}
  */
 const findAll = async () => {
-  return Pincode.find()
-}
+  return Pincode.find();
+};
 //-------------------------------------------
 /**
  * find one and delete
  * @param {Array} aggregateQueryArray
  * @returns {Promise<Pincode>}
  */
-const aggregateQuery = async aggregateQueryArray => {
-  return Pincode.aggregate(aggregateQueryArray)
-}
+const aggregateQuery = async (aggregateQueryArray) => {
+  return Pincode.aggregate(aggregateQueryArray);
+};
 //-------------------------------------------
 /**
  * find one and delete
  * @param {Array} insertDataArray
  * @returns {Promise<Pincode>}
  */
-const createMany = async insertDataArray => {
-  return Pincode.insertMany(insertDataArray)
-}
+const createMany = async (insertDataArray) => {
+  return Pincode.insertMany(insertDataArray);
+};
 //-------------------------------------------
 /**
  * find Count and delete
  * @param {object} matchObj
  * @returns {Promise<Pincode>}
  */
-const findCount = async matchObj => {
-  return Pincode.find({ ...matchObj, isDeleted: false }).count()
-}
+const findCount = async (matchObj) => {
+  return Pincode.find({ ...matchObj, isDeleted: false }).count();
+};
 //-------------------------------------------
 /**
  *
@@ -159,44 +163,44 @@ const findCount = async matchObj => {
  */
 const isExists = async (filterArray, exceptIds = false, combined = false) => {
   if (combined) {
-    let combinedObj = await combineObjects(filterArray)
+    let combinedObj = await combineObjects(filterArray);
 
     if (exceptIds) {
-      combinedObj['_id'] = { $nin: exceptIds }
+      combinedObj["_id"] = { $nin: exceptIds };
     }
 
     if (await getOneByMultiField({ ...combinedObj })) {
       return {
         exists: true,
-        existsSummary: `${Object.keys(combinedObj)} already exist.`
-      }
+        existsSummary: `${Object.keys(combinedObj)} already exist.`,
+      };
     }
-    return { exists: false, existsSummary: '' }
+    return { exists: false, existsSummary: "" };
   }
 
   let mappedArray = await Promise.all(
-    filterArray.map(async element => {
+    filterArray.map(async (element) => {
       if (exceptIds) {
-        element['_id'] = { $nin: exceptIds }
+        element["_id"] = { $nin: exceptIds };
       }
       if (await getOneByMultiField({ ...element })) {
-        return { exists: true, fieldName: Object.keys(element)[0] }
+        return { exists: true, fieldName: Object.keys(element)[0] };
       }
-      return { exists: false, fieldName: Object.keys(element)[0] }
+      return { exists: false, fieldName: Object.keys(element)[0] };
     })
-  )
+  );
 
   return mappedArray.reduce(
     (acc, ele) => {
       if (ele.exists) {
-        acc.exists = true
-        acc.existsSummary += `${ele.fieldName.toLowerCase()} already exist. `
+        acc.exists = true;
+        acc.existsSummary += `${ele.fieldName.toLowerCase()} already exist. `;
       }
-      return acc
+      return acc;
     },
-    { exists: false, existsSummary: '' }
-  )
-}
+    { exists: false, existsSummary: "" }
+  );
+};
 //-------------------------------------------
 module.exports = {
   getOneBySingleField,
@@ -213,5 +217,6 @@ module.exports = {
   onlyUpdateOne,
   createMany,
   findCount,
-  isExists
-}
+  isExists,
+  updateMany,
+};
