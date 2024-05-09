@@ -1510,6 +1510,91 @@ exports.getBarcode = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// get barcode of warehouse to recreate outer box
+
+exports.getWhBarcode = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+
+    let additionalQuery = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: barcodeStatusType.atWarehouse,
+          outerBoxbarCodeNumber: null,
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
+    let barcode = [];
+    const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
+    console.log(foundBarcode, "foundBarcode");
+    if (foundBarcode !== null) {
+      barcode.push(foundBarcode[0]);
+    }
+
+    if (barcode.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: barcode[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 //inventory api
 exports.getInventory = async (req, res) => {
   try {
