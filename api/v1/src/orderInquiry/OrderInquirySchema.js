@@ -49,10 +49,30 @@ const OrderInquirySchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    assignDealerLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    assignDealerCode: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    assignDealerStatus: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     assignWarehouseId: {
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    assignWarehouseLabel: {
+      type: String,
+      trim: true,
+      default: "",
     },
     agentId: {
       type: ObjectId,
@@ -138,19 +158,39 @@ const OrderInquirySchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    countryLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     stateId: {
       type: ObjectId,
       trim: true,
+    },
+    stateLabel: {
+      type: String,
+      trim: true,
+      default: "",
     },
     districtId: {
       type: ObjectId,
       trim: true,
       default: null,
     },
+    districtLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     tehsilId: {
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    tehsilLabel: {
+      type: String,
+      trim: true,
+      default: "",
     },
     schemeId: {
       type: ObjectId,
@@ -168,15 +208,26 @@ const OrderInquirySchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    pincodeLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     pincodeSecondId: {
       type: ObjectId,
       trim: true,
       default: null,
     },
+
     areaId: {
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    areaLabel: {
+      type: String,
+      trim: true,
+      default: "",
     },
 
     emailId: {
@@ -238,7 +289,11 @@ const OrderInquirySchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
-
+    productGroupLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     // reciversName: {
     //   type: String,
     //   required: false,
@@ -306,10 +361,20 @@ const OrderInquirySchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    dispositionLevelTwoLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     dispositionLevelThreeId: {
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    dispositionLevelThreeLabel: {
+      type: String,
+      trim: true,
+      default: "",
     },
     preffered_delivery_start_time: {
       type: String,

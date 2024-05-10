@@ -461,6 +461,120 @@ exports.updateUser = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// update user company
+
+exports.updateUserCompany = async (req, res) => {
+  try {
+    let { companyId } = req.body;
+    let deviceId = req.headers["device-id"];
+
+    // if (req.userData.userType !== userEnum.user) {
+    //   throw new ApiError(
+    //     httpStatus.UNAUTHORIZED,
+    //     `You do not have authority to access this.`
+    //   );
+    // }
+
+    let idToBeSearch = req.params.id;
+
+    const isCompanyExists = await companyService.findCount({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    //------------------Find data-------------------
+    let datafound = await userService.getOneByMultiField({ _id: idToBeSearch });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `User not found.`);
+    }
+
+    // if department and roll same
+
+    let dataUpdated = await userService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
+      }
+    );
+    let {
+      _id: userId,
+      userType,
+      firstName,
+      userName,
+      lastName,
+      email,
+      userRole,
+      branchId,
+      companyId: newCompanyId,
+    } = dataUpdated;
+    const tokenKey = `${dataUpdated?._id}*`;
+
+    const allRedisValue = await redisClient.keys(tokenKey);
+
+    const deletePromises = allRedisValue?.map(
+      async (key) => await redisClient.del(key)
+    );
+    await Promise.all(deletePromises);
+    let token = await tokenCreate(dataUpdated);
+    if (!token) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+    let refreshToken = await refreshTokenCreate(dataUpdated);
+    if (!refreshToken) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong. Please try again later."
+      );
+    }
+
+    await redisClient.set(userId + deviceId, token + "***" + refreshToken);
+    const redisValue = await redisClient.get(userId + deviceId);
+    if (redisValue) {
+      return res.status(httpStatus.OK).send({
+        message: "updated successfully!",
+        data: {
+          token: token,
+          refreshToken: refreshToken,
+          userId: userId,
+          fullName: `${firstName} ${lastName}`,
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          // mobile: mobile,
+          userName: userName,
+          userType: userType,
+          userRole: userRole ? userRole : "ADMIN",
+          companyId: newCompanyId,
+          branchId: branchId,
+        },
+        status: true,
+        code: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {
   try {

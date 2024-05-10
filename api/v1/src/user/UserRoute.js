@@ -155,6 +155,14 @@ router.put(
   validate(userValidation.update),
   userController.updateUser
 );
+
+// update user when company change
+router.put(
+  "/update-user-company/:id",
+  authCheckMiddleware,
+  validate(userValidation.updateUserCompany),
+  userController.updateUserCompany
+);
 /**
  * update status
  */

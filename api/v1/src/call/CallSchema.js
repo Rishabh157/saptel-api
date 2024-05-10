@@ -200,6 +200,11 @@ const CallSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    productGroupLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
 
     // reciversName: {
     //   type: String,
@@ -272,6 +277,26 @@ const CallSchema = new mongoose.Schema(
       type: ObjectId,
       trim: true,
       default: null,
+    },
+    dispositionLevelTwoId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
+    },
+    dispositionLevelTwoLabel: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    dispositionLevelThreeId: {
+      type: ObjectId,
+      trim: true,
+      default: null,
+    },
+    dispositionLevelThreeLabel: {
+      type: String,
+      trim: true,
+      default: "",
     },
     preffered_delivery_start_time: {
       type: String,

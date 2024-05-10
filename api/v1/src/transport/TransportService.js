@@ -1,16 +1,13 @@
-const CourierPreference = require("./CourierPreferenceSchema");
+const Transport = require("./TransportSchema");
 const { combineObjects } = require("../../helper/utils");
 
 const getOneBySingleField = async (fieldName, fieldValue) => {
-  return CourierPreference.findOne({
-    [fieldName]: fieldValue,
-    isDeleted: false,
-  });
+  return Transport.findOne({ [fieldName]: fieldValue, isDeleted: false });
 };
 //-------------------------------------------
 
 const getOneByMultiField = async (matchObj, projectObj) => {
-  return CourierPreference.findOne(
+  return Transport.findOne(
     { ...matchObj, isDeleted: false },
     { ...projectObj }
   );
@@ -19,17 +16,17 @@ const getOneByMultiField = async (matchObj, projectObj) => {
 //-------------------------------------------
 
 const createNewData = async (bodyData) => {
-  return CourierPreference.create({ ...bodyData });
+  return Transport.create({ ...bodyData });
 };
 //-------------------------------------------
 
 const getById = async (id) => {
-  return CourierPreference.findById(id);
+  return Transport.findById(id);
 };
 //-------------------------------------------
 
 const getByIdAndUpdate = async (id, updateBody) => {
-  return CourierPreference.findByIdAndUpdate(
+  return Transport.findByIdAndUpdate(
     { _id: id },
     { ...updateBody },
     { new: true }
@@ -38,7 +35,7 @@ const getByIdAndUpdate = async (id, updateBody) => {
 //-------------------------------------------
 
 const getOneAndUpdate = async (matchObj, updateBody) => {
-  return CourierPreference.findOneAndUpdate(
+  return Transport.findOneAndUpdate(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -47,7 +44,7 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const onlyUpdateOne = async (matchObj, updateBody) => {
-  return CourierPreference.updateOne(
+  return Transport.updateOne(
     { ...matchObj, isDeleted: false },
     { ...updateBody },
     { new: true }
@@ -56,12 +53,12 @@ const onlyUpdateOne = async (matchObj, updateBody) => {
 //-------------------------------------------
 
 const getByIdAndDelete = async (id) => {
-  return CourierPreference.findByIdAndDelete(id);
+  return Transport.findByIdAndDelete(id);
 };
 //-------------------------------------------
 
 const getOneAndDelete = async (matchObj) => {
-  return CourierPreference.findOneAndUpdate(
+  return Transport.findOneAndUpdate(
     { ...matchObj },
     { isDeleted: true },
     { new: true }
@@ -70,35 +67,27 @@ const getOneAndDelete = async (matchObj) => {
 //-------------------------------------------
 
 const findAllWithQuery = async (matchObj, projectObj) => {
-  return CourierPreference.find(
-    { ...matchObj, isDeleted: false },
-    { ...projectObj }
-  );
+  return Transport.find({ ...matchObj, isDeleted: false }, { ...projectObj });
 };
 //-------------------------------------------
 
 const findAll = async () => {
-  return CourierPreference.find();
+  return Transport.find();
 };
 //-------------------------------------------
 
 const aggregateQuery = async (aggregateQueryArray) => {
-  return CourierPreference.aggregate(aggregateQueryArray);
+  return Transport.aggregate(aggregateQueryArray);
 };
 //-------------------------------------------
 
 const createMany = async (insertDataArray) => {
-  return CourierPreference.insertMany(insertDataArray);
+  return Transport.insertMany(insertDataArray);
 };
 //-------------------------------------------
 
 const findCount = async (matchObj) => {
-  return CourierPreference.find({ ...matchObj, isDeleted: false }).count();
-};
-
-// delete many
-const deleteMany = async (objectIDs) => {
-  return CourierPreference.deleteMany({ _id: { $in: objectIDs } });
+  return Transport.find({ ...matchObj, isDeleted: false }).count();
 };
 //-------------------------------------------
 
@@ -159,5 +148,4 @@ module.exports = {
   createMany,
   findCount,
   isExists,
-  deleteMany,
 };

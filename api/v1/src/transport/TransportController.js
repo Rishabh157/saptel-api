@@ -2,8 +2,8 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const courierPreferenceService = require("./CourierPreferenceService");
-const { searchKeys } = require("./CourierPreferenceSchema");
+const transportService = require("./TransportService");
+const { searchKeys } = require("./TransportSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -20,23 +20,16 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { courierName, priority } = req.body;
+    let { transportName, gst } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await courierPreferenceService.isExists([{ courierName }]);
+    let dataExist = await transportService.isExists([{ transportName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-
-    let priorityExist = await courierPreferenceService.isExists([{ priority }]);
-    if (priorityExist.exists && priorityExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, priorityExist.existsSummary);
-    }
     //------------------create data-------------------
-    let dataCreated = await courierPreferenceService.createNewData({
-      ...req.body,
-    });
+    let dataCreated = await transportService.createNewData({ ...req.body });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -62,30 +55,40 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { data } = req.body;
+    let { transportName, gst } = req.body;
 
-    const prioritySet = new Set();
-
-    for (const item of data) {
-      if (prioritySet.has(item.priority)) {
-        throw new ApiError(
-          httpStatus.NOT_IMPLEMENTED,
-          `Duplicate priority values found. `
-        );
-      }
-      prioritySet.add(item.priority);
+    let idToBeSearch = req.params.id;
+    let dataExist = await transportService.isExists(
+      [{ transportName }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    let allData = await courierPreferenceService.findAll({});
-    let allId = allData?.map((ele) => {
-      return ele?._id;
+    //------------------Find data-------------------
+    let datafound = await transportService.getOneByMultiField({
+      _id: idToBeSearch,
     });
-    await courierPreferenceService.deleteMany(allId);
-    let created = await courierPreferenceService?.createMany(data);
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Transport not found.`);
+    }
 
-    if (created) {
+    let dataUpdated = await transportService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
+      }
+    );
+
+    if (dataUpdated) {
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
-        data: created,
+        data: dataUpdated,
         status: true,
         code: null,
         issue: null,
@@ -163,7 +166,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = ["priority"];
+    let booleanFields = [];
     let numberFileds = [];
     let objectIdFields = [];
     const filterQuery = getFilterQuery(
@@ -208,9 +211,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await courierPreferenceService.aggregateQuery(
-      finalAggregateQuery
-    );
+    let dataFound = await transportService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -229,9 +230,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await courierPreferenceService.aggregateQuery(
-      finalAggregateQuery
-    );
+    let result = await transportService.aggregateQuery(finalAggregateQuery);
     if (result.length) {
       return res.status(200).send({
         data: result,
@@ -263,7 +262,7 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await courierPreferenceService.findAllWithQuery(matchQuery);
+    let dataExist = await transportService.findAllWithQuery(matchQuery);
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -290,7 +289,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await courierPreferenceService.getOneByMultiField({
+    let dataExist = await transportService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
@@ -320,10 +319,10 @@ exports.getById = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await courierPreferenceService.getOneByMultiField({ _id }))) {
+    if (!(await transportService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await courierPreferenceService.getOneAndDelete({ _id });
+    let deleted = await transportService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -347,13 +346,13 @@ exports.deleteDocument = async (req, res) => {
 exports.statusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let dataExist = await courierPreferenceService.getOneByMultiField({ _id });
+    let dataExist = await transportService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let isActive = dataExist.isActive ? false : true;
 
-    let statusChanged = await courierPreferenceService.getOneAndUpdate(
+    let statusChanged = await transportService.getOneAndUpdate(
       { _id },
       { isActive }
     );

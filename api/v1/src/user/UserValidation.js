@@ -100,6 +100,15 @@ const update = {
   }),
 };
 
+const updateUserCompany = {
+  param: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+  body: Joi.object().keys({
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 /**
  * filter and pagination api
  */
@@ -285,4 +294,5 @@ module.exports = {
   getAllFloorManagersAndTeamLead,
   getAllUsers,
   changePasswordByAdmin,
+  updateUserCompany,
 };

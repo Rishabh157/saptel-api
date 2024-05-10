@@ -103,6 +103,61 @@ const SalesOrderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    transportnameId: {
+      type: String,
+      default: "",
+    },
+
+    transporterGST: {
+      type: String,
+      default: "",
+    },
+    mode: {
+      type: String,
+      enum: ["ROAD", "AIR"],
+      default: "ROAD",
+    },
+    distance: {
+      type: String,
+      default: "",
+    },
+    vehicleNumber: {
+      type: String,
+      default: "",
+    },
+    vehicleType: {
+      type: String,
+      enum: ["REGULAR"],
+      default: "REGULAR",
+    },
+    transportDocNo: {
+      type: String,
+      default: "",
+    },
+    documnetDate: {
+      type: String,
+      default: "",
+    },
+    roadPermitNumber: {
+      type: String,
+      default: "",
+    },
+    lrNo: {
+      type: String,
+      default: "",
+    },
+    totalWeight: {
+      type: Number,
+      default: null,
+    },
+    totalPackages: {
+      type: Number,
+      default: null,
+    },
+    fileUrl: {
+      type: String,
+      default: "",
+    },
 
     companyId: {
       type: ObjectId,

@@ -3227,7 +3227,22 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
 
 exports.outwardInventory = async (req, res) => {
   try {
-    let { barcodedata, soId } = req.body;
+    let {
+      barcodedata,
+      soId,
+      transporterGST,
+      mode,
+      distance,
+      vehicleNumber,
+      vehicleType,
+      transportDocNo,
+      documnetDate,
+      roadPermitNumber,
+      lrNo,
+      totalWeight,
+      totalPackages,
+      fileUrl,
+    } = req.body;
     const groupedData = barcodedata.reduce((result, item) => {
       const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
 
@@ -3306,6 +3321,18 @@ exports.outwardInventory = async (req, res) => {
           {
             $set: {
               status: productStatus.dispatched,
+              transporterGST,
+              mode,
+              distance,
+              vehicleNumber,
+              vehicleType,
+              transportDocNo,
+              documnetDate,
+              roadPermitNumber,
+              lrNo,
+              totalWeight,
+              totalPackages,
+              fileUrl,
             },
           }
         );

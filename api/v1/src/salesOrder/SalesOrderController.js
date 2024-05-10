@@ -553,6 +553,15 @@ exports.allFilterGroupPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "transports",
+          localField: "transportnameId",
+          foreignField: "_id",
+          as: "transportData",
+          pipeline: [{ $project: { transportName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
@@ -565,6 +574,9 @@ exports.allFilterGroupPagination = async (req, res) => {
           },
           "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
+          },
+          transportName: {
+            $arrayElemAt: ["$transportData.transportName", 0],
           },
         },
       },
@@ -600,6 +612,7 @@ exports.allFilterGroupPagination = async (req, res) => {
           "productSalesOrders",
           "warehouseData",
           "stateData",
+          "transportData",
         ],
       },
     ];
@@ -841,6 +854,15 @@ exports.allFilterGroupPaginationForDealer = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "transports",
+          localField: "transportnameId",
+          foreignField: "_id",
+          as: "transportData",
+          pipeline: [{ $project: { transportName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
@@ -850,6 +872,9 @@ exports.allFilterGroupPaginationForDealer = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          transportName: {
+            $arrayElemAt: ["$transportData.transportName", 0],
           },
           "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
@@ -863,6 +888,7 @@ exports.allFilterGroupPaginationForDealer = async (req, res) => {
           "companyWarehouseName",
           "warehouses_name",
           "productSalesOrders",
+          "transportData",
         ],
       },
     ];
@@ -1087,6 +1113,15 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "transports",
+          localField: "transportnameId",
+          foreignField: "_id",
+          as: "transportData",
+          pipeline: [{ $project: { transportName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
@@ -1096,6 +1131,9 @@ exports.allFilterPagination = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          transportName: {
+            $arrayElemAt: ["$transportData.transportName", 0],
           },
           "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
@@ -1109,6 +1147,7 @@ exports.allFilterPagination = async (req, res) => {
           "companyWarehouseName",
           "warehouses_name",
           "productSalesOrders",
+          "transportData",
         ],
       },
     ];
@@ -1244,6 +1283,15 @@ exports.get = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "transports",
+          localField: "transportnameId",
+          foreignField: "_id",
+          as: "transportData",
+          pipeline: [{ $project: { transportName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
@@ -1253,6 +1301,9 @@ exports.get = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          transportName: {
+            $arrayElemAt: ["$transportData.transportName", 0],
           },
           "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
@@ -1266,6 +1317,7 @@ exports.get = async (req, res) => {
           "companyWarehouseName",
           "warehouses_name",
           "productSalesOrders",
+          "transportData",
         ],
       },
     ];
@@ -1367,6 +1419,15 @@ exports.getByDealerId = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "transports",
+          localField: "transportnameId",
+          foreignField: "_id",
+          as: "transportData",
+          pipeline: [{ $project: { transportName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
@@ -1376,6 +1437,9 @@ exports.getByDealerId = async (req, res) => {
           },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          transportName: {
+            $arrayElemAt: ["$transportData.transportName", 0],
           },
           "productSalesOrder.groupName": {
             $arrayElemAt: ["$productSalesOrders.groupName", 0],
@@ -1389,6 +1453,7 @@ exports.getByDealerId = async (req, res) => {
           "companyWarehouseName",
           "warehouses_name",
           "productSalesOrders",
+          "transportData",
         ],
       },
     ];
@@ -1482,6 +1547,15 @@ exports.getById = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "transports",
+          localField: "transportnameId",
+          foreignField: "_id",
+          as: "transportData",
+          pipeline: [{ $project: { transportName: 1 } }],
+        },
+      },
+      {
         $addFields: {
           dealerLabel: {
             $arrayElemAt: ["$dealer_name.dealerName", 0],
@@ -1495,6 +1569,9 @@ exports.getById = async (req, res) => {
 
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
+          },
+          transportName: {
+            $arrayElemAt: ["$transportData.transportName", 0],
           },
           warehouseBillingAddress: {
             $arrayElemAt: ["$warehouses_name.billingAddress", 0],
@@ -1511,6 +1588,7 @@ exports.getById = async (req, res) => {
           "companyWarehouseName",
           "warehouses_name",
           "productSalesOrders",
+          "transportData",
         ],
       },
     ];

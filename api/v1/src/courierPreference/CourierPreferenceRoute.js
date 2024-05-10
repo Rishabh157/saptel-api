@@ -42,8 +42,7 @@ router.post(
  * update document
  */
 router.put(
-  "/:id",
-
+  "/",
   authCheckMiddleware,
   validate(courierPreferenceValidation.update),
   courierPreferenceController.update

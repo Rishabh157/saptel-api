@@ -65,6 +65,9 @@ const create = {
     dispositionLevelTwoId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
+    dispositionLevelTwoLabel: Joi.string().allow(""),
+    dispositionLevelThreeLabel: Joi.string().allow(""),
+    productGroupLabel: Joi.string().allow(""),
     dispositionLevelThreeId: Joi.string()
       .custom(commonValidation.objectId)
       .allow(null),
@@ -109,7 +112,9 @@ const update = {
     schemeName: Joi.string().allow(""),
     pincodeId: Joi.string().custom(commonValidation.objectId).allow(null),
     pincodeLabel: Joi.string().allow(""),
-
+    dispositionLevelTwoLabel: Joi.string().allow(""),
+    dispositionLevelThreeLabel: Joi.string().allow(""),
+    productGroupLabel: Joi.string().allow(""),
     areaId: Joi.string().custom(commonValidation.objectId).allow(null),
     areaLabel: Joi.string().allow(""),
     emailId: Joi.string().allow(""),

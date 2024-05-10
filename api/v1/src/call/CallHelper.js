@@ -197,7 +197,7 @@ exports.getAssignWarehouse = async (companyId) => {
   let warehouseServingInPincode = await wareHouseService.findAllWithQuery(
     matchQuery
   );
-  return warehouseServingInPincode ? warehouseServingInPincode[0]?._id : null;
+  return warehouseServingInPincode ? warehouseServingInPincode[0] : null;
 };
 
 exports.getDealer = async (survingDealer) => {

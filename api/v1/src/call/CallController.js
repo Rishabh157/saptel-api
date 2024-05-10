@@ -11,6 +11,7 @@ const schemeService = require("../scheme/SchemeService");
 const districtService = require("../district/DistrictService");
 const tehsilService = require("../tehsil/TehsilService");
 const pincodeService = require("../pincode/PincodeService");
+const dealerService = require("../dealer/DealerService");
 const areaService = require("../area/AreaService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
@@ -235,7 +236,7 @@ exports.update = async (req, res) => {
       tehsilId,
       schemeId,
       pincodeId,
-      pincodeLabel,
+
       areaId,
       paymentMode,
       companyId,
@@ -250,6 +251,16 @@ exports.update = async (req, res) => {
       mobileNo,
       alternateNo,
       productGroupId,
+      countryLabel,
+      stateLabel,
+      districtLabel,
+      tehsilLabel,
+      pincodeLabel,
+
+      areaLabel,
+      dispositionLevelTwoLabel,
+      dispositionLevelThreeLabel,
+      productGroupLabel,
     } = req.body;
 
     const isDispositionThreeExists =
@@ -397,7 +408,11 @@ exports.update = async (req, res) => {
       companyId,
       schemeId
     );
-
+    if (dealerServingPincode.length === 1) {
+      var assidnedDealerData = await dealerService?.getOneByMultiField({
+        _id: dealerServingPincode[0]?._id,
+      });
+    }
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
 
@@ -422,8 +437,22 @@ exports.update = async (req, res) => {
           dealerServingPincode.length === 1
             ? dealerServingPincode[0]?.dealerId
             : null,
+        assignDealerLabel:
+          dealerServingPincode.length === 1
+            ? assidnedDealerData?.firstName + " " + assidnedDealerData?.lastName
+            : "",
+        assignDealerCode:
+          dealerServingPincode.length === 1
+            ? assidnedDealerData?.dealerCode
+            : "",
+        assignDealerStatus:
+          dealerServingPincode.length === 1 ? assidnedDealerData?.isActive : "",
         assignWarehouseId:
-          dealerServingPincode.length === 0 ? servingWarehouse : null,
+          dealerServingPincode.length === 0 ? servingWarehouse?._id : null,
+        assignWarehouseLabel:
+          dealerServingPincode.length === 0
+            ? servingWarehouse?.wareHouseName
+            : "",
         approved: flag ? true : prepaidOrderFlag ? false : true,
         agentId: isUserExists?.agentId,
         agentName: agentName,
@@ -437,6 +466,16 @@ exports.update = async (req, res) => {
         isUrgentOrder:
           dispositionThreeData[0]?.applicableCriteria ===
           applicableCriteria.isUrgent,
+        countryLabel,
+        stateLabel,
+        districtLabel,
+        tehsilLabel,
+        pincodeLabel,
+
+        areaLabel,
+        dispositionLevelTwoLabel,
+        dispositionLevelThreeLabel,
+        productGroupLabel,
         // dealerAssignedId: dealerId,
       });
 
@@ -938,53 +977,52 @@ exports.allFilterPagination = async (req, res) => {
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
     let additionalQuery = [
-      {
-        $match: matchQuery,
-      },
-      {
-        $lookup: {
-          from: "dispositiontwos",
-          localField: "dispositionLevelTwoId",
-          foreignField: "_id",
-          as: "dispositionLevelTwoData",
-          pipeline: [
-            {
-              $project: {
-                dispositionName: 1,
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "dispositionthrees",
-          localField: "dispositionLevelThreeId",
-          foreignField: "_id",
-          as: "dispositionthreesData",
-          pipeline: [
-            {
-              $project: {
-                dispositionName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $addFields: {
-          dispositionLevelTwoLabel: {
-            $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
-          },
-          dispositionLevelThreeLabel: {
-            $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
-          },
-        },
-      },
-      {
-        $unset: ["dispositionLevelTwoData", "dispositionthreesData"],
-      },
+      // {
+      //   $match: matchQuery,
+      // },
+      // {
+      //   $lookup: {
+      //     from: "dispositiontwos",
+      //     localField: "dispositionLevelTwoId",
+      //     foreignField: "_id",
+      //     as: "dispositionLevelTwoData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           dispositionName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      // {
+      //   $lookup: {
+      //     from: "dispositionthrees",
+      //     localField: "dispositionLevelThreeId",
+      //     foreignField: "_id",
+      //     as: "dispositionthreesData",
+      //     pipeline: [
+      //       {
+      //         $project: {
+      //           dispositionName: 1,
+      //         },
+      //       },
+      //     ],
+      //   },
+      // },
+      // {
+      //   $addFields: {
+      //     dispositionLevelTwoLabel: {
+      //       $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
+      //     },
+      //     dispositionLevelThreeLabel: {
+      //       $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
+      //     },
+      //   },
+      // },
+      // {
+      //   $unset: ["dispositionLevelTwoData", "dispositionthreesData"],
+      // },
     ];
 
     if (additionalQuery.length) {

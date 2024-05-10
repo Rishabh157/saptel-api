@@ -101,6 +101,7 @@ const batchRoute = require("./src/batch/BatchRoute");
 const DTDRoute = require("./src/dtdTransfer/DTDTransferRoute");
 const missingdamageRoute = require("./src/missingDamageStock/MissingDamageStockRoute");
 const courierPreferenceRoute = require("./src/courierPreference/CourierPreferenceRoute");
+const transportRoute = require("./src/transport/TransportRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -518,6 +519,10 @@ const defaultRoutes = [
   {
     path: "/courier-preference",
     route: courierPreferenceRoute,
+  },
+  {
+    path: "/transport",
+    route: transportRoute,
   },
 ];
 // orderRoute;
