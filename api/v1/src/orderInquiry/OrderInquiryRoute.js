@@ -16,6 +16,13 @@ router.put(
   orderController.updateOrderStatus
 );
 
+router.put(
+  "/warehouse-order-dispatch",
+  authCheckMiddleware,
+  validate(orderValidation.warehouseOrderDispatch),
+  orderController.warehouseOrderDispatch
+);
+
 router.post(
   "/get-all-order-status-count",
   authCheckMiddleware,

@@ -575,7 +575,11 @@ const OrderInquirySchema = new mongoose.Schema(
     },
     orderAssignedToCourier: {
       type: String,
-      enum: [preferredCourierPartner.shipyaari, ""],
+      enum: [
+        preferredCourierPartner.shipyaari,
+        preferredCourierPartner.gpo,
+        "",
+      ],
       default: "",
     },
     isDeleted: {

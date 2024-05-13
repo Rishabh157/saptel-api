@@ -23,6 +23,8 @@ const userService = require("../user/UserService");
 const complaintService = require("../complain/ComplainService");
 const areaService = require("../area/AreaService");
 const barcodeService = require("../barCode/BarCodeService");
+const barcodeFlowService = require("../barCodeFlow/BarCodeFlowService");
+
 const callService = require("../call/CallService");
 const ndrDispositionService = require("../ndrDisposition/NdrDispositionService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
@@ -63,6 +65,7 @@ const {
   preferredCourierPartner,
   subDispositionNDR,
   paymentModeType,
+  barcodeStatusType,
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
@@ -845,6 +848,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
         {
           $set: {
             isGPO: true,
+            isOrderAssignedToCourier: preferredCourierPartner.gpo,
           },
         }
       );
@@ -989,6 +993,7 @@ exports.firstCallConfirmation = async (req, res) => {
           {
             $set: {
               isGPO: true,
+              orderAssignedToCourier: preferredCourierPartner.gpo,
             },
           }
         );
@@ -1127,6 +1132,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         {
           $set: {
             isGPO: true,
+            orderAssignedToCourier: preferredCourierPartner.gpo,
           },
         }
       );
@@ -1262,6 +1268,103 @@ exports.updateOrderStatus = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// warehouse order dispatch
+
+exports.warehouseOrderDispatch = async (req, res) => {
+  try {
+    let { orderId, barcodes } = req.body;
+    console.log(barcodes, "barcodes");
+    let dataExist = await orderService.isExists([]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: orderId,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+
+    await Promise.all(
+      barcodes?.map(async (ele) => {
+        let foundBarcode = await barcodeService.getOneByMultiField({
+          _id: ele,
+          isDeleted: false,
+          isUsed: true,
+          status: barcodeStatusType.atWarehouse,
+        });
+        if (!foundBarcode) {
+          throw new ApiError(httpStatus.OK, `Invalid barcode`);
+        } else {
+          console.log("lll");
+
+          const updatedBarcode = await barcodeService.getOneAndUpdate(
+            {
+              _id: new mongoose.Types.ObjectId(ele),
+              isUsed: true,
+            },
+            {
+              $set: {
+                status: barcodeStatusType.inTransit,
+              },
+            }
+          );
+
+          await barcodeFlowService.createNewData({
+            productGroupId: updatedBarcode.productGroupId,
+            barcodeNumber: updatedBarcode.barcodeNumber,
+            cartonBoxId: updatedBarcode.cartonBoxId,
+            barcodeGroupNumber: updatedBarcode.barcodeGroupNumber,
+            outerBoxbarCodeNumber: updatedBarcode.outerBoxbarCodeNumber,
+            lotNumber: updatedBarcode.lotNumber,
+            isUsed: updatedBarcode.isUsed,
+            wareHouseId: updatedBarcode.wareHouseId,
+            status: barcodeStatusType.inTransit,
+            companyId: updatedBarcode.companyId,
+          });
+        }
+      })
+    );
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        _id: orderId,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          barcodeId: barcodes,
+          status: orderStatusEnum.intransit,
+          orderStatus: productStatus.dispatched,
+        },
+      }
+    );
+
+    await orderInquiryFlowService.createNewData({
+      ...dataUpdated,
+      orderId: orderId,
+    });
+
+    return res.status(httpStatus.OK).send({
+      message: "Updated successfully.",
+      data: null,
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============update  end================
 
 // ========assign order ===============

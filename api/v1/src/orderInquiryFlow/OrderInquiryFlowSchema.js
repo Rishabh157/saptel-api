@@ -8,6 +8,7 @@ const {
   firstCallDispositions,
   validDealerRemark,
   dealerReasonEnum,
+  preferredCourierPartner,
 } = require("../../helper/enumUtils");
 const OrderInquiryFlowSchema = new mongoose.Schema(
   {
@@ -540,6 +541,27 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     dealerFirstCaller: {
       type: ObjectId,
       default: null,
+    },
+    O: {
+      type: Boolean,
+      default: false,
+    },
+    isUrgentOrder: {
+      type: Boolean,
+      default: false,
+    },
+    awbNumber: {
+      type: String,
+      default: "",
+    },
+    orderAssignedToCourier: {
+      type: String,
+      enum: [
+        preferredCourierPartner.shipyaari,
+        preferredCourierPartner.gpo,
+        "",
+      ],
+      default: "",
     },
     isDeleted: {
       type: Boolean,
