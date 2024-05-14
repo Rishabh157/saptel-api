@@ -21,6 +21,7 @@ const {
   barcodeStatusType,
   dealerMissingDamageType,
 } = require("../../helper/enumUtils");
+const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -53,7 +54,7 @@ exports.add = async (req, res) => {
       companyId: req.userData.companyId,
     });
 
-    await barcodeService?.getOneAndUpdate(
+    let dataUpdated = await barcodeService?.getOneAndUpdate(
       { isDeleted: false, isUsed: true, barcodeNumber: barcode },
       {
         $set: {
@@ -61,6 +62,7 @@ exports.add = async (req, res) => {
         },
       }
     );
+    await addToBarcodeFlow(dataUpdated);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

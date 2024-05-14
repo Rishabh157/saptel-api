@@ -542,7 +542,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
-    O: {
+    isGPO: {
       type: Boolean,
       default: false,
     },
@@ -561,6 +561,14 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
         preferredCourierPartner.gpo,
         "",
       ],
+      default: "",
+    },
+    hsnCode: {
+      type: String,
+      default: "",
+    },
+    companyAddress: {
+      type: String,
       default: "",
     },
     isDeleted: {

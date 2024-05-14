@@ -582,6 +582,14 @@ const OrderInquirySchema = new mongoose.Schema(
       ],
       default: "",
     },
+    hsnCode: {
+      type: String,
+      default: "",
+    },
+    companyAddress: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

@@ -28,6 +28,9 @@ const {
   complainStatusEnum,
 } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -848,30 +851,7 @@ exports.accountApproval = async (req, res) => {
           companyId: updatedData?.companyId,
         });
 
-        const orderInquiryFlow = await orderInquiryFlowService.createNewData({
-          schemeId: updatedData?.replacedSchemeId,
-          orderReferenceNumber: orderReferenceNumber,
-
-          schemeName: updatedData?.replacedSchemeLabel,
-          productGroupId: updatedData?.productGroupId,
-          price: 0,
-          status: orderStatusEnum.fresh,
-          orderId: orderInquiry?._id,
-          assignDealerId: null,
-          assignWarehouseId: null,
-          approved: true,
-          agentId: updatedData?.ccInfoAddById,
-          agentName: ccUser?.userName,
-          callCenterId: ccUser?.callCenterId,
-          branchId: ccUser?.branchId,
-          stateId: updatedData?.stateId,
-          districtId: updatedData?.districtId,
-          tehsilId: updatedData?.tehsilId,
-          pincodeId: updatedData?.pincodeId,
-          areaId: updatedData?.areaId,
-          autoFillingShippingAddress: updatedData?.address,
-          companyId: updatedData?.companyId,
-        });
+        await addToOrderFlow(updatedData);
       } else {
         await complaintService?.getOneAndUpdate(
           { complaintNumber: complaintNumber },

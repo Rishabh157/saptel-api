@@ -44,6 +44,10 @@ const {
   productStatus,
   orderStatusEnum,
 } = require("../../helper/enumUtils");
+const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -192,16 +196,8 @@ exports.update = async (req, res) => {
         },
       }
     );
-    await barcodeFlowService.createNewData({
-      productGroupId: dataUpdated.productGroupId,
-      barcodeNumber: dataUpdated.barcodeNumber,
-      barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-      lotNumber: dataUpdated.lotNumber,
-      isUsed: dataUpdated.isUsed,
-      wareHouseId: dataUpdated.wareHouseId,
-      status: dataUpdated.status,
-      companyId: dataUpdated.companyId,
-    });
+
+    await addToBarcodeFlow(dataUpdated);
 
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
@@ -751,6 +747,7 @@ exports.checkBarcode = async (req, res) => {
           },
         }
       );
+      await addToOrderFlow(orderInquiry);
 
       if (!orderInquiry) {
         throw new ApiError(
@@ -770,18 +767,8 @@ exports.checkBarcode = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: dataUpdated.productGroupId,
-          barcodeNumber: dataUpdated.barcodeNumber,
-          cartonBoxId: dataUpdated.cartonBoxId,
-          barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-          outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-          lotNumber: dataUpdated.lotNumber,
-          isUsed: dataUpdated.isUsed,
-          wareHouseId: dataUpdated.wareHouseId,
-          status: barcodeStatusType.delivered,
-          companyId: dataUpdated.companyId,
-        });
+
+        await addToBarcodeFlow(dataUpdated);
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
           status: true,
@@ -852,6 +839,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
           },
         }
       );
+      await addToOrderFlow(orderInquiry);
 
       if (!orderInquiry) {
         throw new ApiError(
@@ -871,6 +859,7 @@ exports.checkBarcodeDealerApp = async (req, res) => {
             },
           }
         );
+        await addToBarcodeFlow(dataUpdated);
 
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
@@ -2841,6 +2830,7 @@ exports.statusChange = async (req, res) => {
       { _id },
       { isActive }
     );
+    await addToBarcodeFlow(statusChanged);
     if (!statusChanged) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -2887,10 +2877,12 @@ exports.courierReturnProduct = async (req, res) => {
     }
     console.log("here..");
 
-    await orderInquiryService?.getOneAndUpdate(
+    let orderInquiry = await orderInquiryService?.getOneAndUpdate(
       { _id: id },
       { $set: { status: orderStatusEnum.closed } }
     );
+    await addToOrderFlow(orderInquiry);
+
     console.log("here..");
     const updates = await Promise.all(
       dataExist.map(async (ele) => {
@@ -2915,18 +2907,7 @@ exports.courierReturnProduct = async (req, res) => {
 
     const newBarcodeFlowData = await Promise.all(
       updates.map((updated) => {
-        return barcodeFlowService.createNewData({
-          productGroupId: updated.productGroupId,
-          barcodeNumber: updated.barcodeNumber,
-          cartonBoxId: updated.cartonBoxId,
-          barcodeGroupNumber: updated.barcodeGroupNumber,
-          outerBoxbarCodeNumber: updated.outerBoxCode,
-          lotNumber: updated.lotNumber,
-          isUsed: updated.isUsed,
-          wareHouseId: updated.wareHouseId,
-          status: updated.status,
-          companyId: updated.companyId,
-        });
+        return addToBarcodeFlow(updated);
       })
     );
 
@@ -2979,18 +2960,7 @@ exports.updateInventory = async (req, res) => {
           },
         }
       );
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
       return dataUpdated;
     });
 
@@ -3109,19 +3079,8 @@ exports.updateWarehouseInventory = async (req, res) => {
           );
         });
       }
+      await addToBarcodeFlow(dataUpdated);
 
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxbarCodeNumber,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
       return dataUpdated;
     });
 
@@ -3185,18 +3144,8 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
         );
       });
 
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxbarCodeNumber,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -3286,18 +3235,7 @@ exports.outwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3337,18 +3275,9 @@ exports.outwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -3423,18 +3352,7 @@ exports.rtvOutwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3463,18 +3381,9 @@ exports.rtvOutwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -3549,18 +3458,7 @@ exports.wtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3588,18 +3486,8 @@ exports.wtwOutwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -3674,18 +3562,7 @@ exports.dtdOutwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(dataUpdated);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3714,18 +3591,8 @@ exports.dtdOutwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -3800,18 +3667,7 @@ exports.dtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3839,18 +3695,8 @@ exports.dtwOutwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -3925,18 +3771,7 @@ exports.wtcOutwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3965,18 +3800,8 @@ exports.wtcOutwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -4051,18 +3876,7 @@ exports.wtsOutwardInventory = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.inTransit,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4090,18 +3904,8 @@ exports.wtsOutwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
+
       return dataUpdated;
     });
 
@@ -4180,18 +3984,7 @@ exports.orderDispatch = async (req, res) => {
             },
           }
         );
-        await barcodeFlowService.createNewData({
-          productGroupId: ele.productGroupId,
-          barcodeNumber: ele.barcodeNumber,
-          cartonBoxId: null,
-          barcodeGroupNumber: ele.barcodeGroupNumber,
-          outerBoxbarCodeNumber: null,
-          lotNumber: ele.lotNumber,
-          isUsed: ele.isUsed,
-          wareHouseId: ele.wareHouseId,
-          status: barcodeStatusType.atWarehouse,
-          companyId: ele.companyId,
-        });
+        await addToBarcodeFlow(ele);
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4206,19 +3999,7 @@ exports.orderDispatch = async (req, res) => {
           },
         }
       );
-
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
       return dataUpdated;
     });
 
@@ -4236,18 +4017,9 @@ exports.orderDispatch = async (req, res) => {
         },
       }
     );
+
     if (updatedOrder) {
-      const { _id, mobileNo, didNo, companyId, agentName, agentId, ...rest } =
-        updatedOrder;
-      await orderInquiryFlowService.createNewData({
-        orderId: updatedOrder._id,
-        mobileNo: updatedOrder.mobileNo,
-        didNo: updatedOrder.didNo,
-        companyId: updatedOrder.companyId,
-        agentName: updatedOrder.agentName,
-        agentId: updatedOrder.agentId,
-        ...rest,
-      });
+      await addToOrderFlow(updatedOrder);
     }
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
@@ -4380,17 +4152,7 @@ exports.dealerOrderDispatch = async (req, res) => {
     );
 
     if (updatedOrder) {
-      const { _id, mobileNo, didNo, companyId, agentName, agentId, ...rest } =
-        updatedOrder;
-      await orderInquiryFlowService.createNewData({
-        orderId: updatedOrder._id,
-        mobileNo: updatedOrder.mobileNo,
-        didNo: updatedOrder.didNo,
-        companyId: updatedOrder.companyId,
-        agentName: updatedOrder.agentName,
-        agentId: updatedOrder.agentId,
-        ...rest,
-      });
+      await addToOrderFlow(updatedOrder);
     }
     if (updatedOrder) {
       return res.status(httpStatus.OK).send({
@@ -4456,18 +4218,7 @@ exports.dealerInwardInventory = async (req, res) => {
           }
         );
       });
-      await barcodeFlowService.createNewData({
-        productGroupId: dataUpdated.productGroupId,
-        barcodeNumber: dataUpdated.barcodeNumber,
-        cartonBoxId: dataUpdated.cartonBoxId,
-        barcodeGroupNumber: dataUpdated.barcodeGroupNumber,
-        outerBoxbarCodeNumber: dataUpdated.outerBoxCode,
-        lotNumber: dataUpdated.lotNumber,
-        isUsed: dataUpdated.isUsed,
-        wareHouseId: dataUpdated.wareHouseId,
-        status: dataUpdated.status,
-        companyId: dataUpdated.companyId,
-      });
+      await addToBarcodeFlow(dataUpdated);
       return dataUpdated;
     });
 

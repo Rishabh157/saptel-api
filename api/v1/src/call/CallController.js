@@ -16,6 +16,8 @@ const areaService = require("../area/AreaService");
 const dispositionTwoService = require("../dispositionTwo/DispositionTwoService");
 const dispositionThreeService = require("../dispositionThree/DispositionThreeService");
 const userService = require("../user/UserService");
+const subcategoryService = require("../productSubCategory/ProductSubCategoryService");
+const companyService = require("../company/CompanyService");
 
 const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 
@@ -57,6 +59,9 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: axios } = require("axios");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -332,8 +337,15 @@ exports.update = async (req, res) => {
     if (!isStateExists) {
       throw new ApiError(httpStatus.OK, "Invalid State.");
     }
+    const iscompanyExists = await companyService.getOneByMultiField({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!iscompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid company.");
+    }
 
-    const isSchemeExists = await schemeService.findCount({
+    const isSchemeExists = await schemeService.getOneByMultiField({
       _id: schemeId,
       isDeleted: false,
     });
@@ -341,6 +353,13 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
     }
 
+    let subCatData = await subcategoryService?.getOneByMultiField({
+      isDeleted: false,
+      _id: isSchemeExists.subCategory,
+    });
+    if (!subCatData) {
+      throw new ApiError(httpStatus.OK, "Invalid Subcategory");
+    }
     const isDistrictExists = await districtService.findCount({
       _id: districtId,
       isDeleted: false,
@@ -476,24 +495,12 @@ exports.update = async (req, res) => {
         dispositionLevelTwoLabel,
         dispositionLevelThreeLabel,
         productGroupLabel,
+        hsnCode: subCatData?.hsnCode,
+        companyAddress: iscompanyExists?.address,
         // dealerAssignedId: dealerId,
       });
 
-      const orderInquiryFlow = await orderInquiryFlowService.createNewData({
-        ...req.body,
-        status: inquiryNumber ? orderStatusEnum.inquiry : status,
-        orderId: orderInquiry?._id,
-        assignDealerId: null,
-        assignWarehouseId: null,
-        approved: flag ? true : prepaidOrderFlag ? false : true,
-        agentId: agentId,
-        agentName: agentName,
-        recordingStartTime: recordingStartTime,
-        recordingEndTime: recordingEndTime,
-        callCenterId: isUserExists?.callCenterId,
-        branchId: isUserExists?.branchId,
-        // dealerAssignedId: dealerId,
-      });
+      await addToOrderFlow(orderInquiry);
 
       const dataUpdated = await callService.getOneAndUpdate(
         {

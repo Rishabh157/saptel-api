@@ -55,7 +55,11 @@ exports.add = async (req, res) => {
     }
 
     // -----------------------check duplicate exist --------------------
-    let dataExist = await initialCallTwoService.isExists([{ initialCallName }]);
+    let dataExist = await initialCallTwoService.isExists(
+      [{ initialCallName }, { initialCallOneId }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -95,8 +99,9 @@ exports.update = async (req, res) => {
     let idToBeSearch = req.params.id;
 
     let dataExist = await initialCallTwoService.isExists(
-      [{ initialCallName }],
-      idToBeSearch
+      [{ initialCallName }, { initialCallOneId }],
+      idToBeSearch,
+      true
     );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);

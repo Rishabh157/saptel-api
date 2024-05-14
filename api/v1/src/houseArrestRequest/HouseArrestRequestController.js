@@ -36,6 +36,9 @@ const {
 } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
 const { getBalance, getDealerFromLedger } = require("../ledger/LedgerHelper");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -157,7 +160,7 @@ exports.add = async (req, res) => {
     }
 
     // updating order with mbk number
-    await orderInquiryService?.getOneAndUpdate(
+    let updatedOrder = await orderInquiryService?.getOneAndUpdate(
       { orderNumber: parseInt(orderNumber), isActive: true, isDeleted: false },
       {
         $set: {
@@ -165,6 +168,7 @@ exports.add = async (req, res) => {
         },
       }
     );
+    await addToOrderFlow(updatedOrder);
 
     //------------------create data-------------------
     let dataCreated = await houseArrestRequestService.createNewData({

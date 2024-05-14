@@ -78,6 +78,10 @@ const {
 } = require("../../third-party-services/courierAPIFunction");
 const { getOrderNumber, getInquiryNumber } = require("../call/CallHelper");
 const fs = require("fs");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
+const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 
 exports.add = async (req, res) => {
   try {
@@ -94,12 +98,7 @@ exports.add = async (req, res) => {
         inquiryNumber: inquiryNumber,
       });
       console.log(orderInquiry, "orderInquiry");
-
-      const orderInquiryFlow = await orderInquiryFlowService.createNewData({
-        ...rest,
-
-        orderId: orderInquiry?._id,
-      });
+      await addToOrderFlow(orderInquiry);
 
       const dataUpdated = await callService.getOneAndUpdate(
         {
@@ -631,16 +630,8 @@ exports.updateCourierNdr = async (req, res) => {
     );
 
     if (dataUpdated) {
-      await orderInquiryFlowService.createNewData({
-        ...dataUpdated,
-        orderId: idToBeSearch,
-        dispositionLevelTwoId: dispositionTwoId,
-        dispositionLevelThreeId: dispositionThreeId,
-        alternateNo: alternateNumber,
-        ndrRemark,
-        status: orderStatusEnum.reattempt,
-        deliveryTimeAndDate: reAttemptDate,
-      });
+      await addToOrderFlow(orderInquiry);
+
       // await axios.post(
       //   "https://uat.onetelemart.com/agent/v2/click-2-hangup",
       //   {
@@ -835,10 +826,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
           },
         }
       );
-      await orderInquiryFlowService.createNewData({
-        ...orderUpdateCourier,
-        orderId: idToBeSearch,
-      });
+      await addToOrderFlow(orderUpdateCourier);
     } else {
       let orderUpdateGPO = await orderService.getOneAndUpdate(
         {
@@ -852,10 +840,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
           },
         }
       );
-      await orderInquiryFlowService.createNewData({
-        ...orderUpdateGPO,
-        orderId: idToBeSearch,
-      });
+      await addToOrderFlow(orderUpdateGPO);
     }
 
     if (dataUpdated) {
@@ -980,10 +965,7 @@ exports.firstCallConfirmation = async (req, res) => {
             },
           }
         );
-        await orderInquiryFlowService.createNewData({
-          ...orderUpdateCourier,
-          orderId: idToBeSearch,
-        });
+        await addToOrderFlow(orderUpdateCourier);
       } else {
         let orderUpdateGPO = await orderService.getOneAndUpdate(
           {
@@ -997,10 +979,7 @@ exports.firstCallConfirmation = async (req, res) => {
             },
           }
         );
-        await orderInquiryFlowService.createNewData({
-          ...orderUpdateGPO,
-          orderId: idToBeSearch,
-        });
+        await addToOrderFlow(orderUpdateGPO);
       }
       // geting deleverable courier partner
       return res.status(httpStatus.OK).send({
@@ -1119,10 +1098,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
           },
         }
       );
-      await orderInquiryFlowService.createNewData({
-        ...orderUpdateCourier,
-        orderId: idToBeSearch,
-      });
+      await addToOrderFlow(orderUpdateCourier);
     } else {
       let orderUpdateGPO = await orderService.getOneAndUpdate(
         {
@@ -1136,10 +1112,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
           },
         }
       );
-      await orderInquiryFlowService.createNewData({
-        ...orderUpdateGPO,
-        orderId: idToBeSearch,
-      });
+      await addToOrderFlow(orderUpdateGPO);
     }
 
     if (dataUpdated) {
@@ -1243,13 +1216,8 @@ exports.updateOrderStatus = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        await orderInquiryFlowService.createNewData({
-          ...ress,
-          orderId: orderId,
-          status,
-          dispositionLevelTwoId: dispositionOne,
-          dispositionLevelThreeId: dispositionTwo,
-        });
+        await addToOrderFlow(ress);
+
         return res.status(httpStatus.OK).send({
           message: "Updated successfully.",
           data: null,
@@ -1313,18 +1281,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
             }
           );
 
-          await barcodeFlowService.createNewData({
-            productGroupId: updatedBarcode.productGroupId,
-            barcodeNumber: updatedBarcode.barcodeNumber,
-            cartonBoxId: updatedBarcode.cartonBoxId,
-            barcodeGroupNumber: updatedBarcode.barcodeGroupNumber,
-            outerBoxbarCodeNumber: updatedBarcode.outerBoxbarCodeNumber,
-            lotNumber: updatedBarcode.lotNumber,
-            isUsed: updatedBarcode.isUsed,
-            wareHouseId: updatedBarcode.wareHouseId,
-            status: barcodeStatusType.inTransit,
-            companyId: updatedBarcode.companyId,
-          });
+          await addToBarcodeFlow(updatedBarcode);
         }
       })
     );
@@ -1343,10 +1300,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
       }
     );
 
-    await orderInquiryFlowService.createNewData({
-      ...dataUpdated,
-      orderId: orderId,
-    });
+    await addToOrderFlow(dataUpdated);
 
     return res.status(httpStatus.OK).send({
       message: "Updated successfully.",
@@ -1414,12 +1368,7 @@ exports.assignOrder = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        await orderInquiryFlowService.createNewData({
-          ...ress,
-          orderId: orderId,
-          assignDealerId: dealerId,
-          assignWarehouseId: warehouseId,
-        });
+        await addToOrderFlow(ress);
         return res.status(httpStatus.OK).send({
           message: "Updated successfully.",
           data: null,
@@ -1472,11 +1421,8 @@ exports.assignOrderToDeliveryBoy = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        await orderInquiryFlowService.createNewData({
-          ...ress,
-          orderId: orderId,
-          delivery_boy_id: deliveryBoyId,
-        });
+        await addToOrderFlow(ress);
+
         return res.status(httpStatus.OK).send({
           message: "Updated successfully.",
           data: null,
@@ -2547,6 +2493,42 @@ exports.getByOrderNumber = async (req, res) => {
           mobileNo: 1,
           autoFillingShippingAddress: 1,
           orderNumber: 1,
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist[0]) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+// get by order number for invoice
+exports.getByOrderNumberForInvoice = async (req, res) => {
+  try {
+    let ordernumber = req.params.ordernumber;
+    let additionalQuery = [
+      {
+        $match: {
+          orderNumber: parseInt(ordernumber),
+          isDeleted: false,
+          // status: orderStatusEnum.delivered,
         },
       },
     ];
@@ -4063,10 +4045,12 @@ exports.orderStatusChange = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    await orderService.getOneAndUpdate(
+    let updatedOrder = await orderService.getOneAndUpdate(
       { _id },
       { orderStatus: productStatus.complete }
     );
+    await addToOrderFlow(updatedOrder);
+
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -4115,11 +4099,8 @@ exports.dealerOrderStatusChange = async (req, res) => {
     if (!orderUpdated) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
-    await orderInquiryFlowService.createNewData({
-      ...orderUpdated,
-      orderId: _id,
-      dealerReason,
-    });
+
+    await addToOrderFlow(orderUpdated);
 
     return res.status(httpStatus.OK).send({
       message: "Updated successfully!",
@@ -4145,10 +4126,11 @@ exports.dealerApprove = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    await orderService.getOneAndUpdate(
+    let updatedOrder = await orderService.getOneAndUpdate(
       { _id },
       { approved: true, status: orderStatusEnum.fresh }
     );
+    await addToOrderFlow(updatedOrder);
 
     return res.status(httpStatus.OK).send({
       message: "Approved!",

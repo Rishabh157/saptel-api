@@ -135,6 +135,15 @@ router.get(
   orderController.getByOrderNumber
 );
 
+// get by order number
+//===============get document by id for dealer===============
+router.get(
+  "/get-by-order-number-for-invoice/:ordernumber",
+  authCheckMiddleware,
+  //   validate(orderValidation),
+  orderController.getByOrderNumberForInvoice
+);
+
 // get by order number for dealer
 //===============get document by id for dealer===============
 router.get(

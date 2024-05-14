@@ -25,6 +25,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -85,12 +86,13 @@ exports.add = async (req, res) => {
       };
     });
     req.body.productDetail.map(async (barcode) => {
-      await barCodeService.getOneAndUpdate(
+      let dataUpdated = await barCodeService.getOneAndUpdate(
         {
           barcodeNumber: barcode?.barcodeNumber,
         },
         { $set: { isUsed: true } }
       );
+      await addToBarcodeFlow(dataUpdated);
     });
     //------------------create data-------------------
 
