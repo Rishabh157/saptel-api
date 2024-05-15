@@ -49,11 +49,11 @@ const confirmOrderShipYaari = async (data) => {
     );
     console.log(response, "response");
     if (response) {
-      return response?.data;
+      return { data: response?.data, status: true };
     }
   } catch (err) {
     console.log(err, "error");
-    return false;
+    return { data: err, status: false };
   }
 };
 

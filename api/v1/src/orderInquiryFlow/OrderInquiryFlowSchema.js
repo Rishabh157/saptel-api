@@ -571,6 +571,24 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    shipyaariResponse: {
+      type: Object,
+      default: "",
+    },
+    schemeProducts: {
+      type: [
+        {
+          productGroupName: {
+            type: String,
+            trim: true,
+          },
+          productGroupId: {
+            type: ObjectId,
+            trim: true,
+          },
+        },
+      ],
+    },
     isDeleted: {
       type: Boolean,
       default: false,

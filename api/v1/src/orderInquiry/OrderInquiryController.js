@@ -810,9 +810,9 @@ exports.approveFirstCallDirectly = async (req, res) => {
       wareHouseData,
       categorydata
     );
-
+    console.log(isOrderAssignedToCourier.status, "llooppp");
     // if true the hit shipment API else GPO
-    if (isOrderAssignedToCourier) {
+    if (isOrderAssignedToCourier.status) {
       let orderUpdateCourier = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
@@ -820,9 +820,10 @@ exports.approveFirstCallDirectly = async (req, res) => {
         },
         {
           $set: {
-            orderAssignedToCourier: preferredCourier,
+            orderAssignedToCourier: preferredCourierPartner.shipyaari,
+            shipyaariResponse: isOrderAssignedToCourier.data,
             awbNumber:
-              isOrderAssignedToCourier?.data?.[0]?.awbs[0].tracking.awb,
+              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
           },
         }
       );
@@ -836,7 +837,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
         {
           $set: {
             isGPO: true,
-            isOrderAssignedToCourier: preferredCourierPartner.gpo,
+            orderAssignedToCourier: preferredCourierPartner.gpo,
           },
         }
       );
@@ -946,7 +947,7 @@ exports.firstCallConfirmation = async (req, res) => {
       );
 
       // if true the hit shipment API else GPO
-      if (isOrderAssignedToCourier) {
+      if (isOrderAssignedToCourier.status) {
         console.log(isOrderAssignedToCourier);
 
         console.log(
@@ -961,7 +962,9 @@ exports.firstCallConfirmation = async (req, res) => {
           {
             $set: {
               orderAssignedToCourier: preferredCourier,
-              awbNumber: isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
+              shipyaariResponse: isOrderAssignedToCourier.data,
+              awbNumber:
+                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
             },
           }
         );
@@ -1079,7 +1082,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
     );
 
     // if true the hit shipment API else GPO
-    if (isOrderAssignedToCourier) {
+    if (isOrderAssignedToCourier.status) {
       console.log(isOrderAssignedToCourier);
 
       console.log(
@@ -1094,7 +1097,9 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         {
           $set: {
             orderAssignedToCourier: preferredCourier,
-            awbNumber: isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
+            shipyaariResponse: isOrderAssignedToCourier.data,
+            awbNumber:
+              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
           },
         }
       );

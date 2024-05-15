@@ -120,6 +120,13 @@ router.get(
   barCodeController.getWhBarcode
 );
 
+router.get(
+  "/dispatch-warehouse-order-barcode/:wid/barcode/:barcode",
+  authCheckMiddleware,
+  validate(barCodeValidation.getDispatchBarcode),
+  barCodeController.getDispatchBarcode
+);
+
 router.post(
   "/inventory/companyid/:cid/warehouseid/:wid/status/:status",
   authCheckMiddleware,

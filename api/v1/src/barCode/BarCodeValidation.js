@@ -379,6 +379,13 @@ const getBarcode = {
   }),
 };
 
+const getDispatchBarcode = {
+  params: Joi.object().keys({
+    barcode: Joi.string(),
+    wid: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 const getBarcodeForOutward = {
   params: Joi.object().keys({
     barcode: Joi.string(),
@@ -535,4 +542,5 @@ module.exports = {
   dtdOutwardInventory,
   updateWarehouseInventoryDealer,
   courierReturn,
+  getDispatchBarcode,
 };

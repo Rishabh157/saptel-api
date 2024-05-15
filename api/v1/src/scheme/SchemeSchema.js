@@ -91,11 +91,13 @@ const SchemeSchema = new mongoose.Schema(
     productInformation: {
       type: [
         {
-          productGroup: {
+          productGroupName: {
             type: String,
             required: true,
-            trim: true,
-            lowercase: true,
+          },
+          productGroup: {
+            type: ObjectId,
+            required: true,
           },
 
           productQuantity: {

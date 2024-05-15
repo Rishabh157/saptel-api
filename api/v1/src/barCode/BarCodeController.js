@@ -1500,6 +1500,65 @@ exports.getBarcode = async (req, res) => {
   }
 };
 
+exports.getDispatchBarcode = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+    const warehouseId = req.params.wid;
+
+    let additionalQuery = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: barcodeStatusType.atWarehouse,
+        },
+      },
+    ];
+    let barcode = [];
+    const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
+    console.log(foundBarcode, "foundBarcode");
+    if (foundBarcode !== null) {
+      barcode.push(foundBarcode[0]);
+    }
+    let orderData = await orderInquiryService?.getOneByMultiField({
+      "schemeProducts.productGroupId": barcode[0]?.productGroupId,
+      orderStatus: productStatus.notDispatched,
+      assignDealerId: null,
+      assignWarehouseId: warehouseId,
+    });
+    if (!orderData) {
+      throw new ApiError(httpStatus.OK, "No orders for this product");
+    }
+    console.log(orderData, "orderData");
+    console.log(barcode, "barcode");
+
+    if (barcode.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: {
+          barcode: barcode[0],
+          products: orderData?.schemeProducts,
+          schemeQuantity: orderData?.shcemeQuantity,
+          orderNumber: orderData?.orderNumber,
+        },
+
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // get barcode of warehouse to recreate outer box
 
 exports.getWhBarcode = async (req, res) => {

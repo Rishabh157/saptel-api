@@ -352,6 +352,14 @@ exports.update = async (req, res) => {
     if (!isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
     }
+    let schemeProductsForOrder = isSchemeExists.productInformation?.map(
+      (ele) => {
+        return {
+          productGroupName: ele?.productGroupName,
+          productGroupId: ele?.productGroup,
+        };
+      }
+    );
 
     let subCatData = await subcategoryService?.getOneByMultiField({
       isDeleted: false,
@@ -497,6 +505,7 @@ exports.update = async (req, res) => {
         productGroupLabel,
         hsnCode: subCatData?.hsnCode,
         companyAddress: iscompanyExists?.address,
+        schemeProducts: schemeProductsForOrder,
         // dealerAssignedId: dealerId,
       });
 

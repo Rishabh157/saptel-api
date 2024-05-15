@@ -27,7 +27,8 @@ const create = {
     endDate: Joi.string().lowercase().required(),
     schemeDescription: Joi.string().lowercase().required(),
     productInformation: Joi.array().items({
-      productGroup: Joi.string().required(),
+      productGroupName: Joi.string().required(),
+      productGroup: Joi.string().custom(commonValidation.objectId).required(),
       productQuantity: Joi.number().required(),
       mrp: Joi.number().required(),
       pop: Joi.number().required(),
@@ -67,7 +68,8 @@ const update = {
     endDate: Joi.string().lowercase().required(),
     schemeDescription: Joi.string().lowercase().required(),
     productInformation: Joi.array().items({
-      productGroup: Joi.string().required(),
+      productGroupName: Joi.string().required(),
+      productGroup: Joi.string().custom(commonValidation.objectId).required(),
       productQuantity: Joi.number().required(),
       mrp: Joi.number().required(),
       pop: Joi.number().required(),
