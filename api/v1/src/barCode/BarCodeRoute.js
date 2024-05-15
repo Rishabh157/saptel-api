@@ -121,7 +121,7 @@ router.get(
 );
 
 router.get(
-  "/dispatch-warehouse-order-barcode/:wid/barcode/:barcode",
+  "/dispatch-warehouse-order-barcode/:wid/barcode/:barcode/status/:status",
   authCheckMiddleware,
   validate(barCodeValidation.getDispatchBarcode),
   barCodeController.getDispatchBarcode

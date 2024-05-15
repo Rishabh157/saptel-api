@@ -1504,6 +1504,7 @@ exports.getDispatchBarcode = async (req, res) => {
   try {
     const barcodeToBeSearch = req.params.barcode;
     const warehouseId = req.params.wid;
+    const status = req.params.status;
 
     let additionalQuery = [
       {
@@ -1525,6 +1526,7 @@ exports.getDispatchBarcode = async (req, res) => {
       orderStatus: productStatus.notDispatched,
       assignDealerId: null,
       assignWarehouseId: warehouseId,
+      orderAssignedToCourier: status,
     });
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "No orders for this product");
@@ -1543,6 +1545,8 @@ exports.getDispatchBarcode = async (req, res) => {
           products: orderData?.schemeProducts,
           schemeQuantity: orderData?.shcemeQuantity,
           orderNumber: orderData?.orderNumber,
+          customerName: orderData?.customerName,
+          address: orderData?.autoFillingShippingAddress,
         },
 
         code: "OK",

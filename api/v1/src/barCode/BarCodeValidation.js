@@ -382,6 +382,7 @@ const getBarcode = {
 const getDispatchBarcode = {
   params: Joi.object().keys({
     barcode: Joi.string(),
+    status: Joi.string(),
     wid: Joi.string().custom(commonValidation.objectId),
   }),
 };
