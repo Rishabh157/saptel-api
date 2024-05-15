@@ -1256,9 +1256,13 @@ exports.warehouseOrderDispatch = async (req, res) => {
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
       _id: orderId,
+      orderStatus: productStatus.notDispatched,
     });
     if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Orders not found.`);
+      throw new ApiError(
+        httpStatus.OK,
+        `Order not found or already dispatched`
+      );
     }
 
     await Promise.all(
