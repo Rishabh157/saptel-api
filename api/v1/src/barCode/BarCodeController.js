@@ -1534,7 +1534,7 @@ exports.getDispatchBarcode = async (req, res) => {
     console.log(orderData, "orderData");
     console.log(barcode, "barcode");
 
-    if (barcode.length === 0) {
+    if (barcode.length === 0 || barcode[0] === undefined) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
