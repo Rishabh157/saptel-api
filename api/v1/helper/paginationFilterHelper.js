@@ -256,6 +256,51 @@ const getDateFilterQuery = (dateFilter, allowedDateFiletrKeys) => {
   return queryArray.length ? queryArray : null;
 };
 
+const getDateFilterQueryForTask = (dateFilter, allowedDateFiletrKeys) => {
+  let queryArray = [];
+
+  if (
+    dateFilter !== undefined &&
+    dateFilter !== null &&
+    Object.keys(dateFilter).length
+  ) {
+    if (dateFilter.dateFilterKey && dateFilter.dateFilterKey !== "") {
+      if (!allowedDateFiletrKeys.includes(dateFilter.dateFilterKey)) {
+        throw new ApiError(
+          httpStatus.NOT_IMPLEMENTED,
+          `Date filter key is invalid.`
+        );
+      }
+    } else {
+      dateFilter["dateFilterKey"] = "createdAt";
+    }
+
+    if (
+      dateFilter.startDate !== undefined &&
+      dateFilter.startDate !== "" &&
+      (dateFilter.endDate === undefined || dateFilter.endDate === "")
+    ) {
+      dateFilter.endDate = dateFilter.startDate;
+    } else if (
+      dateFilter.endDate !== undefined &&
+      dateFilter.endDate !== "" &&
+      (dateFilter.startDate === undefined || dateFilter.startDate === "")
+    ) {
+      dateFilter.startDate = dateFilter.endDate;
+    }
+    if (dateFilter.startDate !== "" && dateFilter.endDate !== "") {
+      queryArray.push({
+        [dateFilter.dateFilterKey]: {
+          $gte: new Date(dateFilter.startDate),
+          $lte: new Date(dateFilter.endDate),
+        },
+      });
+    }
+  }
+
+  return queryArray.length ? queryArray : null;
+};
+
 const getLimitAndTotalCount = (
   limit,
   page,
@@ -327,4 +372,5 @@ module.exports = {
   getDateFilterQuery,
   getLimitAndTotalCount,
   getOrderByAndItsValue,
+  getDateFilterQueryForTask,
 };

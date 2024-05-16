@@ -31,6 +31,30 @@ router.post(
   orderController.getAllOrderStatusCount
 );
 
+//warehouse dipatch order status count GPO
+router.post(
+  "/get-gpo-order-status/:wid",
+  authCheckMiddleware,
+  validate(orderValidation.getOrderDashboardCount),
+  orderController.getGPOOrderStatusCount
+);
+
+//warehouse dipatch order status count shipyaari
+router.post(
+  "/get-shipyaari-order-status/:wid",
+  authCheckMiddleware,
+  validate(orderValidation.getOrderDashboardCount),
+  orderController.getShipyaariOrderStatusCount
+);
+
+//warehouse dipatch order status count e-comm
+router.post(
+  "/get-ecom-order-status/:wid",
+  authCheckMiddleware,
+  validate(orderValidation.getOrderDashboardCount),
+  orderController.getEcomOrderStatusCount
+);
+
 // dealer app deliver order
 
 router.put(

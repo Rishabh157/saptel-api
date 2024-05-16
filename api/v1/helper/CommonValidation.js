@@ -127,6 +127,12 @@ const dateFormat = (value, helpers) => {
   }
   return value;
 };
+const dateFormatWithTime = (value, helpers) => {
+  if (!value.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
+    return helpers.message("Date format must be YYYY-MM-DD HH:mm:ss.");
+  }
+  return value;
+};
 
 const changeDateFormat = (value, helpers) => {
   return moment(value).utcOffset("+05:30").format("YYYY-MM-DD");
@@ -276,4 +282,5 @@ module.exports = {
   dateTimeAfterCurrentTime,
   HHMMSS_Format_check,
   minValue,
+  dateFormatWithTime,
 };

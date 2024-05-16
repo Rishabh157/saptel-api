@@ -176,8 +176,12 @@ const getAllFilter = {
     searchValue: Joi.string().allow(""),
     dateFilter: Joi.object()
       .keys({
-        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
-        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        startDate: Joi.string()
+          // .custom(commonValidation.dateFormatWithTime)
+          .allow(""),
+        endDate: Joi.string()
+          // .custom(commonValidation.dateFormatWithTime)
+          .allow(""),
         dateFilterKey: Joi.string().allow(""),
       })
       .default({}),
@@ -314,7 +318,7 @@ const warehouseOrderDispatch = {
     barcodes: Joi.array()
       .items(Joi.string().custom(commonValidation.objectId).required())
       .required(),
-    orderId: Joi.string().custom(commonValidation.objectId).required(),
+    orderNumber: Joi.number().required(),
   }),
 };
 

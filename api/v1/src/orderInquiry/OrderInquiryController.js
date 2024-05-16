@@ -52,6 +52,7 @@ const {
   getDateFilterQuery,
   getLimitAndTotalCount,
   getOrderByAndItsValue,
+  getDateFilterQueryForTask,
 } = require("../../helper/paginationFilterHelper");
 const {
   moduleType,
@@ -66,6 +67,7 @@ const {
   subDispositionNDR,
   paymentModeType,
   barcodeStatusType,
+  orderTypeEnum,
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
@@ -1246,7 +1248,7 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.warehouseOrderDispatch = async (req, res) => {
   try {
-    let { orderId, barcodes } = req.body;
+    let { orderNumber, barcodes } = req.body;
     console.log(barcodes, "barcodes");
     let dataExist = await orderService.isExists([]);
     if (dataExist.exists && dataExist.existsSummary) {
@@ -1255,7 +1257,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
 
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
-      _id: orderId,
+      orderNumber: orderNumber,
       orderStatus: productStatus.notDispatched,
     });
     if (!datafound) {
@@ -1297,7 +1299,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
-        _id: orderId,
+        orderNumber: orderNumber,
         isDeleted: false,
       },
       {
@@ -2306,6 +2308,356 @@ exports.getAllOrderStatusCount = async (req, res) => {
   }
 };
 
+// get GPO order status count
+
+exports.getGPOOrderStatusCount = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    var warehouseId = req.params.wid;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    console.log("here");
+
+    let additionalQuery = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignWarehouseId: new mongoose.Types.ObjectId(warehouseId),
+          orderAssignedToCourier: preferredCourierPartner.gpo,
+        },
+      },
+      {
+        $project: {
+          shcemeQuantity: 1,
+          schemeProducts: 1,
+          orderStatus: 1,
+        },
+      },
+      {
+        $addFields: {
+          "schemeProducts.productQantity": "$shcemeQuantity",
+        },
+      },
+      {
+        $unwind: "$schemeProducts",
+      },
+      {
+        $group: {
+          _id: {
+            orderStatus: "$orderStatus",
+            productGroupName: "$schemeProducts.productGroupName",
+          },
+          totalQuantity: { $sum: "$schemeProducts.productQantity" },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.orderStatus",
+          products: {
+            $push: {
+              productGroupName: "$_id.productGroupName",
+              quantity: "$totalQuantity",
+            },
+          },
+          count: { $sum: "$totalQuantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          products: {
+            $map: {
+              input: "$products",
+              as: "product",
+              in: {
+                productGroupName: "$$product.productGroupName",
+                quantity: "$$product.quantity",
+              },
+            },
+          },
+          count: 1,
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    let additionalQueryNew = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignWarehouseId: new mongoose.Types.ObjectId(warehouseId),
+          orderAssignedToCourier: preferredCourierPartner.gpo,
+        },
+      },
+      {
+        $group: {
+          _id: "$orderStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ];
+    let OrderCount = await orderService.aggregateQuery(additionalQueryNew);
+
+    console.log(dataExist, "dataExist");
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: { products: dataExist, orders: OrderCount },
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get GPO order status count
+
+exports.getShipyaariOrderStatusCount = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    var warehouseId = req.params.wid;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    console.log("here");
+
+    let additionalQuery = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignWarehouseId: new mongoose.Types.ObjectId(warehouseId),
+          orderAssignedToCourier: preferredCourierPartner.shipyaari,
+        },
+      },
+      {
+        $project: {
+          shcemeQuantity: 1,
+          schemeProducts: 1,
+          orderStatus: 1,
+        },
+      },
+      {
+        $addFields: {
+          "schemeProducts.productQantity": "$shcemeQuantity",
+        },
+      },
+      {
+        $unwind: "$schemeProducts",
+      },
+      {
+        $group: {
+          _id: {
+            orderStatus: "$orderStatus",
+            productGroupName: "$schemeProducts.productGroupName",
+          },
+          totalQuantity: { $sum: "$schemeProducts.productQantity" },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.orderStatus",
+          products: {
+            $push: {
+              productGroupName: "$_id.productGroupName",
+              quantity: "$totalQuantity",
+            },
+          },
+          count: { $sum: "$totalQuantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          products: {
+            $map: {
+              input: "$products",
+              as: "product",
+              in: {
+                productGroupName: "$$product.productGroupName",
+                quantity: "$$product.quantity",
+              },
+            },
+          },
+          count: 1,
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    let additionalQueryNew = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignWarehouseId: new mongoose.Types.ObjectId(warehouseId),
+          orderAssignedToCourier: preferredCourierPartner.shipyaari,
+        },
+      },
+      {
+        $group: {
+          _id: "$orderStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ];
+    let OrderCount = await orderService.aggregateQuery(additionalQueryNew);
+
+    console.log(dataExist, "dataExist");
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: { products: dataExist, orders: OrderCount },
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get GPO order status count
+
+exports.getEcomOrderStatusCount = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    var warehouseId = req.params.wid;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+
+    let additionalQuery = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignWarehouseId: new mongoose.Types.ObjectId(warehouseId),
+          orderType: { $in: [orderTypeEnum.website, orderTypeEnum.amazone] },
+        },
+      },
+      {
+        $project: {
+          shcemeQuantity: 1,
+          schemeProducts: 1,
+          orderStatus: 1,
+        },
+      },
+      {
+        $addFields: {
+          "schemeProducts.productQantity": "$shcemeQuantity",
+        },
+      },
+      {
+        $unwind: "$schemeProducts",
+      },
+      {
+        $group: {
+          _id: {
+            orderStatus: "$orderStatus",
+            productGroupName: "$schemeProducts.productGroupName",
+          },
+          totalQuantity: { $sum: "$schemeProducts.productQantity" },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.orderStatus",
+          products: {
+            $push: {
+              productGroupName: "$_id.productGroupName",
+              quantity: "$totalQuantity",
+            },
+          },
+          count: { $sum: "$totalQuantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          products: {
+            $map: {
+              input: "$products",
+              as: "product",
+              in: {
+                productGroupName: "$$product.productGroupName",
+                quantity: "$$product.quantity",
+              },
+            },
+          },
+          count: 1,
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    let additionalQueryNew = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          assignWarehouseId: new mongoose.Types.ObjectId(warehouseId),
+          orderType: { $in: [orderTypeEnum.website, orderTypeEnum.amazone] },
+        },
+      },
+      {
+        $group: {
+          _id: "$orderStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ];
+    let OrderCount = await orderService.aggregateQuery(additionalQueryNew);
+
+    console.log(dataExist, "dataExist");
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: { products: dataExist, orders: OrderCount },
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============get DispositionTwo by Id start================
 exports.getById = async (req, res) => {
   try {
@@ -2767,10 +3119,15 @@ exports.allFilterPagination = async (req, res) => {
 
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
-    const datefilterQuery = await getDateFilterQuery(
+    // const datefilterQuery = await getDateFilterQuery(
+    //   dateFilter,
+    //   allowedDateFiletrKeys
+    // );
+    const datefilterQuery = await getDateFilterQueryForTask(
       dateFilter,
       allowedDateFiletrKeys
     );
+    console.log(datefilterQuery, "datefilterQuery");
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
