@@ -960,6 +960,7 @@ exports.allFilterPagination = async (req, res) => {
       "areaId",
       "dispositionLevelTwoId",
       "dispositionLevelThreeId",
+      "companyId",
     ];
     const filterQuery = getFilterQuery(
       filterBy,

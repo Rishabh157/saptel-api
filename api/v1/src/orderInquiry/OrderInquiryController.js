@@ -2054,6 +2054,7 @@ exports.getAllOrderStatusCount = async (req, res) => {
       {
         $match: {
           ...datefilterQuery[0],
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
         },
       },
       {
@@ -2708,7 +2709,9 @@ exports.getByMobileNumber = async (req, res) => {
     let { barcode, contactNumber, complaintNumber, email, orderNumber } =
       req.body;
 
-    let matchQuery = {};
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+    };
 
     if (contactNumber) {
       matchQuery.$or = [

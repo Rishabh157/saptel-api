@@ -294,6 +294,7 @@ exports.allFilterPagination = async (req, res) => {
       "tehsilId",
       "pincodeId",
       "areaId",
+      "companyId",
     ];
     const filterQuery = getFilterQuery(
       filterBy,

@@ -334,7 +334,14 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = ["complaintNumber", "orderNumber"];
-    let objectIdFields = ["orderId", "schemeId", "icOne", "icTwo", "icThree"];
+    let objectIdFields = [
+      "orderId",
+      "schemeId",
+      "icOne",
+      "icTwo",
+      "icThree",
+      "companyId",
+    ];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -640,7 +647,11 @@ exports.getByNumber = async (req, res) => {
   try {
     //if no default query then pass {}
     const { number } = req.params;
-    let matchQuery = { isDeleted: false, customerNumber: number };
+    let matchQuery = {
+      isDeleted: false,
+      customerNumber: number,
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

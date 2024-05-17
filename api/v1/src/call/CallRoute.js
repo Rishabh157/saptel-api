@@ -2,6 +2,7 @@ const router = require("express").Router();
 const callController = require("./CallController");
 const validate = require("../../middleware/validate");
 const callValidation = require("./CallValidation");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -20,6 +21,14 @@ router.post(
 
 router.post(
   "/unauth-call",
+  validate(callValidation.getAllFilter),
+  callController.allFilterPaginationUnauth
+);
+
+// auth
+router.post(
+  "/",
+  authCheckMiddleware,
   validate(callValidation.getAllFilter),
   callController.allFilterPaginationUnauth
 );
