@@ -743,7 +743,10 @@ exports.checkBarcode = async (req, res) => {
             longitude,
           },
           $push: {
-            barcodeId: dataExist[0]?._id,
+            barcodeData: {
+              barcodeId: dataExist[0]?._id,
+              barcode: dataExist[0]?.barcodeNumber,
+            },
           },
         }
       );
@@ -835,7 +838,10 @@ exports.checkBarcodeDealerApp = async (req, res) => {
             status,
           },
           $push: {
-            barcodeId: dataExist[0]?._id,
+            barcodeData: {
+              barcodeId: dataExist[0]?._id,
+              barcode: dataExist[0]?.barcodeNumber,
+            },
           },
         }
       );
@@ -4002,7 +4008,7 @@ exports.orderDispatch = async (req, res) => {
     let { barcodedata, orderId } = req.body;
 
     let barcodeaIds = barcodedata?.map((ele) => {
-      return ele?._id;
+      return { barcodeId: ele?._id, barcode: ele?.barcodeNumber };
     });
     const groupedData = barcodedata.reduce((result, item) => {
       const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
@@ -4076,7 +4082,7 @@ exports.orderDispatch = async (req, res) => {
         $set: {
           orderStatus: productStatus.complete,
 
-          barcodeId: barcodeaIds,
+          barcodeData: barcodeaIds,
         },
       }
     );

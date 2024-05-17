@@ -20,9 +20,20 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
-    barcodeId: {
-      type: [ObjectId],
-      default: [],
+
+    barcodeData: {
+      type: [
+        {
+          barcodeId: {
+            type: ObjectId,
+            trim: true,
+          },
+          barcode: {
+            type: String,
+            trim: true,
+          },
+        },
+      ],
     },
     orderStatus: {
       type: String,

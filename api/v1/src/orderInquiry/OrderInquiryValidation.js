@@ -316,7 +316,10 @@ const updateStatus = {
 const warehouseOrderDispatch = {
   body: Joi.object().keys({
     barcodes: Joi.array()
-      .items(Joi.string().custom(commonValidation.objectId).required())
+      .items({
+        barcodeId: Joi.string().custom(commonValidation.objectId).required(),
+        barcode: Joi.string().required(),
+      })
       .required(),
     orderNumber: Joi.number().required(),
   }),

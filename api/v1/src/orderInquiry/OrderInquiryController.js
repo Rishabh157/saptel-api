@@ -1270,7 +1270,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
     await Promise.all(
       barcodes?.map(async (ele) => {
         let foundBarcode = await barcodeService.getOneByMultiField({
-          _id: ele,
+          _id: ele?.barcodeId,
           isDeleted: false,
           isUsed: true,
           status: barcodeStatusType.atWarehouse,
@@ -1282,7 +1282,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
 
           const updatedBarcode = await barcodeService.getOneAndUpdate(
             {
-              _id: new mongoose.Types.ObjectId(ele),
+              _id: new mongoose.Types.ObjectId(ele?.barcodeId),
               isUsed: true,
             },
             {
@@ -1304,7 +1304,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
       },
       {
         $set: {
-          barcodeId: barcodes,
+          barcodeData: barcodes,
           status: orderStatusEnum.intransit,
           orderStatus: productStatus.dispatched,
         },
@@ -2729,9 +2729,11 @@ exports.getByMobileNumber = async (req, res) => {
         barcodeNumber: barcode,
       });
       if (barcodeData) {
-        matchQuery.barcodeId = {
-          $in: [new mongoose.Types.ObjectId(barcodeData?._id)],
-        };
+        matchQuery.$and.push({
+          "barcodeData.barcodeId": {
+            $in: [new mongoose.Types.ObjectId(barcodeData?._id)],
+          },
+        });
       }
     }
     if (complaintNumber) {
@@ -2964,7 +2966,7 @@ exports.allFilterPagination = async (req, res) => {
       console.log(barcodeData, "barcodeData", barcodeData?._id);
       if (barcodeData) {
         matchQuery.$and.push({
-          barcodeId: barcodeData?._id,
+          "barcodeData.barcodeId": barcodeData?._id,
         });
       }
     }

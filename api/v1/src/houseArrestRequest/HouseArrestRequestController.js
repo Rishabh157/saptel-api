@@ -901,19 +901,9 @@ exports.ccInfoUpdate = async (req, res) => {
       if (!orderData) {
         throw new ApiError(httpStatus.OK, "Invalid order number");
       }
-      var barcodeLabels = await Promise.all(
-        orderData?.barcodeId.map(async (ele) => {
-          let barcodeData = await barcodeService?.getOneByMultiField({
-            _id: ele,
-            isDeleted: false,
-            isActive: true,
-            isUsed: true,
-          });
-          if (barcodeData) {
-            return barcodeData?.barcodeNumber;
-          }
-        })
-      );
+      var barcodeLabels = orderData?.barcodeData.map(async (ele) => {
+        return ele?.barcode;
+      });
     }
 
     let updatedData = await houseArrestRequestService.getOneAndUpdate(
@@ -1180,9 +1170,9 @@ exports.dealerApproval = async (req, res) => {
         throw new ApiError(httpStatus.OK, "Invalid order number");
       }
       var barcodeLabels = await Promise.all(
-        orderData?.barcodeId.map(async (ele) => {
+        orderData?.barcodeData.map(async (ele) => {
           let barcodeData = await barcodeService?.getOneByMultiField({
-            _id: ele,
+            _id: ele?.barcodeId,
             isDeleted: false,
             isActive: true,
             isUsed: true,
