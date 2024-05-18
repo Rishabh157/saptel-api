@@ -298,6 +298,7 @@ exports.update = async (req, res) => {
                 orderStatusEnum.delivered,
                 orderStatusEnum.doorCancelled,
                 orderStatusEnum.rto,
+                orderStatusEnum.cancel,
               ],
             },
           },

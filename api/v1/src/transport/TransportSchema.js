@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const TransportSchema = new mongoose.Schema(
   {
@@ -7,6 +8,7 @@ const TransportSchema = new mongoose.Schema(
       trim: true,
     },
     gst: { type: String, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,

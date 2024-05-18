@@ -29,7 +29,10 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await transportService.createNewData({ ...req.body });
+    let dataCreated = await transportService.createNewData({
+      ...req.body,
+      companyId: req.userData.companyId,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -81,6 +84,7 @@ exports.update = async (req, res) => {
       {
         $set: {
           ...req.body,
+          companyId: req.userData.companyId,
         },
       }
     );
@@ -168,7 +172,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = [];
+    let objectIdFields = ["companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,

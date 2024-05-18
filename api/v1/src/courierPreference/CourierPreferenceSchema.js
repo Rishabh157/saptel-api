@@ -1,8 +1,11 @@
+const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const CourierPreferenceSchema = new mongoose.Schema(
   {
     courierName: { type: String, required: true, trim: true, uppercase: true },
     priority: { type: Number, required: true },
+    companyId: { type: ObjectId, required: true, trim: true },
+
     isDeleted: {
       type: Boolean,
       default: false,

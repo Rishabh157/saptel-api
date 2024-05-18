@@ -22,6 +22,7 @@ const productStatus = Object.freeze({
   notDispatched: "NOT_DISPATCHED",
   dispatched: "DISPATCHED",
   complete: "COMPLETE",
+  cancelled: "CANCELLED",
   none: "",
 });
 
@@ -203,6 +204,7 @@ const orderStatusEnum = Object.freeze({
   intransit: "INTRANSIT",
   ndr: "NDR",
   closed: "CLOSED",
+  cancel: "CANCEL",
 });
 
 const dealerReasonEnum = Object.freeze({
@@ -245,6 +247,13 @@ const customerReputationColor = Object.freeze({
   red: "RED",
   orange: "ORANGE",
   green: "GREEN",
+});
+
+const orderCancelReason = Object.freeze({
+  wrongScheme: "WRONG_SCHEME",
+  wrongPaymentMode: "WRONG_PAYMENT_MODE",
+  stockUnavailability: "STOCK_UNAVAILABILITY",
+  other: "OTHER",
 });
 
 const validDealerRemark = Object.freeze({
@@ -587,4 +596,5 @@ module.exports = {
   preferredCourierPartner,
   dealerReasonEnum,
   dealerMissingDamageType,
+  orderCancelReason,
 };

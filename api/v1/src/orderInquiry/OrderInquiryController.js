@@ -16,6 +16,7 @@ const deliveryBoyService = require("../deliveryBoy/DeliveryBoyService");
 const tehsilService = require("../tehsil/TehsilService");
 const warehouseService = require("../wareHouse/WareHouseService");
 const CourierPartnerToken = require("../courierPartnerToken/CourierPartnerTokenService");
+const orderCancelRequestService = require("../orderCancelRequest/OrderCancelRequestService");
 
 const pincodeService = require("../pincode/PincodeService");
 const productCategoryService = require("../productCategory/ProductCategoryService");
@@ -1898,6 +1899,7 @@ exports.getActiveOrder = async (req, res) => {
           orderStatusEnum.delivered,
           orderStatusEnum.inquiry,
           orderStatusEnum.rto,
+          orderStatusEnum.cancel,
         ],
       },
     };
@@ -2001,6 +2003,7 @@ exports.getWarehouseNDROrder = async (req, res) => {
           orderStatusEnum.delivered,
           orderStatusEnum.doorCancelled,
           orderStatusEnum.rto,
+          orderStatusEnum.cancel,
         ],
       },
     };
@@ -2885,6 +2888,7 @@ exports.getByOrderNumber = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 // get by order number for invoice
 exports.getByOrderNumberForInvoice = async (req, res) => {
   try {

@@ -2,8 +2,11 @@ const config = require("../../../../config/config");
 const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
-const courierPreferenceService = require("./CourierPreferenceService");
-const { searchKeys } = require("./CourierPreferenceSchema");
+const orderCancelRequestService = require("./OrderCancelRequestService");
+const orderService = require("../orderInquiry/OrderInquiryService");
+const barcodeService = require("../barCode/BarCodeService");
+
+const { searchKeys } = require("./OrderCancelRequestSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
 
@@ -16,27 +19,49 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const {
+  orderStatusEnum,
+  barcodeStatusType,
+  productStatus,
+} = require("../../helper/enumUtils");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
+const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { courierName, priority } = req.body;
+    let { orderNumber } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await courierPreferenceService.isExists([{ courierName }]);
+
+    let orderExist = await orderService.getOneByMultiField({
+      orderNumber: parseInt(orderNumber),
+      isDeleted: false,
+      status: {
+        $nin: [
+          orderStatusEnum.delivered,
+          orderStatusEnum.doorCancelled,
+          orderStatusEnum.cancel,
+          orderStatusEnum.rto,
+        ],
+      },
+    });
+
+    if (!orderExist) {
+      throw new ApiError(httpStatus.OK, "Invalid order number");
+    }
+    let dataExist = await orderCancelRequestService.isExists([{ orderNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-
-    let priorityExist = await courierPreferenceService.isExists([{ priority }]);
-    if (priorityExist.exists && priorityExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, priorityExist.existsSummary);
-    }
     //------------------create data-------------------
-    let dataCreated = await courierPreferenceService.createNewData({
+    let dataCreated = await orderCancelRequestService.createNewData({
       ...req.body,
       companyId: req.userData.companyId,
+      requestCreatedBy: req.userData.Id,
     });
 
     if (dataCreated) {
@@ -63,30 +88,63 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { data } = req.body;
+    let {
+      orderNumber,
+      cancelReason,
+      remark,
+      requestCreatedBy,
+      cancelDate,
+      companyId,
+    } = req.body;
 
-    const prioritySet = new Set();
-
-    for (const item of data) {
-      if (prioritySet.has(item.priority)) {
-        throw new ApiError(
-          httpStatus.NOT_IMPLEMENTED,
-          `Duplicate priority values found. `
-        );
-      }
-      prioritySet.add(item.priority);
-    }
-    let allData = await courierPreferenceService.findAll({});
-    let allId = allData?.map((ele) => {
-      return ele?._id;
+    let orderExist = await orderService.getOneByMultiField({
+      orderNumber: parseInt(orderNumber),
+      isDeleted: false,
+      status: {
+        $nin: [
+          orderStatusEnum.delivered,
+          orderStatusEnum.doorCancelled,
+          orderStatusEnum.cancel,
+          orderStatusEnum.rto,
+        ],
+      },
     });
-    await courierPreferenceService.deleteMany(allId);
-    let created = await courierPreferenceService?.createMany(data);
 
-    if (created) {
+    if (!orderExist) {
+      throw new ApiError(httpStatus.OK, "Invalid order number");
+    }
+    let idToBeSearch = req.params.id;
+    let dataExist = await orderCancelRequestService.isExists(
+      [{ orderNumber }],
+      idToBeSearch
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+    //------------------Find data-------------------
+    let datafound = await orderCancelRequestService.getOneByMultiField({
+      _id: idToBeSearch,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `OrderCancelRequest not found.`);
+    }
+
+    let dataUpdated = await orderCancelRequestService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
+      }
+    );
+
+    if (dataUpdated) {
       return res.status(httpStatus.CREATED).send({
         message: "Updated successfully.",
-        data: created,
+        data: dataUpdated,
         status: true,
         code: null,
         issue: null,
@@ -94,6 +152,98 @@ exports.update = async (req, res) => {
     } else {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// cancel order
+
+exports.cancelOrder = async (req, res) => {
+  try {
+    let ordernumber = req.params.ordernumber;
+    let cancelRequestId = req.params.cancelRequestId;
+
+    let additionalQuery = [
+      {
+        $match: {
+          orderNumber: parseInt(ordernumber),
+          isDeleted: false,
+          status: {
+            $nin: [
+              orderStatusEnum.delivered,
+              orderStatusEnum.doorCancelled,
+              orderStatusEnum.cancel,
+              orderStatusEnum.rto,
+            ],
+          },
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist[0]) {
+      throw new ApiError(httpStatus.OK, "Invalid order number");
+    }
+    let orderBarcode = dataExist[0]?.barcodeData;
+
+    if (orderBarcode?.length) {
+      await Promise.all(
+        orderBarcode.map(async (ele) => {
+          let updatedBarcode = await barcodeService.getOneAndUpdate(
+            { _id: ele?.barcodeId, isDeleted: false, isUsed: true },
+            {
+              $set: {
+                status: barcodeStatusType.atWarehouse,
+              },
+            }
+          );
+          await addToBarcodeFlow(updatedBarcode);
+        })
+      );
+    }
+
+    let updatedOrder = await orderService.getOneAndUpdate(
+      {
+        orderNumber: parseInt(ordernumber),
+        isDeleted: false,
+        status: {
+          $nin: [
+            orderStatusEnum.delivered,
+            orderStatusEnum.doorCancelled,
+            orderStatusEnum.cancel,
+            orderStatusEnum.rto,
+          ],
+        },
+      },
+      {
+        $set: {
+          status: orderStatusEnum.cancel,
+          orderStatus: productStatus.cancelled,
+          barcodeData: [],
+          schemeProducts: [],
+        },
+      }
+    );
+
+    await addToOrderFlow(updatedOrder);
+    await orderCancelRequestService.getOneAndUpdate(
+      { _id: cancelRequestId },
+      { $set: { status: "COMPLETED", cancelDate: new Date() } }
+    );
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: dataExist[0],
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
@@ -164,9 +314,9 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = ["priority"];
+    let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = ["companyId"];
+    let objectIdFields = ["requestCreatedBy", "companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -198,7 +348,39 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [];
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "requestCreatedBy",
+          foreignField: "_id",
+          as: "userData",
+          pipeline: [
+            {
+              $project: {
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          requestCreatedByLabel: {
+            $concat: [
+              { $arrayElemAt: ["$userData.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$userData.lastName", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $unset: ["userData"],
+      },
+    ];
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -209,7 +391,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await courierPreferenceService.aggregateQuery(
+    let dataFound = await orderCancelRequestService.aggregateQuery(
       finalAggregateQuery
     );
     if (dataFound.length === 0) {
@@ -230,7 +412,7 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    let result = await courierPreferenceService.aggregateQuery(
+    let result = await orderCancelRequestService.aggregateQuery(
       finalAggregateQuery
     );
     if (result.length) {
@@ -264,7 +446,9 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await courierPreferenceService.findAllWithQuery(matchQuery);
+    let dataExist = await orderCancelRequestService.findAllWithQuery(
+      matchQuery
+    );
 
     if (!dataExist || !dataExist.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -291,7 +475,7 @@ exports.get = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let dataExist = await courierPreferenceService.getOneByMultiField({
+    let dataExist = await orderCancelRequestService.getOneByMultiField({
       _id: idToBeSearch,
       isDeleted: false,
     });
@@ -321,10 +505,10 @@ exports.getById = async (req, res) => {
 exports.deleteDocument = async (req, res) => {
   try {
     let _id = req.params.id;
-    if (!(await courierPreferenceService.getOneByMultiField({ _id }))) {
+    if (!(await orderCancelRequestService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    let deleted = await courierPreferenceService.getOneAndDelete({ _id });
+    let deleted = await orderCancelRequestService.getOneAndDelete({ _id });
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -332,39 +516,6 @@ exports.deleteDocument = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: null,
-      code: null,
-      issue: null,
-    });
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
-//statusChange
-exports.statusChange = async (req, res) => {
-  try {
-    let _id = req.params.id;
-    let dataExist = await courierPreferenceService.getOneByMultiField({ _id });
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
-    }
-    let isActive = dataExist.isActive ? false : true;
-
-    let statusChanged = await courierPreferenceService.getOneAndUpdate(
-      { _id },
-      { isActive }
-    );
-    if (!statusChanged) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
-    return res.status(httpStatus.OK).send({
-      message: "Successfull.",
-      status: true,
-      data: statusChanged,
       code: null,
       issue: null,
     });
