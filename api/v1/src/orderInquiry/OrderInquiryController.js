@@ -16,7 +16,7 @@ const deliveryBoyService = require("../deliveryBoy/DeliveryBoyService");
 const tehsilService = require("../tehsil/TehsilService");
 const warehouseService = require("../wareHouse/WareHouseService");
 const CourierPartnerToken = require("../courierPartnerToken/CourierPartnerTokenService");
-const orderCancelRequestService = require("../orderCancelRequest/OrderCancelRequestService");
+const awbMaster = require("../awbMaster/AwbMasterService");
 
 const pincodeService = require("../pincode/PincodeService");
 const productCategoryService = require("../productCategory/ProductCategoryService");
@@ -1249,12 +1249,7 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.warehouseOrderDispatch = async (req, res) => {
   try {
-    let { orderNumber, barcodes } = req.body;
-    console.log(barcodes, "barcodes");
-    let dataExist = await orderService.isExists([]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+    let { orderNumber, barcodes, type } = req.body;
 
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
@@ -1298,6 +1293,20 @@ exports.warehouseOrderDispatch = async (req, res) => {
       })
     );
 
+    if (type === preferredCourierPartner.gpo) {
+      var awbNumberData = await awbMaster?.getOneByMultiField({
+        isUsed: false,
+      });
+      await awbMaster?.getOneAndUpdate(
+        { awbNumber: awbNumberData.awbNumber },
+        {
+          $set: {
+            isUsed: true,
+            orderNumber: orderNumber,
+          },
+        }
+      );
+    }
     let dataUpdated = await orderService.getOneAndUpdate(
       {
         orderNumber: orderNumber,
@@ -1308,6 +1317,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
           barcodeData: barcodes,
           status: orderStatusEnum.intransit,
           orderStatus: productStatus.dispatched,
+          awbNumber: awbNumberData.awbNumber,
         },
       }
     );

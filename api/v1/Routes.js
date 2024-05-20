@@ -103,6 +103,7 @@ const missingdamageRoute = require("./src/missingDamageStock/MissingDamageStockR
 const courierPreferenceRoute = require("./src/courierPreference/CourierPreferenceRoute");
 const transportRoute = require("./src/transport/TransportRoute");
 const orderCancelRequestRoute = require("./src/orderCancelRequest/OrderCancelRequestRoute");
+const awbMasterRoute = require("./src/awbMaster/AwbMasterRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -528,6 +529,10 @@ const defaultRoutes = [
   {
     path: "/order-cancel-request",
     route: orderCancelRequestRoute,
+  },
+  {
+    path: "/awb-master",
+    route: awbMasterRoute,
   },
 ];
 // orderRoute;

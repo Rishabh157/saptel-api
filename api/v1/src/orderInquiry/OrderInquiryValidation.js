@@ -322,6 +322,7 @@ const warehouseOrderDispatch = {
       })
       .required(),
     orderNumber: Joi.number().required(),
+    type: Joi.string().required(),
   }),
 };
 
