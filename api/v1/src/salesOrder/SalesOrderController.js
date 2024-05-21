@@ -326,8 +326,6 @@ exports.updateLevel = async (req, res) => {
       let totalTaxAmount = 0;
 
       let itemDataForTally = [];
-      let taxTypeForTally = "";
-      let taxPercentForTally = 0;
 
       if (Array.isArray(productGroupId) && productGroupId.length > 0) {
         for (const ele of productGroupId) {
@@ -336,11 +334,6 @@ exports.updateLevel = async (req, res) => {
           });
 
           // Assigning data for tally
-          itemDataForTally.push({
-            itemNameForTally: productGroupData[0]?.groupName,
-            rateForTally: ele.rate,
-            quantityForTally: ele?.quantity,
-          });
 
           if (companyState.stateName === dealerState.stateName) {
             salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
@@ -350,8 +343,17 @@ exports.updateLevel = async (req, res) => {
                 (productGroupData[0].cgst + productGroupData[0].sgst)) /
               100;
             totalTaxAmount += salesOrderBalance;
-            taxTypeForTally = "CGST";
-            taxPercentForTally = productGroupData[0].cgst;
+
+            itemDataForTally.push({
+              itemNameForTally: productGroupData[0]?.groupName,
+              rateForTally: ele.rate,
+              quantityForTally: ele?.quantity,
+              taxTypeForTally: ["CGST", "SGST"],
+              taxPercentForTally: [
+                productGroupData[0].cgst,
+                productGroupData[0].sgst,
+              ],
+            });
           } else if (companyState.stateName !== dealerState.stateName) {
             if (dealerState.isUnion) {
               salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
@@ -359,16 +361,26 @@ exports.updateLevel = async (req, res) => {
               salesOrderBalance +=
                 (salesOrderBalance * productGroupData[0].utgst) / 100;
               totalTaxAmount += salesOrderBalance;
-              taxTypeForTally = "UTGST";
-              taxPercentForTally = productGroupData[0].utgst;
+              itemDataForTally.push({
+                itemNameForTally: productGroupData[0]?.groupName,
+                rateForTally: ele.rate,
+                quantityForTally: ele?.quantity,
+                taxTypeForTally: ["UTGST"],
+                taxPercentForTally: [productGroupData[0].utgst],
+              });
             } else {
               salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
               totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
               salesOrderBalance +=
                 (salesOrderBalance * productGroupData[0].igst) / 100;
               totalTaxAmount += salesOrderBalance;
-              taxTypeForTally = "IGST";
-              taxPercentForTally = productGroupData[0].igst;
+              itemDataForTally.push({
+                itemNameForTally: productGroupData[0]?.groupName,
+                rateForTally: ele.rate,
+                quantityForTally: ele?.quantity,
+                taxTypeForTally: ["IGST"],
+                taxPercentForTally: [productGroupData[0].igst],
+              });
             }
           }
         }
@@ -391,9 +403,7 @@ exports.updateLevel = async (req, res) => {
             partyName: dealerData?.firmName,
             soNumber: sonumberToBeSearch,
             itemDataForTally,
-            taxAmount: parseInt(totalTaxAmount - totalAmount),
-            taxType: taxTypeForTally,
-            taxPercent: taxPercentForTally,
+
             expectedDeliveryDate: datafound?.expectedDeliveryDate,
           };
 
