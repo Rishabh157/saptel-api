@@ -5,6 +5,7 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const salesOrderService = require("./SalesOrderService");
 const productGroupService = require("../productGroup/ProductGroupService");
 const wareHouseService = require("../wareHouse/WareHouseService");
+const dealerService = require("../dealer/DealerService");
 const companyService = require("../company/CompanyService");
 const branchService = require("../companyBranch/CompanyBranchService");
 const stateService = require("../state/StateService");
@@ -42,6 +43,7 @@ const {
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
 const { getInvoiceNumber } = require("../call/CallHelper");
+const { addSalesOrderToTally } = require("./SalesOrderHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -61,6 +63,7 @@ exports.add = async (req, res) => {
       companyId,
       dhApprovedById,
       accApprovedById,
+      expectedDeliveryDate,
     } = req.body;
 
     const isCompanyExists = await companyService.findCount({
@@ -95,6 +98,7 @@ exports.add = async (req, res) => {
         companyId: companyId,
         createdById: req.userData.Id,
         branchId: req.userData.branchId,
+        expectedDeliveryDate: expectedDeliveryDate,
       };
     });
     //------------------create data-------------------
@@ -226,6 +230,7 @@ exports.updateLevel = async (req, res) => {
     } = req.body;
 
     let sonumberToBeSearch = req.params.sonumber;
+
     //------------------Find data-------------------
     let datafound = await salesOrderService.getOneByMultiField({
       soNumber: sonumberToBeSearch,
@@ -241,6 +246,7 @@ exports.updateLevel = async (req, res) => {
     if (!branchdata) {
       throw new ApiError(httpStatus.OK, `Something went wrong invalid branch!`);
     }
+
     let dataToSend = {};
     if (type === "ACC") {
       let invoiceNumberIs = await getInvoiceNumber();
@@ -248,17 +254,17 @@ exports.updateLevel = async (req, res) => {
         branchdata?.branchCode,
         invoiceNumberIs
       );
-      (dataToSend.accApprovedById = accApprovedById),
-        (dataToSend.accApprovedActionBy = accApprovedActionBy),
-        (dataToSend.accApprovedAt = accApprovedAt);
+      dataToSend.accApprovedById = accApprovedById;
+      dataToSend.accApprovedActionBy = accApprovedActionBy;
+      dataToSend.accApprovedAt = accApprovedAt;
       dataToSend.accApproved = accApproved;
       dataToSend.invoice = invoice;
       dataToSend.invoiceDate = new Date();
       dataToSend.invoiceNumber = finalInvoiceNo;
     } else {
-      (dataToSend.dhApprovedById = dhApprovedById),
-        (dataToSend.dhApprovedActionBy = dhApprovedActionBy),
-        (dataToSend.dhApprovedAt = dhApprovedAt);
+      dataToSend.dhApprovedById = dhApprovedById;
+      dataToSend.dhApprovedActionBy = dhApprovedActionBy;
+      dataToSend.dhApprovedAt = dhApprovedAt;
       dataToSend.dhApproved = dhApproved;
       dataToSend.invoice = invoice;
     }
@@ -272,6 +278,7 @@ exports.updateLevel = async (req, res) => {
         $set: dataToSend,
       }
     );
+
     if (type === "ACC") {
       let companyWarehouseId = datafound.companyWareHouseId;
       let dealerWarehouseId = datafound.dealerWareHouseId;
@@ -287,6 +294,7 @@ exports.updateLevel = async (req, res) => {
       if (!companyWarehouse || !dealerWarehouse) {
         throw new ApiError(httpStatus.OK, `warehouse is invalid`);
       }
+
       let companyWarehouseStateId =
         companyWarehouse.registrationAddress.stateId;
       let dealerWarehouseStateId = dealerWarehouse.registrationAddress.stateId;
@@ -301,80 +309,112 @@ exports.updateLevel = async (req, res) => {
       if (!companyState || !dealerState) {
         throw new ApiError(httpStatus.OK, `state is invalid`);
       }
+
       const soData = await salesOrderService.findAllWithQuery({
         soNumber: sonumberToBeSearch,
         isDeleted: false,
       });
-      let productGroupId = soData?.map((ele) => {
-        return {
-          Id: ele?.productSalesOrder?.productGroupId,
-          quantity: ele?.productSalesOrder?.quantity,
-          rate: ele?.productSalesOrder?.rate,
-        };
-      });
+
+      let productGroupId = soData?.map((ele) => ({
+        Id: ele?.productSalesOrder?.productGroupId,
+        quantity: ele?.productSalesOrder?.quantity,
+        rate: ele?.productSalesOrder?.rate,
+      }));
+
       let salesOrderBalance = 0;
       let totalAmount = 0;
       let totalTaxAmount = 0;
 
+      let itemDataForTally = [];
+      let taxTypeForTally = "";
+      let taxPercentForTally = 0;
+
       if (Array.isArray(productGroupId) && productGroupId.length > 0) {
-        (async () => {
-          for (const ele of productGroupId) {
-            let productGroupData = await productGroupService.findAllWithQuery({
-              _id: ele?.Id,
-            });
-            if (companyState.stateName === dealerState.stateName) {
+        for (const ele of productGroupId) {
+          let productGroupData = await productGroupService.findAllWithQuery({
+            _id: ele?.Id,
+          });
+
+          // Assigning data for tally
+          itemDataForTally.push({
+            itemNameForTally: productGroupData[0]?.groupName,
+            rateForTally: ele.rate,
+            quantityForTally: ele?.quantity,
+          });
+
+          if (companyState.stateName === dealerState.stateName) {
+            salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
+            totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
+            salesOrderBalance +=
+              (salesOrderBalance *
+                (productGroupData[0].cgst + productGroupData[0].sgst)) /
+              100;
+            totalTaxAmount += salesOrderBalance;
+            taxTypeForTally = "CGST";
+            taxPercentForTally = productGroupData[0].cgst;
+          } else if (companyState.stateName !== dealerState.stateName) {
+            if (dealerState.isUnion) {
               salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
               totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
               salesOrderBalance +=
-                (salesOrderBalance *
-                  (productGroupData[0].cgst + productGroupData[0].sgst)) /
-                100;
+                (salesOrderBalance * productGroupData[0].utgst) / 100;
               totalTaxAmount += salesOrderBalance;
-            } else if (companyState.stateName !== dealerState.stateName) {
-              if (dealerState.isUnion) {
-                salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
-                totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
-                salesOrderBalance +=
-                  (salesOrderBalance * productGroupData[0].utgst) / 100;
-                totalTaxAmount += salesOrderBalance;
-              } else {
-                salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
-                totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
-                salesOrderBalance +=
-                  (salesOrderBalance * productGroupData[0].igst) / 100;
-                totalTaxAmount += salesOrderBalance;
-              }
+              taxTypeForTally = "UTGST";
+              taxPercentForTally = productGroupData[0].utgst;
+            } else {
+              salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
+              totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
+              salesOrderBalance +=
+                (salesOrderBalance * productGroupData[0].igst) / 100;
+              totalTaxAmount += salesOrderBalance;
+              taxTypeForTally = "IGST";
+              taxPercentForTally = productGroupData[0].igst;
             }
           }
+        }
 
-          // This code will execute after the loop is completed
+        // This code will execute after the loop is completed
+        if (soData[0].accApproved === true) {
+          const balance = await getBalance(
+            soData[0].dealerId,
+            0,
+            parseInt(totalTaxAmount)
+          );
 
-          if (soData[0].accApproved === true) {
-            const balance = await getBalance(
-              soData[0].dealerId,
-              0,
-              parseInt(totalTaxAmount)
-            );
+          let dealerData = await dealerService.getOneByMultiField({
+            _id: dealerWarehouse?.dealerId,
+            isDeleted: false,
+          });
 
-            //------------------create data-------------------
-            let dataCreated = await ledgerService.createNewData({
-              noteType: ledgerType.debit,
-              taxAmount: parseInt(totalTaxAmount - totalAmount),
-              creditAmount: 0,
-              debitAmount: parseInt(totalTaxAmount),
-              remark: "By Sales Order",
-              companyId: soData[0].companyId,
-              dealerId: soData[0].dealerId,
-              balance: balance,
-            });
-          }
-        })();
-      } else {
+          let saleOrderTallyData = {
+            companyState: companyState.stateName,
+            partyName: dealerData?.firmName,
+            soNumber: sonumberToBeSearch,
+            itemDataForTally,
+            taxAmount: parseInt(totalTaxAmount - totalAmount),
+            taxType: taxTypeForTally,
+            taxPercent: taxPercentForTally,
+            expectedDeliveryDate: datafound?.expectedDeliveryDate,
+          };
+
+          await addSalesOrderToTally(saleOrderTallyData);
+
+          //------------------create data-------------------
+          let dataCreated = await ledgerService.createNewData({
+            noteType: ledgerType.debit,
+            taxAmount: parseInt(totalTaxAmount - totalAmount),
+            creditAmount: 0,
+            debitAmount: parseInt(totalTaxAmount),
+            remark: "By Sales Order",
+            companyId: soData[0].companyId,
+            dealerId: soData[0].dealerId,
+            balance: balance,
+          });
+        }
       }
     }
 
     //------------------create data-------------------
-
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",

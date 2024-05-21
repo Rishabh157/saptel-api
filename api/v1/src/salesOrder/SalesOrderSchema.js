@@ -91,6 +91,10 @@ const SalesOrderSchema = new mongoose.Schema(
       ],
       default: productStatus.notDispatched,
     },
+    expectedDeliveryDate: {
+      type: String,
+      required: true,
+    },
     invoice: {
       type: String,
       default: "",

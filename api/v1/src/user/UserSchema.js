@@ -6,6 +6,7 @@ const {
   userDepartmentType,
   userRoleType,
 } = require("../../helper/enumUtils");
+
 const UserSchema = new mongoose.Schema(
   {
     firstName: {

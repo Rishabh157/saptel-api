@@ -12,6 +12,7 @@ const create = {
     // soNumber: Joi.string().required(),
     dhApproved: Joi.boolean().allow(null),
     dhApprovedActionBy: Joi.string().allow(""),
+    expectedDeliveryDate: Joi.string().required(),
     dhApprovedAt: Joi.string().allow(""),
     accApproved: Joi.boolean().allow(null),
     accApprovedActionBy: Joi.string().allow(""),
@@ -65,6 +66,7 @@ const update = {
     soData: Joi.array().items({
       id: Joi.string().allow(""),
       soNumber: Joi.string().required(),
+      expectedDeliveryDate: Joi.string().required(),
       dhApproved: Joi.boolean().allow(null),
       dhApprovedActionBy: Joi.string().allow(""),
       dhApprovedAt: Joi.string().allow(""),
