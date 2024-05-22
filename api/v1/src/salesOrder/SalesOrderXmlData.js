@@ -26,7 +26,7 @@ const SalesOrderXmlData = (data) => {
   let ledgerData = "";
   //   let totalAmount = 0;
   let totalTaxAmount = 0;
-
+  let ledgerDataArray = [];
   itemDataForTally?.map((ele) => {
     myItems += `
     
@@ -157,74 +157,101 @@ const SalesOrderXmlData = (data) => {
     ele?.taxTypeForTally?.map((gst, index) => {
       let taxPercent = ele?.taxPercentForTally[index];
       totalTaxPercent += taxPercent;
-
-      ledgerData += `
-        <LEDGERENTRIES.LIST>
-        <OLDAUDITENTRYIDS.LIST TYPE="Number">
-         <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
-        </OLDAUDITENTRYIDS.LIST>
-        <RATEOFINVOICETAX.LIST TYPE="Number">
-         <RATEOFINVOICETAX> ${taxPercent}</RATEOFINVOICETAX>
-        </RATEOFINVOICETAX.LIST>
-        <APPROPRIATEFOR>&#4; Not Applicable</APPROPRIATEFOR>
-        <ROUNDTYPE>&#4; Not Applicable</ROUNDTYPE>
-         <LEDGERNAME>${ele?.taxTypeForTally[index]} ${
-        ele?.taxPercentForTally[index]
-      }%</LEDGERNAME>
-        <GSTCLASS>&#4; Not Applicable</GSTCLASS>
-        <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
-        <LEDGERFROMITEM>No</LEDGERFROMITEM>
-        <REMOVEZEROENTRIES>No</REMOVEZEROENTRIES>
-        <ISPARTYLEDGER>No</ISPARTYLEDGER>
-        <GSTOVERRIDDEN>No</GSTOVERRIDDEN>
-        <ISGSTASSESSABLEVALUEOVERRIDDEN>No</ISGSTASSESSABLEVALUEOVERRIDDEN>
-        <STRDISGSTAPPLICABLE>No</STRDISGSTAPPLICABLE>
-        <STRDGSTISPARTYLEDGER>No</STRDGSTISPARTYLEDGER>
-        <STRDGSTISDUTYLEDGER>No</STRDGSTISDUTYLEDGER>
-        <CONTENTNEGISPOS>No</CONTENTNEGISPOS>
-        <ISLASTDEEMEDPOSITIVE>No</ISLASTDEEMEDPOSITIVE>
-        <ISCAPVATTAXALTERED>No</ISCAPVATTAXALTERED>
-        <ISCAPVATNOTCLAIMED>No</ISCAPVATNOTCLAIMED>
-        <AMOUNT>${
-          (ele?.rateForTally * ele?.quantityForTally * taxPercent) / 100
-        }</AMOUNT>
-                          <VATEXPAMOUNT>${
-                            (ele?.rateForTally *
-                              ele?.quantityForTally *
-                              taxPercent) /
-                            100
-                          }</VATEXPAMOUNT>
-        <SERVICETAXDETAILS.LIST>       </SERVICETAXDETAILS.LIST>
-        <BANKALLOCATIONS.LIST>       </BANKALLOCATIONS.LIST>
-        <BILLALLOCATIONS.LIST>       </BILLALLOCATIONS.LIST>
-        <INTERESTCOLLECTION.LIST>       </INTERESTCOLLECTION.LIST>
-        <OLDAUDITENTRIES.LIST>       </OLDAUDITENTRIES.LIST>
-        <ACCOUNTAUDITENTRIES.LIST>       </ACCOUNTAUDITENTRIES.LIST>
-        <AUDITENTRIES.LIST>       </AUDITENTRIES.LIST>
-        <INPUTCRALLOCS.LIST>       </INPUTCRALLOCS.LIST>
-        <DUTYHEADDETAILS.LIST>       </DUTYHEADDETAILS.LIST>
-        <EXCISEDUTYHEADDETAILS.LIST>       </EXCISEDUTYHEADDETAILS.LIST>
-        <RATEDETAILS.LIST>       </RATEDETAILS.LIST>
-        <SUMMARYALLOCS.LIST>       </SUMMARYALLOCS.LIST>
-        <CENVATDUTYALLOCATIONS.LIST>       </CENVATDUTYALLOCATIONS.LIST>
-        <STPYMTDETAILS.LIST>       </STPYMTDETAILS.LIST>
-        <EXCISEPAYMENTALLOCATIONS.LIST>       </EXCISEPAYMENTALLOCATIONS.LIST>
-        <TAXBILLALLOCATIONS.LIST>       </TAXBILLALLOCATIONS.LIST>
-        <TAXOBJECTALLOCATIONS.LIST>       </TAXOBJECTALLOCATIONS.LIST>
-        <TDSEXPENSEALLOCATIONS.LIST>       </TDSEXPENSEALLOCATIONS.LIST>
-        <VATSTATUTORYDETAILS.LIST>       </VATSTATUTORYDETAILS.LIST>
-        <COSTTRACKALLOCATIONS.LIST>       </COSTTRACKALLOCATIONS.LIST>
-        <REFVOUCHERDETAILS.LIST>       </REFVOUCHERDETAILS.LIST>
-        <INVOICEWISEDETAILS.LIST>       </INVOICEWISEDETAILS.LIST>
-        <VATITCDETAILS.LIST>       </VATITCDETAILS.LIST>
-        <ADVANCETAXDETAILS.LIST>       </ADVANCETAXDETAILS.LIST>
-        <TAXTYPEALLOCATIONS.LIST>       </TAXTYPEALLOCATIONS.LIST>
-       </LEDGERENTRIES.LIST>
-        `;
+      if (ledgerDataArray.length) {
+        let flag = false;
+        let ledgerindex = 0;
+        for (let i = 0; i < ledgerDataArray.length; i++) {
+          if (
+            ledgerDataArray[i].taxPercent === taxPercent &&
+            ledgerDataArray[i].taxType === ele?.taxTypeForTally[index]
+          ) {
+            flag = true;
+            ledgerindex = i;
+          }
+        }
+        if (!flag) {
+          ledgerDataArray.push({
+            taxPercent: taxPercent,
+            taxType: ele?.taxTypeForTally[index],
+            taxAmount:
+              (ele?.rateForTally * ele?.quantityForTally * taxPercent) / 100,
+          });
+        } else {
+          ledgerDataArray[ledgerindex].taxAmount +=
+            (ele?.rateForTally * ele?.quantityForTally * taxPercent) / 100;
+        }
+      } else {
+        ledgerDataArray.push({
+          taxPercent: taxPercent,
+          taxType: ele?.taxTypeForTally[index],
+          taxAmount:
+            (ele?.rateForTally * ele?.quantityForTally * taxPercent) / 100,
+        });
+      }
     });
     totalTaxAmount += totalAmount / totalTaxPercent;
   });
-  console.log(totalTaxAmount, "totalTaxAmount");
+
+  ledgerDataArray?.map((ele) => {
+    ledgerData += `
+    <LEDGERENTRIES.LIST>
+    <OLDAUDITENTRYIDS.LIST TYPE="Number">
+     <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
+    </OLDAUDITENTRYIDS.LIST>
+    <RATEOFINVOICETAX.LIST TYPE="Number">
+     <RATEOFINVOICETAX> ${ele.taxPercent}</RATEOFINVOICETAX>
+    </RATEOFINVOICETAX.LIST>
+    <APPROPRIATEFOR>&#4; Not Applicable</APPROPRIATEFOR>
+    <ROUNDTYPE>&#4; Not Applicable</ROUNDTYPE>
+     <LEDGERNAME>${ele.taxType} ${ele?.taxPercent}%</LEDGERNAME>
+    <GSTCLASS>&#4; Not Applicable</GSTCLASS>
+    <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+    <LEDGERFROMITEM>No</LEDGERFROMITEM>
+    <REMOVEZEROENTRIES>No</REMOVEZEROENTRIES>
+    <ISPARTYLEDGER>No</ISPARTYLEDGER>
+    <GSTOVERRIDDEN>No</GSTOVERRIDDEN>
+    <ISGSTASSESSABLEVALUEOVERRIDDEN>No</ISGSTASSESSABLEVALUEOVERRIDDEN>
+    <STRDISGSTAPPLICABLE>No</STRDISGSTAPPLICABLE>
+    <STRDGSTISPARTYLEDGER>No</STRDGSTISPARTYLEDGER>
+    <STRDGSTISDUTYLEDGER>No</STRDGSTISDUTYLEDGER>
+    <CONTENTNEGISPOS>No</CONTENTNEGISPOS>
+    <ISLASTDEEMEDPOSITIVE>No</ISLASTDEEMEDPOSITIVE>
+    <ISCAPVATTAXALTERED>No</ISCAPVATTAXALTERED>
+    <ISCAPVATNOTCLAIMED>No</ISCAPVATNOTCLAIMED>
+    <AMOUNT>${ele?.taxAmount}</AMOUNT>
+    <VATEXPAMOUNT>${ele?.taxAmount}</VATEXPAMOUNT>
+    <SERVICETAXDETAILS.LIST>       </SERVICETAXDETAILS.LIST>
+    <BANKALLOCATIONS.LIST>       </BANKALLOCATIONS.LIST>
+    <BILLALLOCATIONS.LIST>       </BILLALLOCATIONS.LIST>
+    <INTERESTCOLLECTION.LIST>       </INTERESTCOLLECTION.LIST>
+    <OLDAUDITENTRIES.LIST>       </OLDAUDITENTRIES.LIST>
+    <ACCOUNTAUDITENTRIES.LIST>       </ACCOUNTAUDITENTRIES.LIST>
+    <AUDITENTRIES.LIST>       </AUDITENTRIES.LIST>
+    <INPUTCRALLOCS.LIST>       </INPUTCRALLOCS.LIST>
+    <DUTYHEADDETAILS.LIST>       </DUTYHEADDETAILS.LIST>
+    <EXCISEDUTYHEADDETAILS.LIST>       </EXCISEDUTYHEADDETAILS.LIST>
+    <RATEDETAILS.LIST>       </RATEDETAILS.LIST>
+    <SUMMARYALLOCS.LIST>       </SUMMARYALLOCS.LIST>
+    <CENVATDUTYALLOCATIONS.LIST>       </CENVATDUTYALLOCATIONS.LIST>
+    <STPYMTDETAILS.LIST>       </STPYMTDETAILS.LIST>
+    <EXCISEPAYMENTALLOCATIONS.LIST>       </EXCISEPAYMENTALLOCATIONS.LIST>
+    <TAXBILLALLOCATIONS.LIST>       </TAXBILLALLOCATIONS.LIST>
+    <TAXOBJECTALLOCATIONS.LIST>       </TAXOBJECTALLOCATIONS.LIST>
+    <TDSEXPENSEALLOCATIONS.LIST>       </TDSEXPENSEALLOCATIONS.LIST>
+    <VATSTATUTORYDETAILS.LIST>       </VATSTATUTORYDETAILS.LIST>
+    <COSTTRACKALLOCATIONS.LIST>       </COSTTRACKALLOCATIONS.LIST>
+    <REFVOUCHERDETAILS.LIST>       </REFVOUCHERDETAILS.LIST>
+    <INVOICEWISEDETAILS.LIST>       </INVOICEWISEDETAILS.LIST>
+    <VATITCDETAILS.LIST>       </VATITCDETAILS.LIST>
+    <ADVANCETAXDETAILS.LIST>       </ADVANCETAXDETAILS.LIST>
+    <TAXTYPEALLOCATIONS.LIST>       </TAXTYPEALLOCATIONS.LIST>
+   </LEDGERENTRIES.LIST>`;
+  });
+
+  // console.log(totalTaxAmount, "totalTaxAmount");
+
+  //   `;
+
   let xmlData = `<ENVELOPE>
 <HEADER>
  <TALLYREQUEST>Import Data</TALLYREQUEST>

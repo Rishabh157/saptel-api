@@ -438,9 +438,10 @@ exports.update = async (req, res) => {
     );
     if (dealerServingPincode.length === 1) {
       var assidnedDealerData = await dealerService?.getOneByMultiField({
-        _id: dealerServingPincode[0]?._id,
+        _id: dealerServingPincode[0]?.dealerId,
       });
     }
+    console.log(assidnedDealerData, "assidnedDealerData");
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
 
