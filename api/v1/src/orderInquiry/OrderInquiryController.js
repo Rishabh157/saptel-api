@@ -827,6 +827,9 @@ exports.approveFirstCallDirectly = async (req, res) => {
             shipyaariResponse: isOrderAssignedToCourier.data,
             awbNumber:
               isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
+            secondaryCourierPartner:
+              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
+                ?.partnerName,
           },
         }
       );
@@ -968,6 +971,9 @@ exports.firstCallConfirmation = async (req, res) => {
               shipyaariResponse: isOrderAssignedToCourier.data,
               awbNumber:
                 isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
+              secondaryCourierPartner:
+                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
+                  ?.partnerName,
             },
           }
         );
@@ -1103,6 +1109,9 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
             shipyaariResponse: isOrderAssignedToCourier.data,
             awbNumber:
               isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
+            secondaryCourierPartner:
+              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
+                ?.partnerName,
           },
         }
       );

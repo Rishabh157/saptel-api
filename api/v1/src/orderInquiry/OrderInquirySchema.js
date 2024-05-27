@@ -436,6 +436,7 @@ const OrderInquirySchema = new mongoose.Schema(
         orderStatusEnum.ndr,
         orderStatusEnum.closed,
         orderStatusEnum.cancel,
+        orderStatusEnum.rto,
       ],
       default: orderStatusEnum.fresh,
     },
@@ -587,6 +588,10 @@ const OrderInquirySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    secondaryCourierPartner: {
+      type: String,
+      default: "",
+    },
     orderAssignedToCourier: {
       type: String,
       enum: [
@@ -637,7 +642,14 @@ const OrderInquirySchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["schemeLabel", "mobileNo", "callType", "campaign"];
+const searchKeys = [
+  "schemeLabel",
+  "mobileNo",
+  "callType",
+  "campaign",
+  "awbNumber",
+  "barcodeData.barcode",
+];
 
 module.exports = mongoose.model("OrderInquiry", OrderInquirySchema);
 module.exports.searchKeys = [...searchKeys];

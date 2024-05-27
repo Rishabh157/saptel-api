@@ -529,6 +529,13 @@ const preferredCourierPartner = Object.freeze({
   gpo: "GPO",
 });
 
+const courierRTOType = Object.freeze({
+  fresh: "FRESH/REUSEALE",
+  damage: "DAMAGE",
+  fake: "FAKE",
+  lost: "LOST",
+});
+
 const orderTypeEnum = Object.freeze({
   inbound: "INBOUND",
   website: "WEBSITE",
@@ -597,4 +604,5 @@ module.exports = {
   dealerReasonEnum,
   dealerMissingDamageType,
   orderCancelReason,
+  courierRTOType,
 };

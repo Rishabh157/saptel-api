@@ -426,6 +426,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
         orderStatusEnum.ndr,
         orderStatusEnum.closed,
         orderStatusEnum.cancel,
+        orderStatusEnum.rto,
       ],
       default: orderStatusEnum.fresh,
     },
@@ -565,6 +566,10 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       default: false,
     },
     awbNumber: {
+      type: String,
+      default: "",
+    },
+    secondaryCourierPartner: {
       type: String,
       default: "",
     },

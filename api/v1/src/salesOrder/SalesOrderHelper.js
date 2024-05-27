@@ -8,8 +8,8 @@ const config = require("../../../../config/config");
 const addSalesOrderToTally = async (data) => {
   try {
     let xmlData = SalesOrderXmlData(data);
-
-    // Replace 'your-api-endpoint-url' with the actual URL of the API you want to hit
+    console.log(xmlData, "xmlData");
+    // Repl ace 'your-api-endpoint-url' with the actual URL of the API you want to hit
     const apiEndpoint = `${config.tally_url}`;
 
     // Make the API request

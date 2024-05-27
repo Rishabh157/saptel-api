@@ -104,6 +104,7 @@ const courierPreferenceRoute = require("./src/courierPreference/CourierPreferenc
 const transportRoute = require("./src/transport/TransportRoute");
 const orderCancelRequestRoute = require("./src/orderCancelRequest/OrderCancelRequestRoute");
 const awbMasterRoute = require("./src/awbMaster/AwbMasterRoute");
+const courierRTORoute = require("./src/courierRTO/CourierRTORoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -533,6 +534,10 @@ const defaultRoutes = [
   {
     path: "/awb-master",
     route: awbMasterRoute,
+  },
+  {
+    path: "/courier-rto",
+    route: courierRTORoute,
   },
 ];
 // orderRoute;
