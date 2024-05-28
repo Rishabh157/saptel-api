@@ -46,6 +46,7 @@ exports.add = async (req, res) => {
     let orderData = await orderInquiryService?.getOneByMultiField({
       orderNumber: orderNumber,
       status: orderStatusEnum.delivered,
+      assignWarehouseId: warehouseId,
     });
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "Invaid Order number");
@@ -146,6 +147,17 @@ exports.bulkUpload = async (req, res) => {
           `Request with order number ${data.orderNumber} already exists`
         );
       }
+      const isOrderExists = await orderInquiryService.getOneByMultiField({
+        orderNumber: data.orderNumber,
+        status: orderStatusEnum.delivered,
+        assignWarehouseId: warehouseId,
+      });
+      if (!isOrderExists) {
+        throw new ApiError(
+          httpStatus.NOT_IMPLEMENTED,
+          `Invalid order number ${data.orderNumber}`
+        );
+      }
 
       const dataCreated = await courierRTOService.createNewData(data);
       if (!dataCreated) {
@@ -157,7 +169,10 @@ exports.bulkUpload = async (req, res) => {
       createdData.push(dataCreated);
 
       const updateOrder = await orderInquiryService.getOneAndUpdate(
-        { orderNumber: data.orderNumber },
+        {
+          orderNumber: data.orderNumber,
+          assignWarehouseId: warehouseId,
+        },
         { $set: { status: orderStatusEnum.rto } }
       );
       if (updateOrder) {
