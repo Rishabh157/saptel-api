@@ -397,7 +397,7 @@ const getBarcodeForOutward = {
 };
 const getInventory = {
   params: Joi.object().keys({
-    cid: Joi.string(),
+    // cid: Joi.string(),
     wid: Joi.string(),
     status: Joi.string(),
   }),

@@ -16,6 +16,21 @@ const create = {
   }),
 };
 
+const courierReturn = {
+  params: Joi.object().keys({
+    wid: Joi.required().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+  }),
+};
+
 /**
  * update existing document
  */
@@ -124,4 +139,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  courierReturn,
 };

@@ -28,6 +28,7 @@ const {
 } = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const XLSX = require("xlsx");
+const { default: mongoose } = require("mongoose");
 
 //add start
 exports.add = async (req, res) => {
@@ -45,7 +46,6 @@ exports.add = async (req, res) => {
 
     let orderData = await orderInquiryService?.getOneByMultiField({
       orderNumber: orderNumber,
-      status: orderStatusEnum.delivered,
       assignWarehouseId: warehouseId,
     });
     if (!orderData) {
@@ -149,7 +149,6 @@ exports.bulkUpload = async (req, res) => {
       }
       const isOrderExists = await orderInquiryService.getOneByMultiField({
         orderNumber: data.orderNumber,
-        status: orderStatusEnum.delivered,
         assignWarehouseId: warehouseId,
       });
       if (!isOrderExists) {
@@ -220,6 +219,74 @@ exports.bulkUpload = async (req, res) => {
     logger.info(errData.resData);
     const { message, status, data, code, issue } = errData.resData;
     res.status(errData.statusCode).send({ message, status, data, code, issue });
+  }
+};
+
+exports.courierReturn = async (req, res) => {
+  try {
+    var dateFilter = req.body.dateFilter;
+    var warehouseId = req.params.wid;
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    console.log("here");
+
+    let additionalQuery = [
+      {
+        $match: {
+          ...datefilterQuery[0],
+          warehouseId: new mongoose.Types.ObjectId(warehouseId),
+        },
+      },
+      {
+        $group: {
+          _id: null, // We don't need to group by any specific field
+          totalShipyaariRequest: {
+            $sum: {
+              $cond: [{ $eq: ["$shippingProvider", "SHIPYAARI"] }, 1, 0],
+            },
+          },
+          totalGPORequest: {
+            $sum: {
+              $cond: [{ $eq: ["$shippingProvider", "GPO"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          totalShipyaariRequest: 1, // Include the totalShipyaariRequest field
+          totalGPORequest: 1, // Include the totalGPORequest field
+        },
+      },
+    ];
+
+    // Execute the aggregation query
+    const results = await courierRTOService.aggregateQuery(additionalQuery);
+    console.log(results);
+
+    if (!results || !results?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: results[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
   }
 };
 //update start

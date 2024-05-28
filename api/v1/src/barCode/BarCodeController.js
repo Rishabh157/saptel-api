@@ -1668,7 +1668,7 @@ exports.getInventory = async (req, res) => {
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
-    const cid = req.params.cid;
+    const cid = req.userData.companyId;
     const wid = req.params.wid;
     const status = req.params.status;
 
@@ -1779,7 +1779,6 @@ exports.getInventory = async (req, res) => {
           ],
         },
       },
-
       {
         $lookup: {
           from: "warehouses",
@@ -1796,7 +1795,6 @@ exports.getInventory = async (req, res) => {
           ],
         },
       },
-
       {
         $addFields: {
           productGroupLabel: {
@@ -1811,7 +1809,6 @@ exports.getInventory = async (req, res) => {
       {
         $match: {
           isUsed: true, // You can add any additional match criteria here if needed
-          status: status,
           companyId: new mongoose.Types.ObjectId(cid),
         },
       },
@@ -1822,7 +1819,23 @@ exports.getInventory = async (req, res) => {
             productGroupId: `$productGroupId`,
           },
           productGroupLabel: { $first: "$productGroupLabel" },
+          wareHouseLabel: { $first: "$wareHouseLabel" },
           count: { $sum: 1 }, // Count the documents in each group
+          totalFreshCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "AT_WAREHOUSE"] }, 1, 0],
+            },
+          },
+          totalDamageCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "DAMAGE"] }, 1, 0],
+            },
+          },
+          totalMissingCount: {
+            $sum: {
+              $cond: [{ $in: ["$status", ["MISSING", "FAKE"]] }, 1, 0],
+            },
+          },
           firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
         },
       },
@@ -1835,6 +1848,9 @@ exports.getInventory = async (req, res) => {
           firstDocument: 1, // Include the firstDocument field
           productGroupLabel: 1,
           wareHouseLabel: 1,
+          totalFreshCount: 1, // Include the totalFreshCount field
+          totalDamageCount: 1, // Include the totalDamageCount field
+          totalMissingCount: 1, // Include the totalMissingCount field
         },
       },
     ];

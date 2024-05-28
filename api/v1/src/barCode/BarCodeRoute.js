@@ -128,7 +128,7 @@ router.get(
 );
 
 router.post(
-  "/inventory/companyid/:cid/warehouseid/:wid/status/:status",
+  "/inventory/warehouseid/:wid/status/:status",
   authCheckMiddleware,
   validate(barCodeValidation.getInventory),
   barCodeController.getInventory

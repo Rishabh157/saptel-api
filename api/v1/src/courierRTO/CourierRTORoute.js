@@ -42,6 +42,13 @@ router.post(
   courierRTOController.add
 );
 
+//count api
+router.post(
+  "/get-courier-return-status/:wid",
+  authCheckMiddleware,
+  validate(courierRTOValidation.courierReturn),
+  courierRTOController.courierReturn
+);
 /**
  * create new document bulk upload
  */
@@ -84,6 +91,7 @@ router.put(
   validate(courierRTOValidation.changeStatus),
   courierRTOController.statusChange
 );
+
 /**
  * delete document
  */
