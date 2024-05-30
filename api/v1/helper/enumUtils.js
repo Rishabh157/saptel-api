@@ -499,6 +499,11 @@ const barcodeStatusType = Object.freeze({
   missing: "MISSING",
 });
 
+const tallyLedgerType = Object.freeze({
+  cretidNote: "Credit Note-1",
+  debitNote: "Debit Note",
+});
+
 /**
  * if other the following routes created. please add all actions with their method,
  */
@@ -605,4 +610,5 @@ module.exports = {
   dealerMissingDamageType,
   orderCancelReason,
   courierRTOType,
+  tallyLedgerType,
 };

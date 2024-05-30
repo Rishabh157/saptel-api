@@ -1248,7 +1248,6 @@ exports.getAllUsers = async (req, res) => {
         isActive: true,
       });
     }
-    console.log(matchQuery, newMatchQuery, flag);
     let dataExist = await userService.aggregateQuery([
       { $match: flag ? newMatchQuery : matchQuery },
     ]);

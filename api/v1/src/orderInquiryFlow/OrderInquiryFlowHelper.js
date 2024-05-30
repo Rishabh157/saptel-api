@@ -26,7 +26,6 @@ const addToOrderFlow = async (order) => {
       status: true,
     };
   } catch (err) {
-    console.log(err);
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;

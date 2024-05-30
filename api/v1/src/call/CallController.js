@@ -441,7 +441,6 @@ exports.update = async (req, res) => {
         _id: dealerServingPincode[0]?.dealerId,
       });
     }
-    console.log(assidnedDealerData, "assidnedDealerData");
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
 

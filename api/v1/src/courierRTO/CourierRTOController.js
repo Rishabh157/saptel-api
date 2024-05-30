@@ -232,7 +232,6 @@ exports.courierReturn = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
-    console.log("here");
 
     let additionalQuery = [
       {
@@ -267,7 +266,6 @@ exports.courierReturn = async (req, res) => {
 
     // Execute the aggregation query
     const results = await courierRTOService.aggregateQuery(additionalQuery);
-    console.log(results);
 
     if (!results || !results?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");

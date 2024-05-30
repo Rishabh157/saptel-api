@@ -18,6 +18,10 @@ const LedgerSchema = new mongoose.Schema(
       default: 0,
       trim: true,
     },
+    ledgerNumber: {
+      type: Number,
+      required: true,
+    },
 
     creditAmount: {
       type: Number,
@@ -38,6 +42,10 @@ const LedgerSchema = new mongoose.Schema(
       required: true,
       trim: true,
       lowercase: true,
+    },
+    itemId: {
+      type: ObjectId,
+      required: true,
     },
     companyId: {
       type: ObjectId,

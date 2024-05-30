@@ -554,7 +554,6 @@ exports.getByProductGroup = async (req, res) => {
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
-    console.log(matchQuery, "matchQuery");
     let additionalQuery = [
       { $match: matchQuery },
       {

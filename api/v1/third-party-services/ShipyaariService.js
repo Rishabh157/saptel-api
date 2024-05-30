@@ -47,12 +47,11 @@ const confirmOrderShipYaari = async (data) => {
       data,
       { headers: HEADER }
     );
-    console.log(response, "response");
+
     if (response) {
       return { data: response?.data, status: true };
     }
   } catch (err) {
-    console.log(err, "error");
     return { data: err, status: false };
   }
 };
@@ -91,7 +90,6 @@ const getShipyaariToken = async () => {
       }
     }
   } catch (err) {
-    console.log(err, "error");
     return false;
   }
 };

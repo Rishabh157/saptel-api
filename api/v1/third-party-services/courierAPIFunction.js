@@ -130,7 +130,6 @@ const assignOrderToCourier = async (
         let orderAssignedToShipYaari = await confirmOrderShipYaari(
           shipYaariOrderData
         );
-        console.log(orderAssignedToShipYaari, "orderAssignedToShipYaari");
 
         orderAssigned = orderAssignedToShipYaari;
 

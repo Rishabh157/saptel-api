@@ -1523,7 +1523,7 @@ exports.getDispatchBarcode = async (req, res) => {
     ];
     let barcode = [];
     const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
-    console.log(foundBarcode, "foundBarcode");
+
     if (foundBarcode !== null) {
       barcode.push(foundBarcode[0]);
     }
@@ -1537,8 +1537,6 @@ exports.getDispatchBarcode = async (req, res) => {
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "No orders for this product");
     }
-    console.log(orderData, "orderData");
-    console.log(barcode, "barcode");
 
     if (barcode.length === 0 || barcode[0] === undefined) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -1628,7 +1626,7 @@ exports.getWhBarcode = async (req, res) => {
     ];
     let barcode = [];
     const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
-    console.log(foundBarcode, "foundBarcode");
+
     if (foundBarcode !== null) {
       barcode.push(foundBarcode[0]);
     }
@@ -2943,12 +2941,10 @@ exports.courierReturnProduct = async (req, res) => {
     let condition = req.params.condition;
     let whid = req.params.whid;
     let id = req.params.id;
-    console.log("here..");
 
     // let newBarcode = barcode?.map((ele) => {
     //   return new mongoose.Types.ObjectId(ele);
     // });
-    console.log("here..");
 
     let dataExist = await barCodeService.aggregateQuery([
       {
@@ -2960,7 +2956,6 @@ exports.courierReturnProduct = async (req, res) => {
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
-    console.log("here..");
 
     let orderInquiry = await orderInquiryService?.getOneAndUpdate(
       { _id: id },
@@ -2968,10 +2963,8 @@ exports.courierReturnProduct = async (req, res) => {
     );
     await addToOrderFlow(orderInquiry);
 
-    console.log("here..");
     const updates = await Promise.all(
       dataExist.map(async (ele) => {
-        console.log(ele, "ele");
         return barCodeService.getOneAndUpdate(
           { barcodeNumber: ele?.barcodeNumber },
           {
@@ -2984,7 +2977,6 @@ exports.courierReturnProduct = async (req, res) => {
         );
       })
     );
-    console.log(updates, "updates");
 
     if (!updates.length) {
       throw new ApiError(httpStatus.OK, "Something went wrong.");

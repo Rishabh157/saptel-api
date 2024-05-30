@@ -88,19 +88,18 @@ const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 
 exports.add = async (req, res) => {
   try {
-    console.log("innnn");
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
-    console.log(orderNumber, inquiryNumber, "pp");
+
     const { idToBeSearch, isOrder, ...rest } = req.body;
-    console.log(idToBeSearch, rest, "datattatat");
+
     try {
       const orderInquiry = await orderService.createNewData({
         ...rest,
         orderNumber: isOrder ? orderNumber : null,
         inquiryNumber: inquiryNumber,
       });
-      console.log(orderInquiry, "orderInquiry");
+
       await addToOrderFlow(orderInquiry);
 
       const dataUpdated = await callService.getOneAndUpdate(
@@ -138,7 +137,7 @@ exports.add = async (req, res) => {
 // // get label
 // exports.getOrderLabel = async (req, res) => {
 //   try {
-//     console.log("innnn");
+//
 
 //     const { awbNumber } = req.body;
 //     try {
@@ -179,7 +178,6 @@ exports.add = async (req, res) => {
 // };
 exports.getOrderLabel = async (req, res) => {
   try {
-    console.log("innnn");
     const { awbNumber } = req.body;
     try {
       let shipyaariToken = await CourierPartnerToken?.getOneByMultiField({
@@ -223,8 +221,6 @@ exports.getOrderLabel = async (req, res) => {
 // generate invoice
 exports.generateOrderInvoice = async (req, res) => {
   try {
-    console.log("innnn");
-
     const { awbNumber } = req.body;
     try {
       let shipyaariToken = await CourierPartnerToken?.getOneByMultiField({
@@ -813,7 +809,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
       wareHouseData,
       categorydata
     );
-    console.log(isOrderAssignedToCourier.status, "llooppp");
+
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.status) {
       let orderUpdateCourier = await orderService.getOneAndUpdate(
@@ -954,12 +950,6 @@ exports.firstCallConfirmation = async (req, res) => {
 
       // if true the hit shipment API else GPO
       if (isOrderAssignedToCourier.status) {
-        console.log(isOrderAssignedToCourier);
-
-        console.log(
-          isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
-          "awb number"
-        );
         let orderUpdateCourier = await orderService.getOneAndUpdate(
           {
             _id: idToBeSearch,
@@ -1092,12 +1082,6 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
 
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.status) {
-      console.log(isOrderAssignedToCourier);
-
-      console.log(
-        isOrderAssignedToCourier[0]?.awbs[0].tracking.awb,
-        "awb number"
-      );
       let orderUpdateCourier = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
@@ -1283,8 +1267,6 @@ exports.warehouseOrderDispatch = async (req, res) => {
         if (!foundBarcode) {
           throw new ApiError(httpStatus.OK, `Invalid barcode`);
         } else {
-          console.log("lll");
-
           const updatedBarcode = await barcodeService.getOneAndUpdate(
             {
               _id: new mongoose.Types.ObjectId(ele?.barcodeId),
@@ -2309,7 +2291,7 @@ exports.getAllOrderStatusCount = async (req, res) => {
     ];
 
     let dataExist = await orderService.aggregateQuery(additionalQuery);
-    console.log(dataExist, "dataExist");
+
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -2343,7 +2325,6 @@ exports.getGPOOrderStatusCount = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
-    console.log("here");
 
     let additionalQuery = [
       {
@@ -2426,7 +2407,6 @@ exports.getGPOOrderStatusCount = async (req, res) => {
     ];
     let OrderCount = await orderService.aggregateQuery(additionalQueryNew);
 
-    console.log(dataExist, "dataExist");
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -2460,7 +2440,6 @@ exports.getShipyaariOrderStatusCount = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
-    console.log("here");
 
     let additionalQuery = [
       {
@@ -2543,7 +2522,6 @@ exports.getShipyaariOrderStatusCount = async (req, res) => {
     ];
     let OrderCount = await orderService.aggregateQuery(additionalQueryNew);
 
-    console.log(dataExist, "dataExist");
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -2659,7 +2637,6 @@ exports.getEcomOrderStatusCount = async (req, res) => {
     ];
     let OrderCount = await orderService.aggregateQuery(additionalQueryNew);
 
-    console.log(dataExist, "dataExist");
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -2989,14 +2966,13 @@ exports.allFilterPagination = async (req, res) => {
         isUsed: true,
         barcodeNumber: barcodeNumber,
       });
-      console.log(barcodeData, "barcodeData", barcodeData?._id);
+
       if (barcodeData) {
         matchQuery.$and.push({
           "barcodeData.barcodeId": barcodeData?._id,
         });
       }
     }
-    console.log(matchQuery, "matchQuery");
 
     let dealersOfZonalManager = [];
     if (
@@ -3155,7 +3131,7 @@ exports.allFilterPagination = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
-    console.log(datefilterQuery, "datefilterQuery");
+
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }

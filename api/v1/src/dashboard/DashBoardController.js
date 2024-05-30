@@ -489,7 +489,6 @@ exports.getZmDealerSummaray = async (req, res) => {
     if (datefilterQuery && datefilterQuery.length) {
       dealerMatchQuery.$and.push(...datefilterQuery);
     }
-    console.log(dealerMatchQuery, "dealerMatchQuery");
 
     let allDealersOfZm = await dealerService.aggregateQuery([
       {
@@ -630,7 +629,7 @@ exports.getZmDealerSummaray = async (req, res) => {
         },
       },
     ]);
-    console.log(allDealersOfZm, "allDealersOfZm");
+
     return res.status(httpStatus.OK).send({
       message: "Successfull.",
       status: true,
@@ -1329,7 +1328,7 @@ exports.getAllOrderStatusCountForDealer = async (req, res) => {
     ];
 
     let dataExist = await orderService.aggregateQuery(additionalQuery);
-    console.log(dataExist, "dataExist");
+
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
@@ -1910,7 +1909,7 @@ exports.getSalesDashboard = async (req, res) => {
     ];
 
     let dataExist = await orderService.aggregateQuery(additionalQuery);
-    console.log(dataExist, "dataExist");
+
     if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {

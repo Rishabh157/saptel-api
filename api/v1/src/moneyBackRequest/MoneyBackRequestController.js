@@ -112,6 +112,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
+
     if (req.path.includes("/app/") || req.path.includes("/app")) {
       matchQuery.$and.push({ isActive: true });
     }
@@ -137,6 +138,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get searchQuery
      */
+
     const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
     if (searchQuery && searchQuery.length) {
       matchQuery.$and.push({ $or: searchQuery });
@@ -145,6 +147,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get range filter query
      */
+
     const rangeQuery = getRangeQuery(rangeFilterBy);
     if (rangeQuery && rangeQuery.length) {
       matchQuery.$and.push(...rangeQuery);
@@ -174,6 +177,7 @@ exports.allFilterPagination = async (req, res) => {
       numberFileds,
       objectIdFields
     );
+
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
@@ -189,6 +193,7 @@ exports.allFilterPagination = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
+
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }

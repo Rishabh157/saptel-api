@@ -5,12 +5,19 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const ledgerService = require("./LedgerService");
 const { searchKeys } = require("./LedgerSchema");
 const { errorRes } = require("../../../utils/resError");
-const { getQuery } = require("../../helper/utils");
+const { getQuery, getLedgerNo } = require("./LedgerHelper");
 const mongoose = require("mongoose");
 const companyService = require("../company/CompanyService");
+const warehouseService = require("../wareHouse/WareHouseService");
+const stateService = require("../state/StateService");
 const dealerService = require("../dealer/DealerService");
-const { ledgerType } = require("../../helper/enumUtils");
-const { getDealerFromLedger, getBalance } = require("./LedgerHelper");
+const productGroupService = require("../productGroup/ProductGroupService");
+const { ledgerType, tallyLedgerType } = require("../../helper/enumUtils");
+const {
+  getDealerFromLedger,
+  getBalance,
+  addLedgerToTally,
+} = require("./LedgerHelper");
 const {
   getSearchQuery,
   checkInvalidParams,
@@ -24,15 +31,19 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { noteType, creditAmount, debitAmount, remark, companyId, dealerId } =
-      req.body;
+    let {
+      noteType,
+      creditAmount,
+      debitAmount,
+      remark,
+      companyId,
+      dealerId,
+      itemId,
+    } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await ledgerService.isExists([]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -40,23 +51,95 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
-    const isDealerExists = await dealerService.findCount({
+    const isDealerExists = await dealerService.getOneByMultiField({
       _id: dealerId,
       isDeleted: false,
     });
     if (!isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer.");
     }
+    const isProductGroupExist = await productGroupService?.getOneByMultiField({
+      isDeleted: false,
+      _id: itemId,
+    });
+    if (!isProductGroupExist) {
+      throw new ApiError(httpStatus.OK, "Invalid Item.");
+    }
+    const warehouseData = await warehouseService?.getOneByMultiField({
+      isDeleted: false,
+      isDefault: true,
+    });
+    if (!warehouseData) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong invalid warehouse"
+      );
+    }
+    const companyStateId = warehouseData?.billingAddress?.stateId;
+    const companyStateData = await stateService?.getOneByMultiField({
+      isDeleted: false,
+      _id: companyStateId,
+    });
 
+    const dealerStateData = await stateService?.getOneByMultiField({
+      isDeleted: false,
+      _id: isDealerExists?.billingAddress?.stateId,
+    });
+
+    if (!dealerStateData) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong with dealer state"
+      );
+    }
     const dealerExitsId = await getDealerFromLedger(dealerId);
     const balance = await getBalance(dealerExitsId, creditAmount, debitAmount);
 
-    // let ledgerNo =
+    let ledgerNo = await getLedgerNo(noteType);
+
+    let dataExist = await ledgerService.isExists(
+      [{ noteType }, { ledgerNumber: ledgerNo }],
+      false,
+      true
+    );
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
     //------------------create data-------------------
     let dataCreated = await ledgerService.createNewData({
       ...req.body,
       balance: balance,
+      ledgerNumber: ledgerNo,
     });
+
+    let gstType;
+    if (companyStateData.stateName === dealerStateData.stateName) {
+      gstType = ["CGST", "SGST"];
+    } else if (companyStateData.stateName !== dealerStateData.stateName) {
+      if (dealerStateData.isUnion) {
+        gstType = ["UTGST"];
+      } else {
+        gstType = ["IGST"];
+      }
+    }
+
+    let xmlData = {
+      companyState: companyStateData?.stateName,
+      partyName: isDealerExists?.firmName,
+      itemName: isProductGroupExist?.groupName,
+      amount: creditAmount ? creditAmount : debitAmount,
+      cgst: isProductGroupExist?.cgst,
+      sgst: isProductGroupExist?.sgst,
+      utgst: isProductGroupExist?.utgst,
+      igst: isProductGroupExist?.igst,
+      gstType,
+      ledgerType: creditAmount
+        ? tallyLedgerType.cretidNote
+        : tallyLedgerType.debitNote,
+      ledgerNumber: ledgerNo,
+    };
+
+    let creditNoteTallySync = await addLedgerToTally(xmlData);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

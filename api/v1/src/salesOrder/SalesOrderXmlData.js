@@ -7,14 +7,7 @@ const SalesOrderXmlData = (data) => {
 
     expectedDeliveryDate,
   } = data;
-  console.log(
-    companyState,
-    partyName,
-    soNumber,
-    itemDataForTally,
 
-    "datat"
-  );
   const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based, so add 1
@@ -28,7 +21,6 @@ const SalesOrderXmlData = (data) => {
   let totalTaxAmount = 0;
   let ledgerDataArray = [];
   itemDataForTally?.map((ele) => {
-    console.log(ele, "datatata");
     myItems += `
     
     <ALLINVENTORYENTRIES.LIST>
@@ -197,7 +189,6 @@ const SalesOrderXmlData = (data) => {
     });
     totalTaxAmount += totalAmount + (totalAmount * totalTaxPercent) / 100;
   });
-  console.log(totalTaxAmount, "totalTaxAmount");
   ledgerDataArray?.map((ele) => {
     ledgerData += `
     <LEDGERENTRIES.LIST>
@@ -253,10 +244,6 @@ const SalesOrderXmlData = (data) => {
     <TAXTYPEALLOCATIONS.LIST>       </TAXTYPEALLOCATIONS.LIST>
    </LEDGERENTRIES.LIST>`;
   });
-
-  // console.log(totalTaxAmount, "totalTaxAmount");
-
-  //   `;
 
   let xmlData = `<ENVELOPE>
   <HEADER>

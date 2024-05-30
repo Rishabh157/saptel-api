@@ -15,6 +15,7 @@ const create = {
     remark: Joi.string().lowercase().required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     dealerId: Joi.string().custom(commonValidation.objectId).required(),
+    itemId: Joi.string().custom(commonValidation.objectId).required(),
   }),
 };
 

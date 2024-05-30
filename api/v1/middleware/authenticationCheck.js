@@ -13,7 +13,6 @@ exports.authCheckMiddleware = async (req, res, next) => {
     /**
      * check token exist in req body
      */
-    console.log("yha");
 
     let isTokenExist = authHelper.checkTokenExist(req, res);
 
@@ -66,7 +65,7 @@ exports.authCheckMiddleware = async (req, res, next) => {
         throw new ApiError(httpStatus.UNAUTHORIZED, userDetails.message);
       }
     }
-    console.log("complete");
+
     next();
   } catch (err) {
     let errData = errorRes(err);
@@ -87,7 +86,6 @@ exports.authCheckDealerMiddleware = async (req, res, next) => {
     /**
      * check token exist in req body
      */
-    console.log("uui");
 
     let isTokenExist = authHelper.checkTokenExist(req, res);
 
