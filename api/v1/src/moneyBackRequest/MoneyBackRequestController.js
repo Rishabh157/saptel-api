@@ -5,6 +5,10 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const moneyBackRequestService = require("./MoneyBackRequestService");
 const moneyBackRequestLogService = require("../moneyBackRequestLog/MoneyBackRequestLogService");
 const complaintService = require("../complain/ComplainService");
+const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
+const orderInquiryService = require("../orderInquiry/OrderInquiryService");
+const schemeService = require("../scheme/SchemeService");
+
 const { searchKeys } = require("./MoneyBackRequestSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -19,7 +23,10 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
-const { complainStatusEnum } = require("../../helper/enumUtils");
+const {
+  complainStatusEnum,
+  customerReturnRequestType,
+} = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
@@ -784,7 +791,7 @@ exports.accountApproval = async (req, res) => {
       complaintNumber,
     } = req.body;
 
-    let dataExist = await moneyBackRequestService.findCount({
+    let dataExist = await moneyBackRequestService.getOneByMultiField({
       _id: id,
       isDeleted: false,
       isActive: true,
@@ -793,6 +800,28 @@ exports.accountApproval = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
+    let orderdata = await orderInquiryService?.getOneByMultiField({
+      orderNumber: parseInt(dataExist?.orderNumber),
+    });
+    if (!orderdata) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong invalid order number"
+      );
+    }
+    let schemeData = await schemeService?.getOneByMultiField({
+      isDeleted: false,
+      _id: orderdata?.schemeId,
+    });
+    if (!schemeData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong invalid Scheme");
+    }
+    let newSchemes = schemeData?.productInformation?.map((ele) => {
+      return {
+        productGroupName: ele?.productGroupName,
+        quantity: ele?.productQuantity,
+      };
+    });
     let updatedData = await moneyBackRequestService.getOneAndUpdate(
       { _id: id },
       {
@@ -828,6 +857,19 @@ exports.accountApproval = async (req, res) => {
         companyId: req.userData.companyId,
         accoutUserId: req?.userData?.Id,
       });
+      if (orderdata?.assignWarehouseId !== null) {
+        await customerWhReturnService?.createNewData({
+          orderNumber: orderdata?.orderNumber,
+          barcodeData: orderdata?.barcodeData,
+          ccRemark: dataExist?.ccRemark,
+          requestType: customerReturnRequestType.moneyBack,
+          warehouseId: orderdata?.assignWarehouseId,
+          companyId: req.userData.companyId,
+          schemeName: orderdata?.schemeName,
+          schemeQuantity: orderdata?.shcemeQuantity,
+          productInfo: newSchemes,
+        });
+      }
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,

@@ -14,6 +14,8 @@ const ledgerService = require("../ledger/LedgerService");
 const initialCallOneService = require("../initialCallOne/InitialCallOneService");
 const barcodeService = require("../barCode/BarCodeService");
 const houseArrestLogsService = require("../houseArrestRequestLogs/HouseArrestRequestLogsService");
+const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
+
 const { searchKeys } = require("./HouseArrestRequestSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -33,6 +35,7 @@ const {
   complainStatusEnum,
   orderStatusEnum,
   ledgerType,
+  customerReturnRequestType,
 } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
 const { getBalance, getDealerFromLedger } = require("../ledger/LedgerHelper");
@@ -1084,7 +1087,29 @@ exports.accountApproval = async (req, res) => {
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    let orderdata = await orderInquiryService?.getOneByMultiField({
+      orderNumber: parseInt(dataExist?.orderNumber),
+    });
+    if (!orderdata) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong invalid order number"
+      );
+    }
 
+    let schemeData = await schemeService?.getOneByMultiField({
+      isDeleted: false,
+      _id: orderdata?.schemeId,
+    });
+    if (!schemeData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong invalid Scheme");
+    }
+    let newSchemes = schemeData?.productInformation?.map((ele) => {
+      return {
+        productGroupName: ele?.productGroupName,
+        quantity: ele?.productQuantity,
+      };
+    });
     let updatedData = await houseArrestRequestService.getOneAndUpdate(
       { _id: id },
       {
@@ -1131,6 +1156,19 @@ exports.accountApproval = async (req, res) => {
 
         accoutUserId: req?.userData?.Id,
       });
+      if (orderdata?.assignWarehouseId !== null) {
+        await customerWhReturnService?.createNewData({
+          orderNumber: orderdata?.orderNumber,
+          barcodeData: orderdata.barcodeData,
+          ccRemark: dataExist?.ccRemark,
+          requestType: customerReturnRequestType.houseArrest,
+          warehouseId: orderdata?.assignWarehouseId,
+          companyId: req.userData.companyId,
+          schemeName: orderdata?.schemeName,
+          schemeQuantity: orderdata?.shcemeQuantity,
+          productInfo: newSchemes,
+        });
+      }
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,

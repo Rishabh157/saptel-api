@@ -47,6 +47,7 @@ exports.add = async (req, res) => {
     let orderData = await orderInquiryService?.getOneByMultiField({
       orderNumber: orderNumber,
       assignWarehouseId: warehouseId,
+      assignDealerId: null,
     });
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "Invaid Order number");
@@ -150,6 +151,7 @@ exports.bulkUpload = async (req, res) => {
       const isOrderExists = await orderInquiryService.getOneByMultiField({
         orderNumber: data.orderNumber,
         assignWarehouseId: warehouseId,
+        assignDealerId: null,
       });
       if (!isOrderExists) {
         throw new ApiError(

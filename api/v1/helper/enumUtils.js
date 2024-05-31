@@ -80,6 +80,12 @@ const slotDaysType = Object.freeze({
   sunday: "SUNDAY",
 });
 
+const customerReturnRequestType = Object.freeze({
+  moneyBack: "MONEYBACK",
+  replacement: "REPLACEMENT",
+  houseArrest: "HOUSEARREST",
+});
+
 const companyEnum = Object.freeze({
   pltc: "PRIVATE_LIMITED_COMPANY",
   plc: "PUBLIC_LIMITED_COMPANY",
@@ -611,4 +617,5 @@ module.exports = {
   orderCancelReason,
   courierRTOType,
   tallyLedgerType,
+  customerReturnRequestType,
 };

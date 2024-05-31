@@ -5,6 +5,8 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const productReplacementRequestService = require("./ProductReplacementRequestService");
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const complaintService = require("../complain/ComplainService");
+const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
+
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const userService = require("../user/UserService");
 const schemeService = require("../scheme/SchemeService");
@@ -26,6 +28,7 @@ const {
 const {
   orderStatusEnum,
   complainStatusEnum,
+  customerReturnRequestType,
 } = require("../../helper/enumUtils");
 const { default: mongoose } = require("mongoose");
 const {
@@ -801,6 +804,29 @@ exports.accountApproval = async (req, res) => {
     if (!dataExist) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
+    let orderdata = await orderInquiryService?.getOneByMultiField({
+      orderNumber: parseInt(dataExist?.orderNumber),
+    });
+    if (!orderdata) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Something went wrong invalid order number"
+      );
+    }
+
+    let schemeData = await schemeService?.getOneByMultiField({
+      isDeleted: false,
+      _id: orderdata?.schemeId,
+    });
+    if (!schemeData) {
+      throw new ApiError(httpStatus.OK, "Something went wrong invalid Scheme");
+    }
+    let newSchemes = schemeData?.productInformation?.map((ele) => {
+      return {
+        productGroupName: ele?.productGroupName,
+        quantity: ele?.productQuantity,
+      };
+    });
 
     let updatedData = await productReplacementRequestService.getOneAndUpdate(
       { _id: id },
@@ -873,6 +899,19 @@ exports.accountApproval = async (req, res) => {
         companyId: req.userData.companyId,
         accoutUserId: updatedData?.accoutUserId,
       });
+      if (orderdata?.assignWarehouseId !== null) {
+        await customerWhReturnService?.createNewData({
+          orderNumber: orderdata?.orderNumber,
+          barcodeData: orderdata.barcodeData,
+          ccRemark: dataExist?.ccRemark,
+          requestType: customerReturnRequestType.replacement,
+          warehouseId: orderdata?.assignWarehouseId,
+          companyId: req.userData.companyId,
+          schemeName: orderdata?.schemeName,
+          schemeQuantity: orderdata?.shcemeQuantity,
+          productInfo: newSchemes,
+        });
+      }
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,

@@ -91,6 +91,13 @@ router.get(
   barCodeController.getByBarcode
 );
 
+// for customer return
+router.get(
+  "/customer-return/barcode/:barcode/status/:status",
+  authCheckMiddleware,
+  validate(barCodeValidation.getBarcodeForCustomerReturn),
+  barCodeController.getBarcodeForCustomerReturn
+);
 router.get(
   "/outer-box-barcode/:barcode",
   authCheckMiddleware,
@@ -302,7 +309,7 @@ router.put(
  * update status
  */
 router.put(
-  "/courier-return-product/:id/condition/:condition/warehouse/:whid",
+  "/customer-return-product/:id/condition/:condition/warehouse/:whid",
   authCheckMiddleware,
   validate(barCodeValidation.courierReturn),
   barCodeController.courierReturnProduct

@@ -15,6 +15,7 @@ const wtsMasterService = require("../warehouseToSample/wtsMasterService");
 const dtwMasterService = require("../dealerToWarehouse/dtwMasterService");
 
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
+const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const ProductGroupService = require("../productGroup/ProductGroupService");
 const rtvMasterService = require("../rtvMaster/RtvMasterService");
@@ -1198,6 +1199,94 @@ exports.getByBarcode = async (req, res) => {
   }
 };
 
+// barcode for customer return
+
+exports.getBarcodeForCustomerReturn = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+    const status = req.params.status;
+    const cid = req.userData.companyId;
+
+    let additionalQueryForOne = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          status: status,
+          companyId: new mongoose.Types.ObjectId(cid),
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
+
+    console.log(additionalQueryForOne, "additionalQueryForOne");
+
+    const foundBarcode = await barCodeService.aggregateQuery(
+      additionalQueryForOne
+    );
+    console.log(foundBarcode, "foundBarcode");
+
+    if (foundBarcode.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: foundBarcode,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 exports.getByOuterBoxBarcode = async (req, res) => {
   try {
     const barcodeToBeSearch = req.params.barcode;
@@ -1834,6 +1923,11 @@ exports.getInventory = async (req, res) => {
               $cond: [{ $in: ["$status", ["MISSING", "FAKE"]] }, 1, 0],
             },
           },
+          totalRtvCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "RTV"] }, 1, 0],
+            },
+          },
           firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
         },
       },
@@ -1849,6 +1943,7 @@ exports.getInventory = async (req, res) => {
           totalFreshCount: 1, // Include the totalFreshCount field
           totalDamageCount: 1, // Include the totalDamageCount field
           totalMissingCount: 1, // Include the totalMissingCount field
+          totalRtvCount: 1,
         },
       },
     ];
@@ -2937,14 +3032,28 @@ exports.statusChange = async (req, res) => {
 //courier return products
 exports.courierReturnProduct = async (req, res) => {
   try {
+    console.log("here");
     let barcode = req.body.barcode;
     let condition = req.params.condition;
     let whid = req.params.whid;
     let id = req.params.id;
+    let orderNumber = req.body.orderNumber;
 
     // let newBarcode = barcode?.map((ele) => {
     //   return new mongoose.Types.ObjectId(ele);
     // });
+    const validationPromises = barcode?.map(async (ele) => {
+      const orderInquiryFound = await orderInquiryService?.getOneByMultiField({
+        orderNumber: orderNumber,
+        "barcodeData.barcode": { $in: [ele] },
+      });
+      if (!orderInquiryFound) {
+        throw new ApiError(httpStatus.OK, "Barcode not from this order");
+      }
+    });
+
+    // Wait for all promises to resolve
+    await Promise.all(validationPromises);
 
     let dataExist = await barCodeService.aggregateQuery([
       {
@@ -2958,11 +3067,11 @@ exports.courierReturnProduct = async (req, res) => {
     }
 
     let orderInquiry = await orderInquiryService?.getOneAndUpdate(
-      { _id: id },
+      { orderNumber: orderNumber },
       { $set: { status: orderStatusEnum.closed } }
     );
     await addToOrderFlow(orderInquiry);
-
+    console.log("yha tak");
     const updates = await Promise.all(
       dataExist.map(async (ele) => {
         return barCodeService.getOneAndUpdate(
@@ -2986,6 +3095,11 @@ exports.courierReturnProduct = async (req, res) => {
       updates.map((updated) => {
         return addToBarcodeFlow(updated);
       })
+    );
+
+    await customerWhReturnService?.getOneAndUpdate(
+      { _id: id },
+      { isCompleted: true }
     );
 
     return res.status(httpStatus.OK).send({
@@ -3441,7 +3555,7 @@ exports.rtvOutwardInventory = async (req, res) => {
           $set: {
             status: barcodeStatusType.rtv,
             vendorId: new mongoose.Types.ObjectId(ele?.vendorId),
-            wareHouseId: null,
+            // wareHouseId: null,
           },
         }
       );
