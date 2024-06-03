@@ -12,7 +12,6 @@ const BarCodeFlowSchema = new mongoose.Schema(
     isUsed: { type: Boolean, default: false },
     wareHouseId: { type: ObjectId, default: null, trim: true },
     vendorId: { type: ObjectId, default: null, trim: true },
-
     dealerId: { type: ObjectId, default: null, trim: true },
     status: {
       type: String,
@@ -27,18 +26,23 @@ const BarCodeFlowSchema = new mongoose.Schema(
         barcodeStatusType.wtc,
         barcodeStatusType.dtw,
         barcodeStatusType.dtd,
-
         barcodeStatusType.delivered,
         barcodeStatusType.damage,
         barcodeStatusType.missing,
+        barcodeStatusType.fake,
+        barcodeStatusType.expired,
 
         "",
       ],
       default: "",
     },
-
+    expiryDate: { type: String, required: true },
+    barcodeLog: { type: String, required: true },
     companyId: { type: ObjectId, required: true, trim: true },
-
+    isFreezed: {
+      type: Boolean,
+      default: false,
+    },
     isDeleted: {
       type: Boolean,
       default: false,

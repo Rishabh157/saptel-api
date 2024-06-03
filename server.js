@@ -6,7 +6,10 @@ const fs = require("fs");
 const port = config.port || 3004;
 const server = http.createServer(app);
 const cron = require("node-cron");
-const { addSlotEveryDayFun } = require("./api/v1/cron-functions");
+const {
+  addSlotEveryDayFun,
+  UpdateExpiredBarcode,
+} = require("./api/v1/cron-functions");
 const {
   getShipyaariToken,
 } = require("./api/v1/third-party-services/ShipyaariService");
@@ -15,6 +18,7 @@ const {
 cron.schedule("0 12 * * *", async () => {
   await getShipyaariToken();
   await addSlotEveryDayFun();
+  await UpdateExpiredBarcode();
 });
 //-------------------------------
 //start server

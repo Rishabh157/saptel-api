@@ -5,7 +5,7 @@ const { errorRes } = require("../../../utils/resError");
 const ApiError = require("../../../utils/apiErrorUtils");
 const barCodeFlowService = require("./BarCodeFlowService");
 
-const addToBarcodeFlow = async (barcode) => {
+const addToBarcodeFlow = async (barcode, barcodeLog) => {
   try {
     barcode = JSON.parse(JSON.stringify(barcode));
 
@@ -13,6 +13,7 @@ const addToBarcodeFlow = async (barcode) => {
 
     let addbarcodeLog = await barCodeFlowService.createNewData({
       ...barcode,
+      barcodeLog: barcodeLog,
     });
     if (!addbarcodeLog) {
       throw new ApiError(httpStatus.OK, "Something went wrong..");

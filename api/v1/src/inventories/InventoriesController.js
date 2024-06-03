@@ -82,7 +82,7 @@ exports.add = async (req, res) => {
         },
         { $set: { isUsed: true } }
       );
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(dataUpdated, "Barcode inward in warehouse");
     });
     //------------------create data-------------------
 

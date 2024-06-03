@@ -98,6 +98,14 @@ router.get(
   validate(barCodeValidation.getBarcodeForCustomerReturn),
   barCodeController.getBarcodeForCustomerReturn
 );
+
+// for customer return
+router.get(
+  "/customer-return-order-barcodes/:orderno",
+  authCheckMiddleware,
+  validate(barCodeValidation.getBarcodeForCustomerReturnFromOrderNo),
+  barCodeController.getBarcodeForCustomerReturnFromOrderNumber
+);
 router.get(
   "/outer-box-barcode/:barcode",
   authCheckMiddleware,
@@ -303,6 +311,16 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.changeStatus),
   barCodeController.statusChange
+);
+
+/**
+ * update status for freeze barcode
+ */
+router.put(
+  "/freeze-barcode/:bcode/status/:status",
+  authCheckMiddleware,
+  validate(barCodeValidation.freezeBarcode),
+  barCodeController.freezeBarcode
 );
 
 /**

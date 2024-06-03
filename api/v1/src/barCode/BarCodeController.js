@@ -58,17 +58,9 @@ exports.add = async (req, res) => {
       barcodeGroupNumber,
       quantity,
       lotNumber,
-      companyId,
+      expiryDate,
       status,
     } = req.body;
-
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
 
     /**
      * check duplicate exist
@@ -98,6 +90,7 @@ exports.add = async (req, res) => {
     }
 
     let output = [];
+    let barcodeFlowData = [];
 
     for (let i = 0; i < quantity; i++) {
       if (i > 0) {
@@ -110,14 +103,26 @@ exports.add = async (req, res) => {
         barcodeNumber: lotNumber + currentBarcode,
         lotNumber,
         wareHouseId: null,
-        companyId,
+        companyId: req.userData.companyId,
+        expiryDate,
         status: "",
+      });
+      barcodeFlowData.push({
+        productGroupId,
+        barcodeGroupNumber,
+        barcodeNumber: lotNumber + currentBarcode,
+        lotNumber,
+        wareHouseId: null,
+        companyId: req.userData.companyId,
+        expiryDate,
+        status: "",
+        barcodeLog: "Barcode created in warehouse",
       });
     }
 
     //------------------create data-------------------
     let dataCreated = await barCodeService.createMany(output);
-    await barcodeFlowService.createMany(output);
+    await barcodeFlowService.createMany(barcodeFlowData);
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -198,7 +203,7 @@ exports.update = async (req, res) => {
       }
     );
 
-    await addToBarcodeFlow(dataUpdated);
+    await addToBarcodeFlow(dataUpdated, "Barcode updated");
 
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
@@ -772,7 +777,10 @@ exports.checkBarcode = async (req, res) => {
           }
         );
 
-        await addToBarcodeFlow(dataUpdated);
+        await addToBarcodeFlow(
+          dataUpdated,
+          `Barcode status updated to Delivered`
+        );
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
           status: true,
@@ -866,7 +874,10 @@ exports.checkBarcodeDealerApp = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(dataUpdated);
+        await addToBarcodeFlow(
+          dataUpdated,
+          `Barcode Delivered from Dealer ${req.userData.firstName} ${req.userData.lastName}`
+        );
 
         return res.status(httpStatus.OK).send({
           message: "Successfull.",
@@ -1066,6 +1077,7 @@ exports.getByBarcode = async (req, res) => {
           status: status,
           productGroupId: new mongoose.Types.ObjectId(productGroupId),
           companyId: new mongoose.Types.ObjectId(cid),
+          isFreezed: false,
         },
       },
       {
@@ -1118,6 +1130,7 @@ exports.getByBarcode = async (req, res) => {
           status: status,
           productGroupId: new mongoose.Types.ObjectId(productGroupId),
           companyId: new mongoose.Types.ObjectId(cid),
+          isFreezed: false,
         },
       },
       {
@@ -1287,6 +1300,112 @@ exports.getBarcodeForCustomerReturn = async (req, res) => {
   }
 };
 
+// customer return barcode from order no
+
+exports.getBarcodeForCustomerReturnFromOrderNumber = async (req, res) => {
+  try {
+    const orderno = req.params.orderno;
+    const cid = req.userData.companyId;
+    console.log(cid, "company");
+    const orderData = await orderInquiryService.getOneByMultiField({
+      orderNumber: orderno,
+    });
+
+    if (!orderData) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Order not found.");
+    }
+
+    console.log(orderData, "orderData");
+
+    let orderBarcode = orderData?.barcodeData?.map((ele) => ele?.barcode);
+    console.log(orderBarcode, "orderBarcode");
+
+    if (!orderBarcode || orderBarcode.length === 0) {
+      throw new ApiError(
+        httpStatus.NOT_FOUND,
+        "No barcodes found for the order."
+      );
+    }
+
+    let allBarcodes = [];
+    for (const ele of orderBarcode) {
+      console.log(`Processing barcode: ${ele}`);
+
+      const additionalQueryForOne = [
+        {
+          $match: {
+            barcodeNumber: ele,
+            isUsed: true,
+            companyId: new mongoose.Types.ObjectId(cid),
+          },
+        },
+        {
+          $lookup: {
+            from: "productgroups",
+            localField: "productGroupId",
+            foreignField: "_id",
+            as: "product_group",
+            pipeline: [
+              { $match: { isDeleted: false } },
+              { $project: { groupName: 1 } },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "warehouses",
+            localField: "wareHouseId",
+            foreignField: "_id",
+            as: "warehouse_data",
+            pipeline: [
+              { $match: { isDeleted: false } },
+              { $project: { wareHouseName: 1 } },
+            ],
+          },
+        },
+        {
+          $addFields: {
+            productGroupLabel: {
+              $arrayElemAt: ["$product_group.groupName", 0],
+            },
+            wareHouseLabel: {
+              $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+            },
+          },
+        },
+        { $unset: ["product_group", "warehouse_data"] },
+      ];
+
+      const foundBarcode = await barCodeService.aggregateQuery(
+        additionalQueryForOne
+      );
+      console.log(foundBarcode, "foundBarcode");
+
+      if (foundBarcode.length > 0) {
+        allBarcodes.push(foundBarcode[0]);
+      }
+    }
+
+    if (allBarcodes.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: allBarcodes,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 exports.getByOuterBoxBarcode = async (req, res) => {
   try {
     const barcodeToBeSearch = req.params.barcode;
@@ -1910,22 +2029,36 @@ exports.getInventory = async (req, res) => {
           count: { $sum: 1 }, // Count the documents in each group
           totalFreshCount: {
             $sum: {
-              $cond: [{ $eq: ["$status", "AT_WAREHOUSE"] }, 1, 0],
+              $cond: [
+                { $eq: ["$status", barcodeStatusType.atWarehouse] },
+                1,
+                0,
+              ],
             },
           },
           totalDamageCount: {
             $sum: {
-              $cond: [{ $eq: ["$status", "DAMAGE"] }, 1, 0],
+              $cond: [{ $eq: ["$status", barcodeStatusType.damage] }, 1, 0],
             },
           },
           totalMissingCount: {
             $sum: {
-              $cond: [{ $in: ["$status", ["MISSING", "FAKE"]] }, 1, 0],
+              $cond: [{ $eq: ["$status", barcodeStatusType.missing] }, 1, 0],
             },
           },
           totalRtvCount: {
             $sum: {
-              $cond: [{ $eq: ["$status", "RTV"] }, 1, 0],
+              $cond: [{ $eq: ["$status", barcodeStatusType.rtv] }, 1, 0],
+            },
+          },
+          totalFakeCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", barcodeStatusType.fake] }, 1, 0],
+            },
+          },
+          expiredCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", barcodeStatusType.expired] }, 1, 0],
             },
           },
           firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
@@ -1944,6 +2077,8 @@ exports.getInventory = async (req, res) => {
           totalDamageCount: 1, // Include the totalDamageCount field
           totalMissingCount: 1, // Include the totalMissingCount field
           totalRtvCount: 1,
+          totalFakeCount: 1,
+          expiredCount: 1,
         },
       },
     ];
@@ -3008,7 +3143,10 @@ exports.statusChange = async (req, res) => {
       { _id },
       { isActive }
     );
-    await addToBarcodeFlow(statusChanged);
+    await addToBarcodeFlow(
+      statusChanged,
+      `Barcode Status changes to ${isActive}`
+    );
     if (!statusChanged) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -3016,6 +3154,44 @@ exports.statusChange = async (req, res) => {
       message: "Successfull.",
       status: true,
       data: statusChanged,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// freeze barcode
+
+exports.freezeBarcode = async (req, res) => {
+  try {
+    let barcode = req.params.bcode;
+    let status = req.params.status;
+
+    let dataExist = await barCodeService.getOneByMultiField({
+      barcodeNumber: barcode,
+    });
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    let freezedBarcode = await barCodeService.getOneAndUpdate(
+      { barcodeNumber: barcode },
+      { isFreezed: status }
+    );
+    if (!freezedBarcode) {
+      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    }
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: freezedBarcode,
       code: "OK",
       issue: null,
     });
@@ -3093,7 +3269,10 @@ exports.courierReturnProduct = async (req, res) => {
 
     const newBarcodeFlowData = await Promise.all(
       updates.map((updated) => {
-        return addToBarcodeFlow(updated);
+        return addToBarcodeFlow(
+          updated,
+          `Returned from courier ${orderInquiry?.orderAssignedToCourier}, assigned to order number: ${orderInquiry?.orderNumber}, Received in ${condition} COndition`
+        );
       })
     );
 
@@ -3151,7 +3330,7 @@ exports.updateInventory = async (req, res) => {
           },
         }
       );
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(dataUpdated, "Barcode inward in Warehouse");
       return dataUpdated;
     });
 
@@ -3270,7 +3449,7 @@ exports.updateWarehouseInventory = async (req, res) => {
           );
         });
       }
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(dataUpdated, "Barcode inwarrd in warehouse");
 
       return dataUpdated;
     });
@@ -3335,7 +3514,10 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
         );
       });
 
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode inward in Dealers warehouse"
+      );
 
       return dataUpdated;
     });
@@ -3426,7 +3608,7 @@ exports.outwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3467,7 +3649,10 @@ exports.outwardInventory = async (req, res) => {
         );
       });
 
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode Dispatched from warehouse to Dealer"
+      );
 
       return dataUpdated;
     });
@@ -3543,7 +3728,7 @@ exports.rtvOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3573,7 +3758,10 @@ exports.rtvOutwardInventory = async (req, res) => {
         );
       });
 
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode Dispatched from warehouse to Vendor"
+      );
 
       return dataUpdated;
     });
@@ -3649,7 +3837,7 @@ exports.wtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3677,7 +3865,10 @@ exports.wtwOutwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode Dispatched from warehouse to Other company warehouse"
+      );
 
       return dataUpdated;
     });
@@ -3753,7 +3944,7 @@ exports.dtdOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(dataUpdated);
+        await addToBarcodeFlow(dataUpdated, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3782,7 +3973,10 @@ exports.dtdOutwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode dispatched from one dealer to other dealer"
+      );
 
       return dataUpdated;
     });
@@ -3858,7 +4052,7 @@ exports.dtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3886,7 +4080,10 @@ exports.dtwOutwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode dispatched from Dealer to company warehouse"
+      );
 
       return dataUpdated;
     });
@@ -3962,7 +4159,7 @@ exports.wtcOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3991,7 +4188,10 @@ exports.wtcOutwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode Dispatched from warehouse to other company"
+      );
 
       return dataUpdated;
     });
@@ -4067,7 +4267,7 @@ exports.wtsOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4095,7 +4295,10 @@ exports.wtsOutwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode dispatched from warehouse to sample testing"
+      );
 
       return dataUpdated;
     });
@@ -4175,7 +4378,7 @@ exports.orderDispatch = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele);
+        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4190,7 +4393,10 @@ exports.orderDispatch = async (req, res) => {
           },
         }
       );
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode Delivered to customer successfully!"
+      );
       return dataUpdated;
     });
 
@@ -4409,7 +4615,7 @@ exports.dealerInwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated);
+      await addToBarcodeFlow(dataUpdated, "Barcode inward at Dealer warehouse");
       return dataUpdated;
     });
 

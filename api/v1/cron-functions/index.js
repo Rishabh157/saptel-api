@@ -1,6 +1,8 @@
 const SlotDefinition = require("../src/slotDefination/SlotDefinitionService");
 const SlotMaster = require("../src/slotMaster/SlotMasterService");
+const barcodeService = require("../src/barCode/BarCodeService");
 const moment = require("moment"); // You may need to install the moment library using 'npm install moment'
+const { barcodeStatusType } = require("../helper/enumUtils");
 
 exports.addSlotEveryDayFun = async () => {
   const slotDefinition = await SlotDefinition.findAllWithQuery({
@@ -49,4 +51,25 @@ exports.addSlotEveryDayFun = async () => {
       companyId: ele.companyId || "",
     });
   });
+};
+
+exports.UpdateExpiredBarcode = async () => {
+  console.log("expiry");
+  let todaysDate = JSON.stringify(
+    new Date(`${moment().format("YYYY-MM-DD")}`)
+  ).replace('"', "");
+
+  let updated = await barcodeService?.updateMany(
+    {
+      isUsed: true,
+      expiryDate: {
+        $lte: todaysDate.split("T")[0],
+      },
+    },
+    {
+      $set: {
+        status: barcodeStatusType.expired,
+      },
+    }
+  );
 };

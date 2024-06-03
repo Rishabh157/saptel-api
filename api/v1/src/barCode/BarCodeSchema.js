@@ -28,14 +28,21 @@ const BarCodeSchema = new mongoose.Schema(
         barcodeStatusType.delivered,
         barcodeStatusType.damage,
         barcodeStatusType.missing,
+        barcodeStatusType.fake,
+        barcodeStatusType.expired,
         "",
       ],
       default: "",
     },
+    expiryDate: { type: String, required: true },
 
     companyId: { type: ObjectId, required: true, trim: true },
 
     isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    isFreezed: {
       type: Boolean,
       default: false,
     },

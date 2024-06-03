@@ -1255,6 +1255,23 @@ exports.warehouseOrderDispatch = async (req, res) => {
         `Order not found or already dispatched`
       );
     }
+    if (type === preferredCourierPartner.gpo) {
+      var awbNumberData = await awbMaster?.getOneByMultiField({
+        isUsed: false,
+      });
+      if (!awbNumberData) {
+        throw new ApiError(httpStatus.OK, `No AWB found please add GPO AWB`);
+      }
+      await awbMaster?.getOneAndUpdate(
+        { awbNumber: awbNumberData.awbNumber },
+        {
+          $set: {
+            isUsed: true,
+            orderNumber: orderNumber,
+          },
+        }
+      );
+    }
 
     await Promise.all(
       barcodes?.map(async (ele) => {
@@ -1279,37 +1296,37 @@ exports.warehouseOrderDispatch = async (req, res) => {
             }
           );
 
-          await addToBarcodeFlow(updatedBarcode);
+          await addToBarcodeFlow(
+            updatedBarcode,
+            "Barcode status marked as intransit"
+          );
         }
       })
     );
 
+    let dataToBeUpdate = [];
     if (type === preferredCourierPartner.gpo) {
-      var awbNumberData = await awbMaster?.getOneByMultiField({
-        isUsed: false,
+      dataToBeUpdate.push({
+        barcodeData: barcodes,
+        status: orderStatusEnum.intransit,
+        orderStatus: productStatus.dispatched,
+        awbNumber: awbNumberData?.awbNumber,
       });
-      await awbMaster?.getOneAndUpdate(
-        { awbNumber: awbNumberData.awbNumber },
-        {
-          $set: {
-            isUsed: true,
-            orderNumber: orderNumber,
-          },
-        }
-      );
+    } else if (type === preferredCourierPartner.shipyaari) {
+      dataToBeUpdate.push({
+        barcodeData: barcodes,
+        status: orderStatusEnum.intransit,
+        orderStatus: productStatus.dispatched,
+      });
     }
+
     let dataUpdated = await orderService.getOneAndUpdate(
       {
         orderNumber: orderNumber,
         isDeleted: false,
       },
       {
-        $set: {
-          barcodeData: barcodes,
-          status: orderStatusEnum.intransit,
-          orderStatus: productStatus.dispatched,
-          awbNumber: awbNumberData.awbNumber,
-        },
+        $set: dataToBeUpdate[0],
       }
     );
 

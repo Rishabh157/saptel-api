@@ -204,7 +204,10 @@ exports.cancelOrder = async (req, res) => {
               },
             }
           );
-          await addToBarcodeFlow(updatedBarcode);
+          await addToBarcodeFlow(
+            updatedBarcode,
+            "Order canceled barcode inwarded in inventory"
+          );
         })
       );
     }

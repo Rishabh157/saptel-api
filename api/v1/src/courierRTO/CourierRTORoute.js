@@ -85,7 +85,7 @@ router.get(
  * update status
  */
 router.put(
-  "/chnage-request-status/:id",
+  "/change-request-status/:id",
 
   authCheckMiddleware,
   validate(courierRTOValidation.changeStatus),

@@ -43,22 +43,46 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-
+    let orderNumberIs;
     let orderData = await orderInquiryService?.getOneByMultiField({
       orderNumber: orderNumber,
       assignWarehouseId: warehouseId,
       assignDealerId: null,
+      orderAssignedToCourier: shippingProvider,
     });
+    orderNumberIs = orderData?.orderNumber;
     if (!orderData) {
-      throw new ApiError(httpStatus.OK, "Invaid Order number");
+      let orderDataByAWB = await orderInquiryService?.getOneByMultiField({
+        awbNumber: orderNumber,
+        assignWarehouseId: warehouseId,
+        assignDealerId: null,
+        orderAssignedToCourier: shippingProvider,
+      });
+      orderNumberIs = orderDataByAWB?.orderNumber;
+
+      if (!orderDataByAWB) {
+        let orderDataByBarcode = await orderInquiryService?.getOneByMultiField({
+          "barcodeData.barcode": { $in: [orderNumber] },
+          assignWarehouseId: warehouseId,
+          assignDealerId: null,
+          orderAssignedToCourier: shippingProvider,
+        });
+        orderNumberIs = orderDataByBarcode?.orderNumber;
+        console.log(orderDataByBarcode, "orderDataByBarcode");
+        if (!orderDataByBarcode) {
+          throw new ApiError(httpStatus.OK, "Invaid Order");
+        }
+      }
     }
 
     //------------------create data-------------------
     let dataCreated = await courierRTOService.createNewData({
       ...req.body,
+      orderNumber: orderNumberIs,
       companyId: req.userData.companyId,
     });
-    let updateOrder = await orderInquiryService?.getOneAndUpdate(
+    let updateOrder;
+    let orderDataByOrderNo = await orderInquiryService?.getOneAndUpdate(
       { orderNumber: orderNumber },
       {
         $set: {
@@ -66,16 +90,39 @@ exports.add = async (req, res) => {
         },
       }
     );
+    updateOrder = orderDataByOrderNo;
+    if (!orderDataByOrderNo) {
+      var orderDataByAwbNo = await orderInquiryService?.getOneAndUpdate(
+        { awbNumber: orderNumber },
+        {
+          $set: {
+            status: orderStatusEnum.rto,
+          },
+        }
+      );
+      updateOrder = orderDataByAwbNo;
+    }
+    if (!orderDataByAwbNo) {
+      var orderDataByBarcode = await orderInquiryService?.getOneAndUpdate(
+        { "barcodeData.barcode": orderNumber },
+        {
+          $set: {
+            status: orderStatusEnum.rto,
+          },
+        }
+      );
+      updateOrder = orderDataByBarcode;
+    }
+
     await addToOrderFlow(updateOrder);
     let barcodeStatus = "";
     if (requestStatus === courierRTOType.fresh) {
       barcodeStatus = barcodeStatusType.atWarehouse;
     } else if (requestStatus === courierRTOType.damage) {
       barcodeStatus = barcodeStatusType.damage;
-    } else if (
-      requestStatus === courierRTOType.fake ||
-      requestStatus === courierRTOType.lost
-    ) {
+    } else if (requestStatus === courierRTOType.fake) {
+      barcodeStatus = barcodeStatusType.fake;
+    } else if (requestStatus === courierRTOType.lost) {
       barcodeStatus = barcodeStatusType.missing;
     }
 
@@ -88,7 +135,10 @@ exports.add = async (req, res) => {
           },
         }
       );
-      await addToBarcodeFlow(updatedBarcode);
+      await addToBarcodeFlow(
+        updatedBarcode,
+        `Barcode returned from Customer, Barcode status is: ${barcodeStatus}`
+      );
     });
 
     if (dataCreated) {
@@ -189,6 +239,8 @@ exports.bulkUpload = async (req, res) => {
           barcodeStatus = barcodeStatusType.damage;
           break;
         case courierRTOType.fake:
+          barcodeStatus = barcodeStatusType.fake;
+          break;
         case courierRTOType.lost:
           barcodeStatus = barcodeStatusType.missing;
           break;
@@ -203,7 +255,10 @@ exports.bulkUpload = async (req, res) => {
             { $set: { status: barcodeStatus } }
           );
           if (updatedBarcode) {
-            await addToBarcodeFlow(updatedBarcode);
+            await addToBarcodeFlow(
+              updatedBarcode,
+              `Barcode returned from Customer, Barcode status is: ${barcodeStatus}`
+            );
           }
         }
       }
@@ -638,6 +693,8 @@ exports.statusChange = async (req, res) => {
         barcodeStatus = barcodeStatusType.damage;
         break;
       case courierRTOType.fake:
+        barcodeStatus = barcodeStatusType.fake;
+        break;
       case courierRTOType.lost:
         barcodeStatus = barcodeStatusType.missing;
         break;
@@ -655,7 +712,10 @@ exports.statusChange = async (req, res) => {
         );
 
         if (updatedBarcode) {
-          await addToBarcodeFlow(updatedBarcode);
+          await addToBarcodeFlow(
+            updatedBarcode,
+            `Barcode status marked incorrect, Correct Barcode status is: ${barcodeStatus}`
+          );
         }
       }
     }

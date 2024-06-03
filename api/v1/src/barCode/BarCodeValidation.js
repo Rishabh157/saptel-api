@@ -15,8 +15,7 @@ const create = {
     isUsed: Joi.boolean(),
     // wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
-    // status: Joi.string().required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    expiryDate: Joi.string().required(),
   }),
 };
 
@@ -54,6 +53,8 @@ const updateInventory = {
       wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
       dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
       // status: Joi.string().required(),
+      expiryDate: Joi.string().required(),
+      isFreezed: Joi.boolean(),
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
   }),
@@ -402,6 +403,13 @@ const getBarcodeForCustomerReturn = {
     status: Joi.string(),
   }),
 };
+
+const getBarcodeForCustomerReturnFromOrderNo = {
+  params: Joi.object().keys({
+    orderno: Joi.number(),
+  }),
+};
+
 const getInventory = {
   params: Joi.object().keys({
     // cid: Joi.string(),
@@ -511,6 +519,13 @@ const changeStatus = {
   }),
 };
 
+const freezeBarcode = {
+  params: Joi.object().keys({
+    bcode: Joi.string(),
+    status: Joi.boolean(),
+  }),
+};
+
 const courierReturn = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
@@ -553,4 +568,6 @@ module.exports = {
   courierReturn,
   getDispatchBarcode,
   getBarcodeForCustomerReturn,
+  freezeBarcode,
+  getBarcodeForCustomerReturnFromOrderNo,
 };
