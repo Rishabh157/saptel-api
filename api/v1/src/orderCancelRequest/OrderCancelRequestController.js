@@ -206,7 +206,7 @@ exports.cancelOrder = async (req, res) => {
           );
           await addToBarcodeFlow(
             updatedBarcode,
-            "Order canceled barcode inwarded in inventory"
+            "Order cancelled barcode inwarded in inventory"
           );
         })
       );

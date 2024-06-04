@@ -62,7 +62,7 @@ exports.add = async (req, res) => {
         },
       }
     );
-    await addToBarcodeFlow(dataUpdated);
+    await addToBarcodeFlow(dataUpdated, `Barcode status changed to ${type}`);
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

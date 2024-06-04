@@ -505,6 +505,7 @@ const barcodeStatusType = Object.freeze({
   missing: "MISSING",
   fake: "FAKE",
   expired: "EXPIRED",
+  destroyed: "DESTROYED",
 });
 
 const tallyLedgerType = Object.freeze({

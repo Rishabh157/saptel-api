@@ -327,7 +327,7 @@ router.put(
  * update status
  */
 router.put(
-  "/customer-return-product/:id/condition/:condition/warehouse/:whid",
+  "/customer-return-product/:id/warehouse/:whid",
   authCheckMiddleware,
   validate(barCodeValidation.courierReturn),
   barCodeController.courierReturnProduct

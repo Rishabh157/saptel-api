@@ -84,8 +84,8 @@ router.put(
 router.put(
   "/approve-order/:orderid",
   authCheckMiddleware,
-  validate(orderValidation.dealerApprove),
-  orderController.dealerApprove
+  validate(orderValidation.prePaidApprove),
+  orderController.prePaidApprove
 );
 
 //===============get one document (if query) / all document===============

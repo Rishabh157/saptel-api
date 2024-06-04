@@ -431,19 +431,24 @@ exports.update = async (req, res) => {
     );
 
     // dealers who serves on this pincode
-    const dealerServingPincode = await dealerSurvingPincode(
-      isPincodeExists?.pincode,
-      companyId,
-      schemeId
-    );
-    if (dealerServingPincode.length === 1) {
+    let dealerServingPincode = [];
+    if (!prepaidOrderFlag) {
+      let dealerServingPincodeData = await dealerSurvingPincode(
+        isPincodeExists?.pincode,
+        companyId,
+        schemeId
+      );
+      dealerServingPincode = dealerServingPincodeData;
+    }
+    if (dealerServingPincode?.length === 1) {
       var assidnedDealerData = await dealerService?.getOneByMultiField({
         _id: dealerServingPincode[0]?.dealerId,
       });
     }
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
-
+    console.log(servingWarehouse, "servingWarehouse");
+    console.log(dealerServingPincode, "dealerServingPincode");
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
 
@@ -458,27 +463,29 @@ exports.update = async (req, res) => {
         orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
         inquiryNumber: inquiryNumber,
         isOrderAssigned:
-          dealerServingPincode.length > 1 || servingWarehouse === undefined
+          dealerServingPincode?.length > 1 || servingWarehouse === undefined
             ? false
             : true,
         assignDealerId:
-          dealerServingPincode.length === 1
+          dealerServingPincode?.length === 1
             ? dealerServingPincode[0]?.dealerId
             : null,
         assignDealerLabel:
-          dealerServingPincode.length === 1
+          dealerServingPincode?.length === 1
             ? assidnedDealerData?.firstName + " " + assidnedDealerData?.lastName
             : "",
         assignDealerCode:
-          dealerServingPincode.length === 1
+          dealerServingPincode?.length === 1
             ? assidnedDealerData?.dealerCode
             : "",
         assignDealerStatus:
-          dealerServingPincode.length === 1 ? assidnedDealerData?.isActive : "",
+          dealerServingPincode?.length === 1
+            ? assidnedDealerData?.isActive
+            : "",
         assignWarehouseId:
-          dealerServingPincode.length === 0 ? servingWarehouse?._id : null,
+          dealerServingPincode?.length === 0 ? servingWarehouse?._id : null,
         assignWarehouseLabel:
-          dealerServingPincode.length === 0
+          dealerServingPincode?.length === 0
             ? servingWarehouse?.wareHouseName
             : "",
         approved: flag ? true : prepaidOrderFlag ? false : true,

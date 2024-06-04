@@ -608,6 +608,10 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
         },
       ],
     },
+    transactionId: {
+      type: String,
+      default: "",
+    },
     isDeleted: {
       type: Boolean,
       default: false,

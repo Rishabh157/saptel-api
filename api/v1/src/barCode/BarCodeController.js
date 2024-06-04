@@ -9,10 +9,12 @@ const salesOrderService = require("../salesOrder/SalesOrderService");
 const WarehouseService = require("../wareHouse/WareHouseService");
 const wtwMasterService = require("../warehouseToWarehouse/wtwMasterService");
 const dtdMasterService = require("../dtdTransfer/DTDTransferService");
+const dealerService = require("../dealer/DealerService");
 
 const wtcMasterService = require("../warehouseToCompany/wtcMasterService");
 const wtsMasterService = require("../warehouseToSample/wtsMasterService");
 const dtwMasterService = require("../dealerToWarehouse/dtwMasterService");
+const vendorService = require("../vendor/VendorService");
 
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
@@ -65,13 +67,13 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await barCodeService.isExists([
-      { lotNumber },
-      { barcodeGroupNumber },
-    ]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+    // let dataExist = await barCodeService.isExists([
+    //   { lotNumber },
+    //   { barcodeGroupNumber },
+    // ]);
+    // if (dataExist.exists && dataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    // }
     let lastObject = await barCodeService.aggregateQuery([
       { $sort: { _id: -1 } },
       { $limit: 1 },
@@ -82,11 +84,22 @@ exports.add = async (req, res) => {
       },
     ]);
 
+    if (
+      lastObject[0]?.lotNumber === lotNumber &&
+      lastObject[0]?.productGroupId.toString() !== productGroupId.toString()
+    ) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Can not assign this product to lot number ${lotNumber}`
+      );
+    }
+
     let currentBarcode = "";
+    console.log(lastObject, "lastObject");
     if (lastObject.length) {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Duplicate Lot Number.`);
+      currentBarcode = parseInt(lastObject[0]?.barcodeNumber) + 1;
     } else {
-      currentBarcode = "000001";
+      currentBarcode = lotNumber + "000001";
     }
 
     let output = [];
@@ -94,13 +107,15 @@ exports.add = async (req, res) => {
 
     for (let i = 0; i < quantity; i++) {
       if (i > 0) {
+        console.log(currentBarcode, "currentBarcode");
         paddeeBarcode = JSON.stringify(parseInt(currentBarcode) + 1);
+        console.log(paddeeBarcode, "paddeeBarcode");
         currentBarcode = paddeeBarcode.toString().padStart(6, "0");
       }
       output.push({
         productGroupId,
         barcodeGroupNumber,
-        barcodeNumber: lotNumber + currentBarcode,
+        barcodeNumber: currentBarcode,
         lotNumber,
         wareHouseId: null,
         companyId: req.userData.companyId,
@@ -1069,6 +1084,16 @@ exports.getByBarcode = async (req, res) => {
     const status = req.params.status;
     const cid = req.userData.companyId;
 
+    const barcodeFlowData = await barcodeFlowService?.aggregateQuery([
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+        },
+      },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
+
     let additionalQueryForAll = [
       {
         $match: {
@@ -1192,7 +1217,15 @@ exports.getByBarcode = async (req, res) => {
     }
 
     if (ResponseData.length === 0) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
+      console.log(barcodeFlowData, "barcodeFlowData");
+      throw new ApiError(
+        httpStatus.OK,
+        `${
+          barcodeFlowData.length
+            ? barcodeFlowData[0]?.barcodeLog
+            : "Invalid barcode"
+        }`
+      );
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successful.",
@@ -2061,6 +2094,11 @@ exports.getInventory = async (req, res) => {
               $cond: [{ $eq: ["$status", barcodeStatusType.expired] }, 1, 0],
             },
           },
+          destroyedCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", barcodeStatusType.destroyed] }, 1, 0],
+            },
+          },
           firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
         },
       },
@@ -2079,6 +2117,7 @@ exports.getInventory = async (req, res) => {
           totalRtvCount: 1,
           totalFakeCount: 1,
           expiredCount: 1,
+          destroyedCount: 1,
         },
       },
     ];
@@ -3209,8 +3248,7 @@ exports.freezeBarcode = async (req, res) => {
 exports.courierReturnProduct = async (req, res) => {
   try {
     console.log("here");
-    let barcode = req.body.barcode;
-    let condition = req.params.condition;
+    let barcodeData = req.body.barcode;
     let whid = req.params.whid;
     let id = req.params.id;
     let orderNumber = req.body.orderNumber;
@@ -3218,6 +3256,9 @@ exports.courierReturnProduct = async (req, res) => {
     // let newBarcode = barcode?.map((ele) => {
     //   return new mongoose.Types.ObjectId(ele);
     // });
+    const barcode = barcodeData?.map((ele) => {
+      return ele?.barcode;
+    });
     const validationPromises = barcode?.map(async (ele) => {
       const orderInquiryFound = await orderInquiryService?.getOneByMultiField({
         orderNumber: orderNumber,
@@ -3249,12 +3290,12 @@ exports.courierReturnProduct = async (req, res) => {
     await addToOrderFlow(orderInquiry);
     console.log("yha tak");
     const updates = await Promise.all(
-      dataExist.map(async (ele) => {
+      barcodeData.map(async (ele) => {
         return barCodeService.getOneAndUpdate(
-          { barcodeNumber: ele?.barcodeNumber },
+          { barcodeNumber: ele?.barcode },
           {
             $set: {
-              status: condition,
+              status: ele?.condition,
               wareHouseId: whid,
               dealerId: null,
             },
@@ -3271,7 +3312,7 @@ exports.courierReturnProduct = async (req, res) => {
       updates.map((updated) => {
         return addToBarcodeFlow(
           updated,
-          `Returned from courier ${orderInquiry?.orderAssignedToCourier}, assigned to order number: ${orderInquiry?.orderNumber}, Received in ${condition} COndition`
+          `Returned from courier ${orderInquiry?.orderAssignedToCourier}, assigned to order number: ${orderInquiry?.orderNumber}, Received in ${updated.condition} Condition`
         );
       })
     );
@@ -3330,7 +3371,20 @@ exports.updateInventory = async (req, res) => {
           },
         }
       );
-      await addToBarcodeFlow(dataUpdated, "Barcode inward in Warehouse");
+      console.log(ele?.wareHouseId, ele?.productGroupId, "ele?.wareHouseId");
+      let warehouseData = await WarehouseService?.getOneByMultiField({
+        isDeleted: false,
+        _id: new mongoose.Types.ObjectId(ele?.wareHouseId),
+      });
+      console.log(warehouseData, "warehouseData");
+      let productGroupData = await ProductGroupService?.getOneByMultiField({
+        isDeleted: false,
+        _id: new mongoose.Types.ObjectId(ele?.productGroupId),
+      });
+      await addToBarcodeFlow(
+        dataUpdated,
+        `Barcode inwarded in ${warehouseData?.wareHouseName} Warehouse of ${productGroupData?.groupName}`
+      );
       return dataUpdated;
     });
 
@@ -3449,7 +3503,7 @@ exports.updateWarehouseInventory = async (req, res) => {
           );
         });
       }
-      await addToBarcodeFlow(dataUpdated, "Barcode inwarrd in warehouse");
+      await addToBarcodeFlow(dataUpdated, "Barcode inwarded in warehouse");
 
       return dataUpdated;
     });
@@ -3513,10 +3567,16 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
           }
         );
       });
+      let dealerData = await dealerService?.getOneByMultiField({
+        isDeleted: false,
+        _id: req.userData.Id,
+      });
 
       await addToBarcodeFlow(
         dataUpdated,
-        "Barcode inward in Dealers warehouse"
+        `Barcode inward in ${
+          dealerData?.firstName + " " + dealerData?.lastName
+        } Dealers warehouse`
       );
 
       return dataUpdated;
@@ -3608,7 +3668,7 @@ exports.outwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3623,35 +3683,39 @@ exports.outwardInventory = async (req, res) => {
           },
         }
       );
-      soId?.forEach(async (soid) => {
-        await salesOrderService.getOneAndUpdate(
-          {
-            _id: new mongoose.Types.ObjectId(soid),
-            isDeleted: false,
-          },
-          {
-            $set: {
-              status: productStatus.dispatched,
-              transporterGST,
-              mode,
-              distance,
-              vehicleNumber,
-              vehicleType,
-              transportDocNo,
-              documnetDate,
-              roadPermitNumber,
-              lrNo,
-              totalWeight,
-              totalPackages,
-              fileUrl,
+      const updatedSOs = await Promise.all(
+        soId.map(async (soid) => {
+          const updatedSO = await salesOrderService.getOneAndUpdate(
+            {
+              _id: new mongoose.Types.ObjectId(soid),
+              isDeleted: false,
             },
-          }
-        );
-      });
+            {
+              $set: {
+                status: productStatus.dispatched,
+                transporterGST,
+                mode,
+                distance,
+                vehicleNumber,
+                vehicleType,
+                transportDocNo,
+                documnetDate,
+                roadPermitNumber,
+                lrNo,
+                totalWeight,
+                totalPackages,
+                fileUrl,
+              },
+            }
+          );
+
+          return updatedSO?.soNumber; // Return soNumber for each update
+        })
+      );
 
       await addToBarcodeFlow(
         dataUpdated,
-        "Barcode Dispatched from warehouse to Dealer"
+        `Barcode is in-Transit Dispatched from warehouse to Dealer with respect to Sales order number: ${updatedSOs[0]}`
       );
 
       return dataUpdated;
@@ -3728,7 +3792,7 @@ exports.rtvOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3757,10 +3821,19 @@ exports.rtvOutwardInventory = async (req, res) => {
           }
         );
       });
+      let warehouseData = await WarehouseService?.getOneByMultiField({
+        isDeleted: false,
+        _id: dataUpdated?.warehouseId,
+      });
+
+      let vendorData = await vendorService?.getOneByMultiField({
+        isDeleted: false,
+        _id: new mongoose.Types.ObjectId(ele?.vendorId),
+      });
 
       await addToBarcodeFlow(
         dataUpdated,
-        "Barcode Dispatched from warehouse to Vendor"
+        `Barcode Dispatched from ${warehouseData?.wareHouseName} to ${vendorData?.companyName} Vendor`
       );
 
       return dataUpdated;
@@ -3837,7 +3910,7 @@ exports.wtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3852,8 +3925,10 @@ exports.wtwOutwardInventory = async (req, res) => {
           },
         }
       );
-      wtwId?.forEach(async (wtwid) => {
-        await wtwMasterService.getOneAndUpdate(
+      let companyWarehouseId;
+      let otherCompanyWarehouseId;
+      const promises = wtwId?.forEach(async (wtwid) => {
+        let wtwUpdatedData = await wtwMasterService.getOneAndUpdate(
           {
             _id: new mongoose.Types.ObjectId(wtwid),
             isDeleted: false,
@@ -3864,10 +3939,22 @@ exports.wtwOutwardInventory = async (req, res) => {
             },
           }
         );
+        companyWarehouseId = wtwUpdatedData?.fromWarehouseId;
+        otherCompanyWarehouseId = wtwUpdatedData?.toWarehouseId;
       });
+      await Promise.all(promises);
+      let companyWarehouseData = await WarehouseService?.getOneByMultiField({
+        isDeleted: false,
+        _id: companyWarehouseId,
+      });
+      let otherCompanyWarehouseData =
+        await WarehouseService?.getOneByMultiField({
+          isDeleted: false,
+          _id: otherCompanyWarehouseId,
+        });
       await addToBarcodeFlow(
         dataUpdated,
-        "Barcode Dispatched from warehouse to Other company warehouse"
+        `Barcode Dispatched from ${companyWarehouseData?.wareHouseName} to Other company warehouse named ${otherCompanyWarehouseData?.wareHouseName}`
       );
 
       return dataUpdated;
@@ -3933,7 +4020,7 @@ exports.dtdOutwardInventory = async (req, res) => {
       });
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
-        await barCodeService.updateMany(
+        let updatedBarcode = await barCodeService.updateMany(
           {
             outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
             isUsed: true,
@@ -3944,7 +4031,6 @@ exports.dtdOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(dataUpdated, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -3960,8 +4046,11 @@ exports.dtdOutwardInventory = async (req, res) => {
           },
         }
       );
-      dtdId?.forEach(async (dtdid) => {
-        await dtdMasterService.getOneAndUpdate(
+      let fromDealerId;
+      let toDealerId;
+
+      const promises = dtdId?.map(async (dtdid) => {
+        let updatedDTD = await dtdMasterService.getOneAndUpdate(
           {
             _id: new mongoose.Types.ObjectId(dtdid),
             isDeleted: false,
@@ -3972,12 +4061,26 @@ exports.dtdOutwardInventory = async (req, res) => {
             },
           }
         );
+        fromDealerId = updatedDTD?.fromDealerId;
+        toDealerId = updatedDTD?.toDealerId;
       });
+
+      await Promise.all(promises);
+
+      let fromDealerData = await dealerService?.getOneByMultiField({
+        isDeleted: false,
+        _id: fromDealerId,
+      });
+
+      let toDealerData = await dealerService?.getOneByMultiField({
+        isDeleted: false,
+        _id: toDealerId,
+      });
+
       await addToBarcodeFlow(
         dataUpdated,
-        "Barcode dispatched from one dealer to other dealer"
+        `Barcode dispatched from ${fromDealerData?.firmName} dealer's warehouse to ${toDealerData?.firmName} dealer's warehouse`
       );
-
       return dataUpdated;
     });
 
@@ -4052,7 +4155,7 @@ exports.dtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4067,8 +4170,11 @@ exports.dtwOutwardInventory = async (req, res) => {
           },
         }
       );
-      dtwId?.forEach(async (dtwid) => {
-        await dtwMasterService.getOneAndUpdate(
+      let fromDealerWarehouseId;
+      let toWarehouseId;
+
+      const promises = dtwId?.map(async (dtwid) => {
+        let updatedDTW = await dtwMasterService.getOneAndUpdate(
           {
             _id: new mongoose.Types.ObjectId(dtwid),
             isDeleted: false,
@@ -4079,10 +4185,27 @@ exports.dtwOutwardInventory = async (req, res) => {
             },
           }
         );
+        console.log(updatedDTW, "updatedDTW");
+        fromDealerWarehouseId = updatedDTW?.fromWarehouseId;
+        toWarehouseId = updatedDTW?.toWarehouseId;
+        return updatedDTW; // Return the updated document to ensure Promise.all works correctly
       });
+
+      await Promise.all(promises);
+
+      let fromDealerWarehouseData = await WarehouseService?.getOneByMultiField({
+        isDeleted: false,
+        _id: fromDealerWarehouseId,
+      });
+
+      let toWarehouseData = await WarehouseService?.getOneByMultiField({
+        isDeleted: false,
+        _id: toWarehouseId,
+      });
+
       await addToBarcodeFlow(
         dataUpdated,
-        "Barcode dispatched from Dealer to company warehouse"
+        `Barcode dispatched from Dealer's ${fromDealerWarehouseData?.wareHouseName} warehouse to company's ${toWarehouseData?.wareHouseName} warehouse`
       );
 
       return dataUpdated;
@@ -4159,7 +4282,7 @@ exports.wtcOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4267,7 +4390,7 @@ exports.wtsOutwardInventory = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4378,7 +4501,7 @@ exports.orderDispatch = async (req, res) => {
             },
           }
         );
-        await addToBarcodeFlow(ele, "Barcode outerBox Opened");
+        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4615,7 +4738,10 @@ exports.dealerInwardInventory = async (req, res) => {
           }
         );
       });
-      await addToBarcodeFlow(dataUpdated, "Barcode inward at Dealer warehouse");
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode inwarded at Dealer warehouse"
+      );
       return dataUpdated;
     });
 

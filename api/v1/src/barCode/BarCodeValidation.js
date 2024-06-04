@@ -529,11 +529,15 @@ const freezeBarcode = {
 const courierReturn = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
-    condition: Joi.string().required(),
     whid: Joi.string().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    barcode: Joi.array().items(Joi.string().required()).required(),
+    barcode: Joi.array()
+      .items({
+        barcode: Joi.string().required(),
+        condition: Joi.string().required(),
+      })
+      .required(),
     orderNumber: Joi.number().required(),
   }),
 };

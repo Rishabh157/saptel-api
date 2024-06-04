@@ -30,6 +30,7 @@ const BarCodeSchema = new mongoose.Schema(
         barcodeStatusType.missing,
         barcodeStatusType.fake,
         barcodeStatusType.expired,
+        barcodeStatusType.destroyed,
         "",
       ],
       default: "",

@@ -531,6 +531,7 @@ exports.allFilterGroupPagination = async (req, res) => {
     finalAggregateQuery.push(groupBywtNumber);
 
     //-----------------------------------
+    console.log(finalAggregateQuery, "finalAggregateQuery");
     let dataFound = await wtwMasterService.aggregateQuery(finalAggregateQuery);
 
     if (dataFound.length === 0) {

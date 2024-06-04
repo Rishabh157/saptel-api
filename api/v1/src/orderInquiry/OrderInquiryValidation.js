@@ -341,9 +341,12 @@ const assignOrderToDeliveryBoy = {
   }),
 };
 
-const dealerApprove = {
+const prePaidApprove = {
   params: Joi.object().keys({
     orderid: Joi.string().custom(commonValidation.objectId),
+  }),
+  body: Joi.object().keys({
+    transactionId: Joi.string().required(),
   }),
 };
 
@@ -540,7 +543,7 @@ module.exports = {
   assignOrder,
   assignOrderToDeliveryBoy,
   getAllFilterDeliveryBoy,
-  dealerApprove,
+  prePaidApprove,
   getGlobalSearch,
   dealerOrderStatusChange,
   firstCallConfirmation,

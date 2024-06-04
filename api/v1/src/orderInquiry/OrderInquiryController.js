@@ -1298,7 +1298,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
 
           await addToBarcodeFlow(
             updatedBarcode,
-            "Barcode status marked as intransit"
+            `Barcode status marked as intransit and assigned to order number: ${orderNumber}`
           );
         }
       })
@@ -4506,16 +4506,21 @@ exports.dealerOrderStatusChange = async (req, res) => {
   }
 };
 
-exports.dealerApprove = async (req, res) => {
+exports.prePaidApprove = async (req, res) => {
   try {
     let _id = req.params.orderid;
+    let transactionId = req.body.transactionId;
+
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
     let updatedOrder = await orderService.getOneAndUpdate(
       { _id },
-      { approved: true, status: orderStatusEnum.fresh }
+      {
+        approved: true,
+        transactionId: transactionId,
+      }
     );
     await addToOrderFlow(updatedOrder);
 
