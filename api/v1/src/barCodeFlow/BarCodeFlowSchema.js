@@ -32,6 +32,7 @@ const BarCodeFlowSchema = new mongoose.Schema(
         barcodeStatusType.fake,
         barcodeStatusType.expired,
         barcodeStatusType.destroyed,
+        barcodeStatusType.close,
         "",
       ],
       default: "",

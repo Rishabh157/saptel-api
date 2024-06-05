@@ -159,6 +159,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     stateId: {
       type: ObjectId,
       trim: true,
+      default: null,
     },
     stateLabel: {
       type: String,

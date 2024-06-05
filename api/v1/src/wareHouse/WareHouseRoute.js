@@ -18,6 +18,14 @@ router.get(
   wareHouseController.getWarehouse
 );
 
+// get warehouse from company id
+router.get(
+  "/get-warehouse-by-company/:cid",
+  authCheckMiddleware,
+  validate(wareHouseValidation.getByCompany),
+  wareHouseController.getByCompany
+);
+
 router.get(
   "/dealer/company/:companyid/warehouse",
   authCheckDealerMiddleware,

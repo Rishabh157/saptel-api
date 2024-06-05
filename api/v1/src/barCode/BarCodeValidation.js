@@ -81,6 +81,15 @@ const updateWarehouseInventory = {
   }),
 };
 
+const updateBarcodeToClose = {
+  body: Joi.object().keys({
+    barcodes: Joi.array().items(Joi.string().required()),
+  }),
+  params: Joi.object().keys({
+    wid: Joi.required().custom(commonValidation.objectId),
+  }),
+};
+
 const updateWarehouseInventoryDealer = {
   body: Joi.object().keys({
     barcodedata: Joi.array().items({
@@ -379,6 +388,12 @@ const getBarcode = {
     barcode: Joi.string(),
   }),
 };
+const getDamageExpireBarcode = {
+  params: Joi.object().keys({
+    barcode: Joi.string().required(),
+    wid: Joi.string().required(),
+  }),
+};
 
 const getDispatchBarcode = {
   params: Joi.object().keys({
@@ -574,4 +589,6 @@ module.exports = {
   getBarcodeForCustomerReturn,
   freezeBarcode,
   getBarcodeForCustomerReturnFromOrderNo,
+  updateBarcodeToClose,
+  getDamageExpireBarcode,
 };

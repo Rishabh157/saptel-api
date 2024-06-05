@@ -7,6 +7,9 @@ const {
   authCheckDealerMiddleware,
   authCheckDeliveryBoyMiddleware,
 } = require("../../middleware/authenticationCheck");
+const multer = require("multer");
+
+const upload = multer({ dest: "uploads/" });
 
 /**
  * return true if barcode is valid
@@ -135,6 +138,14 @@ router.get(
   barCodeController.getWhBarcode
 );
 
+// get barcode to discontinue
+router.get(
+  "/get-damage-expire-barcode/:barcode/warehouse/:wid",
+  authCheckMiddleware,
+  validate(barCodeValidation.getDamageExpireBarcode),
+  barCodeController.getDamageExpireBarcode
+);
+
 router.get(
   "/dispatch-warehouse-order-barcode/:wid/barcode/:barcode/status/:status",
   authCheckMiddleware,
@@ -198,6 +209,22 @@ router.put(
   authCheckMiddleware,
   validate(barCodeValidation.updateWarehouseInventory),
   barCodeController.updateWarehouseInventory
+);
+
+// Update barcode status to CLOSE
+router.put(
+  "/barcode-close/:wid",
+  authCheckMiddleware,
+  validate(barCodeValidation.updateBarcodeToClose),
+  barCodeController.updateBarcodeToClose
+);
+
+// bulk upload barcode to change Status CLOSE
+router.post(
+  "/bulk-upload/barcode-to-close/:warehouseId",
+  authCheckMiddleware,
+  upload.single("file"),
+  barCodeController.bulkUpload
 );
 
 /**

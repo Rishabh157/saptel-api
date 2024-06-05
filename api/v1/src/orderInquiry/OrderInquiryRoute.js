@@ -255,6 +255,14 @@ router.post(
   orderController.add
 );
 
+// bilk upload
+router.post(
+  "/bulk-upload",
+  // authCheckMiddleware,
+  // validate(orderValidation.create),
+  orderController.bulkAdd
+);
+
 // order add for e-commerce
 router.put(
   "/e-commerce/add",

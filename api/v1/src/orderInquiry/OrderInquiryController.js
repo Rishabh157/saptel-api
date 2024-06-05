@@ -134,6 +134,39 @@ exports.add = async (req, res) => {
   }
 };
 
+exports.bulkAdd = async (req, res) => {
+  try {
+    const orderNumber = await getOrderNumber();
+    const inquiryNumber = await getInquiryNumber();
+
+    try {
+      const orderInquiry = await orderService.createNewData({
+        ...req.body,
+        orderNumber: orderNumber,
+        inquiryNumber: inquiryNumber,
+      });
+
+      await addToOrderFlow(orderInquiry);
+
+      return res.status(httpStatus.OK).send({
+        message: "created successfully.",
+        data: null,
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } catch (error) {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
+    }
+  } catch (err) {
+    let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
 // // get label
 // exports.getOrderLabel = async (req, res) => {
 //   try {

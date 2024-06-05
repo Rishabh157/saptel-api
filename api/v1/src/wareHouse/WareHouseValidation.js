@@ -152,6 +152,14 @@ const get = {
     })
     .optional(),
 };
+
+const getByCompany = {
+  query: Joi.object()
+    .keys({
+      cid: Joi.string().custom(commonValidation.objectId),
+    })
+    .optional(),
+};
 /**
  * get a document
  */
@@ -204,4 +212,5 @@ module.exports = {
   getDocument,
   getAllByDealerId,
   getDocumentByDealerid,
+  getByCompany,
 };

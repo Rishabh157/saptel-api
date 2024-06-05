@@ -51,7 +51,7 @@ const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const {
   addToOrderFlow,
 } = require("../orderInquiryFlow/OrderInquiryFlowHelper");
-
+const XLSX = require("xlsx");
 //add start
 exports.add = async (req, res) => {
   try {
@@ -1892,6 +1892,97 @@ exports.getWhBarcode = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+//get damage / expire barcode
+
+exports.getDamageExpireBarcode = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+    const warehouseId = req.params.wid;
+
+    let additionalQuery = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+          wareHouseId: new mongoose.Types.ObjectId(warehouseId),
+          status: {
+            $in: [barcodeStatusType.damage, barcodeStatusType.expired],
+          },
+          outerBoxbarCodeNumber: null,
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "wareHouseId",
+          foreignField: "_id",
+          as: "warehouse_data",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            {
+              $project: {
+                wareHouseName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          wareHouseLabel: {
+            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          },
+        },
+      },
+      { $unset: ["product_group", "warehouse_data"] },
+    ];
+    let barcode = [];
+    const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
+
+    if (foundBarcode !== null && foundBarcode[0] !== undefined) {
+      barcode.push(foundBarcode[0]);
+    }
+    console.log(barcode, "barcode");
+
+    if (barcode.length === 0) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: barcode[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //inventory api
 exports.getInventory = async (req, res) => {
   try {
@@ -2099,6 +2190,11 @@ exports.getInventory = async (req, res) => {
               $cond: [{ $eq: ["$status", barcodeStatusType.destroyed] }, 1, 0],
             },
           },
+          closedCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", barcodeStatusType.close] }, 1, 0],
+            },
+          },
           firstDocument: { $first: "$$ROOT" }, // Get the first document in each group
         },
       },
@@ -2118,6 +2214,7 @@ exports.getInventory = async (req, res) => {
           totalFakeCount: 1,
           expiredCount: 1,
           destroyedCount: 1,
+          closedCount: 1,
         },
       },
     ];
@@ -3531,6 +3628,124 @@ exports.updateWarehouseInventory = async (req, res) => {
   }
 };
 
+//barcode update to CLOSE
+
+exports.updateBarcodeToClose = async (req, res) => {
+  try {
+    let { barcodes } = req.body;
+    let { wid } = req.params;
+
+    const promises = barcodes?.map(async (ele) => {
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          barcodeNumber: ele,
+          isDeleted: false,
+          isUsed: true,
+          wareHouseId: wid,
+          status: {
+            $in: [barcodeStatusType.damage, barcodeStatusType.expired],
+          },
+        },
+        {
+          $set: {
+            status: barcodeStatusType.close,
+          },
+        }
+      );
+
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode discontinued as it was Damaged or Expired"
+      );
+
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+    if (updatedDataArray.length > 0) {
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully.",
+        data: updatedDataArray[0],
+        status: true,
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//add start
+exports.bulkUpload = async (req, res) => {
+  try {
+    if (!req.file) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded.");
+    }
+    const warehouseId = req.params.warehouseId;
+    // const { companyId } = req.userData;
+
+    // Read the Excel file
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Extract AWB numbers and other data
+    const barcodes = sheet.map((row) => ({
+      barcodeNumber: row.barcodenumber,
+    }));
+
+    const promises = barcodes?.map(async (ele) => {
+      const dataUpdated = await barCodeService.getOneAndUpdate(
+        {
+          barcodeNumber: ele,
+          isDeleted: false,
+          isUsed: true,
+          wareHouseId: warehouseId,
+          status: {
+            $in: [barcodeStatusType.damage, barcodeStatusType.expired],
+          },
+        },
+        {
+          $set: {
+            status: barcodeStatusType.close,
+          },
+        }
+      );
+
+      await addToBarcodeFlow(
+        dataUpdated,
+        "Barcode discontinued as it was Damaged or Expired"
+      );
+
+      return dataUpdated;
+    });
+
+    const updatedDataArray = await Promise.all(promises);
+    // Check for duplicates and create new data
+
+    res.status(httpStatus.CREATED).send({
+      message: "Updated successfully!",
+      data: null,
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    const errData = errorRes(err);
+    logger.info(errData.resData);
+    const { message, status, data, code, issue } = errData.resData;
+    res.status(errData.statusCode).send({ message, status, data, code, issue });
+  }
+};
+
 // dealer inward
 
 exports.updateWarehouseInventoryDealer = async (req, res) => {
@@ -3927,7 +4142,7 @@ exports.wtwOutwardInventory = async (req, res) => {
       );
       let companyWarehouseId;
       let otherCompanyWarehouseId;
-      const promises = wtwId?.forEach(async (wtwid) => {
+      const promises = wtwId?.map(async (wtwid) => {
         let wtwUpdatedData = await wtwMasterService.getOneAndUpdate(
           {
             _id: new mongoose.Types.ObjectId(wtwid),
