@@ -7,6 +7,7 @@ const companyService = require("../company/CompanyService");
 const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 const { searchKeys } = require("./SchemeSchema");
 const { errorRes } = require("../../../utils/resError");
+const moment = require("moment");
 const {
   getQuery,
   getUserRoleData,
@@ -542,10 +543,20 @@ exports.getByProductGroup = async (req, res) => {
     let companyId = req.params.companyid;
     let pgid = req.params.pgid;
     //if no default query then pass {}
+    let todaysDate = JSON.stringify(
+      new Date(`${moment().format("YYYY-MM-DD")}`)
+    )
+      .replace('"', "")
+      .replaceAll("-", "/");
+
+    console.log(todaysDate, "date");
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
       isActive: true,
+      endDate: {
+        $gte: todaysDate.split("T")[0],
+      },
     };
     matchQuery["productInformation.productGroup"] = new mongoose.Types.ObjectId(
       pgid

@@ -776,7 +776,56 @@ exports.approveFirstCallDirectly = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
     let status = req.body.status;
+    let productData = req.body.productData;
+    let warehouseId = req.body.warehouseId;
 
+    console.log(status, "status");
+    // Example usage
+    const handleProductData = async (
+      productData,
+      warehouseId,
+      barcodeStatus
+    ) => {
+      const promises = productData?.map(async (ele) => {
+        const foundBarcode = await barcodeService?.getOneByMultiField({
+          productGroupId: ele,
+          isUsed: true,
+          isFreezed: false,
+          wareHouseId: warehouseId,
+          status: barcodeStatus,
+        });
+        console.log(foundBarcode, "foundBarcode");
+
+        if (!foundBarcode) {
+          return Promise.reject(
+            new ApiError(
+              httpStatus.OK,
+              `Insufficient stock in warehouse for this order!`
+            )
+          );
+        }
+
+        return foundBarcode;
+      });
+
+      return Promise.all(promises.map((p) => p.catch((e) => e)));
+    };
+
+    if (status === "APPROVED") {
+      const results = await handleProductData(
+        productData,
+        warehouseId,
+        barcodeStatusType?.atWarehouse
+      );
+      const errors = results.filter((result) => result instanceof Error);
+
+      if (errors.length > 0) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "Insufficient stock in warehouse for this order!"
+        );
+      }
+    }
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
       _id: idToBeSearch,
@@ -904,8 +953,61 @@ exports.approveFirstCallDirectly = async (req, res) => {
 exports.firstCallConfirmation = async (req, res) => {
   try {
     let idToBeSearch = req.params.id;
-    let { address, remark, callbackDate, status, alternateNo } = req.body;
+    let {
+      address,
+      remark,
+      callbackDate,
+      status,
+      alternateNo,
+      productData,
+      warehouseId,
+    } = req.body;
 
+    const handleProductData = async (
+      productData,
+      warehouseId,
+      barcodeStatus
+    ) => {
+      const promises = productData?.map(async (ele) => {
+        const foundBarcode = await barcodeService?.getOneByMultiField({
+          productGroupId: ele,
+          isUsed: true,
+          isFreezed: false,
+          wareHouseId: warehouseId,
+          status: barcodeStatus,
+        });
+        console.log(foundBarcode, "foundBarcode");
+
+        if (!foundBarcode) {
+          return Promise.reject(
+            new ApiError(
+              httpStatus.OK,
+              `Insufficient stock in warehouse for this order!`
+            )
+          );
+        }
+
+        return foundBarcode;
+      });
+
+      return Promise.all(promises.map((p) => p.catch((e) => e)));
+    };
+
+    if (status === "APPROVED") {
+      const results = await handleProductData(
+        productData,
+        warehouseId,
+        barcodeStatusType?.atWarehouse
+      );
+      const errors = results.filter((result) => result instanceof Error);
+
+      if (errors.length > 0) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "Insufficient stock in warehouse for this order!"
+        );
+      }
+    }
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
       _id: idToBeSearch,
@@ -1049,8 +1151,55 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
       approvedBy,
       mobileNo,
       alternateNo,
+      productData,
+      warehouseId,
     } = req.body;
 
+    const handleProductData = async (
+      productData,
+      warehouseId,
+      barcodeStatus
+    ) => {
+      const promises = productData?.map(async (ele) => {
+        const foundBarcode = await barcodeService?.getOneByMultiField({
+          productGroupId: ele,
+          isUsed: true,
+          isFreezed: false,
+          wareHouseId: warehouseId,
+          status: barcodeStatus,
+        });
+        console.log(foundBarcode, "foundBarcode");
+
+        if (!foundBarcode) {
+          return Promise.reject(
+            new ApiError(
+              httpStatus.OK,
+              `Insufficient stock in warehouse for this order!`
+            )
+          );
+        }
+
+        return foundBarcode;
+      });
+
+      return Promise.all(promises.map((p) => p.catch((e) => e)));
+    };
+
+    if (status === "APPROVED") {
+      const results = await handleProductData(
+        productData,
+        warehouseId,
+        barcodeStatusType?.atWarehouse
+      );
+      const errors = results.filter((result) => result instanceof Error);
+
+      if (errors.length > 0) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          "Insufficient stock in warehouse for this order!"
+        );
+      }
+    }
     //------------------Find data-------------------
     let datafound = await orderService.getOneByMultiField({
       _id: idToBeSearch,

@@ -75,13 +75,13 @@ exports.add = async (req, res) => {
     //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     // }
     let lastObject = await barCodeService.aggregateQuery([
-      { $sort: { _id: -1 } },
-      { $limit: 1 },
       {
         $match: {
           lotNumber: lotNumber,
         },
       },
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
     ]);
 
     if (
@@ -3304,30 +3304,65 @@ exports.statusChange = async (req, res) => {
 };
 
 // freeze barcode
-
 exports.freezeBarcode = async (req, res) => {
   try {
-    let barcode = req.params.bcode;
+    let barcodeArray = req.body.bcode;
     let status = req.params.status;
+    const handleBarcodes = async (barcodes) => {
+      // Create an array of promises
+      const promises = barcodes?.map(async (ele) => {
+        try {
+          const dataExist = await barCodeService.getOneByMultiField({
+            barcodeNumber: ele,
+          });
 
-    let dataExist = await barCodeService.getOneByMultiField({
-      barcodeNumber: barcode,
-    });
-    if (!dataExist) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
+          if (!dataExist) {
+            // Reject the promise if data is not found
+            return Promise.reject(
+              new ApiError(httpStatus.OK, "Data not found.")
+            );
+          } else {
+            let freezedBarcode = await barCodeService.getOneAndUpdate(
+              { barcodeNumber: ele },
+              { isFreezed: status }
+            );
+            if (!freezedBarcode) {
+              return Promise.reject(
+                new ApiError(httpStatus.OK, "Something went wrong.")
+              );
+            }
+          }
+
+          // Resolve with the data if found
+          return dataExist;
+        } catch (error) {
+          return error; // Catch any error and return it to be handled later
+        }
+      });
+
+      // Use Promise.all to handle the array of promises
+      return Promise.all(promises.map((p) => p.catch((e) => e)));
+    };
+
+    // Example usage:
+    const results = await handleBarcodes(barcodeArray);
+
+    // Filter out errors from the results
+    const successes = results.filter((result) => !(result instanceof Error));
+    const errors = results.filter((result) => result instanceof Error);
+
+    if (errors.length > 0) {
+      // If there are any errors, handle them appropriately
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Some barcodes could not be processed."
+      );
     }
 
-    let freezedBarcode = await barCodeService.getOneAndUpdate(
-      { barcodeNumber: barcode },
-      { isFreezed: status }
-    );
-    if (!freezedBarcode) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
-    }
     return res.status(httpStatus.OK).send({
-      message: "Successfull.",
+      message: "Successful.",
       status: true,
-      data: freezedBarcode,
+      data: successes,
       code: "OK",
       issue: null,
     });

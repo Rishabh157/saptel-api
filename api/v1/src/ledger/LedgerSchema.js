@@ -45,7 +45,8 @@ const LedgerSchema = new mongoose.Schema(
     },
     itemId: {
       type: ObjectId,
-      required: true,
+
+      default: null,
     },
     companyId: {
       type: ObjectId,

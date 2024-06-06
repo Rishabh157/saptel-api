@@ -344,7 +344,7 @@ router.put(
  * update status for freeze barcode
  */
 router.put(
-  "/freeze-barcode/:bcode/status/:status",
+  "/freeze-barcode/status/:status",
   authCheckMiddleware,
   validate(barCodeValidation.freezeBarcode),
   barCodeController.freezeBarcode

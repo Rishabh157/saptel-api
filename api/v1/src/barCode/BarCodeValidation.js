@@ -536,8 +536,10 @@ const changeStatus = {
 
 const freezeBarcode = {
   params: Joi.object().keys({
-    bcode: Joi.string(),
     status: Joi.boolean(),
+  }),
+  body: Joi.object().keys({
+    bcode: Joi.array().items(Joi.string()),
   }),
 };
 

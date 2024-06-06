@@ -30,7 +30,7 @@ const {
   actionType,
 } = require("../../helper/enumUtils");
 
-const { getBalance } = require("../ledger/LedgerHelper");
+const { getBalance, getLedgerNo } = require("../ledger/LedgerHelper");
 
 const {
   getSearchQuery,
@@ -408,7 +408,18 @@ exports.updateLevel = async (req, res) => {
           };
 
           await addSalesOrderToTally(saleOrderTallyData);
-
+          console.log(
+            ledgerType.debit,
+            parseInt(totalTaxAmount - totalAmount),
+            0,
+            parseInt(totalTaxAmount),
+            "By Sales Order",
+            soData[0].companyId,
+            soData[0].dealerId,
+            balance.toExponential,
+            "printt"
+          );
+          let ledgerNumber = await getLedgerNo();
           //------------------create data-------------------
           let dataCreated = await ledgerService.createNewData({
             noteType: ledgerType.debit,
@@ -419,6 +430,8 @@ exports.updateLevel = async (req, res) => {
             companyId: soData[0].companyId,
             dealerId: soData[0].dealerId,
             balance: balance,
+
+            ledgerNumber: ledgerNumber,
           });
         }
       }

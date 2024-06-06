@@ -434,6 +434,10 @@ const firstCallConfirmation = {
     callbackDate: Joi.string().allow(""),
     status: Joi.string().required(),
     alternateNo: Joi.string().required(),
+    warehouseId: Joi.string().custom(commonValidation.objectId).required(),
+    productData: Joi.array().items(
+      Joi.string().custom(commonValidation.objectId).required()
+    ),
   }),
 };
 
@@ -449,6 +453,10 @@ const firstCallConfirmationUnauth = {
     status: Joi.string().required(),
     mobileNo: Joi.string().required(),
     alternateNo: Joi.string().required(),
+    warehouseId: Joi.string().custom(commonValidation.objectId).required(),
+    productData: Joi.array().items(
+      Joi.string().custom(commonValidation.objectId).required()
+    ),
   }),
 };
 
@@ -458,6 +466,10 @@ const approveFirstCallDirectly = {
   }),
   body: Joi.object().keys({
     status: Joi.string().required(),
+    warehouseId: Joi.string().custom(commonValidation.objectId).required(),
+    productData: Joi.array().items(
+      Joi.string().custom(commonValidation.objectId).required()
+    ),
   }),
 };
 /**
