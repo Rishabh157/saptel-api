@@ -37,16 +37,15 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { pincode, tehsilId, districtId, stateId, countryId, companyId } =
-      req.body;
+    let { pincode, tehsilId, districtId, stateId, countryId } = req.body;
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    // const isCompanyExists = await companyService.findCount({
+    //   _id: companyId,
+    //   isDeleted: false,
+    // });
+    // if (!isCompanyExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Company");
+    // }
 
     const isCountryExists = await countryService.findCount({
       _id: countryId,

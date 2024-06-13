@@ -12,7 +12,7 @@ const DistrictSchema = new mongoose.Schema(
       enum: [preferredCourierPartner.shipyaari, preferredCourierPartner.gpo],
       default: preferredCourierPartner.shipyaari,
     },
-    companyId: { type: ObjectId, required: true, trim: true },
+    // companyId: { type: ObjectId, required: true, trim: true },
     isFixed: {
       type: Boolean,
       default: false,

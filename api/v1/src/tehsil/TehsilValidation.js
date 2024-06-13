@@ -13,7 +13,7 @@ const create = {
     districtId: Joi.string().custom(commonValidation.objectId).required(),
     stateId: Joi.string().custom(commonValidation.objectId).required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    // companyId: Joi.string().custom(commonValidation.objectId).required(),
     preferredCourier: Joi.string()
       .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
       .required(),

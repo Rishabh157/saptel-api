@@ -8,7 +8,7 @@ const PincodeSchema = new mongoose.Schema(
     districtId: { type: ObjectId, required: true, trim: true, lowercase: true },
     stateId: { type: ObjectId, required: true, trim: true, lowercase: true },
     countryId: { type: ObjectId, required: true, trim: true, lowercase: true },
-    companyId: { type: ObjectId, required: true, trim: true },
+    // companyId: { type: ObjectId, required: true, trim: true },
 
     preferredCourier: {
       type: String,

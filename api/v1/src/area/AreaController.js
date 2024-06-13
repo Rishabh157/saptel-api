@@ -38,15 +38,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      area,
-      pincodeId,
-      tehsilId,
-      districtId,
-      stateId,
-      countryId,
-      companyId,
-    } = req.body;
+    let { area, pincodeId, tehsilId, districtId, stateId, countryId } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -95,13 +88,13 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Country");
     }
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    // const isCompanyExists = await companyService.findCount({
+    //   _id: companyId,
+    //   isDeleted: false,
+    // });
+    // if (!isCompanyExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Company");
+    // }
 
     //------------------create data-------------------
     let dataCreated = await areaService.createNewData({ ...req.body });
@@ -130,15 +123,8 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let {
-      area,
-      pincodeId,
-      tehsilId,
-      districtId,
-      stateId,
-      countryId,
-      companyId,
-    } = req.body;
+    let { area, pincodeId, tehsilId, districtId, stateId, countryId } =
+      req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -183,13 +169,13 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Country");
     }
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    // const isCompanyExists = await companyService.findCount({
+    //   _id: companyId,
+    //   isDeleted: false,
+    // });
+    // if (!isCompanyExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Company");
+    // }
 
     //------------------Find data-------------------
     let datafound = await areaService.getOneByMultiField({ _id: idToBeSearch });

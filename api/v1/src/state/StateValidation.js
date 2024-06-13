@@ -11,7 +11,7 @@ const create = {
   body: Joi.object().keys({
     stateName: Joi.string().lowercase().required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
-    companyId: Joi.string().custom(commonValidation.objectId).required(),
+    // companyId: Joi.string().custom(commonValidation.objectId).required(),
     isUnion: Joi.boolean(),
     preferredCourier: Joi.string()
       .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
@@ -30,7 +30,7 @@ const update = {
   body: Joi.object().keys({
     // stateName: Joi.string().lowercase().required(),
     // countryId: Joi.string().custom(commonValidation.objectId).required(),
-    // companyId: Joi.string().custom(commonValidation.objectId).required(),
+    companyId: Joi.string().custom(commonValidation.objectId).required(),
     isUnion: Joi.boolean(),
     preferredCourier: Joi.string()
       .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)

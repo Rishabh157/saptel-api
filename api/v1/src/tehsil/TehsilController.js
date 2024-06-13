@@ -37,7 +37,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { tehsilName, districtId, stateId, countryId, companyId } = req.body;
+    let { tehsilName, districtId, stateId, countryId } = req.body;
 
     const isDistrictExists = await districtService.findCount({
       _id: districtId,
@@ -60,13 +60,13 @@ exports.add = async (req, res) => {
     if (!isCountryExists) {
       throw new ApiError(httpStatus.OK, "Invalid Country");
     }
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    // const isCompanyExists = await companyService.findCount({
+    //   _id: companyId,
+    //   isDeleted: false,
+    // });
+    // if (!isCompanyExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Company");
+    // }
 
     /**
      * check duplicate exist

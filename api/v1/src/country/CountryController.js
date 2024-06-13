@@ -31,7 +31,7 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { countryName, companyId } = req.body;
+    let { countryName } = req.body;
     /**
      * check duplicate exist
      */
@@ -40,13 +40,13 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    // const isCompanyExists = await companyService.findCount({
+    //   _id: companyId,
+    //   isDeleted: false,
+    // });
+    // if (!isCompanyExists) {
+    //   throw new ApiError(httpStatus.OK, "Invalid Company");
+    // }
 
     //------------------create data-------------------
     let dataCreated = await countryService.createNewData({ ...req.body });

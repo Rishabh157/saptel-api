@@ -8,7 +8,7 @@ const AreaSchema = new mongoose.Schema(
     districtId: { type: ObjectId, required: true, trim: true },
     stateId: { type: ObjectId, required: true, trim: true },
     countryId: { type: ObjectId, required: true, trim: true },
-    companyId: { type: ObjectId, required: true, trim: true },
+    // companyId: { type: ObjectId, required: true, trim: true },
     isDeleted: {
       type: Boolean,
       default: false,
