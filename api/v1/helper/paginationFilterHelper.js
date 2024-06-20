@@ -212,6 +212,7 @@ const getFilterQuery = (
 
   //----------------------------
 };
+
 const getDateFilterQuery = (dateFilter, allowedDateFiletrKeys) => {
   let queryArray = [];
   if (

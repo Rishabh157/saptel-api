@@ -2,40 +2,18 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
-const { preferredCourierPartner } = require("../../helper/enumUtils");
 
 /**
  * create new document
  */
 const create = {
   body: Joi.object().keys({
-    stateName: Joi.string().lowercase().required(),
-    countryId: Joi.string().custom(commonValidation.objectId).required(),
-    // companyId: Joi.string().custom(commonValidation.objectId).required(),
-    isUnion: Joi.boolean(),
-    preferredCourier: Joi.string()
-      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
-      .required(),
-    isFixed: Joi.boolean(),
-  }),
-};
-
-/**
- * update existing document
- */
-const update = {
-  params: Joi.object().keys({
-    id: Joi.required().custom(commonValidation.objectId),
-  }),
-  body: Joi.object().keys({
-    // stateName: Joi.string().lowercase().required(),
-    // countryId: Joi.string().custom(commonValidation.objectId).required(),
-    // companyId: Joi.string().custom(commonValidation.objectId).required(),
-    isUnion: Joi.boolean(),
-    preferredCourier: Joi.string()
-      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
-      .required(),
-    isFixed: Joi.boolean(),
+    serialNo: Joi.number().required(),
+    outerBoxNumber: Joi.string().required(),
+    innerBarcodes: Joi.array().items(Joi.string().required()),
+    createdBy: Joi.string().required(),
+    batchNumber: Joi.string().required(),
+    productId: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
@@ -90,55 +68,24 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
-      stateName: Joi.string(),
-      countryId: Joi.string(),
+      outerBoxNumber: Joi.string().optional(),
     })
     .optional(),
 };
 
-const getStateByPincode = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-const getallByPincode = {
-  params: Joi.object().keys({
-    pincode: Joi.string(),
-  }),
-};
 /**
- * get a document
+ * get by id
  */
-const getDocument = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
-/**
- * delete a document
- */
-const deleteDocument = {
+const getById = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
   }),
 };
 
-/**
- * change status of document
- */
-const changeStatus = {
-  params: Joi.object().keys({
-    id: Joi.string().custom(commonValidation.objectId),
-  }),
-};
 module.exports = {
   create,
   getAllFilter,
   get,
-  update,
-  deleteDocument,
-  changeStatus,
-  getDocument,
-  getStateByPincode,
-  getallByPincode,
+
+  getById,
 };

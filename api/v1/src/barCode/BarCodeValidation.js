@@ -44,6 +44,7 @@ const updateInventory = {
   body: Joi.object().keys({
     barcodedata: Joi.array().items({
       _id: Joi.string().custom(commonValidation.objectId).required(),
+      barcodeNumber: Joi.string().required(),
       productGroupId: Joi.string().custom(commonValidation.objectId).required(),
       barcodeGroupNumber: Joi.string().required(),
       cartonBoxId: Joi.string().custom(commonValidation.objectId).required(),

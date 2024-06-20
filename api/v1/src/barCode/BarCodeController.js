@@ -10,6 +10,7 @@ const WarehouseService = require("../wareHouse/WareHouseService");
 const wtwMasterService = require("../warehouseToWarehouse/wtwMasterService");
 const dtdMasterService = require("../dtdTransfer/DTDTransferService");
 const dealerService = require("../dealer/DealerService");
+const reprintOuterBoxSevice = require("../reprintOuterBox/ReprintOuterBoxService");
 
 const wtcMasterService = require("../warehouseToCompany/wtcMasterService");
 const wtsMasterService = require("../warehouseToSample/wtsMasterService");
@@ -29,6 +30,10 @@ const {
   getFieldsToDisplay,
   getAllowedField,
 } = require("../../helper/utils");
+const {
+  getInquiryNumber,
+} = require("../reprintOuterBox/ReprintOuterBoxHelper");
+
 const { getDealerData } = require("../../middleware/authenticationCheck");
 const {
   getSearchQuery,
@@ -3521,7 +3526,19 @@ exports.updateInventory = async (req, res) => {
     });
 
     const updatedDataArray = await Promise.all(promises);
-
+    const allBarcodes = barcodedata?.map((ele) => {
+      return ele?.barcodeNumber;
+    });
+    let serialNumber = await getInquiryNumber();
+    await reprintOuterBoxSevice?.createNewData({
+      serialNo: serialNumber,
+      outerBoxNumber: outerBoxCode,
+      innerBarcodes: allBarcodes,
+      createdBy: req.userData.firstName + " " + req.userData.lastName,
+      batchNumber: barcodedata[0]?.lotNumber,
+      productId: barcodedata[0]?.productGroupId,
+      expiryDate: barcodedata[0]?.expiryDate,
+    });
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
