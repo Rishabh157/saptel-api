@@ -23,6 +23,13 @@ router.put(
   orderController.warehouseOrderDispatch
 );
 
+router.put(
+  "/warehouse-manual-order-dispatch",
+  authCheckMiddleware,
+  validate(orderValidation.warehouseManualOrderDispatch),
+  orderController.warehouseManualOrderDispatch
+);
+
 router.post(
   "/get-all-order-status-count",
   authCheckMiddleware,
@@ -157,6 +164,15 @@ router.get(
   authCheckMiddleware,
   //   validate(orderValidation),
   orderController.getByOrderNumber
+);
+
+// get by order number for manual assigning  barcode to order
+//===============get document by id for dealer===============
+router.get(
+  "/get-by-order-number/manual-mapping/:ordernumber/warehouseid/:assignWarehouseId",
+  authCheckMiddleware,
+  //   validate(orderValidation),
+  orderController.getByOrderNumberForMannualMapping
 );
 
 // get by order number

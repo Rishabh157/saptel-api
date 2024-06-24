@@ -1531,6 +1531,90 @@ exports.warehouseOrderDispatch = async (req, res) => {
   }
 };
 
+// warehouse manual order dispatch
+
+exports.warehouseManualOrderDispatch = async (req, res) => {
+  try {
+    let { orderNumber, barcodes } = req.body;
+
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      orderNumber: orderNumber,
+      orderStatus: productStatus.notDispatched,
+    });
+    if (!datafound) {
+      throw new ApiError(
+        httpStatus.OK,
+        `Order not found or already dispatched`
+      );
+    }
+    await Promise.all(
+      barcodes?.map(async (ele) => {
+        let foundBarcode = await barcodeService.getOneByMultiField({
+          _id: ele?.barcodeId,
+          isDeleted: false,
+          isUsed: true,
+          status: barcodeStatusType.atWarehouse,
+        });
+        if (!foundBarcode) {
+          throw new ApiError(httpStatus.OK, `Invalid barcode`);
+        } else {
+          const updatedBarcode = await barcodeService.getOneAndUpdate(
+            {
+              _id: new mongoose.Types.ObjectId(ele?.barcodeId),
+              isUsed: true,
+            },
+            {
+              $set: {
+                status: barcodeStatusType.inTransit,
+              },
+            }
+          );
+
+          await addToBarcodeFlow(
+            updatedBarcode,
+            `Barcode status marked as intransit and assigned to order number: ${orderNumber}`
+          );
+        }
+      })
+    );
+    let dataToBeUpdate = [];
+
+    dataToBeUpdate.push({
+      barcodeData: barcodes,
+      status: orderStatusEnum.intransit,
+      orderStatus: productStatus.dispatched,
+    });
+
+    let dataUpdated = await orderService.getOneAndUpdate(
+      {
+        orderNumber: orderNumber,
+        isDeleted: false,
+      },
+      {
+        $set: dataToBeUpdate[0],
+      }
+    );
+
+    await addToOrderFlow(dataUpdated);
+
+    return res.status(httpStatus.OK).send({
+      message: "Updated successfully.",
+      data: null,
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // =============update  end================
 
 // ========assign order ===============
@@ -3057,6 +3141,54 @@ exports.getByOrderNumber = async (req, res) => {
           mobileNo: 1,
           autoFillingShippingAddress: 1,
           orderNumber: 1,
+        },
+      },
+    ];
+
+    let dataExist = await orderService.aggregateQuery(additionalQuery);
+
+    if (!dataExist[0]) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get by order number for mannual mapping
+
+exports.getByOrderNumberForMannualMapping = async (req, res) => {
+  try {
+    let ordernumber = req.params.ordernumber;
+    let assignWarehouseId = req.params.assignWarehouseId;
+    let additionalQuery = [
+      {
+        $match: {
+          orderNumber: parseInt(ordernumber),
+          isDeleted: false,
+          status: {
+            $in: [
+              orderStatusEnum.fresh,
+              orderStatusEnum.prepaid,
+              orderStatusEnum.urgent,
+            ],
+          },
+          orderStatus: productStatus.notDispatched,
+          assignDealerId: null,
+          assignWarehouseId: new mongoose.Types.ObjectId(assignWarehouseId),
         },
       },
     ];

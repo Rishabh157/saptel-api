@@ -326,6 +326,18 @@ const warehouseOrderDispatch = {
   }),
 };
 
+const warehouseManualOrderDispatch = {
+  body: Joi.object().keys({
+    barcodes: Joi.array()
+      .items({
+        barcodeId: Joi.string().custom(commonValidation.objectId).required(),
+        barcode: Joi.string().required(),
+      })
+      .required(),
+    orderNumber: Joi.number().required(),
+  }),
+};
+
 const assignOrder = {
   body: Joi.object().keys({
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
@@ -569,4 +581,5 @@ module.exports = {
   getOrderLabel,
   generateOrderInvoice,
   warehouseOrderDispatch,
+  warehouseManualOrderDispatch,
 };
