@@ -626,6 +626,10 @@ const OrderInquirySchema = new mongoose.Schema(
             type: ObjectId,
             trim: true,
           },
+          productQuantity: {
+            type: Number,
+            trim: true,
+          },
         },
       ],
     },

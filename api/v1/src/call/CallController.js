@@ -82,9 +82,9 @@ exports.add = async (req, res) => {
     const isUserExists =
       agentName !== null
         ? await userService.findCount({
-            userName: agentName,
-            isDeleted: false,
-          })
+          userName: agentName,
+          isDeleted: false,
+        })
         : null;
     if (agentName !== null && !isUserExists) {
       throw new ApiError(httpStatus.OK, "Invalid Agent User Name.");
@@ -93,9 +93,9 @@ exports.add = async (req, res) => {
     const isStateExists =
       stateId !== null
         ? await stateService.findCount({
-            _id: stateId,
-            isDeleted: false,
-          })
+          _id: stateId,
+          isDeleted: false,
+        })
         : null;
     if (stateId !== null && !isStateExists) {
       throw new ApiError(httpStatus.OK, "Invalid State.");
@@ -104,9 +104,9 @@ exports.add = async (req, res) => {
     const isSchemeExists =
       schemeId !== null
         ? await schemeService.findCount({
-            _id: schemeId,
-            isDeleted: false,
-          })
+          _id: schemeId,
+          isDeleted: false,
+        })
         : null;
     if (schemeId !== null && !isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
@@ -115,9 +115,9 @@ exports.add = async (req, res) => {
     const isDistrictExists =
       districtId !== null
         ? await districtService.findCount({
-            _id: districtId,
-            isDeleted: false,
-          })
+          _id: districtId,
+          isDeleted: false,
+        })
         : null;
     if (districtId !== null && !isDistrictExists) {
       throw new ApiError(httpStatus.OK, "Invalid District.");
@@ -126,9 +126,9 @@ exports.add = async (req, res) => {
     const isTehsilExists =
       tehsilId !== null
         ? await tehsilService.findCount({
-            _id: tehsilId,
-            isDeleted: false,
-          })
+          _id: tehsilId,
+          isDeleted: false,
+        })
         : null;
     if (tehsilId !== null && !isTehsilExists) {
       throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
@@ -137,9 +137,9 @@ exports.add = async (req, res) => {
     const isAreaExists =
       areaId !== null
         ? await areaService.findCount({
-            _id: areaId,
-            isDeleted: false,
-          })
+          _id: areaId,
+          isDeleted: false,
+        })
         : null;
     if (areaId !== null && !isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid Area.");
@@ -148,9 +148,9 @@ exports.add = async (req, res) => {
     const isPincodeExists =
       pincodeId !== null
         ? await pincodeService.findCount({
-            _id: pincodeId,
-            isDeleted: false,
-          })
+          _id: pincodeId,
+          isDeleted: false,
+        })
         : null;
     if (pincodeId !== null && !isPincodeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Pincode.");
@@ -170,9 +170,9 @@ exports.add = async (req, res) => {
     const isDispositionTwoExists =
       dispositionLevelTwoId !== null
         ? await dispositionTwoService.findCount({
-            _id: dispositionLevelTwoId,
-            isDeleted: false,
-          })
+          _id: dispositionLevelTwoId,
+          isDeleted: false,
+        })
         : null;
     if (dispositionLevelTwoId !== null && !isDispositionTwoExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
@@ -181,9 +181,9 @@ exports.add = async (req, res) => {
     const isDispositionThreeExists =
       dispositionLevelThreeId !== null
         ? await dispositionThreeService.findCount({
-            _id: dispositionLevelThreeId,
-            isDeleted: false,
-          })
+          _id: dispositionLevelThreeId,
+          isDeleted: false,
+        })
         : null;
     if (dispositionLevelThreeId !== null && !isDispositionThreeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
@@ -241,7 +241,6 @@ exports.update = async (req, res) => {
       tehsilId,
       schemeId,
       pincodeId,
-
       areaId,
       paymentMode,
       companyId,
@@ -261,7 +260,6 @@ exports.update = async (req, res) => {
       districtLabel,
       tehsilLabel,
       pincodeLabel,
-
       areaLabel,
       dispositionLevelTwoLabel,
       dispositionLevelThreeLabel,
@@ -358,9 +356,11 @@ exports.update = async (req, res) => {
         return {
           productGroupName: ele?.productGroupName,
           productGroupId: ele?.productGroup,
+          productQuantity: ele?.productQuantity,
         };
       }
     );
+
 
     let subCatData = await subcategoryService?.getOneByMultiField({
       isDeleted: false,
@@ -447,8 +447,6 @@ exports.update = async (req, res) => {
     }
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
-    console.log(servingWarehouse, "servingWarehouse");
-    console.log(dealerServingPincode, "dealerServingPincode");
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
 
@@ -458,8 +456,8 @@ exports.update = async (req, res) => {
         status: flag
           ? status
           : prepaidOrderFlag
-          ? orderStatusEnum.prepaid
-          : orderStatusEnum.inquiry,
+            ? orderStatusEnum.prepaid
+            : orderStatusEnum.inquiry,
         orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
         inquiryNumber: inquiryNumber,
         isOrderAssigned:
@@ -506,7 +504,6 @@ exports.update = async (req, res) => {
         districtLabel,
         tehsilLabel,
         pincodeLabel,
-
         areaLabel,
         dispositionLevelTwoLabel,
         dispositionLevelThreeLabel,
@@ -576,7 +573,6 @@ exports.update = async (req, res) => {
       // );
 
       // Handle error response
-      console.error("API call failed:", error);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
         message: "Something went wrong!",
         data: null,
