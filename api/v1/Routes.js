@@ -107,6 +107,7 @@ const awbMasterRoute = require("./src/awbMaster/AwbMasterRoute");
 const courierRTORoute = require("./src/courierRTO/CourierRTORoute");
 const customerWHReturnRoute = require("./src/customerWHReturn/CustomerWHReturnRoute");
 const reprintOuterBoxRoute = require("./src/reprintOuterBox/ReprintOuterBoxRoute");
+const webLeadsRoute = require("./src/webLeads/WebLeadsRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -548,6 +549,10 @@ const defaultRoutes = [
   {
     path: "/reprint-outerbox",
     route: reprintOuterBoxRoute,
+  },
+  {
+    path: "/webleads",
+    route: webLeadsRoute,
   },
 ];
 // orderRoute;
