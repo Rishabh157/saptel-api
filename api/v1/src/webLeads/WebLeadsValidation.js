@@ -9,9 +9,12 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     order_id: Joi.string().custom(commonValidation.objectId).allow(null),
-    name: Joi.string().allow(""),
+    name: Joi.string().required(),
     phone: Joi.string().custom(commonValidation.indianMobile).required(),
-    email: Joi.string().lowercase().custom(commonValidation.emailFormat).allow(""),
+    email: Joi.string()
+      .lowercase()
+      .custom(commonValidation.emailFormat)
+      .allow(""),
     address: Joi.string().allow(""),
     address1: Joi.string().allow(""),
     landmark: Joi.string().allow(""),
