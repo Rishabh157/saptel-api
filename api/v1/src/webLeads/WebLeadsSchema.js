@@ -3,28 +3,33 @@ const mongoose = require("mongoose");
 
 const WebLeadsSchema = new mongoose.Schema(
   {
-    order_id: { type: ObjectId, required: false, trim: true },
+    order_id: { type: ObjectId, default: null, trim: true },
     name: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
-    email: { type: String, required: false, trim: true },
-    address: { type: String, required: false, trim: true },
-    address1: { type: String, required: false, trim: true },
-    landmark: { type: String, required: false, trim: true },
-    city: { type: String, required: false, trim: true },
-    state: { type: String, required: false, trim: true },
-    country: { type: String, required: false, trim: true },
-    zip_code: { type: String, required: false, trim: true },
-    quantity: { type: String, required: false, trim: true },
-    remark: { type: String, required: false, trim: true },
-    sdate: { type: String, required: false, trim: true },
-    status: { type: String, required: false, trim: true },
-    idtag: { type: String, required: false, trim: true },
+    email: { type: String, default: "", trim: true },
+    address: { type: String, default: "", trim: true },
+    address1: { type: String, default: "", trim: true },
+    landmark: { type: String, default: "", trim: true },
+    city: { type: String, default: "", trim: true },
+    state: { type: String, default: "", trim: true },
+    country: { type: String, default: "", trim: true },
+    zip_code: { type: String, default: "", trim: true },
+    quantity: { type: String, default: "", trim: true },
+    remark: { type: String, default: "", trim: true },
+    sdate: { type: String, default: "", trim: true },
+    status: { type: String, default: "", trim: true },
+    idtag: { type: String, default: "", trim: true },
     product_name: { type: String, required: true, trim: true },
-    mode: { type: String, required: false, trim: true },
-    paymeny_mode: { type: String, required: false, trim: true },
-    url: { type: String, required: false, trim: true },
-    price: { type: String, required: false, trim: true },
-    leadStatus: { type: String, required: false, trim: true },
+    mode: { type: String, default: "", trim: true },
+    paymeny_mode: { type: String, default: "", trim: true },
+    url: { type: String, default: "", trim: true },
+    price: { type: String, default: "", trim: true },
+    leadStatus: {
+      type: String,
+      enum: ["", "COMPLETE", "INQUIRY", "FAKE"],
+      default: "",
+      trim: true,
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -39,12 +44,7 @@ const WebLeadsSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = [
-  "phone",
-  "email",
-  "product_name",
-  "leadStatus"
-];
+const searchKeys = ["phone", "email", "product_name", "leadStatus"];
 
 module.exports = mongoose.model("WebLeads", WebLeadsSchema);
 module.exports.searchKeys = [...searchKeys];

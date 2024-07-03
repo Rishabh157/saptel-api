@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const webLeadsService = require("./WebLeadsService");
 const { searchKeys } = require("./WebLeadsSchema");
+const WebLeads = require("./WebLeadsSchema");
 const { errorRes } = require("../../../utils/resError");
 const {
   getUserRoleData,
@@ -12,6 +13,7 @@ const {
 } = require("../../helper/utils");
 const companyService = require("../company/CompanyService");
 const websiteMasterService = require("../websiteMaster/WebsiteMasterService");
+const moment = require("moment");
 
 const {
   getSearchQuery,
@@ -28,15 +30,42 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    //------------------create data-------------------
-    let dataCreated = await webLeadsService.createNewData({ ...req.body });
+    const { phone, product_name } = req.body;
+    const createdAt = new Date().toISOString().slice(0, 10);
+    // Upsert (update or insert) the data based on the phone number
+    let dataFound = await webLeadsService?.getOneByMultiField({
+      phone,
+      createdAt: {
+        $gte: new Date(`${moment().startOf("day")}`),
+        $lte: new Date(`${moment().endOf("day")}`),
+      },
+    });
+    let dataUpdated;
+    let isAdded = true;
+    if (!dataFound) {
+      dataUpdated = await webLeadsService.createNewData({ ...req.body });
+    } else {
+      isAdded = false;
+      dataUpdated = await webLeadsService.getOneAndUpdate(
+        {
+          phone,
+        },
+        {
+          $set: {
+            ...req.body,
+          },
+        }
+      );
+    }
 
-    if (dataCreated) {
-      return res.status(httpStatus.CREATED).send({
-        message: "Added successfully.",
-        data: dataCreated,
+    if (dataUpdated) {
+      const message = isAdded ? "Added successfully." : "Updated successfully.";
+      const code = isAdded ? "CREATED" : "UPDATED";
+      return res.status(isAdded ? httpStatus.CREATED : httpStatus.OK).send({
+        message,
+        data: dataUpdated,
         status: true,
-        code: "CREATED",
+        code,
         issue: null,
       });
     } else {
@@ -51,7 +80,6 @@ exports.add = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
-
 //update start
 exports.update = async (req, res) => {
   try {
@@ -248,9 +276,7 @@ exports.allFilterPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await webLeadsService.aggregateQuery(
-      finalAggregateQuery
-    );
+    let dataFound = await webLeadsService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
@@ -309,9 +335,9 @@ exports.getById = async (req, res) => {
     let idToBeSearch = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(idToBeSearch)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid ID format.');
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid ID format.");
     }
-    let getData = await webLeadsService.getById(idToBeSearch)
+    let getData = await webLeadsService.getById(idToBeSearch);
 
     if (!getData) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -359,7 +385,6 @@ exports.statusChange = async (req, res) => {
       code: "OK",
       issue: null,
     });
-
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
@@ -390,7 +415,6 @@ exports.deleteDocument = async (req, res) => {
       code: "OK",
       issue: null,
     });
-
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

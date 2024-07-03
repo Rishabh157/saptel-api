@@ -19,7 +19,7 @@ const userService = require("../user/UserService");
 const subcategoryService = require("../productSubCategory/ProductSubCategoryService");
 const companyService = require("../company/CompanyService");
 
-const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
+const webLeadService = require("../webLeads/WebLeadsService");
 
 const {
   getDealer,
@@ -454,11 +454,23 @@ exports.update = async (req, res) => {
         dealerServingPincode = [];
       }
     }
+    console.log(assidnedDealerData, "assidnedDealerData");
+    console.log(dealerServingPincode, "dealerServingPincode");
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
-
+    if (flag || prepaidOrderFlag) {
+      await webLeadService?.getOneAndUpdate(
+        { phone: mobileNo },
+        { $set: { leadStatus: "COMPLETE" } }
+      );
+    } else {
+      await webLeadService?.getOneAndUpdate(
+        { phone: mobileNo },
+        { $set: { leadStatus: "INQUIRY" } }
+      );
+    }
     try {
       const orderInquiry = await orderService.createNewData({
         ...req.body,
