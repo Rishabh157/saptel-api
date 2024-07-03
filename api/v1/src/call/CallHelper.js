@@ -1,4 +1,7 @@
-const { applicableCriteria } = require("../../helper/enumUtils");
+const {
+  applicableCriteria,
+  barcodeStatusType,
+} = require("../../helper/enumUtils");
 const { getQuery } = require("../../helper/utils");
 const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
 const dealerService = require("../dealer/DealerService");
@@ -10,6 +13,8 @@ const complaintService = require("../complain/ComplainService");
 const houseArrestService = require("../houseArrestRequest/HouseArrestRequestService");
 const dealerSchemeService = require("../dealerScheme/DealerSchemeService");
 const salesOrderService = require("../salesOrder/SalesOrderService");
+const schemeService = require("../scheme/SchemeService");
+const barcodeService = require("../barCode/BarCodeService");
 
 const { default: mongoose } = require("mongoose");
 
@@ -144,6 +149,46 @@ exports.isPrepaid = async (applicableCriteriaList) => {
     }
   });
   return flag;
+};
+
+exports.checkDealerHaveInventory = async (schemeId, dealerId) => {
+  console.log(schemeId, dealerId, "data---------------------");
+  let schemeData = await schemeService?.getOneByMultiField({ _id: schemeId });
+  let productInfo = schemeData?.productInformation?.map((ele) => {
+    return {
+      productGroupId: ele?.productGroup,
+      quantity: ele?.productQuantity,
+    };
+  });
+  console.log(productInfo, "==============================");
+
+  let validQuantity = true;
+
+  await Promise.all(
+    productInfo?.map(async (ele) => {
+      let foundBarcode = await barcodeService?.aggregateQuery([
+        {
+          $match: {
+            productGroupId: ele?.productGroupId,
+            wareHouseId: null,
+            dealerId: new mongoose.Types.ObjectId(dealerId),
+            status: barcodeStatusType.atDealerWarehouse,
+          },
+        },
+      ]);
+      console.log(
+        foundBarcode.length,
+        ele?.quantity,
+        "length ................................"
+      );
+      if (foundBarcode.length < ele?.quantity) {
+        console.log("match //////////////////////////////////");
+        validQuantity = false;
+      }
+    })
+  );
+
+  return validQuantity;
 };
 
 exports.dealerSurvingPincode = async (pincodeName, companyId, schemeId) => {

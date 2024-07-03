@@ -29,6 +29,7 @@ const {
   dealerSurvingPincode,
   getAssignWarehouse,
   isPrepaid,
+  checkDealerHaveInventory,
 } = require("./CallHelper");
 // ----service---------
 const { searchKeys } = require("./CallSchema");
@@ -441,12 +442,22 @@ exports.update = async (req, res) => {
       dealerServingPincode = dealerServingPincodeData;
     }
     if (dealerServingPincode?.length === 1) {
-      var assidnedDealerData = await dealerService?.getOneByMultiField({
-        _id: dealerServingPincode[0]?.dealerId,
-      });
+      let isInventoryExists = await checkDealerHaveInventory(
+        schemeId,
+        dealerServingPincode[0]?.dealerId
+      );
+      console.log(isInventoryExists, "isInventoryExists");
+      if (isInventoryExists) {
+        var assidnedDealerData = await dealerService?.getOneByMultiField({
+          _id: dealerServingPincode[0]?.dealerId,
+        });
+      } else {
+        dealerServingPincode = [];
+      }
     }
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
+    console.log(assidnedDealerData, "assidnedDealerData");
     console.log(servingWarehouse, "servingWarehouse");
     console.log(dealerServingPincode, "dealerServingPincode");
     const orderNumber = await getOrderNumber();
