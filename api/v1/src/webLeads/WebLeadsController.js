@@ -35,6 +35,7 @@ exports.add = async (req, res) => {
     // Upsert (update or insert) the data based on the phone number
     let dataFound = await webLeadsService?.getOneByMultiField({
       phone,
+      product_name,
       createdAt: {
         $gte: new Date(`${moment().startOf("day")}`),
         $lte: new Date(`${moment().endOf("day")}`),
