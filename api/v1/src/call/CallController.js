@@ -242,7 +242,6 @@ exports.update = async (req, res) => {
       tehsilId,
       schemeId,
       pincodeId,
-
       areaId,
       paymentMode,
       companyId,
@@ -262,7 +261,6 @@ exports.update = async (req, res) => {
       districtLabel,
       tehsilLabel,
       pincodeLabel,
-
       areaLabel,
       dispositionLevelTwoLabel,
       dispositionLevelThreeLabel,
@@ -359,6 +357,7 @@ exports.update = async (req, res) => {
         return {
           productGroupName: ele?.productGroupName,
           productGroupId: ele?.productGroup,
+          productQuantity: ele?.productQuantity,
         };
       }
     );
@@ -457,9 +456,6 @@ exports.update = async (req, res) => {
     }
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
-    console.log(assidnedDealerData, "assidnedDealerData");
-    console.log(servingWarehouse, "servingWarehouse");
-    console.log(dealerServingPincode, "dealerServingPincode");
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
 
@@ -517,7 +513,6 @@ exports.update = async (req, res) => {
         districtLabel,
         tehsilLabel,
         pincodeLabel,
-
         areaLabel,
         dispositionLevelTwoLabel,
         dispositionLevelThreeLabel,
@@ -587,7 +582,6 @@ exports.update = async (req, res) => {
       // );
 
       // Handle error response
-      console.error("API call failed:", error);
       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
         message: "Something went wrong!",
         data: null,
