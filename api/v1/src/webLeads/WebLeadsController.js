@@ -30,12 +30,13 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    const { phone, product_name } = req.body;
+    const { phone, product_name, idtag } = req.body;
     const createdAt = new Date().toISOString().slice(0, 10);
     // Upsert (update or insert) the data based on the phone number
     let dataFound = await webLeadsService?.getOneByMultiField({
       phone,
       product_name,
+      idtag,
       createdAt: {
         $gte: new Date(`${moment().startOf("day")}`),
         $lte: new Date(`${moment().endOf("day")}`),
