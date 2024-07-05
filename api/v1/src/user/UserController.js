@@ -688,14 +688,32 @@ exports.allFilterPagination = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterData",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           branchLabel: {
             $arrayElemAt: ["$branch_data.branchName", 0],
           },
+          callCenterName: {
+            $arrayElemAt: ["$callcenterData.callCenterName", 0],
+          },
         },
       },
       {
-        $unset: ["branch_data"],
+        $unset: ["branch_data", "callcenterData"],
       },
     ];
 
