@@ -639,7 +639,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = ["isActive"];
     let numberFileds = [];
-    let objectIdFileds = ["companyId"];
+    let objectIdFileds = ["companyId" , "branchId" , "callCenterId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
