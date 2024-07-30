@@ -2,9 +2,7 @@ const router = require("express").Router();
 const websitePageController = require("./WebLeadsController");
 const validate = require("../../middleware/validate");
 const webLeadsValidation = require("./WebLeadsValidation");
-const {
-  authCheckMiddleware,
-} = require("../../middleware/authenticationCheck");
+const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**

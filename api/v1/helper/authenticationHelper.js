@@ -3,7 +3,7 @@ const userService = require("../src/user/UserService");
 const logger = require("../../../config/logger");
 const { errorRes } = require("../../utils/resError");
 const httpStatus = require("http-status");
-const redisClient = require("../../../database/redis");
+const { getRedisClient } = require("../../../database/redis");
 
 const checkTokenExist = (req, res) => {
   if (
@@ -33,6 +33,13 @@ const checkTokenExist = (req, res) => {
 
 const redisCheck = async (decoded, deviceId, token) => {
   try {
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     const redisValue = await redisClient.get(decoded.Id + deviceId);
     if (!redisValue) {
       throw new ApiError(httpStatus.UNAUTHORIZED, `Invalid Token`);

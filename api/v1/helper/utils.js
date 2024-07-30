@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../../../config/config");
-const redisClient = require("../../../database/redis");
 const userAccessService = require("../src/userAccess/UserAccessService");
+const { getRedisClient } = require("../../../database/redis");
 
 exports.combineObjects = (objectsArray) => {
   let arra = objectsArray.reduce((acc, el) => {
@@ -112,6 +112,13 @@ exports.logOut = async (req, logOutAll = false) => {
   let token = req.headers["x-access-token"];
   let deviceId = req.headers["device-id"] ? req.headers["device-id"] : "";
   const decoded = await jwt.verify(token, config.jwt_secret);
+  const redisClient = await getRedisClient();
+  if (!redisClient) {
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Failed to connect to Redis."
+    );
+  }
   if (deviceId !== "" && logOutAll === false) {
     await redisClient.del(decoded.Id + deviceId);
   } else {

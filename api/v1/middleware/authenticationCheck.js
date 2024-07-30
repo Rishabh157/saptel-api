@@ -6,7 +6,6 @@ const httpStatus = require("http-status");
 const ApiError = require("../../utils/apiErrorUtils");
 const { userEnum } = require("../helper/enumUtils");
 const { errorRes } = require("../../utils/resError");
-const redisClient = require("../../../database/redis");
 
 exports.authCheckMiddleware = async (req, res, next) => {
   try {

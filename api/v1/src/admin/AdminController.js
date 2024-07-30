@@ -12,7 +12,6 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const { errorRes } = require("../../../utils/resError");
 const { userEnum } = require("../../helper/enumUtils");
 const bcrypt = require("bcrypt");
-const redisClient = require("../../../../database/redis");
 const jwt = require("jsonwebtoken");
 const { logOut } = require("../../helper/utils");
 const ProxyChain = require("proxy-chain");
@@ -21,6 +20,7 @@ const rp = require("request-promise");
 const tunnel = require("tunnel");
 
 const { default: axios } = require("axios");
+const { getRedisClient } = require("../../../../database/redis");
 /*********************************************************************/
 
 /**
@@ -190,6 +190,13 @@ exports.changePassword = async (req, res) => {
         "Something went wrong. Please try again later."
       );
     }
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     await redisClient.set(
       userId + deviceId,
       newToken + "***" + newRefreshToken
@@ -282,7 +289,13 @@ exports.login = async (req, res) => {
         "Something went wrong. Please try again later."
       );
     }
-
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     await redisClient.set(userId + deviceId, token + "***" + refreshToken);
     const redisValue = await redisClient.get(userId + deviceId);
     if (redisValue) {
@@ -338,6 +351,13 @@ exports.refreshToken = async (req, res) => {
     const tokenKey = `${decoded.Id}*`;
     // const allKeys = await redisClient.keys();
     //
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     const allRedisValue = await redisClient.keys(tokenKey);
     if (!allRedisValue.length) {
       throw new ApiError(

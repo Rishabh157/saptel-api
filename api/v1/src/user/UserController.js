@@ -51,8 +51,8 @@ const {
   userRoleType,
   userDepartmentType,
 } = require("../../helper/enumUtils");
-const redisClient = require("../../../../database/redis");
 const { getSeniorUserRole } = require("./UserHelper");
+const { getRedisClient } = require("../../../../database/redis");
 
 //add start
 exports.add = async (req, res) => {
@@ -373,7 +373,13 @@ exports.updateUser = async (req, res) => {
           userId: datafound?._id,
         });
         const tokenKey = `${datafound?._id}*`;
-
+        const redisClient = await getRedisClient();
+        if (!redisClient) {
+          throw new ApiError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Failed to connect to Redis."
+          );
+        }
         const allRedisValue = await redisClient.keys(tokenKey);
 
         const deletePromises = allRedisValue?.map(
@@ -425,7 +431,13 @@ exports.updateUser = async (req, res) => {
         "Something went wrong. Please try again later."
       );
     }
-
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     await redisClient.set(userId + deviceId, token + "***" + refreshToken);
     const redisValue = await redisClient.get(userId + deviceId);
     if (redisValue) {
@@ -517,7 +529,13 @@ exports.updateUserCompany = async (req, res) => {
       companyId: newCompanyId,
     } = dataUpdated;
     const tokenKey = `${dataUpdated?._id}*`;
-
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     const allRedisValue = await redisClient.keys(tokenKey);
 
     const deletePromises = allRedisValue?.map(
@@ -1445,7 +1463,13 @@ exports.login = async (req, res) => {
         "Something went wrong. Please try again later."
       );
     }
-
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     await redisClient.set(userId + deviceId, token + "***" + refreshToken);
     const redisValue = await redisClient.get(userId + deviceId);
     if (redisValue) {
@@ -1552,6 +1576,13 @@ exports.refreshToken = async (req, res) => {
     const tokenKey = `${decoded.Id}*`;
     // const allKeys = await redisClient.keys();
     //
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     const allRedisValue = await redisClient.keys(tokenKey);
     if (!allRedisValue.length) {
       throw new ApiError(
@@ -1655,6 +1686,13 @@ exports.changePassword = async (req, res) => {
         "Something went wrong. Please try again later."
       );
     }
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
+      );
+    }
     await redisClient.set(
       userId + deviceId,
       newToken + "***" + newRefreshToken
@@ -1722,6 +1760,13 @@ exports.changePasswordByAdmin = async (req, res) => {
       throw new ApiError(
         httpStatus.OK,
         "Something went wrong. Please try again later."
+      );
+    }
+    const redisClient = await getRedisClient();
+    if (!redisClient) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to connect to Redis."
       );
     }
     await redisClient.set(

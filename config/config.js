@@ -34,6 +34,8 @@ let {
   SHIPYAARI_PASSWORD,
   ORDER_QUEUE_URL,
   TALLY_BASEURL_LOCAL,
+  REDIS_URL,
+  REDIS_URL_TLS,
 } = process.env;
 
 let envObj = {
@@ -67,6 +69,8 @@ let envObj = {
   SHIPYAARI_PASSWORD,
   ORDER_QUEUE_URL,
   TALLY_BASEURL_LOCAL,
+  REDIS_URL,
+  REDIS_URL_TLS,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -125,6 +129,8 @@ const envVarsSchema = Joi.object().keys({
     .label("Shipyaari password required"),
   ORDER_QUEUE_URL: Joi.string().required().label("Order queue url required"),
   TALLY_BASEURL_LOCAL: Joi.string().required().label("Tally url required"),
+  REDIS_URL: Joi.string().required().label("REDIS URL url"),
+  REDIS_URL_TLS: Joi.string().required().label("REDIS URL TLS url"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -177,4 +183,9 @@ module.exports = {
   shipyaari_password: envVars.SHIPYAARI_PASSWORD,
   order_queue_url: envVars.ORDER_QUEUE_URL,
   tally_url: envVars.TALLY_BASEURL_LOCAL,
+  redis: {
+    tlsFlag: true, // Whether to use TLS for Redis
+    url: envVars.REDIS_URL, // Redis URL (non-TLS)
+    urlTls: envVars.REDIS_URL_TLS, // Redis URL with TLS
+  },
 };

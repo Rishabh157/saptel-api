@@ -26,8 +26,8 @@ const WebLeadsSchema = new mongoose.Schema(
     price: { type: String, default: "", trim: true },
     leadStatus: {
       type: String,
-      enum: ["", "COMPLETE", "INQUIRY", "FAKE"],
-      default: "",
+      enum: ["PENDING", "COMPLETE", "INQUIRY", "FAKE"],
+      default: "PENDING",
       trim: true,
     },
     isDeleted: {

@@ -103,6 +103,14 @@ router.get(
   orderController.get
 );
 
+//===============get azazone orders===============
+router.get(
+  "/get-sts-token",
+  // authCheckMiddleware,
+  //   validate(orderValidation.get),
+  orderController.getAmazoneOrder
+);
+
 //===============get one document (if query) / all document===============
 router.post(
   "/get-multiple-orders",

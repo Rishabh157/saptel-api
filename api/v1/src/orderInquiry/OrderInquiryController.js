@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const moment = require("moment");
+const AWS = require("aws-sdk");
+
 // ----service---------
 const orderService = require("./OrderInquiryService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
@@ -1772,6 +1774,54 @@ exports.get = async (req, res) => {
         issue: null,
       });
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// generate STS token
+
+exports.getAmazoneOrder = async (req, res) => {
+  try {
+    const sts = new AWS.STS({
+      accessKeyId:
+        "amzn1.application-oa2-client.435ca9bffce24b97b1a446902cc09631",
+      secretAccessKey:
+        "amzn1.oa2-cs.v1.fcb81f1ac8c896cc08e625b95431a92d375661b21aeae4a4bfe3da7da",
+      region: "ap-south-1",
+    });
+    console.log(sts, "sts");
+    // Parameters for AssumeRole
+    const params = {
+      RoleArn:
+        "arn:aws:iam::amzn1.sp.solution.ac9ee5ed-74d2-4ebb-9cb8-121182ed9a15:role/SAPTEL",
+      RoleSessionName: "YourSessionName",
+      DurationSeconds: 3600, // 1 hour, can be between 900 and 3600 seconds
+    };
+
+    // Assume the role
+    sts.assumeRole(params, (err, data) => {
+      if (err) {
+        console.log("Error assuming role:", err);
+      } else {
+        const { Credentials } = data;
+        console.log("Access Key:", Credentials.AccessKeyId);
+        console.log("Secret Access Key:", Credentials.SecretAccessKey);
+        console.log("Session Token:", Credentials.SessionToken);
+      }
+    });
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: null,
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
