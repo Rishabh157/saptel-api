@@ -488,6 +488,9 @@ const orderType = Object.freeze({
   other: "OTHER",
 });
 
+//FAKE ORDER DISPOSITION
+const fakeOrderDisposition = "FAKE";
+
 // barcode status type
 const barcodeStatusType = Object.freeze({
   atWarehouse: "AT_WAREHOUSE",
@@ -622,4 +625,5 @@ module.exports = {
   courierRTOType,
   tallyLedgerType,
   customerReturnRequestType,
+  fakeOrderDisposition,
 };

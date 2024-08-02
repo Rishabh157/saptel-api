@@ -48,6 +48,7 @@ const {
   actionType,
   orderStatusEnum,
   paymentModeType,
+  fakeOrderDisposition,
 } = require("../../helper/enumUtils");
 
 const {
@@ -464,6 +465,11 @@ exports.update = async (req, res) => {
       await webLeadService?.getOneAndUpdate(
         { phone: mobileNo },
         { $set: { leadStatus: "COMPLETE" } }
+      );
+    } else if (dispositionLevelThreeLabel === fakeOrderDisposition) {
+      await webLeadService?.getOneAndUpdate(
+        { phone: mobileNo },
+        { $set: { leadStatus: "FAKE" } }
       );
     } else {
       await webLeadService?.getOneAndUpdate(
