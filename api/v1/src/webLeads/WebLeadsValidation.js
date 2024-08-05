@@ -22,7 +22,6 @@ const create = {
     quantity: Joi.string().allow(""),
     remark: Joi.string().allow(""),
     sdate: Joi.string().allow(""),
-    status: Joi.string().allow(""),
     idtag: Joi.string().allow(""),
     product_name: Joi.string().required(),
     mode: Joi.string().allow(""),

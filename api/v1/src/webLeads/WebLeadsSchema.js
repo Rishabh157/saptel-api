@@ -16,7 +16,6 @@ const WebLeadsSchema = new mongoose.Schema(
     zip_code: { type: String, default: "", trim: true },
     quantity: { type: String, default: "", trim: true },
     remark: { type: String, default: "", trim: true },
-    sdate: { type: String, default: "", trim: true },
     status: { type: String, default: "", trim: true },
     idtag: { type: String, default: "", trim: true },
     product_name: { type: String, required: true, trim: true },
