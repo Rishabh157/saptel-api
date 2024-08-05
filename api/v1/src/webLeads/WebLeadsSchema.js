@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
+const { webLeadStatusEnum } = require("../../helper/enumUtils");
 
 const WebLeadsSchema = new mongoose.Schema(
   {
@@ -25,8 +26,13 @@ const WebLeadsSchema = new mongoose.Schema(
     price: { type: String, default: "", trim: true },
     leadStatus: {
       type: String,
-      enum: ["PENDING", "COMPLETE", "INQUIRY", "FAKE"],
-      default: "PENDING",
+      enum: [
+        webLeadStatusEnum.pending,
+        webLeadStatusEnum.complete,
+        webLeadStatusEnum.inquiry,
+        webLeadStatusEnum.fake,
+      ],
+      default: webLeadStatusEnum.pending,
       trim: true,
     },
     isDeleted: {

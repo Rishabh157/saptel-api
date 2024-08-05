@@ -491,6 +491,13 @@ const orderType = Object.freeze({
 //FAKE ORDER DISPOSITION
 const fakeOrderDisposition = "FAKE";
 
+const webLeadStatusEnum = Object.freeze({
+  complete: "COMPLETE",
+  pending: "PENDING",
+  fake: "FAKE",
+  inquiry: "INQUIRY",
+});
+
 // barcode status type
 const barcodeStatusType = Object.freeze({
   atWarehouse: "AT_WAREHOUSE",
@@ -626,4 +633,5 @@ module.exports = {
   tallyLedgerType,
   customerReturnRequestType,
   fakeOrderDisposition,
+  webLeadStatusEnum,
 };

@@ -49,6 +49,7 @@ const {
   orderStatusEnum,
   paymentModeType,
   fakeOrderDisposition,
+  webLeadStatusEnum,
 } = require("../../helper/enumUtils");
 
 const {
@@ -464,7 +465,7 @@ exports.update = async (req, res) => {
     if (flag || prepaidOrderFlag) {
       await webLeadService?.getOneAndUpdate(
         { phone: mobileNo },
-        { $set: { leadStatus: "COMPLETE" } }
+        { $set: { leadStatus: webLeadStatusEnum.complete } }
       );
     } else if (
       dispositionLevelThreeLabel.toLowerCase() ===
@@ -472,12 +473,12 @@ exports.update = async (req, res) => {
     ) {
       await webLeadService?.getOneAndUpdate(
         { phone: mobileNo },
-        { $set: { leadStatus: "FAKE" } }
+        { $set: { leadStatus: webLeadStatusEnum.fake } }
       );
     } else {
       await webLeadService?.getOneAndUpdate(
         { phone: mobileNo },
-        { $set: { leadStatus: "INQUIRY" } }
+        { $set: { leadStatus: webLeadStatusEnum.inquiry } }
       );
     }
     try {
