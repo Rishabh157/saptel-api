@@ -1,6 +1,9 @@
 const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
-const { webLeadStatusEnum } = require("../../helper/enumUtils");
+const {
+  webLeadStatusEnum,
+  webLeadPaymentMode,
+} = require("../../helper/enumUtils");
 
 const WebLeadsSchema = new mongoose.Schema(
   {
@@ -20,7 +23,16 @@ const WebLeadsSchema = new mongoose.Schema(
     status: { type: String, default: "", trim: true },
     idtag: { type: String, default: "", trim: true },
     product_name: { type: String, required: true, trim: true },
-    mode: { type: String, default: "", trim: true },
+    mode: {
+      type: String,
+      enum: [
+        webLeadPaymentMode.overseas,
+        webLeadPaymentMode.prepaid,
+        webLeadPaymentMode.cod,
+      ],
+      default: webLeadPaymentMode.cod,
+      trim: true,
+    },
     paymeny_mode: { type: String, default: "", trim: true },
     url: { type: String, default: "", trim: true },
     price: { type: String, default: "", trim: true },

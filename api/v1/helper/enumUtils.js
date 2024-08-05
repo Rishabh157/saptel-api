@@ -542,6 +542,12 @@ const dealerMissingDamageType = Object.freeze({
   damage: "DAMAGE",
 });
 
+const webLeadPaymentMode = Object.freeze({
+  cod: "COD",
+  prepaid: "PREPAID",
+  overseas: "OVERSEAS",
+});
+
 const firstCallDispositions = Object.freeze({
   callBack: "CALLBACK",
   approved: "APPROVED",
@@ -634,4 +640,5 @@ module.exports = {
   customerReturnRequestType,
   fakeOrderDisposition,
   webLeadStatusEnum,
+  webLeadPaymentMode,
 };

@@ -10,7 +10,7 @@ const create = {
   body: Joi.object().keys({
     order_id: Joi.string().custom(commonValidation.objectId).allow(null),
     name: Joi.string().required(),
-    phone: Joi.string().required(),
+    phone: Joi.string().custom(commonValidation.indianMobile).required(),
     email: Joi.string().lowercase().allow(""),
     address: Joi.string().allow(""),
     address1: Joi.string().allow(""),
