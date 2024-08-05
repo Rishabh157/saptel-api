@@ -40,6 +40,7 @@ exports.add = async (req, res) => {
       phone,
       product_name,
       idtag,
+      leadStatus: "PENDING",
       createdAt: {
         $gte: new Date(`${moment().startOf("day")}`),
         $lte: new Date(`${moment().endOf("day")}`),

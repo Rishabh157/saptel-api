@@ -466,7 +466,10 @@ exports.update = async (req, res) => {
         { phone: mobileNo },
         { $set: { leadStatus: "COMPLETE" } }
       );
-    } else if (dispositionLevelThreeLabel === fakeOrderDisposition) {
+    } else if (
+      dispositionLevelThreeLabel.toLowerCase() ===
+      fakeOrderDisposition.toLowerCase()
+    ) {
       await webLeadService?.getOneAndUpdate(
         { phone: mobileNo },
         { $set: { leadStatus: "FAKE" } }
