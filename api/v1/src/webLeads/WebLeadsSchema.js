@@ -27,7 +27,7 @@ const WebLeadsSchema = new mongoose.Schema(
       type: String,
       enum: [
         webLeadPaymentMode.overseas,
-        webLeadPaymentMode.prepaid,
+        webLeadPaymentMode.online,
         webLeadPaymentMode.cod,
       ],
       default: webLeadPaymentMode.cod,
@@ -36,6 +36,7 @@ const WebLeadsSchema = new mongoose.Schema(
     paymeny_mode: { type: String, default: "", trim: true },
     url: { type: String, default: "", trim: true },
     price: { type: String, default: "", trim: true },
+    transactionId: { type: String, default: "", trim: true },
     leadStatus: {
       type: String,
       enum: [
@@ -43,6 +44,7 @@ const WebLeadsSchema = new mongoose.Schema(
         webLeadStatusEnum.complete,
         webLeadStatusEnum.inquiry,
         webLeadStatusEnum.fake,
+        webLeadStatusEnum.prepaidOrder,
       ],
       default: webLeadStatusEnum.pending,
       trim: true,

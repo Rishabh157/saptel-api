@@ -28,12 +28,18 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
-const { moduleType, actionType } = require("../../helper/enumUtils");
+const {
+  moduleType,
+  actionType,
+  webLeadStatusEnum,
+} = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    const { phone, product_name, idtag } = req.body;
+    const { phone, product_name, idtag, mode, leadStatus } = req.body;
+    console.log(mode, "mode");
+    let isPrepaidOrder = leadStatus === webLeadStatusEnum.prepaidOrder;
     const createdAt = new Date().toISOString().slice(0, 10);
     // Upsert (update or insert) the data based on the phone number
     let dataFound = await webLeadsService?.getOneByMultiField({
@@ -48,7 +54,7 @@ exports.add = async (req, res) => {
     });
     let dataUpdated;
     let isAdded = true;
-    if (!dataFound) {
+    if (!dataFound && !isPrepaidOrder) {
       dataUpdated = await webLeadsService.createNewData({ ...req.body });
     } else {
       isAdded = false;

@@ -29,6 +29,7 @@ const create = {
     url: Joi.string().allow(""),
     price: Joi.string().allow(""),
     leadStatus: Joi.string().allow(""),
+    transactionId: Joi.string().allow(""),
   }),
 };
 

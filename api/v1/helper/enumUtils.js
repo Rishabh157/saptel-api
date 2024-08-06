@@ -496,6 +496,7 @@ const webLeadStatusEnum = Object.freeze({
   pending: "PENDING",
   fake: "FAKE",
   inquiry: "INQUIRY",
+  prepaidOrder: "PREPAIDORDER",
 });
 
 // barcode status type
@@ -544,7 +545,7 @@ const dealerMissingDamageType = Object.freeze({
 
 const webLeadPaymentMode = Object.freeze({
   cod: "COD",
-  prepaid: "PREPAID",
+  online: "ONLINE",
   overseas: "OVERSEAS",
 });
 
