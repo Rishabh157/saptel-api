@@ -16,16 +16,6 @@ router.post(
 );
 
 /**
- * pagination
- */
-router.post(
-  "/prepaid-orders",
-  authCheckMiddleware,
-  validate(webLeadsValidation.getAllFilter),
-  websitePageController.allFilterPaginationPrePiadOrder
-);
-
-/**
  * create new document
  */
 router.post(

@@ -99,6 +99,7 @@ const getAllFilter = {
       })
     ),
     isPaginationRequired: Joi.boolean().default(true).optional(),
+    isPrepaid: Joi.boolean().default(true),
   }),
 };
 
