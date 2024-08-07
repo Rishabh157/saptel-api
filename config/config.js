@@ -36,10 +36,10 @@ let {
   TALLY_BASEURL_LOCAL,
   REDIS_URL,
   REDIS_URL_TLS,
-  MERCHANT_ID,
-  ACCESS_CODE,
-  WORKING_KEY,
-  CC_AVENUE_VERIFY_PAYMENT_URL,
+  // MERCHANT_ID,
+  // ACCESS_CODE,
+  // WORKING_KEY,
+  // CC_AVENUE_VERIFY_PAYMENT_URL,
 } = process.env;
 
 let envObj = {
@@ -75,10 +75,10 @@ let envObj = {
   TALLY_BASEURL_LOCAL,
   REDIS_URL,
   REDIS_URL_TLS,
-  MERCHANT_ID,
-  ACCESS_CODE,
-  WORKING_KEY,
-  CC_AVENUE_VERIFY_PAYMENT_URL,
+  // MERCHANT_ID,
+  // ACCESS_CODE,
+  // WORKING_KEY,
+  // CC_AVENUE_VERIFY_PAYMENT_URL,
 };
 const envVarsSchema = Joi.object().keys({
   PROJECT_NAME: Joi.string().default("RARE_EXP").required(),
@@ -139,12 +139,12 @@ const envVarsSchema = Joi.object().keys({
   TALLY_BASEURL_LOCAL: Joi.string().required().label("Tally url required"),
   REDIS_URL: Joi.string().required().label("REDIS URL url"),
   REDIS_URL_TLS: Joi.string().required().label("REDIS URL TLS url"),
-  MERCHANT_ID: Joi.string().required().label("MERCHANT_ID required"),
-  ACCESS_CODE: Joi.string().required().label("ACCESS_CODE required"),
-  WORKING_KEY: Joi.string().required().label("WORKING_KEY required"),
-  CC_AVENUE_VERIFY_PAYMENT_URL: Joi.string()
-    .required()
-    .label("CC_AVENUE_VERIFY_PAYMENT_URL required"),
+  // MERCHANT_ID: Joi.string().required().label("MERCHANT_ID required"),
+  // ACCESS_CODE: Joi.string().required().label("ACCESS_CODE required"),
+  // WORKING_KEY: Joi.string().required().label("WORKING_KEY required"),
+  // CC_AVENUE_VERIFY_PAYMENT_URL: Joi.string()
+  //   .required()
+  //   .label("CC_AVENUE_VERIFY_PAYMENT_URL required"),
 });
 
 const { value: envVars, error } = envVarsSchema
@@ -202,8 +202,8 @@ module.exports = {
     url: envVars.REDIS_URL, // Redis URL (non-TLS)
     urlTls: envVars.REDIS_URL_TLS, // Redis URL with TLS
   },
-  merchantId: envVars.MERCHANT_ID,
-  accessCode: envVars.ACCESS_CODE,
-  workingKey: envVars.WORKING_KEY,
-  ccAvenueUrl: envVars.CC_AVENUE_VERIFY_PAYMENT_URL,
+  // merchantId: envVars.MERCHANT_ID,
+  // accessCode: envVars.ACCESS_CODE,
+  // workingKey: envVars.WORKING_KEY,
+  // ccAvenueUrl: envVars.CC_AVENUE_VERIFY_PAYMENT_URL,
 };

@@ -16,6 +16,16 @@ router.post(
 );
 
 /**
+ * pagination
+ */
+router.post(
+  "/prepaid-orders",
+  authCheckMiddleware,
+  validate(webLeadsValidation.getAllFilter),
+  websitePageController.allFilterPaginationPrePiadOrder
+);
+
+/**
  * create new document
  */
 router.post(
@@ -23,6 +33,16 @@ router.post(
   // authCheckMiddleware,
   validate(webLeadsValidation.create),
   websitePageController.add
+);
+
+/**
+ * check payment status of cc avenue paymentgateway
+ */
+router.post(
+  "/check-payment-status/ccavenue",
+  // authCheckMiddleware,
+  validate(webLeadsValidation.checkPaymentCCavenue),
+  websitePageController.checkPaymentCCavenue
 );
 
 /**
