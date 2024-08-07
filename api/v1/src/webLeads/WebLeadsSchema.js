@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const {
   webLeadStatusEnum,
   webLeadPaymentMode,
+  paymentGatewayNameEnum,
 } = require("../../helper/enumUtils");
 
 const WebLeadsSchema = new mongoose.Schema(
@@ -37,6 +38,16 @@ const WebLeadsSchema = new mongoose.Schema(
     url: { type: String, default: "", trim: true },
     price: { type: String, default: "", trim: true },
     transactionId: { type: String, default: "", trim: true },
+    paymentGatewayName: {
+      type: String,
+      enum: [
+        paymentGatewayNameEnum.razorpay,
+        paymentGatewayNameEnum.ccavenue,
+        "",
+      ],
+      default: "",
+      trim: true,
+    },
     leadStatus: {
       type: String,
       enum: [

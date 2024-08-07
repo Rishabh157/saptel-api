@@ -499,6 +499,11 @@ const webLeadStatusEnum = Object.freeze({
   prepaidOrder: "PREPAIDORDER",
 });
 
+const paymentGatewayNameEnum = Object.freeze({
+  ccavenue: "CC_AVENUE",
+  razorpay: "RAZORPAY",
+});
+
 // barcode status type
 const barcodeStatusType = Object.freeze({
   atWarehouse: "AT_WAREHOUSE",
@@ -642,4 +647,5 @@ module.exports = {
   fakeOrderDisposition,
   webLeadStatusEnum,
   webLeadPaymentMode,
+  paymentGatewayNameEnum,
 };

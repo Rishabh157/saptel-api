@@ -30,6 +30,7 @@ const create = {
     price: Joi.string().allow(""),
     leadStatus: Joi.string().allow(""),
     transactionId: Joi.string().allow(""),
+    paymentGatewayName: Joi.string().allow(""),
   }),
 };
 
@@ -47,6 +48,13 @@ const update = {
     footerSpace: Joi.string().allow(""),
     websiteId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
+// check payment status cc avenue
+const checkPaymentCCavenue = {
+  params: Joi.object().keys({
+    transactionId: Joi.string().required,
   }),
 };
 
@@ -142,4 +150,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  checkPaymentCCavenue,
 };
