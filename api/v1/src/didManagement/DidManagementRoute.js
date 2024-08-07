@@ -23,10 +23,10 @@ router.get(
  * getByDid Number
  */
 router.get(
-  "/unauth/:didno",
+  "/unauth/:didno/company/:companyId",
   // authCheckMiddleware,
   // validate(didManagementValidation.get),
-  didManagementController.getByDidNo
+  didManagementController.getByDidNoUnauth
 );
 
 //-----------------------------------------------------

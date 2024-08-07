@@ -191,7 +191,116 @@ exports.getByDidNo = async (req, res) => {
     let didNo = req.params.didno;
 
     let additionalQuery = [
-      { $match: { didNumber: didNo } },
+      {
+        $match: {
+          didNumber: didNo,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "scheme_data",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+                productInformation: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "slotdefinitions",
+          localField: "slotId",
+          foreignField: "_id",
+          as: "slot_data",
+          pipeline: [
+            {
+              $project: {
+                slotName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "channelmasters",
+          localField: "channelId",
+          foreignField: "_id",
+          as: "channel_data",
+          pipeline: [
+            {
+              $project: {
+                channelName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          schemeLabel: {
+            $arrayElemAt: ["$scheme_data.schemeName", 0],
+          },
+          schemeProductGroup: {
+            $arrayElemAt: ["$scheme_data.productInformation", 0],
+          },
+
+          slotLabel: {
+            $arrayElemAt: ["$slot_data.slotName", 0],
+          },
+          channelLabel: {
+            $arrayElemAt: ["$channel_data.channelName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["channel_data", "scheme_data", "slot_data"],
+      },
+    ];
+    let dataExist = await didManagementService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist[0],
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// unauth
+
+exports.getByDidNoUnauth = async (req, res) => {
+  try {
+    let didNo = req.params.didno;
+    let companyId = req.params.companyId;
+
+    let additionalQuery = [
+      {
+        $match: {
+          didNumber: didNo,
+          companyId: new mongoose.Types.ObjectId(companyId),
+        },
+      },
       {
         $lookup: {
           from: "schemes",
