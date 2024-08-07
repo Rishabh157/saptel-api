@@ -624,6 +624,94 @@ exports.getByProductGroup = async (req, res) => {
   }
 };
 
+//
+
+exports.getByProductGroupAuth = async (req, res) => {
+  try {
+    let companyId = req.userData.companyId;
+    let pgid = req.params.pgid;
+    //if no default query then pass {}
+    let todaysDate = JSON.stringify(
+      new Date(`${moment().format("YYYY-MM-DD")}`)
+    )
+      .replace('"', "")
+      .replaceAll("-", "/");
+
+    console.log(todaysDate, "date");
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+      isDeleted: false,
+      isActive: true,
+      endDate: {
+        $gte: todaysDate.split("T")[0],
+      },
+    };
+    matchQuery["productInformation.productGroup"] = new mongoose.Types.ObjectId(
+      pgid
+    );
+
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "productcategories",
+          localField: "category",
+          foreignField: "_id",
+          as: "parent_name",
+          pipeline: [{ $project: { categoryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "subCategory",
+          foreignField: "_id",
+          as: "sub_category_name",
+          pipeline: [{ $project: { subCategoryName: 1 } }],
+        },
+      },
+
+      {
+        $addFields: {
+          productCategoryLabel: {
+            $arrayElemAt: ["$parent_name.categoryName", 0],
+          },
+          ProductSubCategoryLabel: {
+            $arrayElemAt: ["$sub_category_name.subCategoryName", 0],
+          },
+        },
+      },
+      {
+        $unset: ["parent_name", "sub_category_name"],
+      },
+    ];
+
+    let dataExist = await schemeService.aggregateQuery(additionalQuery);
+
+    if (!dataExist || !dataExist?.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //single view api
 exports.getById = async (req, res) => {
   try {

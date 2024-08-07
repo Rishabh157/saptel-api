@@ -45,6 +45,14 @@ router.get(
   validate(dispositionThreeValidation.getByDispositionOneId),
   dispositionThreeController.getByDispositionTwoId
 );
+
+//===============get all document fo dispositionTwoId ===============
+router.get(
+  "/get-all/:id",
+  authCheckMiddleware,
+  validate(dispositionThreeValidation.getByDispositionOneId),
+  dispositionThreeController.getByDispositionTwoId
+);
 //===============get all document fo dispositionTwoId (without token for delivery boy)===============
 router.get(
   "/delivery-boy/dispositionthree/:id",

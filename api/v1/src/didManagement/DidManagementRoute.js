@@ -29,6 +29,17 @@ router.get(
   didManagementController.getByDidNo
 );
 
+//-----------------------------------------------------
+/**
+ * getByDid Number with token
+ */
+router.get(
+  "/didno/:didno",
+  authCheckMiddleware,
+  // validate(didManagementValidation.get),
+  didManagementController.getByDidNo
+);
+
 /**
  * get all didManagement pagination filter
  */

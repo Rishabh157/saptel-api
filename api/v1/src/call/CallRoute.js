@@ -37,10 +37,30 @@ router.post(
  * create new document
  */
 router.post("/add", validate(callValidation.create), callController.add);
+
+/**
+ * create new document with token
+ */
+router.post(
+  "/auth/add",
+  authCheckMiddleware,
+  validate(callValidation.create),
+  callController.add
+);
 /**
  * update document
  */
 router.put("/:id", validate(callValidation.update), callController.update);
+
+/**
+ * update document auth
+ */
+router.put(
+  "/auth/:id",
+  authCheckMiddleware,
+  validate(callValidation.update),
+  callController.updateAuth
+);
 
 /**
  * get by id

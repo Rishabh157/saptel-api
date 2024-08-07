@@ -45,6 +45,16 @@ router.get(
   validate(schemeValidation.getByProductGroup),
   schemeController.getByProductGroup
 );
+
+/**
+ * get all documents without token for inbound calls
+ */
+router.get(
+  "/product-group/:pgid",
+  authCheckMiddleware,
+  validate(schemeValidation.getByProductGroup),
+  schemeController.getByProductGroupAuth
+);
 /**
  * get one document
  */

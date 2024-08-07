@@ -39,6 +39,14 @@ router.get(
   dispositionTwoController.getAuth
 );
 
+//===============get one document (if query) / all document  ===============
+router.get(
+  "/dp2",
+  authCheckMiddleware,
+  validate(dispositionTwoValidation.get),
+  dispositionTwoController.getAuth
+);
+
 //===============get all document fo dispositionTwo Id Wihtout token===============
 router.get(
   "/unauth/get-all/:id",
