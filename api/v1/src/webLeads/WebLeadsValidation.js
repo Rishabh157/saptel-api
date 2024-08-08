@@ -9,6 +9,7 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     order_id: Joi.string().custom(commonValidation.objectId).allow(null),
+    companyCode: Joi.string().required(),
     name: Joi.string().required(),
     phone: Joi.string().custom(commonValidation.indianMobile).required(),
     email: Joi.string().lowercase().allow(""),
@@ -24,13 +25,17 @@ const create = {
     sdate: Joi.string().allow(""),
     idtag: Joi.string().allow(""),
     product_name: Joi.string().required(),
-    mode: Joi.string().allow(""),
+    paymentMode: Joi.string().allow(""),
+    paymentStatus: Joi.string().allow(""),
     paymeny_mode: Joi.string().allow(""),
+    leadType: Joi.string().required(),
     url: Joi.string().allow(""),
     price: Joi.string().allow(""),
     leadStatus: Joi.string().allow(""),
     transactionId: Joi.string().allow(""),
     paymentGatewayName: Joi.string().allow(""),
+    leadStatus: Joi.string().required(),
+    webLeadApiKey: Joi.string().required(),
   }),
 };
 

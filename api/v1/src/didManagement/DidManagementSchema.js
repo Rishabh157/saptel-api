@@ -8,6 +8,11 @@ const DidManagementSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    didType: {
+      type: String,
+      enum: ["WEB", "MEDIA"],
+      default: "MEDIA",
+    },
     slotId: {
       type: ObjectId,
       required: true,

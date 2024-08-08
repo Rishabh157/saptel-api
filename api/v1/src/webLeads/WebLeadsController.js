@@ -38,10 +38,25 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    const { phone, product_name, idtag, mode, leadStatus } = req.body;
-    console.log(mode, "mode");
+    const {
+      phone,
+      product_name,
+      idtag,
+      leadStatus,
+      webLeadApiKey,
+      companyCode,
+    } = req.body;
+    if (webLeadApiKey !== config.webleadApiKey) {
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Invalid API KEY`);
+    }
     let isPrepaidOrder = leadStatus === webLeadStatusEnum.prepaidOrder;
     const createdAt = new Date().toISOString().slice(0, 10);
+
+    // get companyid
+    let comapnydata = await companyService?.getOneByMultiField({ companyCode });
+    if (!comapnydata) {
+      throw new ApiError(httpStatus.NOT_FOUND, `Invalid Company`);
+    }
     // Upsert (update or insert) the data based on the phone number
     let dataFound = await webLeadsService?.getOneByMultiField({
       phone,
@@ -56,7 +71,10 @@ exports.add = async (req, res) => {
     let dataUpdated;
     let isAdded = true;
     if (!dataFound && !isPrepaidOrder) {
-      dataUpdated = await webLeadsService.createNewData({ ...req.body });
+      dataUpdated = await webLeadsService.createNewData({
+        ...req.body,
+        companyId: comapnydata?._id,
+      });
     } else {
       isAdded = false;
       dataUpdated = await webLeadsService.getOneAndUpdate(
@@ -66,6 +84,7 @@ exports.add = async (req, res) => {
         {
           $set: {
             ...req.body,
+            companyId: comapnydata?._id,
           },
         }
       );
@@ -225,17 +244,22 @@ exports.allFilterPagination = async (req, res) => {
       : true;
     let finalAggregateQuery = [];
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [
+        {
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req?.userData.companyId),
+        },
+      ],
     };
 
     if (isPrepaid) {
       matchQuery.$and.push({
-        mode: {
+        paymentMode: {
           $in: [webLeadPaymentMode.online, webLeadPaymentMode.overseas],
         },
       });
     } else {
-      matchQuery.$and.push({ mode: webLeadPaymentMode.cod });
+      matchQuery.$and.push({ paymentMode: webLeadPaymentMode.cod });
     }
     /**
      * to send only active data on web

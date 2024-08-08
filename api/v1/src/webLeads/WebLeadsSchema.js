@@ -4,11 +4,15 @@ const {
   webLeadStatusEnum,
   webLeadPaymentMode,
   paymentGatewayNameEnum,
+  webLeadPaymentStatus,
+  webLeadType,
 } = require("../../helper/enumUtils");
 
 const WebLeadsSchema = new mongoose.Schema(
   {
     order_id: { type: ObjectId, default: null, trim: true },
+    companyId: { type: ObjectId, default: null, trim: true },
+    companyCode: { type: String, required: true, trim: true },
     name: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },
     email: { type: String, default: "", trim: true },
@@ -24,7 +28,7 @@ const WebLeadsSchema = new mongoose.Schema(
     status: { type: String, default: "", trim: true },
     idtag: { type: String, default: "", trim: true },
     product_name: { type: String, required: true, trim: true },
-    mode: {
+    paymentMode: {
       type: String,
       enum: [
         webLeadPaymentMode.overseas,
@@ -33,6 +37,15 @@ const WebLeadsSchema = new mongoose.Schema(
       ],
       default: webLeadPaymentMode.cod,
       trim: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: [
+        webLeadPaymentStatus.na,
+        webLeadPaymentStatus.pending,
+        webLeadPaymentStatus.paid,
+      ],
+      default: webLeadPaymentStatus.na,
     },
     paymeny_mode: { type: String, default: "", trim: true },
     url: { type: String, default: "", trim: true },
@@ -47,6 +60,11 @@ const WebLeadsSchema = new mongoose.Schema(
       ],
       default: "",
       trim: true,
+    },
+    leadType: {
+      type: String,
+      enum: [webLeadType.web, webLeadType.amazon, webLeadType.flipcart],
+      required: true,
     },
     leadStatus: {
       type: String,

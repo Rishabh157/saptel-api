@@ -36,6 +36,7 @@ let {
   TALLY_BASEURL_LOCAL,
   REDIS_URL,
   REDIS_URL_TLS,
+  WEBLEAD_API_KEY,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -75,6 +76,7 @@ let envObj = {
   TALLY_BASEURL_LOCAL,
   REDIS_URL,
   REDIS_URL_TLS,
+  WEBLEAD_API_KEY,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -139,6 +141,7 @@ const envVarsSchema = Joi.object().keys({
   TALLY_BASEURL_LOCAL: Joi.string().required().label("Tally url required"),
   REDIS_URL: Joi.string().required().label("REDIS URL url"),
   REDIS_URL_TLS: Joi.string().required().label("REDIS URL TLS url"),
+  WEBLEAD_API_KEY: Joi.string().required().label("WEBLEAD_API_KEY is required"),
   // MERCHANT_ID: Joi.string().required().label("MERCHANT_ID required"),
   // ACCESS_CODE: Joi.string().required().label("ACCESS_CODE required"),
   // WORKING_KEY: Joi.string().required().label("WORKING_KEY required"),
@@ -202,6 +205,7 @@ module.exports = {
     url: envVars.REDIS_URL, // Redis URL (non-TLS)
     urlTls: envVars.REDIS_URL_TLS, // Redis URL with TLS
   },
+  webleadApiKey: envVars.WEBLEAD_API_KEY,
   // merchantId: envVars.MERCHANT_ID,
   // accessCode: envVars.ACCESS_CODE,
   // workingKey: envVars.WORKING_KEY,

@@ -20,19 +20,23 @@ const {
 //add start
 exports.add = async (req, res) => {
   try {
-    let { courierName, priority } = req.body;
+    let { courierName, courierCode } = req.body;
     /**
      * check duplicate exist
      */
-    let dataExist = await courierPreferenceService.isExists([{ courierName }]);
+    let dataExist = await courierPreferenceService.isExists(
+      [{ courierName }, { courierCode }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
 
-    let priorityExist = await courierPreferenceService.isExists([{ priority }]);
-    if (priorityExist.exists && priorityExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, priorityExist.existsSummary);
-    }
+    // let priorityExist = await courierPreferenceService.isExists([{ priority }]);
+    // if (priorityExist.exists && priorityExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, priorityExist.existsSummary);
+    // }
     //------------------create data-------------------
     let dataCreated = await courierPreferenceService.createNewData({
       ...req.body,
@@ -63,32 +67,35 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { data } = req.body;
+    let idToBeSearch = req.params.id;
 
-    const prioritySet = new Set();
+    // let dataExist = await courierPreferenceService.isExists(
+    //   [{ courierName }, { courierCode }],
+    //   idToBeSearch,
+    //   true
+    // );
+    // if (dataExist.exists && dataExist.existsSummary) {
+    //   throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    // }
 
-    for (const item of data) {
-      if (prioritySet.has(item.priority)) {
-        throw new ApiError(
-          httpStatus.NOT_IMPLEMENTED,
-          `Duplicate priority values found. `
-        );
+    let dataUpdated = await courierPreferenceService.getOneAndUpdate(
+      {
+        _id: idToBeSearch,
+        isDeleted: false,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
       }
-      prioritySet.add(item.priority);
-    }
-    let allData = await courierPreferenceService.findAll({});
-    let allId = allData?.map((ele) => {
-      return ele?._id;
-    });
-    await courierPreferenceService.deleteMany(allId);
-    let created = await courierPreferenceService?.createMany(data);
+    );
 
-    if (created) {
-      return res.status(httpStatus.CREATED).send({
+    if (dataUpdated) {
+      return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
-        data: created,
+        data: dataUpdated,
         status: true,
-        code: null,
+        code: "OK",
         issue: null,
       });
     } else {
@@ -103,6 +110,49 @@ exports.update = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+//update start
+// exports.update = async (req, res) => {
+//   try {
+//     let { data } = req.body;
+
+//     const prioritySet = new Set();
+
+//     for (const item of data) {
+//       if (prioritySet.has(item.priority)) {
+//         throw new ApiError(
+//           httpStatus.NOT_IMPLEMENTED,
+//           `Duplicate priority values found. `
+//         );
+//       }
+//       prioritySet.add(item.priority);
+//     }
+//     let allData = await courierPreferenceService.findAll({});
+//     let allId = allData?.map((ele) => {
+//       return ele?._id;
+//     });
+//     await courierPreferenceService.deleteMany(allId);
+//     let created = await courierPreferenceService?.createMany(data);
+
+//     if (created) {
+//       return res.status(httpStatus.CREATED).send({
+//         message: "Updated successfully.",
+//         data: created,
+//         status: true,
+//         code: null,
+//         issue: null,
+//       });
+//     } else {
+//       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 // all filter pagination api
 exports.allFilterPagination = async (req, res) => {

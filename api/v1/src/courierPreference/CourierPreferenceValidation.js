@@ -9,7 +9,10 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     courierName: Joi.string().uppercase().required(),
-    priority: Joi.number().required(),
+    courierCode: Joi.string().uppercase().required(),
+    courierType: Joi.string().required(),
+    transportType: Joi.string().required(),
+    isApiAvailable: Joi.boolean(),
   }),
 };
 
@@ -17,12 +20,12 @@ const create = {
  * update existing document
  */
 const update = {
+  params: Joi.object().keys({
+    id: Joi.string().custom(commonValidation.objectId),
+  }),
   body: Joi.object().keys({
-    data: Joi.array().items({
-      courierName: Joi.string().uppercase().required(),
-      priority: Joi.number().required(),
-      companyId: Joi.string().custom(commonValidation.objectId).required(),
-    }),
+    courierType: Joi.string().required(),
+    transportType: Joi.string().required(),
   }),
 };
 

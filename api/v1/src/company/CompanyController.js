@@ -25,6 +25,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { moduleType, actionType } = require("../../helper/enumUtils");
+const { generateCode } = require("./CompanyHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -45,9 +46,24 @@ exports.add = async (req, res) => {
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
+    const getUniqueCode = async () => {
+      let unqcode = generateCode();
+      let isCodeExists = await companyService?.getOneByMultiField({
+        companyCode: unqcode,
+      });
+      if (isCodeExists) {
+        return getUniqueCode();
+      }
+      return unqcode;
+    };
+    let uniqueCode = await getUniqueCode();
+
     //------------------create data-------------------
     req.body.maskedPhoneNo = "******" + req.body.phoneNo.substring(6);
-    let dataCreated = await companyService.createNewData({ ...req.body });
+    let dataCreated = await companyService.createNewData({
+      ...req.body,
+      companyCode: uniqueCode,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

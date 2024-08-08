@@ -11,9 +11,23 @@ const PincodeSchema = new mongoose.Schema(
     // companyId: { type: ObjectId, required: true, trim: true },
 
     preferredCourier: {
-      type: String,
-      enum: [preferredCourierPartner.shipyaari, preferredCourierPartner.gpo],
-      default: preferredCourierPartner.shipyaari,
+      type: [
+        {
+          courierId: {
+            type: ObjectId,
+            required: true,
+          },
+          courierName: {
+            type: ObjectId,
+            required: true,
+          },
+          priority: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
+      required: true,
     },
     isFixed: {
       type: Boolean,

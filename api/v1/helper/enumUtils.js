@@ -554,6 +554,28 @@ const webLeadPaymentMode = Object.freeze({
   overseas: "OVERSEAS",
 });
 
+const webLeadPaymentStatus = Object.freeze({
+  na: "NA",
+  pending: "PENDING",
+  paid: "PAID",
+});
+
+const webLeadType = Object.freeze({
+  web: "WEB",
+  amazon: "AMAZON",
+  flipcart: "FLIPCART",
+});
+
+const courierType = Object.freeze({
+  awb: "AWB",
+  api: "API",
+});
+
+const transportType = Object.freeze({
+  air: "AIR",
+  surface: "SURFACE",
+});
+
 const firstCallDispositions = Object.freeze({
   callBack: "CALLBACK",
   approved: "APPROVED",
@@ -648,4 +670,8 @@ module.exports = {
   webLeadStatusEnum,
   webLeadPaymentMode,
   paymentGatewayNameEnum,
+  webLeadPaymentStatus,
+  webLeadType,
+  courierType,
+  transportType,
 };

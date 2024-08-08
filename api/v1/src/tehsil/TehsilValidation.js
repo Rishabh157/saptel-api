@@ -14,9 +14,11 @@ const create = {
     stateId: Joi.string().custom(commonValidation.objectId).required(),
     countryId: Joi.string().custom(commonValidation.objectId).required(),
     // companyId: Joi.string().custom(commonValidation.objectId).required(),
-    preferredCourier: Joi.string()
-      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
-      .required(),
+    preferredCourier: Joi.array().items({
+      courierId: Joi.string().custom(commonValidation.objectId).required(),
+      courierName: Joi.string().required(),
+      priority: Joi.string().required(),
+    }),
     isFixed: Joi.boolean(),
   }),
 };
@@ -29,9 +31,11 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    preferredCourier: Joi.string()
-      .valid(preferredCourierPartner.shipyaari, preferredCourierPartner.gpo)
-      .required(),
+    preferredCourier: Joi.array().items({
+      courierId: Joi.string().custom(commonValidation.objectId).required(),
+      courierName: Joi.string().required(),
+      priority: Joi.string().required(),
+    }),
     isFixed: Joi.boolean(),
   }),
 };

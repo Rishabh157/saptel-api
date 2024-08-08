@@ -8,9 +8,23 @@ const TehsilSchema = new mongoose.Schema(
     stateId: { type: ObjectId, required: true, trim: true },
     countryId: { type: ObjectId, required: true, trim: true },
     preferredCourier: {
-      type: String,
-      enum: [preferredCourierPartner.shipyaari, preferredCourierPartner.gpo],
-      default: preferredCourierPartner.shipyaari,
+      type: [
+        {
+          courierId: {
+            type: ObjectId,
+            required: true,
+          },
+          courierName: {
+            type: ObjectId,
+            required: true,
+          },
+          priority: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
+      required: true,
     },
     // companyId: { type: ObjectId, required: true, trim: true },
     isFixed: {

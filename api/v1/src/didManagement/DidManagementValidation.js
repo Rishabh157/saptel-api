@@ -13,6 +13,7 @@ const create = {
     slotId: Joi.string().custom(commonValidation.objectId).required(),
     channelId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    didType: Joi.string().required(),
   }),
 };
 
@@ -29,6 +30,7 @@ const update = {
     slotId: Joi.string().custom(commonValidation.objectId).required(),
     channelId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
+    didType: Joi.string().required(),
   }),
 };
 
