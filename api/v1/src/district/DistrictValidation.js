@@ -16,7 +16,7 @@ const create = {
     preferredCourier: Joi.array().items({
       courierId: Joi.string().custom(commonValidation.objectId).required(),
       courierName: Joi.string().required(),
-      priority: Joi.string().required(),
+      priority: Joi.number().required(),
     }),
     isFixed: Joi.boolean(),
   }),
@@ -33,7 +33,7 @@ const update = {
     preferredCourier: Joi.array().items({
       courierId: Joi.string().custom(commonValidation.objectId).required(),
       courierName: Joi.string().required(),
-      priority: Joi.string().required(),
+      priority: Joi.number().required(),
     }),
     isFixed: Joi.boolean(),
   }),

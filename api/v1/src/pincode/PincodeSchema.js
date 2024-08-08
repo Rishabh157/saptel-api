@@ -18,7 +18,7 @@ const PincodeSchema = new mongoose.Schema(
             required: true,
           },
           courierName: {
-            type: ObjectId,
+            type: String,
             required: true,
           },
           priority: {
