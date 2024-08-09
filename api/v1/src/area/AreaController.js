@@ -43,7 +43,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await areaService.isExists([{ area }]);
+    let dataExist = await areaService.isExists([{ area }, { pincodeId }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }

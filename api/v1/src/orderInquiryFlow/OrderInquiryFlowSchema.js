@@ -576,11 +576,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     },
     orderAssignedToCourier: {
       type: String,
-      enum: [
-        preferredCourierPartner.shipyaari,
-        preferredCourierPartner.gpo,
-        "",
-      ],
+
       default: "",
     },
     hsnCode: {

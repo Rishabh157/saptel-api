@@ -1088,7 +1088,7 @@ exports.firstCallConfirmation = async (req, res) => {
         wareHouseData,
         categorydata
       );
-
+      console.log(isOrderAssignedToCourier, "isOrderAssignedToCourier");
       // if true the hit shipment API else GPO
       if (
         isOrderAssignedToCourier.apiStatus &&
