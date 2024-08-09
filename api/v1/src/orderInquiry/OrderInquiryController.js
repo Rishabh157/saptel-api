@@ -895,7 +895,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
     );
 
     // if true the hit shipment API else GPO
-    if (isOrderAssignedToCourier.status) {
+    if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
       let orderUpdateCourier = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
@@ -903,7 +903,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
         },
         {
           $set: {
-            orderAssignedToCourier: preferredCourierPartner.shipyaari,
+            orderAssignedToCourier: isOrderAssignedToCourier.courierName,
             shipyaariResponse: isOrderAssignedToCourier.data,
             awbNumber:
               isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
@@ -915,19 +915,23 @@ exports.approveFirstCallDirectly = async (req, res) => {
       );
       await addToOrderFlow(orderUpdateCourier);
     } else {
-      let orderUpdateGPO = await orderService.getOneAndUpdate(
+      let orderUpdateToOther = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
           isDeleted: false,
         },
         {
           $set: {
-            isGPO: true,
-            orderAssignedToCourier: preferredCourierPartner.gpo,
+            isGPO:
+              isOrderAssignedToCourier?.courierName ===
+              preferredCourierPartner.gpo
+                ? true
+                : false,
+            orderAssignedToCourier: isOrderAssignedToCourier?.courierName,
           },
         }
       );
-      await addToOrderFlow(orderUpdateGPO);
+      await addToOrderFlow(orderUpdateToOther);
     }
 
     if (dataUpdated) {
@@ -1086,7 +1090,10 @@ exports.firstCallConfirmation = async (req, res) => {
       );
 
       // if true the hit shipment API else GPO
-      if (isOrderAssignedToCourier.status) {
+      if (
+        isOrderAssignedToCourier.apiStatus &&
+        isOrderAssignedToCourier?.isApi
+      ) {
         let orderUpdateCourier = await orderService.getOneAndUpdate(
           {
             _id: idToBeSearch,
@@ -1094,7 +1101,7 @@ exports.firstCallConfirmation = async (req, res) => {
           },
           {
             $set: {
-              orderAssignedToCourier: preferredCourier,
+              orderAssignedToCourier: isOrderAssignedToCourier.courierName,
               shipyaariResponse: isOrderAssignedToCourier.data,
               awbNumber:
                 isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
@@ -1106,19 +1113,23 @@ exports.firstCallConfirmation = async (req, res) => {
         );
         await addToOrderFlow(orderUpdateCourier);
       } else {
-        let orderUpdateGPO = await orderService.getOneAndUpdate(
+        let orderUpdateToOther = await orderService.getOneAndUpdate(
           {
             _id: idToBeSearch,
             isDeleted: false,
           },
           {
             $set: {
-              isGPO: true,
-              orderAssignedToCourier: preferredCourierPartner.gpo,
+              isGPO:
+                isOrderAssignedToCourier?.courierName ===
+                preferredCourierPartner.gpo
+                  ? true
+                  : false,
+              orderAssignedToCourier: isOrderAssignedToCourier?.courierName,
             },
           }
         );
-        await addToOrderFlow(orderUpdateGPO);
+        await addToOrderFlow(orderUpdateToOther);
       }
       // geting deleverable courier partner
       return res.status(httpStatus.OK).send({
@@ -1265,7 +1276,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
     );
 
     // if true the hit shipment API else GPO
-    if (isOrderAssignedToCourier.status) {
+    if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
       let orderUpdateCourier = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
@@ -1273,7 +1284,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         },
         {
           $set: {
-            orderAssignedToCourier: preferredCourier,
+            orderAssignedToCourier: isOrderAssignedToCourier.courierName,
             shipyaariResponse: isOrderAssignedToCourier.data,
             awbNumber:
               isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
@@ -1285,19 +1296,23 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
       );
       await addToOrderFlow(orderUpdateCourier);
     } else {
-      let orderUpdateGPO = await orderService.getOneAndUpdate(
+      let orderUpdateToOther = await orderService.getOneAndUpdate(
         {
           _id: idToBeSearch,
           isDeleted: false,
         },
         {
           $set: {
-            isGPO: true,
-            orderAssignedToCourier: preferredCourierPartner.gpo,
+            isGPO:
+              isOrderAssignedToCourier?.courierName ===
+              preferredCourierPartner.gpo
+                ? true
+                : false,
+            orderAssignedToCourier: isOrderAssignedToCourier?.courierName,
           },
         }
       );
-      await addToOrderFlow(orderUpdateGPO);
+      await addToOrderFlow(orderUpdateToOther);
     }
 
     if (dataUpdated) {

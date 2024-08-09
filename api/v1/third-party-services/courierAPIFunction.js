@@ -1,11 +1,13 @@
 const {
   preferredCourierPartner,
   paymentModeType,
+  courierType,
 } = require("../helper/enumUtils");
 const {
   getEstTimeFromShipYaari,
   confirmOrderShipYaari,
 } = require("./ShipyaariService");
+const courierMasterService = require("../../v1/src/courierPreference/CourierPreferenceService");
 
 const getEstTime = async (data, courierName) => {
   try {
@@ -42,6 +44,107 @@ const convertEpochTime = (mongoDateString) => {
   return epochTimeInSeconds;
 };
 
+// const assignOrderToCourier = async (
+//   toPincodeData,
+//   fromPincodeData,
+//   schemeData,
+//   orderData,
+//   preferredCourier,
+//   wareHouseData,
+//   categorydata
+// ) => {
+//   try {
+//     let orderAssigned;
+//     switch (preferredCourier) {
+//       case preferredCourierPartner.shipyaari:
+//         let shipYaariOrderData = {
+//           pickupDetails: {
+//             fullAddress: wareHouseData?.billingAddress?.address,
+//             pincode: fromPincodeData?.pincode,
+//             contact: {
+//               name: wareHouseData?.wareHouseName,
+//               mobileNo: wareHouseData?.billingAddress?.phone,
+//             },
+//           },
+//           deliveryDetails: {
+//             fullAddress: orderData?.autoFillingShippingAddress,
+//             pincode: toPincodeData?.pincode,
+//             contact: {
+//               name: orderData?.customerName,
+//               mobileNo: orderData?.mobileNo,
+//             },
+//             gstNumber: "", // warehuse gst number
+//           },
+//           boxInfo: [
+//             {
+//               name: "box_1", // to be discuss
+//               weightUnit: "Kg",
+//               deadWeight: parseFloat(
+//                 (schemeData?.weight * orderData?.shcemeQuantity) / 1000
+//               ), // multiply by quantity
+//               length: parseFloat(
+//                 schemeData?.dimension?.depth * orderData?.shcemeQuantity
+//               ), // multiply by quantity
+//               breadth: parseFloat(
+//                 schemeData?.dimension?.width * orderData?.shcemeQuantity
+//               ), // multiply by quantity
+//               height: schemeData?.dimension?.height,
+//               measureUnit: "cm",
+//               products: [
+//                 {
+//                   name: schemeData?.schemeName,
+//                   category: categorydata?.categoryName,
+//                   sku: schemeData?.schemeCode, // schem code
+//                   qty: orderData?.shcemeQuantity,
+//                   unitPrice: orderData?.price,
+//                   unitTax: 0, // to be discuss
+//                   weightUnit: "kg",
+//                   deadWeight: schemeData?.weight / 1000, // convert to kg
+//                   length: schemeData?.dimension?.depth,
+//                   breadth: schemeData?.dimension?.width,
+//                   height: schemeData?.dimension?.height,
+//                   measureUnit: "cm",
+//                 },
+//               ],
+//               codInfo: {
+//                 isCod: orderData?.paymentmode === paymentModeType.COD,
+//                 collectableAmount: orderData?.price * orderData?.shcemeQuantity, // multiply be quantity
+//                 invoiceValue: orderData?.price * orderData?.shcemeQuantity, //multiply be quantity
+//               },
+//               podInfo: {
+//                 isPod: false, // to be discuss
+//               },
+//               insurance: false, // to be discuss
+//             },
+//           ],
+
+//           orderType: "B2C",
+//           transit: "FORWARD",
+//           courierPartner: "",
+//           pickupDate: convertEpochTime(new Date()), // today date
+//           gstNumber: "",
+//           orderId: orderData?.orderNumber.toString(),
+//           eWayBillNo: 0,
+//           brandName: "Telemart",
+//           brandLogo: "", // telemart image
+//         };
+
+//         let orderAssignedToShipYaari = await confirmOrderShipYaari(
+//           shipYaariOrderData
+//         );
+
+//         orderAssigned = orderAssignedToShipYaari;
+
+//         break;
+//       default:
+//         break;
+//     }
+//     return orderAssigned;
+//   } catch (err) {
+//     return err;
+//   }
+// };
+
 const assignOrderToCourier = async (
   toPincodeData,
   fromPincodeData,
@@ -52,92 +155,131 @@ const assignOrderToCourier = async (
   categorydata
 ) => {
   try {
-    let orderAssigned;
-    switch (preferredCourier) {
-      case preferredCourierPartner.shipyaari:
-        let shipYaariOrderData = {
-          pickupDetails: {
-            fullAddress: wareHouseData?.billingAddress?.address,
-            pincode: fromPincodeData?.pincode,
-            contact: {
-              name: wareHouseData?.wareHouseName,
-              mobileNo: wareHouseData?.billingAddress?.phone,
-            },
-          },
-          deliveryDetails: {
-            fullAddress: orderData?.autoFillingShippingAddress,
-            pincode: toPincodeData?.pincode,
-            contact: {
-              name: orderData?.customerName,
-              mobileNo: orderData?.mobileNo,
-            },
-            gstNumber: "", // warehuse gst number
-          },
-          boxInfo: [
-            {
-              name: "box_1", // to be discuss
-              weightUnit: "Kg",
-              deadWeight: parseFloat(
-                (schemeData?.weight * orderData?.shcemeQuantity) / 1000
-              ), // multiply by quantity
-              length: parseFloat(
-                schemeData?.dimension?.depth * orderData?.shcemeQuantity
-              ), // multiply by quantity
-              breadth: parseFloat(
-                schemeData?.dimension?.width * orderData?.shcemeQuantity
-              ), // multiply by quantity
-              height: schemeData?.dimension?.height,
-              measureUnit: "cm",
-              products: [
-                {
-                  name: schemeData?.schemeName,
-                  category: categorydata?.categoryName,
-                  sku: schemeData?.schemeCode, // schem code
-                  qty: orderData?.shcemeQuantity,
-                  unitPrice: orderData?.price,
-                  unitTax: 0, // to be discuss
-                  weightUnit: "kg",
-                  deadWeight: schemeData?.weight / 1000, // convert to kg
-                  length: schemeData?.dimension?.depth,
-                  breadth: schemeData?.dimension?.width,
-                  height: schemeData?.dimension?.height,
-                  measureUnit: "cm",
-                },
-              ],
-              codInfo: {
-                isCod: orderData?.paymentmode === paymentModeType.COD,
-                collectableAmount: orderData?.price * orderData?.shcemeQuantity, // multiply be quantity
-                invoiceValue: orderData?.price * orderData?.shcemeQuantity, //multiply be quantity
-              },
-              podInfo: {
-                isPod: false, // to be discuss
-              },
-              insurance: false, // to be discuss
-            },
-          ],
-
-          orderType: "B2C",
-          transit: "FORWARD",
-          courierPartner: "",
-          pickupDate: convertEpochTime(new Date()), // today date
-          gstNumber: "",
-          orderId: orderData?.orderNumber.toString(),
-          eWayBillNo: 0,
-          brandName: "Telemart",
-          brandLogo: "", // telemart image
-        };
-
-        let orderAssignedToShipYaari = await confirmOrderShipYaari(
-          shipYaariOrderData
-        );
-
-        orderAssigned = orderAssignedToShipYaari;
-
-        break;
-      default:
-        break;
+    let orderAssigned = {
+      isApi: false,
+      data: null,
+      courierName: "",
+      apiStatus: false,
+    };
+    if (preferredCourier?.length === 0) {
+      return {
+        isApi: false,
+        data: null,
+        courierName: preferredCourierPartner.gpo,
+        apiStatus: false,
+      };
     }
-    return orderAssigned;
+    Promise.all(
+      preferredCourier?.map(async (ele) => {
+        let foundCourier = await courierMasterService?.getOneByMultiField({
+          isActive: true,
+          isDeleted: false,
+          _id: ele?.courierId,
+        });
+        if (foundCourier?.courierType === courierType.api) {
+          switch (foundCourier?.courierName) {
+            case preferredCourierPartner.shipyaari:
+              let shipYaariOrderData = {
+                pickupDetails: {
+                  fullAddress: wareHouseData?.billingAddress?.address,
+                  pincode: fromPincodeData?.pincode,
+                  contact: {
+                    name: wareHouseData?.wareHouseName,
+                    mobileNo: wareHouseData?.billingAddress?.phone,
+                  },
+                },
+                deliveryDetails: {
+                  fullAddress: orderData?.autoFillingShippingAddress,
+                  pincode: toPincodeData?.pincode,
+                  contact: {
+                    name: orderData?.customerName,
+                    mobileNo: orderData?.mobileNo,
+                  },
+                  gstNumber: "", // warehuse gst number
+                },
+                boxInfo: [
+                  {
+                    name: "box_1", // to be discuss
+                    weightUnit: "Kg",
+                    deadWeight: parseFloat(
+                      (schemeData?.weight * orderData?.shcemeQuantity) / 1000
+                    ), // multiply by quantity
+                    length: parseFloat(
+                      schemeData?.dimension?.depth * orderData?.shcemeQuantity
+                    ), // multiply by quantity
+                    breadth: parseFloat(
+                      schemeData?.dimension?.width * orderData?.shcemeQuantity
+                    ), // multiply by quantity
+                    height: schemeData?.dimension?.height,
+                    measureUnit: "cm",
+                    products: [
+                      {
+                        name: schemeData?.schemeName,
+                        category: categorydata?.categoryName,
+                        sku: schemeData?.schemeCode, // schem code
+                        qty: orderData?.shcemeQuantity,
+                        unitPrice: orderData?.price,
+                        unitTax: 0, // to be discuss
+                        weightUnit: "kg",
+                        deadWeight: schemeData?.weight / 1000, // convert to kg
+                        length: schemeData?.dimension?.depth,
+                        breadth: schemeData?.dimension?.width,
+                        height: schemeData?.dimension?.height,
+                        measureUnit: "cm",
+                      },
+                    ],
+                    codInfo: {
+                      isCod: orderData?.paymentmode === paymentModeType.COD,
+                      collectableAmount:
+                        orderData?.price * orderData?.shcemeQuantity, // multiply be quantity
+                      invoiceValue:
+                        orderData?.price * orderData?.shcemeQuantity, //multiply be quantity
+                    },
+                    podInfo: {
+                      isPod: false, // to be discuss
+                    },
+                    insurance: false, // to be discuss
+                  },
+                ],
+
+                orderType: "B2C",
+                transit: "FORWARD",
+                courierPartner: "",
+                pickupDate: convertEpochTime(new Date()), // today date
+                gstNumber: "",
+                orderId: orderData?.orderNumber.toString(),
+                eWayBillNo: 0,
+                brandName: "Telemart",
+                brandLogo: "", // telemart image
+              };
+
+              let orderAssignedToShipYaari = await confirmOrderShipYaari(
+                shipYaariOrderData
+              );
+
+              if (orderAssignedToShipYaari?.status) {
+                return (orderAssigned = {
+                  isApi: true,
+                  data: orderAssignedToShipYaari?.data,
+                  courierName: foundCourier?.courierType,
+                  apiStatus: true,
+                });
+              }
+
+              break;
+            default:
+              break;
+          }
+        } else {
+          return (orderAssigned = {
+            isApi: false,
+            data: null,
+            courierName: ele?.courierName,
+            apiStatus: false,
+          });
+        }
+      })
+    );
   } catch (err) {
     return err;
   }

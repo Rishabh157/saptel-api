@@ -56,6 +56,7 @@ const WebLeadsSchema = new mongoose.Schema(
       enum: [
         paymentGatewayNameEnum.razorpay,
         paymentGatewayNameEnum.ccavenue,
+        paymentGatewayNameEnum.paypal,
         "",
       ],
       default: "",

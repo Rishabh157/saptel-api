@@ -502,6 +502,7 @@ const webLeadStatusEnum = Object.freeze({
 const paymentGatewayNameEnum = Object.freeze({
   ccavenue: "CC_AVENUE",
   razorpay: "RAZORPAY",
+  paypal: "PAYPAL",
 });
 
 // barcode status type
