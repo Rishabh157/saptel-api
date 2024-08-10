@@ -9,7 +9,6 @@ const commonValidation = require("../../helper/CommonValidation");
 const create = {
   body: Joi.object().keys({
     courierName: Joi.string().uppercase().required(),
-    courierCode: Joi.string().uppercase().required(),
     courierType: Joi.string().required(),
     transportType: Joi.string().required(),
     isApiAvailable: Joi.boolean(),

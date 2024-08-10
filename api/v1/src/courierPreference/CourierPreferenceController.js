@@ -16,14 +16,28 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { generateCode } = require("../company/CompanyHelper");
+const { courierType } = require("../../helper/enumUtils");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { courierName, courierCode } = req.body;
+    let { courierName } = req.body;
     /**
      * check duplicate exist
      */
+    const getUniqueCode = async () => {
+      let unqcode = generateCode();
+      let isCodeExists = await courierPreferenceService?.getOneByMultiField({
+        courierCode: unqcode,
+      });
+      if (isCodeExists) {
+        return getUniqueCode();
+      }
+      return unqcode;
+    };
+    let courierCode = await getUniqueCode();
+
     let dataExist = await courierPreferenceService.isExists(
       [{ courierName }, { courierCode }],
       false,
@@ -309,7 +323,44 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = { isDeleted: false, isActive: true };
+    if (req.query && Object.keys(req.query).length) {
+      matchQuery = getQuery(matchQuery, req.query);
+    }
+
+    let dataExist = await courierPreferenceService.findAllWithQuery(matchQuery);
+
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get all AWB type courier
+
+exports.getAwbCourier = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let matchQuery = {
+      isDeleted: false,
+      isActive: true,
+      courierType: courierType.awb,
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }

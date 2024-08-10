@@ -34,7 +34,9 @@ exports.add = async (req, res) => {
     const awbData = sheet.map((row) => ({
       awbNumber: row.awbNumber,
       isUsed: false,
-      orderNumber: null,
+      orderNumber: row?.orderNumber || null,
+      isGPOAWB: row?.isGPOAWB || false,
+      courierCode: row?.courierCode,
       companyId: req.userData.companyId,
     }));
 

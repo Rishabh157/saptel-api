@@ -3496,6 +3496,7 @@ exports.allFilterPagination = async (req, res) => {
       "batchId",
       "assignDealerId",
       "assignWarehouseId",
+      "schemeProducts.productGroupId",
     ];
 
     const filterQuery = getFilterQuery(

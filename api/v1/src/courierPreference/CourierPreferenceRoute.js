@@ -16,6 +16,17 @@ router.get(
   validate(courierPreferenceValidation.get),
   courierPreferenceController.get
 );
+
+//-----------------------------------------------------
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/awb-courier",
+  authCheckMiddleware,
+  validate(courierPreferenceValidation.get),
+  courierPreferenceController.getAwbCourier
+);
 /**
  * get all courierPreference pagination filter
  */
