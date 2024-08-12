@@ -568,7 +568,7 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
     },
     awbNumber: {
       type: String,
-      default: "",
+      default: "NA",
     },
     secondaryCourierPartner: {
       type: String,

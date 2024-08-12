@@ -35,8 +35,8 @@ exports.add = async (req, res) => {
       awbNumber: row.awbNumber,
       isUsed: false,
       orderNumber: row?.orderNumber || null,
-      isGPOAWB: row?.isGPOAWB || false,
-      courierCode: row?.courierCode,
+      isGPOAWB: req.body.courierCode === "GPO" ? true : false,
+      courierCode: req.body.courierCode,
       companyId: req.userData.companyId,
     }));
 
@@ -45,6 +45,12 @@ exports.add = async (req, res) => {
       let dataExist = await awbMasterService.isExists([
         { awbNumber: data.awbNumber },
       ]);
+      if (req.body.courierCode !== "GPO" && data.orderNumber === null) {
+        throw new ApiError(
+          httpStatus.OK,
+          `Order number required in Other couriers`
+        );
+      }
       if (dataExist.exists && dataExist.existsSummary) {
         throw new ApiError(
           httpStatus.OK,

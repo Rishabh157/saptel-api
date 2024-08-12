@@ -3,6 +3,12 @@ Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
 
+const create = {
+  body: Joi.object().keys({
+    courierCode: Joi.string().required(),
+  }),
+};
+
 /**
  * filter and pagination api
  */
@@ -91,4 +97,5 @@ module.exports = {
   deleteDocument,
   changeStatus,
   getById,
+  create,
 };

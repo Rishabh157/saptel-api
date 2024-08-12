@@ -55,6 +55,7 @@ exports.add = async (req, res) => {
     let dataCreated = await courierPreferenceService.createNewData({
       ...req.body,
       companyId: req.userData.companyId,
+      courierCode,
     });
 
     if (dataCreated) {

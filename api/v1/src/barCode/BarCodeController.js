@@ -1757,7 +1757,11 @@ exports.getDispatchBarcode = async (req, res) => {
     const barcodeToBeSearch = req.params.barcode;
     const warehouseId = req.params.wid;
     const status = req.params.status;
-
+    console.log(
+      barcodeToBeSearch,
+      barcodeStatusType.atWarehouse,
+      ",,,,,,,,,,,,,,,,,,,,,,,,,"
+    );
     let additionalQuery = [
       {
         $match: {
@@ -1769,16 +1773,20 @@ exports.getDispatchBarcode = async (req, res) => {
     ];
     let barcode = [];
     const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
-
+    console.log(foundBarcode, "////////////");
     if (foundBarcode !== null) {
       barcode.push(foundBarcode[0]);
     }
+    console.log(barcode, "00000000000");
+
+    console.log(barcode[0]?.productGroupId, "--------");
     let orderData = await orderInquiryService?.getOneByMultiField({
       "schemeProducts.productGroupId": barcode[0]?.productGroupId,
       orderStatus: productStatus.notDispatched,
       assignDealerId: null,
       assignWarehouseId: warehouseId,
       orderAssignedToCourier: status,
+      awbNumber: "NA",
     });
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "No orders for this product");

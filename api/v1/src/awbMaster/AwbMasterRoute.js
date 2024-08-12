@@ -35,10 +35,9 @@ router.post(
  */
 router.post(
   "/add",
-
   authCheckMiddleware,
   upload.single("file"),
-  //   validate(awbMasterValidation.create),
+  validate(awbMasterValidation.create),
   awbMasterController.add
 );
 

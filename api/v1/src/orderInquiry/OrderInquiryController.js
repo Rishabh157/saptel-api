@@ -1457,9 +1457,28 @@ exports.warehouseOrderDispatch = async (req, res) => {
     if (type === preferredCourierPartner.gpo) {
       var awbNumberData = await awbMaster?.getOneByMultiField({
         isUsed: false,
+        isGPOAWB: true,
       });
       if (!awbNumberData) {
         throw new ApiError(httpStatus.OK, `No AWB found please add GPO AWB`);
+      }
+      await awbMaster?.getOneAndUpdate(
+        { awbNumber: awbNumberData.awbNumber },
+        {
+          $set: {
+            isUsed: true,
+            orderNumber: orderNumber,
+          },
+        }
+      );
+    } else {
+      var awbNumberData = await awbMaster?.getOneByMultiField({
+        isUsed: false,
+        isGPOAWB: false,
+        orderNumber: orderNumber,
+      });
+      if (!awbNumberData) {
+        throw new ApiError(httpStatus.OK, `No AWB found please add AWB`);
       }
       await awbMaster?.getOneAndUpdate(
         { awbNumber: awbNumberData.awbNumber },
@@ -1516,6 +1535,13 @@ exports.warehouseOrderDispatch = async (req, res) => {
         barcodeData: barcodes,
         status: orderStatusEnum.intransit,
         orderStatus: productStatus.dispatched,
+      });
+    } else {
+      dataToBeUpdate.push({
+        barcodeData: barcodes,
+        status: orderStatusEnum.intransit,
+        orderStatus: productStatus.dispatched,
+        awbNumber: awbNumberData?.awbNumber,
       });
     }
 
