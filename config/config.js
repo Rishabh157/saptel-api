@@ -37,6 +37,12 @@ let {
   REDIS_URL,
   REDIS_URL_TLS,
   WEBLEAD_API_KEY,
+  MESSAGE_API_USERNAME,
+  MESSAGE_API_PASSWORD,
+  MESSAGE_API_FROM,
+  MESSAGE_API_CONTENT_ID,
+  MAERKS_API_BASE_URL,
+  MAERKS_API_KEY,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -77,6 +83,12 @@ let envObj = {
   REDIS_URL,
   REDIS_URL_TLS,
   WEBLEAD_API_KEY,
+  MESSAGE_API_USERNAME,
+  MESSAGE_API_PASSWORD,
+  MESSAGE_API_FROM,
+  MESSAGE_API_CONTENT_ID,
+  MAERKS_API_BASE_URL,
+  MAERKS_API_KEY,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -142,6 +154,22 @@ const envVarsSchema = Joi.object().keys({
   REDIS_URL: Joi.string().required().label("REDIS URL url"),
   REDIS_URL_TLS: Joi.string().required().label("REDIS URL TLS url"),
   WEBLEAD_API_KEY: Joi.string().required().label("WEBLEAD_API_KEY is required"),
+  MESSAGE_API_USERNAME: Joi.string()
+    .required()
+    .label("MESSAGE_API_USERNAME is required"),
+  MESSAGE_API_PASSWORD: Joi.string()
+    .required()
+    .label("MESSAGE_API_PASSWORD is required"),
+  MESSAGE_API_FROM: Joi.string()
+    .required()
+    .label("MESSAGE_API_FROM is required"),
+  MESSAGE_API_CONTENT_ID: Joi.string()
+    .required()
+    .label("MESSAGE_API_CONTENT_ID is required"),
+  MAERKS_API_BASE_URL: Joi.string()
+    .required()
+    .label("MAERKS_API_BASE_URL is required"),
+  MAERKS_API_KEY: Joi.string().required().label("MAERKS_API_KEY is required"),
   // MERCHANT_ID: Joi.string().required().label("MERCHANT_ID required"),
   // ACCESS_CODE: Joi.string().required().label("ACCESS_CODE required"),
   // WORKING_KEY: Joi.string().required().label("WORKING_KEY required"),
@@ -206,6 +234,12 @@ module.exports = {
     urlTls: envVars.REDIS_URL_TLS, // Redis URL with TLS
   },
   webleadApiKey: envVars.WEBLEAD_API_KEY,
+  messageApiUserName: envVars.MESSAGE_API_USERNAME,
+  messageApiPassword: envVars.MESSAGE_API_PASSWORD,
+  messageApiFrom: envVars.MESSAGE_API_FROM,
+  messageApiContentId: envVars.MESSAGE_API_CONTENT_ID,
+  maerksApiBaseUrl: envVars.MAERKS_API_BASE_URL,
+  maerksApiKey: envVars.MAERKS_API_KEY,
   // merchantId: envVars.MERCHANT_ID,
   // accessCode: envVars.ACCESS_CODE,
   // workingKey: envVars.WORKING_KEY,

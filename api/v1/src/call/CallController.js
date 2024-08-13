@@ -245,6 +245,7 @@ exports.update = async (req, res) => {
       schemeId,
       pincodeId,
       areaId,
+      schemeName,
       paymentMode,
       companyId,
       dispositionLevelTwoId,
@@ -256,6 +257,7 @@ exports.update = async (req, res) => {
       status,
       shcemeQuantity,
       mobileNo,
+      customerName,
       alternateNo,
       productGroupId,
       countryLabel,
@@ -546,6 +548,11 @@ exports.update = async (req, res) => {
       });
 
       await addToOrderFlow(orderInquiry);
+      if (flag || prepaidOrderFlag) {
+        await axios.post(
+          `https://pgapi.vispl.in/fe/api/v1/send?username=${config.messageApiUserName}&password=${config.messageApiPassword}&unicode=false&from=${config.messageApiFrom}&to=${mobileNo}&text=Thank you ${customerName} ji for booking ${schemeName}, your order no. is ${orderNumber}. For delivery, dealer details will be updated shortly. TELEMART&dltContentId=${config.messageApiContentId}`
+        );
+      }
 
       const dataUpdated = await callService.getOneAndUpdate(
         {
