@@ -8,6 +8,7 @@ const {
   confirmOrderShipYaari,
 } = require("./ShipyaariService");
 const courierMasterService = require("../../v1/src/courierPreference/CourierPreferenceService");
+const { createOrder } = require("./MaerksService");
 
 const getEstTime = async (data, courierName) => {
   try {
@@ -264,6 +265,93 @@ const assignOrderToCourier = async (
               return {
                 isApi: true,
                 data: orderAssignedToShipYaari?.data,
+                courierName: foundCourier?.courierType,
+                apiStatus: true,
+              };
+            }
+
+            break;
+          case preferredCourierPartner.maersk:
+            let maerskOrderData = {
+              pickupDetails: {
+                fullAddress: wareHouseData?.billingAddress?.address,
+                pincode: fromPincodeData?.pincode,
+                contact: {
+                  name: wareHouseData?.wareHouseName,
+                  mobileNo: wareHouseData?.billingAddress?.phone,
+                },
+              },
+              deliveryDetails: {
+                fullAddress: orderData?.autoFillingShippingAddress,
+                pincode: toPincodeData?.pincode,
+                contact: {
+                  name: orderData?.customerName,
+                  mobileNo: orderData?.mobileNo,
+                },
+                gstNumber: "", // warehouse GST number
+              },
+              boxInfo: [
+                {
+                  name: "box_1",
+                  weightUnit: "Kg",
+                  deadWeight: parseFloat(
+                    (schemeData?.weight * orderData?.shcemeQuantity) / 1000
+                  ),
+                  length: parseFloat(
+                    schemeData?.dimension?.depth * orderData?.shcemeQuantity
+                  ),
+                  breadth: parseFloat(
+                    schemeData?.dimension?.width * orderData?.shcemeQuantity
+                  ),
+                  height: schemeData?.dimension?.height,
+                  measureUnit: "cm",
+                  products: [
+                    {
+                      name: schemeData?.schemeName,
+                      category: categorydata?.categoryName,
+                      sku: schemeData?.schemeCode,
+                      qty: orderData?.shcemeQuantity,
+                      unitPrice: orderData?.price,
+                      unitTax: 0,
+                      weightUnit: "kg",
+                      deadWeight: schemeData?.weight / 1000,
+                      length: schemeData?.dimension?.depth,
+                      breadth: schemeData?.dimension?.width,
+                      height: schemeData?.dimension?.height,
+                      measureUnit: "cm",
+                    },
+                  ],
+                  codInfo: {
+                    isCod: orderData?.paymentmode === paymentModeType.COD,
+                    collectableAmount:
+                      orderData?.price * orderData?.shcemeQuantity,
+                    invoiceValue: orderData?.price * orderData?.shcemeQuantity,
+                  },
+                  podInfo: {
+                    isPod: false,
+                  },
+                  insurance: false,
+                },
+              ],
+              orderType: "B2C",
+              transit: "FORWARD",
+              courierPartner: "",
+              pickupDate: convertEpochTime(new Date()),
+              gstNumber: "",
+              orderId: orderData?.orderNumber.toString(),
+              eWayBillNo: 0,
+              brandName: "Telemart",
+              brandLogo: "",
+            };
+
+            let orderAssignedTomaersk = await createOrder(maerskOrderData);
+
+            console.log(orderAssignedTomaersk, "---------------------");
+
+            if (orderAssignedTomaersk?.status) {
+              return {
+                isApi: true,
+                data: orderAssignedTomaersk?.data,
                 courierName: foundCourier?.courierType,
                 apiStatus: true,
               };

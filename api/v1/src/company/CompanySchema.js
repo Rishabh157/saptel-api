@@ -7,7 +7,7 @@ const CompanySchema = new mongoose.Schema(
     companyCode: { type: String, required: true, trim: true, uppercase: true },
     websiteUrl: { type: String, required: false, trim: true },
     companyLogo: { type: String, required: false, trim: true },
-    gstNo: { type: String, default: "", trim: true },
+    gstNo: { type: String, required: true, trim: true },
     address: { type: String, required: true, trim: true, lowercase: true },
     phoneNo: { type: String, required: false, trim: true },
     maskedPhoneNo: {

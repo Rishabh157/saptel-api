@@ -58,8 +58,7 @@ class ClickPostServices {
     }
   }
 
-  async createOrder(req, res) {
-    const data = req.body;
+  async createOrder(data) {
     const result = await this.makeRequest(
       "post",
       "/api/v3/create-order/",

@@ -586,6 +586,7 @@ const firstCallDispositions = Object.freeze({
 
 const preferredCourierPartner = Object.freeze({
   shipyaari: "SHIPYAARI",
+  maersk: "MAERSK",
   gpo: "GPO",
 });
 

@@ -11,7 +11,7 @@ const create = {
     companyName: Joi.string().lowercase().required(),
     websiteUrl: Joi.string(),
     companyLogo: Joi.string(),
-    gstNo: Joi.string().allow(""),
+    gstNo: Joi.string().required(),
     address: Joi.string().lowercase().required(),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
@@ -38,7 +38,7 @@ const update = {
     companyName: Joi.string().lowercase().required(),
     websiteUrl: Joi.string().uri().allow(""),
     companyLogo: Joi.string().uri().allow(""),
-    gstNo: Joi.string().allow(""),
+    gstNo: Joi.string().required(),
     address: Joi.string().lowercase().required(),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
