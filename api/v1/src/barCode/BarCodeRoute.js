@@ -159,6 +159,13 @@ router.post(
   validate(barCodeValidation.getInventory),
   barCodeController.getInventory
 );
+
+router.post(
+  "/inventory/vendorid/:vid/status/:status",
+  authCheckMiddleware,
+  validate(barCodeValidation.getInventoryVendor),
+  barCodeController.getVendorInventory
+);
 // for dealer
 
 router.post(
