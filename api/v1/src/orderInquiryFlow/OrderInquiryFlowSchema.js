@@ -591,6 +591,11 @@ const OrderInquiryFlowSchema = new mongoose.Schema(
       type: Object,
       default: "",
     },
+    maerksResponse: {
+      type: Object,
+      default: "",
+    },
+
     schemeProducts: {
       type: [
         {

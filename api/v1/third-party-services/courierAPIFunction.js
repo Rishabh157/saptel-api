@@ -8,6 +8,10 @@ const {
   confirmOrderShipYaari,
 } = require("./ShipyaariService");
 const courierMasterService = require("../../v1/src/courierPreference/CourierPreferenceService");
+const stateService = require("../../v1/src/state/StateService");
+const districtService = require("../../v1/src/district/DistrictService");
+const pincodeService = require("../../v1/src/pincode/PincodeService");
+const categoryService = require("../../v1/src/productCategory/ProductCategoryService");
 const { createOrder } = require("./MaerksService");
 
 const getEstTime = async (data, courierName) => {
@@ -272,76 +276,146 @@ const assignOrderToCourier = async (
 
             break;
           case preferredCourierPartner.maersk:
+            let pickUpState = await stateService?.getOneByMultiField({
+              isDeleted: false,
+              _id: wareHouseData?.billingAddress?.stateId,
+            });
+            let pickUpDistrict = await districtService?.getOneByMultiField({
+              isDeleted: false,
+              _id: wareHouseData?.billingAddress?.districtId,
+            });
+            let pickUpPincode = await pincodeService?.getOneByMultiField({
+              isDeleted: false,
+              _id: wareHouseData?.billingAddress?.pincodeId,
+            });
+            let productCategory = await categoryService?.getOneByMultiField({
+              isDeleted: false,
+              _id: wareHouseData?.category,
+            });
+
             let maerskOrderData = {
-              pickupDetails: {
-                fullAddress: wareHouseData?.billingAddress?.address,
-                pincode: fromPincodeData?.pincode,
-                contact: {
-                  name: wareHouseData?.wareHouseName,
-                  mobileNo: wareHouseData?.billingAddress?.phone,
-                },
+              drop_info: {
+                drop_lat: 0,
+                drop_city: orderData?.tehsilLabel, // what to add here
+                drop_long: 0,
+                drop_name: orderData?.customerName,
+                drop_email: orderData?.emailId,
+                drop_phone: orderData?.mobileNo,
+                drop_state: orderData?.stateLabel,
+                drop_address: orderData?.autoFillingShippingAddress,
+                drop_district: orderData?.districtLabel,
+                drop_landmark: orderData?.landmark || null,
+                drop_pincode: orderData?.pincodeLabel,
+                drop_country: "IN",
+                drop_address_type: "RESIDENTIAL", // then we have to decide the options in typeOfAddress key
               },
-              deliveryDetails: {
-                fullAddress: orderData?.autoFillingShippingAddress,
-                pincode: toPincodeData?.pincode,
-                contact: {
-                  name: orderData?.customerName,
-                  mobileNo: orderData?.mobileNo,
-                },
-                gstNumber: "", // warehouse GST number
+              pickup_info: {
+                pickup_lat: 0,
+                pickup_city: "Indore", // we have to see what to do for city
+                pickup_long: 0,
+                pickup_name: wareHouseData?.wareHouseName,
+                pickup_time: "2024-08-23T11:52:36+04:00", // what should be the pickup time???
+                pickup_email: wareHouseData?.email,
+                pickup_phone: wareHouseData?.billingAddress?.phone,
+                pickup_state: pickUpState?.stateName,
+                pickup_address: wareHouseData?.billingAddress?.address,
+                pickup_district: pickUpDistrict?.districtName,
+                pickup_landmark: null,
+                pickup_phone_code: "+91",
+                pickup_pincode: pickUpPincode?.pincode,
+                pickup_country: "IN",
+                pickup_address_type: "OFFICE",
               },
-              boxInfo: [
-                {
-                  name: "box_1",
-                  weightUnit: "Kg",
-                  deadWeight: parseFloat(
-                    (schemeData?.weight * orderData?.shcemeQuantity) / 1000
-                  ),
-                  length: parseFloat(
-                    schemeData?.dimension?.depth * orderData?.shcemeQuantity
-                  ),
-                  breadth: parseFloat(
-                    schemeData?.dimension?.width * orderData?.shcemeQuantity
-                  ),
-                  height: schemeData?.dimension?.height,
-                  measureUnit: "cm",
-                  products: [
-                    {
-                      name: schemeData?.schemeName,
-                      category: categorydata?.categoryName,
-                      sku: schemeData?.schemeCode,
-                      qty: orderData?.shcemeQuantity,
-                      unitPrice: orderData?.price,
-                      unitTax: 0,
-                      weightUnit: "kg",
-                      deadWeight: schemeData?.weight / 1000,
-                      length: schemeData?.dimension?.depth,
-                      breadth: schemeData?.dimension?.width,
-                      height: schemeData?.dimension?.height,
-                      measureUnit: "cm",
-                    },
-                  ],
-                  codInfo: {
-                    isCod: orderData?.paymentmode === paymentModeType.COD,
-                    collectableAmount:
+              shipment_details: {
+                items: [
+                  {
+                    sku: schemeData?.schemeCode,
+                    price: orderData?.price,
+                    weight: parseFloat(
+                      (schemeData?.weight * orderData?.shcemeQuantity) / 1000
+                    ),
+                    hs_code: "6405.10.00", // what should be here
+                    quantity: orderData?.shcemeQuantity,
+                    description: schemeData?.schemeName,
+                    manufacture_country: "India",
+                    manufacture_country_code: "IND",
+                    cat: productCategory?.categoryName || "",
+                    color: "",
+                    brand: "Telemart",
+                    size: "",
+                    final_amount_paid:
                       orderData?.price * orderData?.shcemeQuantity,
-                    invoiceValue: orderData?.price * orderData?.shcemeQuantity,
+                    store_credits_used: "0", // ???
                   },
-                  podInfo: {
-                    isPod: false,
-                  },
-                  insurance: false,
+                ],
+                height: schemeData?.dimension?.height,
+                length: parseFloat(
+                  schemeData?.dimension?.depth * orderData?.shcemeQuantity
+                ),
+                weight: schemeData?.weight,
+                breadth: schemeData?.dimension?.width,
+                order_id: orderData?.orderNumber.toString(),
+                cod_value: orderData?.price * orderData?.shcemeQuantity, //??
+                order_type:
+                  orderData?.paymentmode === paymentModeType.COD
+                    ? "COD"
+                    : orderData?.paymentmode === paymentModeType.UPI_ONLINE
+                    ? "PREPAID"
+                    : "COD",
+                invoice_date: "2024-08-2", // what should be here
+                delivery_type: "FORWARD", // ??
+                invoice_value: orderData?.price * orderData?.shcemeQuantity, //??
+                invoice_number: "TLC-2022-06-WS-00038", //???
+                courier_partner: "4", //??
+                reference_number: "test-12345", //??
+                account_code: "Delhivery_Surface", //??
+              },
+              additional: {
+                return_info: {
+                  lat: 0,
+                  city: "Indore",
+                  long: 0,
+                  name: wareHouseData?.wareHouseName,
+                  email: wareHouseData?.email,
+                  phone: wareHouseData?.billingAddress?.phone,
+                  state: pickUpState?.stateName,
+                  address: wareHouseData?.billingAddress?.address,
+                  district: pickUpDistrict?.districtName,
+                  landmark: null,
+                  pincode: pickUpPincode?.pincode,
+                  country: "IN",
                 },
-              ],
-              orderType: "B2C",
-              transit: "FORWARD",
-              courierPartner: "",
-              pickupDate: convertEpochTime(new Date()),
-              gstNumber: "",
-              orderId: orderData?.orderNumber.toString(),
-              eWayBillNo: 0,
-              brandName: "Telemart",
-              brandLogo: "",
+                estimated_delivery_date: "",
+                async: false,
+                label: true,
+                user_defined_field_array: [
+                  {
+                    name: "udf_1",
+                    type: "String",
+                    value: "",
+                  },
+                ],
+              },
+              gst_info: {
+                seller_gstin: "1234",
+                taxable_value: 100,
+                ewaybill_serial_number: "2345677",
+                is_seller_registered_under_gst: false,
+                sgst_tax_rate: 100,
+                place_of_supply: "DELHI",
+                gst_discount: 0,
+                hsn_code: "1234",
+                sgst_amount: 100,
+                enterprise_gstin: "13",
+                gst_total_tax: 100,
+                igst_amount: 100,
+                cgst_amount: 200,
+                gst_tax_base: 200,
+                consignee_gstin: "1233",
+                igst_tax_rate: 100,
+                invoice_reference: "1234",
+                cgst_tax_rate: 100,
+              },
             };
 
             let orderAssignedTomaersk = await createOrder(maerskOrderData);

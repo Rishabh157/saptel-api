@@ -896,24 +896,47 @@ exports.approveFirstCallDirectly = async (req, res) => {
 
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
-      let orderUpdateCourier = await orderService.getOneAndUpdate(
-        {
-          _id: idToBeSearch,
-          isDeleted: false,
-        },
-        {
-          $set: {
-            orderAssignedToCourier: isOrderAssignedToCourier.courierName,
-            shipyaariResponse: isOrderAssignedToCourier.data,
-            awbNumber:
-              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
-            secondaryCourierPartner:
-              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
-                ?.partnerName,
+      if (
+        isOrderAssignedToCourier.courierName ===
+        preferredCourierPartner.shipyaari
+      ) {
+        let orderUpdateCourier = await orderService.getOneAndUpdate(
+          {
+            _id: idToBeSearch,
+            isDeleted: false,
           },
-        }
-      );
-      await addToOrderFlow(orderUpdateCourier);
+          {
+            $set: {
+              orderAssignedToCourier: isOrderAssignedToCourier.courierName,
+              shipyaariResponse: isOrderAssignedToCourier.data,
+              awbNumber:
+                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
+              secondaryCourierPartner:
+                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
+                  ?.partnerName,
+            },
+          }
+        );
+        await addToOrderFlow(orderUpdateCourier);
+      } else if (
+        isOrderAssignedToCourier.courierName === preferredCourierPartner.maersk
+      ) {
+        let orderUpdateCourier = await orderService.getOneAndUpdate(
+          {
+            _id: idToBeSearch,
+            isDeleted: false,
+          },
+          {
+            $set: {
+              orderAssignedToCourier: isOrderAssignedToCourier.courierName,
+              maerksResponse: isOrderAssignedToCourier.data,
+              awbNumber: isOrderAssignedToCourier?.data?.result?.waybill,
+              secondaryCourierPartner: null,
+            },
+          }
+        );
+        await addToOrderFlow(orderUpdateCourier);
+      }
     } else {
       let orderUpdateToOther = await orderService.getOneAndUpdate(
         {
@@ -1094,24 +1117,49 @@ exports.firstCallConfirmation = async (req, res) => {
         isOrderAssignedToCourier.apiStatus &&
         isOrderAssignedToCourier?.isApi
       ) {
-        let orderUpdateCourier = await orderService.getOneAndUpdate(
-          {
-            _id: idToBeSearch,
-            isDeleted: false,
-          },
-          {
-            $set: {
-              orderAssignedToCourier: isOrderAssignedToCourier.courierName,
-              shipyaariResponse: isOrderAssignedToCourier.data,
-              awbNumber:
-                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
-              secondaryCourierPartner:
-                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
-                  ?.partnerName,
+        if (
+          isOrderAssignedToCourier.courierName ===
+          preferredCourierPartner.shipyaari
+        ) {
+          let orderUpdateCourier = await orderService.getOneAndUpdate(
+            {
+              _id: idToBeSearch,
+              isDeleted: false,
             },
-          }
-        );
-        await addToOrderFlow(orderUpdateCourier);
+            {
+              $set: {
+                orderAssignedToCourier: isOrderAssignedToCourier.courierName,
+                shipyaariResponse: isOrderAssignedToCourier.data,
+                awbNumber:
+                  isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking
+                    .awb,
+                secondaryCourierPartner:
+                  isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
+                    ?.partnerName,
+              },
+            }
+          );
+          await addToOrderFlow(orderUpdateCourier);
+        } else if (
+          isOrderAssignedToCourier.courierName ===
+          preferredCourierPartner.maersk
+        ) {
+          let orderUpdateCourier = await orderService.getOneAndUpdate(
+            {
+              _id: idToBeSearch,
+              isDeleted: false,
+            },
+            {
+              $set: {
+                orderAssignedToCourier: isOrderAssignedToCourier.courierName,
+                maerksResponse: isOrderAssignedToCourier.data,
+                awbNumber: isOrderAssignedToCourier?.data?.result?.waybill,
+                secondaryCourierPartner: null,
+              },
+            }
+          );
+          await addToOrderFlow(orderUpdateCourier);
+        }
       } else {
         let orderUpdateToOther = await orderService.getOneAndUpdate(
           {
@@ -1277,24 +1325,47 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
 
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
-      let orderUpdateCourier = await orderService.getOneAndUpdate(
-        {
-          _id: idToBeSearch,
-          isDeleted: false,
-        },
-        {
-          $set: {
-            orderAssignedToCourier: isOrderAssignedToCourier.courierName,
-            shipyaariResponse: isOrderAssignedToCourier.data,
-            awbNumber:
-              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
-            secondaryCourierPartner:
-              isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
-                ?.partnerName,
+      if (
+        isOrderAssignedToCourier.courierName ===
+        preferredCourierPartner.shipyaari
+      ) {
+        let orderUpdateCourier = await orderService.getOneAndUpdate(
+          {
+            _id: idToBeSearch,
+            isDeleted: false,
           },
-        }
-      );
-      await addToOrderFlow(orderUpdateCourier);
+          {
+            $set: {
+              orderAssignedToCourier: isOrderAssignedToCourier.courierName,
+              shipyaariResponse: isOrderAssignedToCourier.data,
+              awbNumber:
+                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0].tracking.awb,
+              secondaryCourierPartner:
+                isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
+                  ?.partnerName,
+            },
+          }
+        );
+        await addToOrderFlow(orderUpdateCourier);
+      } else if (
+        isOrderAssignedToCourier.courierName === preferredCourierPartner.maersk
+      ) {
+        let orderUpdateCourier = await orderService.getOneAndUpdate(
+          {
+            _id: idToBeSearch,
+            isDeleted: false,
+          },
+          {
+            $set: {
+              orderAssignedToCourier: isOrderAssignedToCourier.courierName,
+              maerksResponse: isOrderAssignedToCourier.data,
+              awbNumber: isOrderAssignedToCourier?.data?.result?.waybill,
+              secondaryCourierPartner: null,
+            },
+          }
+        );
+        await addToOrderFlow(orderUpdateCourier);
+      }
     } else {
       let orderUpdateToOther = await orderService.getOneAndUpdate(
         {
