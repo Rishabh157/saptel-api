@@ -13,6 +13,7 @@ const districtService = require("../../v1/src/district/DistrictService");
 const pincodeService = require("../../v1/src/pincode/PincodeService");
 const categoryService = require("../../v1/src/productCategory/ProductCategoryService");
 const { createOrder } = require("./MaerksService");
+const { v4: uuidv4 } = require("uuid"); // For UUID version 4 (randomly generated)
 
 const getEstTime = async (data, courierName) => {
   try {
@@ -166,6 +167,7 @@ const assignOrderToCourier = async (
       data: null,
       courierName: "",
       apiStatus: false,
+      invoiceNumber: null,
     };
 
     if (!preferredCourier || preferredCourier.length === 0) {
@@ -269,7 +271,7 @@ const assignOrderToCourier = async (
               return {
                 isApi: true,
                 data: orderAssignedToShipYaari?.data,
-                courierName: foundCourier?.courierType,
+                courierName: foundCourier?.courierName,
                 apiStatus: true,
               };
             }
@@ -293,6 +295,18 @@ const assignOrderToCourier = async (
               _id: wareHouseData?.category,
             });
 
+            // create invoice number
+            const invoiceNumber = uuidv4();
+            const today = new Date();
+
+            // Get the year, month, and day
+            const year = today.getFullYear();
+            const month = today.getMonth() + 1; // Months are zero-based, so add 1
+            const day = today.getDate();
+
+            // Format the date as YYYY-MM-D
+            const invoiceDate = `${year}-${month}-${day}`;
+
             let maerskOrderData = {
               drop_info: {
                 drop_lat: 0,
@@ -307,14 +321,14 @@ const assignOrderToCourier = async (
                 drop_landmark: orderData?.landmark || null,
                 drop_pincode: orderData?.pincodeLabel,
                 drop_country: "IN",
-                drop_address_type: "RESIDENTIAL", // then we have to decide the options in typeOfAddress key
+                drop_address_type: "RESIDENTIAL", // look for the key option office/ home
               },
               pickup_info: {
                 pickup_lat: 0,
                 pickup_city: "Indore", // we have to see what to do for city
                 pickup_long: 0,
                 pickup_name: wareHouseData?.wareHouseName,
-                pickup_time: "2024-08-23T11:52:36+04:00", // what should be the pickup time???
+                pickup_time: "2024-08-23T11:52:36+04:00", // same day
                 pickup_email: wareHouseData?.email,
                 pickup_phone: wareHouseData?.billingAddress?.phone,
                 pickup_state: pickUpState?.stateName,
@@ -334,7 +348,7 @@ const assignOrderToCourier = async (
                     weight: parseFloat(
                       (schemeData?.weight * orderData?.shcemeQuantity) / 1000
                     ),
-                    hs_code: "6405.10.00", // what should be here
+                    hs_code: "", // what should be here
                     quantity: orderData?.shcemeQuantity,
                     description: schemeData?.schemeName,
                     manufacture_country: "India",
@@ -362,12 +376,12 @@ const assignOrderToCourier = async (
                     : orderData?.paymentmode === paymentModeType.UPI_ONLINE
                     ? "PREPAID"
                     : "COD",
-                invoice_date: "2024-08-2", // what should be here
+                invoice_date: invoiceDate, // what should be here
                 delivery_type: "FORWARD", // ??
                 invoice_value: orderData?.price * orderData?.shcemeQuantity, //??
-                invoice_number: "TLC-2022-06-WS-00038", //???
+                invoice_number: invoiceNumber, //???
                 courier_partner: "4", //??
-                reference_number: "test-12345", //??
+                reference_number: orderData?.orderNumber.toString(), //??
                 account_code: "Delhivery_Surface", //??
               },
               additional: {
@@ -385,7 +399,7 @@ const assignOrderToCourier = async (
                   pincode: pickUpPincode?.pincode,
                   country: "IN",
                 },
-                estimated_delivery_date: "",
+                estimated_delivery_date: "2024-08-30",
                 async: false,
                 label: true,
                 user_defined_field_array: [
@@ -422,12 +436,14 @@ const assignOrderToCourier = async (
 
             console.log(orderAssignedTomaersk, "---------------------");
 
-            if (orderAssignedTomaersk?.status) {
+            if (orderAssignedTomaersk?.meta?.success) {
+              console.log("response success");
               return {
                 isApi: true,
-                data: orderAssignedTomaersk?.data,
-                courierName: foundCourier?.courierType,
+                data: orderAssignedTomaersk,
+                courierName: foundCourier?.courierName,
                 apiStatus: true,
+                invoiceNumber,
               };
             }
 

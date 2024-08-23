@@ -894,6 +894,10 @@ exports.approveFirstCallDirectly = async (req, res) => {
       categorydata
     );
 
+    console.log(
+      isOrderAssignedToCourier,
+      "-----------------------isOrderAssignedToCourier-----------------------"
+    );
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
       if (
@@ -932,6 +936,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
               maerksResponse: isOrderAssignedToCourier.data,
               awbNumber: isOrderAssignedToCourier?.data?.result?.waybill,
               secondaryCourierPartner: null,
+              orderInvoice: isOrderAssignedToCourier.invoiceNumber,
             },
           }
         );
@@ -1155,6 +1160,7 @@ exports.firstCallConfirmation = async (req, res) => {
                 maerksResponse: isOrderAssignedToCourier.data,
                 awbNumber: isOrderAssignedToCourier?.data?.result?.waybill,
                 secondaryCourierPartner: null,
+                orderInvoice: isOrderAssignedToCourier.invoiceNumber,
               },
             }
           );
@@ -1361,6 +1367,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
               maerksResponse: isOrderAssignedToCourier.data,
               awbNumber: isOrderAssignedToCourier?.data?.result?.waybill,
               secondaryCourierPartner: null,
+              orderInvoice: isOrderAssignedToCourier.invoiceNumber,
             },
           }
         );
@@ -1525,43 +1532,49 @@ exports.warehouseOrderDispatch = async (req, res) => {
         `Order not found or already dispatched`
       );
     }
-    if (type === preferredCourierPartner.gpo) {
-      var awbNumberData = await awbMaster?.getOneByMultiField({
-        isUsed: false,
-        isGPOAWB: true,
-      });
-      if (!awbNumberData) {
-        throw new ApiError(httpStatus.OK, `No AWB found please add GPO AWB`);
-      }
-      await awbMaster?.getOneAndUpdate(
-        { awbNumber: awbNumberData.awbNumber },
-        {
-          $set: {
-            isUsed: true,
-            orderNumber: orderNumber,
-          },
+    console.log(type, "------------");
+    if (
+      type !== preferredCourierPartner.maersk &&
+      preferredCourierPartner.shipyaari
+    ) {
+      console.log("innnnn");
+      if (type === preferredCourierPartner.gpo) {
+        var awbNumberData = await awbMaster?.getOneByMultiField({
+          isUsed: false,
+          isGPOAWB: true,
+        });
+        if (!awbNumberData) {
+          throw new ApiError(httpStatus.OK, `No AWB found please add GPO AWB`);
         }
-      );
-    } else {
-      var awbNumberData = await awbMaster?.getOneByMultiField({
-        isUsed: false,
-        isGPOAWB: false,
-        orderNumber: orderNumber,
-      });
-      if (!awbNumberData) {
-        throw new ApiError(httpStatus.OK, `No AWB found please add AWB`);
-      }
-      await awbMaster?.getOneAndUpdate(
-        { awbNumber: awbNumberData.awbNumber },
-        {
-          $set: {
-            isUsed: true,
-            orderNumber: orderNumber,
-          },
+        await awbMaster?.getOneAndUpdate(
+          { awbNumber: awbNumberData.awbNumber },
+          {
+            $set: {
+              isUsed: true,
+              orderNumber: orderNumber,
+            },
+          }
+        );
+      } else {
+        var awbNumberData = await awbMaster?.getOneByMultiField({
+          isUsed: false,
+          isGPOAWB: false,
+          orderNumber: orderNumber,
+        });
+        if (!awbNumberData) {
+          throw new ApiError(httpStatus.OK, `No AWB found please add AWB`);
         }
-      );
+        await awbMaster?.getOneAndUpdate(
+          { awbNumber: awbNumberData.awbNumber },
+          {
+            $set: {
+              isUsed: true,
+              orderNumber: orderNumber,
+            },
+          }
+        );
+      }
     }
-
     await Promise.all(
       barcodes?.map(async (ele) => {
         let foundBarcode = await barcodeService.getOneByMultiField({

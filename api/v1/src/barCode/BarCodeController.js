@@ -51,6 +51,7 @@ const {
   barcodeStatusType,
   productStatus,
   orderStatusEnum,
+  preferredCourierPartner,
 } = require("../../helper/enumUtils");
 const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const {
@@ -1780,14 +1781,29 @@ exports.getDispatchBarcode = async (req, res) => {
     console.log(barcode, "00000000000");
 
     console.log(barcode[0]?.productGroupId, "--------");
-    let orderData = await orderInquiryService?.getOneByMultiField({
-      "schemeProducts.productGroupId": barcode[0]?.productGroupId,
-      orderStatus: productStatus.notDispatched,
-      assignDealerId: null,
-      assignWarehouseId: warehouseId,
-      orderAssignedToCourier: status,
-      awbNumber: "NA",
-    });
+
+    // query change according to courier
+    let query;
+    if (status === preferredCourierPartner.maersk) {
+      query = {
+        "schemeProducts.productGroupId": barcode[0]?.productGroupId,
+        orderStatus: productStatus.notDispatched,
+        assignDealerId: null,
+        assignWarehouseId: warehouseId,
+        orderAssignedToCourier: status,
+      };
+    } else {
+      query = {
+        "schemeProducts.productGroupId": barcode[0]?.productGroupId,
+        orderStatus: productStatus.notDispatched,
+        assignDealerId: null,
+        assignWarehouseId: warehouseId,
+        orderAssignedToCourier: status,
+        awbNumber: "NA",
+      };
+    }
+
+    let orderData = await orderInquiryService?.getOneByMultiField(query);
     if (!orderData) {
       throw new ApiError(httpStatus.OK, "No orders for this product");
     }

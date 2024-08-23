@@ -43,6 +43,7 @@ let {
   MESSAGE_API_CONTENT_ID,
   MAERKS_API_BASE_URL,
   MAERKS_API_KEY,
+  MAERKS_API_USERNAME,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -89,6 +90,7 @@ let envObj = {
   MESSAGE_API_CONTENT_ID,
   MAERKS_API_BASE_URL,
   MAERKS_API_KEY,
+  MAERKS_API_USERNAME,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -170,6 +172,9 @@ const envVarsSchema = Joi.object().keys({
     .required()
     .label("MAERKS_API_BASE_URL is required"),
   MAERKS_API_KEY: Joi.string().required().label("MAERKS_API_KEY is required"),
+  MAERKS_API_USERNAME: Joi.string()
+    .required()
+    .label("MAERKS_API_USERNAME is required"),
   // MERCHANT_ID: Joi.string().required().label("MERCHANT_ID required"),
   // ACCESS_CODE: Joi.string().required().label("ACCESS_CODE required"),
   // WORKING_KEY: Joi.string().required().label("WORKING_KEY required"),
@@ -240,6 +245,8 @@ module.exports = {
   messageApiContentId: envVars.MESSAGE_API_CONTENT_ID,
   maerksApiBaseUrl: envVars.MAERKS_API_BASE_URL,
   maerksApiKey: envVars.MAERKS_API_KEY,
+  maerksApiUserName: envVars.MAERKS_API_USERNAME,
+
   // merchantId: envVars.MERCHANT_ID,
   // accessCode: envVars.ACCESS_CODE,
   // workingKey: envVars.WORKING_KEY,
