@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const webLeadsService = require("./WebLeadsService");
+const webLeadsErrorSchema = require("./webLeadsErrorLog/WebLeadErrorLogSchema");
 const { searchKeys } = require("./WebLeadsSchema");
 const WebLeads = require("./WebLeadsSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -37,15 +38,16 @@ const {
 
 //add start
 exports.add = async (req, res) => {
+  const {
+    phone,
+    product_name,
+    idtag,
+    leadStatus,
+    webLeadApiKey,
+    companyCode,
+    name,
+  } = req.body;
   try {
-    const {
-      phone,
-      product_name,
-      idtag,
-      leadStatus,
-      webLeadApiKey,
-      companyCode,
-    } = req.body;
     if (webLeadApiKey !== config.webleadApiKey) {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Invalid API KEY`);
     }
@@ -107,6 +109,13 @@ exports.add = async (req, res) => {
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
+    console.log(name, phone, product_name, message);
+    await webLeadsErrorSchema.create({
+      name: name,
+      phone: phone,
+      product_name: product_name,
+      response: message,
+    });
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });
