@@ -166,6 +166,7 @@ router.post(
   validate(barCodeValidation.getInventoryVendor),
   barCodeController.getVendorInventory
 );
+
 // for dealer
 
 router.post(

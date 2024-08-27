@@ -108,6 +108,7 @@ const courierRTORoute = require("./src/courierRTO/CourierRTORoute");
 const customerWHReturnRoute = require("./src/customerWHReturn/CustomerWHReturnRoute");
 const reprintOuterBoxRoute = require("./src/reprintOuterBox/ReprintOuterBoxRoute");
 const webLeadsRoute = require("./src/webLeads/WebLeadsRoute");
+const reportRoute = require("./src/reports/ReportsRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -553,6 +554,10 @@ const defaultRoutes = [
   {
     path: "/webleads",
     route: webLeadsRoute,
+  },
+  {
+    path: "/report",
+    route: reportRoute,
   },
 ];
 // orderRoute;

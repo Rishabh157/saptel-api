@@ -202,6 +202,13 @@ const getAllFloorManagersAndTeamLead = {
   }),
 };
 
+const getAllAgents = {
+  params: Joi.object().keys({
+    departmentid: Joi.string(),
+    callcenterid: Joi.string().required(),
+  }),
+};
+
 const getAllUsers = {
   params: Joi.object().keys({
     userrole: Joi.string().required(),
@@ -295,4 +302,5 @@ module.exports = {
   getAllUsers,
   changePasswordByAdmin,
   updateUserCompany,
+  getAllAgents,
 };

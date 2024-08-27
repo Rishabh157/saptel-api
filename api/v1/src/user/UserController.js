@@ -657,7 +657,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = ["isActive"];
     let numberFileds = [];
-    let objectIdFileds = ["companyId" , "branchId" , "callCenterId"];
+    let objectIdFileds = ["companyId", "branchId", "callCenterId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
@@ -1218,6 +1218,48 @@ exports.getAllTeamLeads = async (req, res) => {
         ? userDepartmentType.salesDepartment
         : userDepartmentType.customerCareDepartement,
       userRole: { $in: isSales ? userRoleSales : userRoleCustomer },
+    };
+
+    let dataExist = await userService.findAllWithQuery(matchQuery);
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// get all agents according to call center
+
+exports.getAllAgents = async (req, res) => {
+  try {
+    let { callcenterid } = req.params;
+
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+      callCenterId: new mongoose.Types.ObjectId(callcenterid),
+      isDeleted: false,
+      isActive: true,
+      userDepartment: {
+        $in: [
+          userDepartmentType.salesDepartment,
+          userDepartmentType.customerCareDepartement,
+        ],
+      },
+      isAgent: true,
     };
 
     let dataExist = await userService.findAllWithQuery(matchQuery);

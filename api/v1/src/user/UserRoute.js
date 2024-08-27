@@ -79,6 +79,16 @@ router.get(
 );
 
 /**
+ * get all Agent according to call center
+ */
+router.get(
+  "/get-agents/call-center/:callcenterid",
+  authCheckMiddleware,
+  validate(userValidation.getAllAgents),
+  userController.getAllAgents
+);
+
+/**
  * get all user by user role
  */
 router.post(
