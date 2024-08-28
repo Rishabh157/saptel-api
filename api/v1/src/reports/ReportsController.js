@@ -8,6 +8,8 @@ const { errorRes } = require("../../../utils/resError");
 
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const { getDateFilterQuery } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
+const { orderStatusEnum } = require("../../helper/enumUtils");
 
 exports.agentOrderStatus = async (req, res) => {
   try {
@@ -22,6 +24,7 @@ exports.agentOrderStatus = async (req, res) => {
       allowedDateFiletrKeys
     );
     if (datefilterQuery && datefilterQuery.length) {
+      console.log(datefilterQuery, "datefilterQuery");
       matchQuery.$and.push(...datefilterQuery);
     }
     const isCallCenterExists = await callCenterService.findCount({
@@ -47,26 +50,90 @@ exports.agentOrderStatus = async (req, res) => {
     }
 
     //----------------------------
+    // Prepare aggregation pipeline
+    const statuses = [
+      orderStatusEnum.fresh,
+      orderStatusEnum.all,
+      orderStatusEnum.prepaid,
+      orderStatusEnum.delivered,
+      orderStatusEnum.doorCancelled,
+      orderStatusEnum.hold,
+      orderStatusEnum.psc,
+      orderStatusEnum.una,
+      orderStatusEnum.pnd,
+      orderStatusEnum.urgent,
+      orderStatusEnum.nonAction,
+      orderStatusEnum.rto,
+      orderStatusEnum.inquiry,
+      orderStatusEnum.reattempt,
+      orderStatusEnum.deliveryOutOfNetwork,
+      orderStatusEnum.intransit,
+      orderStatusEnum.ndr,
+      orderStatusEnum.closed,
+      orderStatusEnum.cancel,
+    ];
 
-    /**
-     * check search keys valid
-     **/
+    let pipeline = [
+      {
+        $match: {
+          ...matchQuery,
+          agentName: agentExists.userName,
+        },
+      },
+      {
+        $group: {
+          _id: { schemeName: "$schemeName", status: "$status" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.schemeName",
+          statuses: {
+            $push: {
+              status: "$_id.status",
+              count: "$count",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          schemeName: "$_id",
+          ...statuses.reduce((acc, status) => {
+            acc[status] = {
+              $let: {
+                vars: {
+                  matchedStatus: {
+                    $filter: {
+                      input: "$statuses",
+                      as: "stat",
+                      cond: { $eq: ["$$stat.status", status] },
+                    },
+                  },
+                },
+                in: {
+                  $cond: {
+                    if: { $gt: [{ $size: "$$matchedStatus" }, 0] },
+                    then: { $arrayElemAt: ["$$matchedStatus.count", 0] },
+                    else: 0,
+                  },
+                },
+              },
+            };
+            return acc;
+          }, {}),
+        },
+      },
+    ];
 
-    let additionalQuery = [];
-    additionalQuery.push({
-      $match: { ...matchQuery, agentName: agentExists?.userName },
-    });
-
-    let result = await orderInquiryService.aggregateQuery(additionalQuery);
-
+    let result = await orderInquiryService.aggregateQuery(pipeline);
+    console.log(result, "result");
     if (result?.length) {
       return res.status(httpStatus.OK).send({
         data: result,
-        totalPage: totalpages,
         status: true,
-        currentPage: page,
-        totalItem: totalData,
-        pageSize: limit,
         message: "Data Found",
         code: "OK",
         issue: null,
