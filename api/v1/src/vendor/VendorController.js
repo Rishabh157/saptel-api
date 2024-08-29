@@ -35,7 +35,6 @@ exports.add = async (req, res) => {
   try {
     let {
       companyName,
-      vendorCode,
       companyType,
       ownerShipType,
       websiteAddress,
@@ -48,6 +47,24 @@ exports.add = async (req, res) => {
       openingBalance,
     } = req.body;
 
+    let lastObject = await vendorService.aggregateQuery([
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
+
+    let currentNumber = 0;
+    if (!lastObject.length) {
+      currentNumber = 1;
+    } else {
+      currentNumber = parseInt(lastObject[0]?.vendorCode?.slice(2)) + 1; // Slice to remove 'VC' prefix
+    }
+
+    // Convert the currentNumber to a 4-digit string with leading zeros
+    let formattedNumber = currentNumber.toString().padStart(4, "0");
+
+    // Add the 'VC' prefix
+    let finalOutput = `VC${formattedNumber}`;
+
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -59,10 +76,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await vendorService.isExists([
-      { companyName },
-      { vendorCode },
-    ]);
+    let dataExist = await vendorService.isExists([{ companyName }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -79,7 +93,10 @@ exports.add = async (req, res) => {
     });
     req.body.contactInformation = updatedContactInformation;
 
-    let dataCreated = await vendorService.createNewData({ ...req.body });
+    let dataCreated = await vendorService.createNewData({
+      ...req.body,
+      vendorCode: finalOutput.toString(),
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
@@ -107,7 +124,6 @@ exports.update = async (req, res) => {
   try {
     let {
       companyName,
-      vendorCode,
       companyType,
       ownerShipType,
       websiteAddress,

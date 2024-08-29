@@ -67,6 +67,7 @@ exports.add = async (req, res) => {
       quantity,
       lotNumber,
       expiryDate,
+      invoiceNumber,
       status,
     } = req.body;
 
@@ -125,6 +126,7 @@ exports.add = async (req, res) => {
         lotNumber,
         wareHouseId: null,
         companyId: req.userData.companyId,
+        invoiceNumber,
         expiryDate,
         status: "",
       });
@@ -135,6 +137,7 @@ exports.add = async (req, res) => {
         lotNumber,
         wareHouseId: null,
         companyId: req.userData.companyId,
+        invoiceNumber,
         expiryDate,
         status: "",
         barcodeLog: "Barcode created in warehouse",

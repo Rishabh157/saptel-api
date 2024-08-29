@@ -45,8 +45,31 @@ exports.add = async (req, res) => {
       companyId,
       gstNumber,
       gstCertificate,
+      isDefault,
     } = req.body;
 
+    /**
+     * check duplicate exist
+     */
+    let dataExist = await wareHouseService.isExists([
+      { wareHouseCode },
+      { wareHouseName },
+    ]);
+    if (dataExist.exists && dataExist.existsSummary) {
+      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    }
+
+    // check isDefault should be true on one warehouse only
+    let foundIsDefaultWarehouse = await wareHouseService.findCount({
+      isDefault: true,
+    });
+
+    if (foundIsDefaultWarehouse) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Can not set another Primary warehouse!"
+      );
+    }
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,
@@ -80,16 +103,6 @@ exports.add = async (req, res) => {
       wareHouseCode = "WH" + String(nextNumber).padStart(5, "0");
     }
 
-    /**
-     * check duplicate exist
-     */
-    let dataExist = await wareHouseService.isExists([
-      { wareHouseCode },
-      { wareHouseName },
-    ]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
     //------------------create data-------------------
     req.body.registrationAddress.maskedPhoneNo =
       "******" + req.body.registrationAddress.phone.substring(6);
@@ -147,6 +160,17 @@ exports.update = async (req, res) => {
 
     let idToBeSearch = req.params.id;
 
+    // check isDefault should be true on one warehouse only
+    let foundIsDefaultWarehouse = await wareHouseService.findCount({
+      isDefault: true,
+    });
+
+    if (foundIsDefaultWarehouse) {
+      throw new ApiError(
+        httpStatus.OK,
+        "Can not set another Primary warehouse!"
+      );
+    }
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
       isDeleted: false,

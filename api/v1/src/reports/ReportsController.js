@@ -170,7 +170,7 @@ exports.agentWiseComplaint = async (req, res) => {
       matchQuery.$and.push(...datefilterQuery);
     }
 
-    if (schemeId) {
+    if (schemeId !== null) {
       const isSchemeExists = await schemeService.findCount({
         _id: schemeId,
         isDeleted: false,
@@ -185,7 +185,7 @@ exports.agentWiseComplaint = async (req, res) => {
       }
     }
 
-    if (agentId) {
+    if (agentId !== null) {
       const agentExists = await userService.getOneByMultiField({
         _id: agentId,
         isDeleted: false,

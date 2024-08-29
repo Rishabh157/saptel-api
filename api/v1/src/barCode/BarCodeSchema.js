@@ -5,6 +5,7 @@ const BarCodeSchema = new mongoose.Schema(
   {
     productGroupId: { type: ObjectId, required: true, trim: true },
     barcodeNumber: { type: String, required: true, trim: true },
+    invoiceNumber: { type: String, required: true, trim: true },
     outerBoxbarCodeNumber: { type: String, default: null },
     cartonBoxId: { type: ObjectId, default: null },
     barcodeGroupNumber: { type: String, required: true, trim: true },

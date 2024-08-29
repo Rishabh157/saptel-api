@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const companyService = require("./CompanyService");
+const branchService = require("../companyBranch/CompanyBranchService");
 const { searchKeys } = require("./CompanySchema");
 const { errorRes } = require("../../../utils/resError");
 const {
@@ -66,6 +67,11 @@ exports.add = async (req, res) => {
     });
 
     if (dataCreated) {
+      await branchService.createNewData({
+        branchName: companyName,
+        companyId: dataCreated?._id,
+        branchCode: companyName,
+      });
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
         data: dataCreated,

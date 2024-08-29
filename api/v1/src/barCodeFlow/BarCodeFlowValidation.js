@@ -12,7 +12,7 @@ const create = {
     barcodeGroupNumber: Joi.string().required(),
     outerBoxbarCodeNumber: Joi.string().required(),
     cartonBoxId: Joi.string().custom(commonValidation.objectId).allow(null),
-
+    invoiceNumber: Joi.string().required(),
     quantity: Joi.number().required(),
     lotNumber: Joi.string().required(),
     isUsed: Joi.boolean(),

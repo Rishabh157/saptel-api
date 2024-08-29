@@ -43,6 +43,7 @@ const create = {
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    isDefault: Joi.boolean(),
   }),
 };
 
@@ -89,6 +90,7 @@ const update = {
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    isDefault: Joi.boolean(),
   }),
 };
 

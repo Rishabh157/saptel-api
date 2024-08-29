@@ -13,6 +13,8 @@ const BarCodeFlowSchema = new mongoose.Schema(
     wareHouseId: { type: ObjectId, default: null, trim: true },
     vendorId: { type: ObjectId, default: null, trim: true },
     dealerId: { type: ObjectId, default: null, trim: true },
+    invoiceNumber: { type: String, required: true, trim: true },
+
     status: {
       type: String,
       enum: [
