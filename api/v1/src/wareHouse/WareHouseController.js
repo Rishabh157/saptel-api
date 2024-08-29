@@ -51,6 +51,20 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
+    let lastObject = await wareHouseService.aggregateQuery([
+      { $sort: { _id: -1 } },
+      { $limit: 1 },
+    ]);
+
+    let wareHouseCode = "";
+    if (!lastObject.length) {
+      wareHouseCode = "WH00001";
+    } else {
+      const lastSchemeCode = lastObject[0]?.wareHouseCode || "WH00000";
+      const lastNumber = parseInt(lastSchemeCode.replace("WH", ""), 10);
+      const nextNumber = lastNumber + 1;
+      wareHouseCode = "WH" + String(nextNumber).padStart(5, "0");
+    }
     let dataExist = await wareHouseService.isExists([
       { wareHouseCode },
       { wareHouseName },
@@ -66,7 +80,7 @@ exports.add = async (req, res) => {
 
     if (foundIsDefaultWarehouse) {
       throw new ApiError(
-        httpStatus.OK,
+        httpStatus.NOT_ACCEPTABLE,
         "Can not set another Primary warehouse!"
       );
     }
@@ -86,21 +100,6 @@ exports.add = async (req, res) => {
         : null;
     if (dealerId !== null && dealerId !== undefined && !isDealerExists) {
       throw new ApiError(httpStatus.OK, "Invalid Dealer.");
-    }
-
-    let lastObject = await wareHouseService.aggregateQuery([
-      { $sort: { _id: -1 } },
-      { $limit: 1 },
-    ]);
-
-    let wareHouseCode = "";
-    if (!lastObject.length) {
-      wareHouseCode = "WH00001";
-    } else {
-      const lastSchemeCode = lastObject[0]?.wareHouseCode || "WH00000";
-      const lastNumber = parseInt(lastSchemeCode.replace("WH", ""), 10);
-      const nextNumber = lastNumber + 1;
-      wareHouseCode = "WH" + String(nextNumber).padStart(5, "0");
     }
 
     //------------------create data-------------------
