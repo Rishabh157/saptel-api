@@ -78,7 +78,7 @@ exports.add = async (req, res) => {
       isDefault: true,
     });
 
-    if (foundIsDefaultWarehouse) {
+    if (foundIsDefaultWarehouse && isDefault) {
       throw new ApiError(
         httpStatus.NOT_ACCEPTABLE,
         "Can not set another Primary warehouse!"
@@ -151,7 +151,7 @@ exports.update = async (req, res) => {
       registrationAddress,
       billingAddress,
       contactInformation,
-
+      isDefault,
       companyId,
       gstNumber,
       gstCertificate,
@@ -164,9 +164,9 @@ exports.update = async (req, res) => {
       isDefault: true,
     });
 
-    if (foundIsDefaultWarehouse) {
+    if (foundIsDefaultWarehouse && isDefault) {
       throw new ApiError(
-        httpStatus.OK,
+        httpStatus.NOT_ACCEPTABLE,
         "Can not set another Primary warehouse!"
       );
     }
