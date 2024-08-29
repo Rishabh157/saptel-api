@@ -11,4 +11,11 @@ router.post(
   reportController.agentOrderStatus
 );
 
+router.post(
+  "/agent-wise-complaint",
+  authCheckMiddleware,
+  validate(reportValidation.agentWiseComplaint),
+  reportController.agentWiseComplaint
+);
+
 module.exports = router;

@@ -4,6 +4,8 @@ const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const userService = require("../user/UserService");
 const callCenterService = require("../callCenterMaster/CallCenterMasterService");
+const schemeService = require("../scheme/SchemeService");
+const complaintService = require("../complain/ComplainService");
 const { errorRes } = require("../../../utils/resError");
 
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
@@ -130,6 +132,86 @@ exports.agentOrderStatus = async (req, res) => {
 
     let result = await orderInquiryService.aggregateQuery(pipeline);
     console.log(result, "result");
+    if (result?.length) {
+      return res.status(httpStatus.OK).send({
+        data: result,
+        status: true,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.agentWiseComplaint = async (req, res) => {
+  try {
+    const { schemeId, agentId, dateFilter } = req.body;
+    let matchQuery = {
+      $and: [{ isDeleted: false }],
+    };
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      console.log(datefilterQuery, "datefilterQuery");
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    if (schemeId) {
+      const isSchemeExists = await schemeService.findCount({
+        _id: schemeId,
+        isDeleted: false,
+        isActive: true,
+      });
+      if (!isSchemeExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Scheme");
+      } else {
+        matchQuery.$and.push({
+          schemeId: new mongoose.Types.ObjectId(schemeId),
+        });
+      }
+    }
+
+    if (agentId) {
+      const agentExists = await userService.getOneByMultiField({
+        _id: agentId,
+        isDeleted: false,
+        isActive: true,
+      });
+      if (!agentExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Agent");
+      } else {
+        matchQuery.$and.push({
+          complaintById: new mongoose.Types.ObjectId(agentId),
+        });
+      }
+    }
+
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    //----------------------------
+    // Prepare aggregation pipeline
+
+    let result = await complaintService.aggregateQuery([
+      {
+        $match: matchQuery,
+      },
+    ]);
     if (result?.length) {
       return res.status(httpStatus.OK).send({
         data: result,

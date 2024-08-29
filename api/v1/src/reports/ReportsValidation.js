@@ -20,6 +20,23 @@ const agentOrderStatus = {
   }),
 };
 
+// Agent wise complaint
+
+const agentWiseComplaint = {
+  body: Joi.object().keys({
+    schemeId: Joi.string().custom(commonValidation.objectId).optional(),
+    agentId: Joi.string().custom(commonValidation.objectId).optional(),
+    dateFilter: Joi.object()
+      .keys({
+        startDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        endDate: Joi.string().custom(commonValidation.dateFormat).allow(""),
+        dateFilterKey: Joi.string().allow(""),
+      })
+      .default({}),
+  }),
+};
+
 module.exports = {
   agentOrderStatus,
+  agentWiseComplaint,
 };

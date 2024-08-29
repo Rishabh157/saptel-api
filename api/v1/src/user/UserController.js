@@ -1284,6 +1284,40 @@ exports.getAllAgents = async (req, res) => {
   }
 };
 
+// get customer care agent
+
+exports.getAllCustomerCareAgents = async (req, res) => {
+  try {
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+      isDeleted: false,
+      isActive: true,
+      userDepartment: userDepartmentType.customerCareDepartement,
+      isAgent: true,
+    };
+
+    let dataExist = await userService.findAllWithQuery(matchQuery);
+    if (!dataExist || !dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 // get all users by user role
 exports.getAllUsers = async (req, res) => {
   try {

@@ -89,6 +89,15 @@ router.get(
 );
 
 /**
+ * get all Agent of customer care
+ */
+router.get(
+  "/get-customer-care-agent",
+  authCheckMiddleware,
+  userController.getAllCustomerCareAgents
+);
+
+/**
  * get all user by user role
  */
 router.post(

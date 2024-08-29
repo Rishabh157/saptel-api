@@ -314,7 +314,11 @@ exports.allFilterPagination = async (req, res) => {
 exports.get = async (req, res) => {
   try {
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = {
+      isDeleted: false,
+      isActive: true,
+      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
