@@ -11,7 +11,7 @@ const create = {
     order_id: Joi.string().custom(commonValidation.objectId).allow(null),
     companyCode: Joi.string().required(),
     name: Joi.string().required(),
-    phone: Joi.string().custom(commonValidation.indianMobile).required(),
+    phone: Joi.string().max(10).min(10).required("Number should be 10 digit"),
     email: Joi.string().lowercase().allow(""),
     address: Joi.string().allow(""),
     address1: Joi.string().allow(""),

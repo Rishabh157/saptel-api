@@ -72,6 +72,8 @@ exports.add = async (req, res) => {
     });
     let dataUpdated;
     let isAdded = true;
+
+    console.log(dataFound, isPrepaidOrder, "-------");
     if (!dataFound && !isPrepaidOrder) {
       dataUpdated = await webLeadsService.createNewData({
         ...req.body,
@@ -92,6 +94,7 @@ exports.add = async (req, res) => {
       );
     }
 
+    console.log("uuuuuuuuuuu", dataUpdated);
     if (dataUpdated) {
       const message = isAdded ? "Added successfully." : "Updated successfully.";
       const code = isAdded ? "CREATED" : "UPDATED";

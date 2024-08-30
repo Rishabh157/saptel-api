@@ -47,6 +47,13 @@ exports.add = async (req, res) => {
       openingBalance,
     } = req.body;
 
+    const isCompanyExists = await companyService.getOneByMultiField({
+      _id: companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
     let lastObject = await vendorService.aggregateQuery([
       {
         $match: {
@@ -61,22 +68,14 @@ exports.add = async (req, res) => {
     if (!lastObject.length) {
       currentNumber = 1;
     } else {
-      currentNumber = parseInt(lastObject[0]?.vendorCode?.slice(2)) + 1; // Slice to remove 'VC' prefix
+      currentNumber = parseInt(lastObject[0]?.vendorCode?.split("-")[2]) + 1; // Slice to remove 'VC' prefix
     }
 
     // Convert the currentNumber to a 4-digit string with leading zeros
     let formattedNumber = currentNumber.toString().padStart(4, "0");
 
     // Add the 'VC' prefix
-    let finalOutput = `VC${formattedNumber}`;
-
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
+    let finalOutput = `${isCompanyExists.companyCode}-VC-${formattedNumber}`;
 
     /**
      * check duplicate exist
