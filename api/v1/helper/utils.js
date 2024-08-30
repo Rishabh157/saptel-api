@@ -103,8 +103,8 @@ exports.generateInvoiceString = async (branchCode, invoiceNumber) => {
   const formattedInvoiceNumber = invoiceNumber.toString().padStart(4, "0");
 
   // Generating the string in the specified format
-  const invoiceString = `${branchCode}/${financialYear}/${formattedInvoiceNumber}`;
-
+  const invoiceString = `${branchCode}-${financialYear}-${formattedInvoiceNumber}`;
+  console.log(invoiceString, "-----------------", invoiceString);
   return invoiceString;
 };
 

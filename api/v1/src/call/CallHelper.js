@@ -72,24 +72,31 @@ exports.getInquiryNumber = async () => {
   return inquiryNumber;
 };
 
-exports.getInvoiceNumber = async () => {
+exports.getInvoiceNumber = async (companyId) => {
   let invoiceNumber = 0;
-
+  console.log(companyId, "companyId");
   let lastObject = await salesOrderService.aggregateQuery([
-    { $match: { invoiceNumber: { $ne: null } } },
+    {
+      $match: {
+        invoiceNumber: { $ne: null },
+        companyId: new mongoose.Types.ObjectId(companyId),
+      },
+    },
     { $sort: { _id: -1 } },
     { $limit: 1 },
   ]);
-
+  console.log(lastObject, "lastObject");
   if (lastObject.length) {
     invoiceNumber =
       parseInt(
-        lastObject[0]?.invoiceNumber ? lastObject[0]?.invoiceNumber : 0
+        lastObject[0]?.invoiceNumber
+          ? lastObject[0]?.invoiceNumber.split("-").pop()
+          : 0
       ) + 1;
   } else {
     invoiceNumber = 1;
   }
-
+  console.log(invoiceNumber.toString().padStart(4, "0"), "-------------");
   // Formatting the invoice number with leading zeros
   return invoiceNumber.toString().padStart(4, "0");
 };

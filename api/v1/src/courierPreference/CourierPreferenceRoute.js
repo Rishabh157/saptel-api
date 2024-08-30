@@ -27,6 +27,7 @@ router.get(
   validate(courierPreferenceValidation.get),
   courierPreferenceController.getAwbCourier
 );
+
 /**
  * get all courierPreference pagination filter
  */

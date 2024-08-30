@@ -249,7 +249,7 @@ exports.updateLevel = async (req, res) => {
 
     let dataToSend = {};
     if (type === "ACC") {
-      let invoiceNumberIs = await getInvoiceNumber();
+      let invoiceNumberIs = await getInvoiceNumber(req.userData.companyId);
       let finalInvoiceNo = await generateInvoiceString(
         branchdata?.branchCode,
         invoiceNumberIs

@@ -2192,6 +2192,15 @@ exports.getInventory = async (req, res) => {
               ],
             },
           },
+          totalUsedFreshCount: {
+            $sum: {
+              $cond: [
+                { $eq: ["$status", barcodeStatusType.atWarehouseButUsed] },
+                1,
+                0,
+              ],
+            },
+          },
           totalDamageCount: {
             $sum: {
               $cond: [{ $eq: ["$status", barcodeStatusType.damage] }, 1, 0],
@@ -2240,6 +2249,7 @@ exports.getInventory = async (req, res) => {
           productGroupLabel: 1,
           wareHouseLabel: 1,
           totalFreshCount: 1, // Include the totalFreshCount field
+          totalUsedFreshCount: 1,
           totalDamageCount: 1, // Include the totalDamageCount field
           totalMissingCount: 1, // Include the totalMissingCount field
           totalRtvCount: 1,

@@ -114,6 +114,7 @@ const SalesOrderSchema = new mongoose.Schema(
 
     transporterGST: {
       type: String,
+      trim: true,
       default: "",
     },
     mode: {

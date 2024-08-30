@@ -508,6 +508,7 @@ const paymentGatewayNameEnum = Object.freeze({
 // barcode status type
 const barcodeStatusType = Object.freeze({
   atWarehouse: "AT_WAREHOUSE",
+  atWarehouseButUsed: "AT_WAREHOUSE_USED",
   atDealerWarehouse: "AT_DEALER_WAREHOUSE",
   inTransit: "IN_TRANSIT",
   delivered: "DELIVERED",

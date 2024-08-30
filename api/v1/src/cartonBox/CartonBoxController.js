@@ -304,22 +304,22 @@ exports.get = async (req, res) => {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.cartonBox,
-      userRoleData,
-      actionType.listAll
-    );
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.cartonBox,
+    //   userRoleData,
+    //   actionType.listAll
+    // );
     let dataExist = await cartonBoxService.findAllWithQuery(matchQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    // let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields || !allowedFields?.length) {
+    if (!dataExist || !dataExist?.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields,
+        data: dataExist,
         code: "OK",
         issue: null,
       });
