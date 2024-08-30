@@ -37,7 +37,11 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await channelGroupService.isExists([{ groupName }]);
+    let dataExist = await channelGroupService.isExists(
+      [{ groupName }, { companyId }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }

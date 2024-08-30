@@ -35,9 +35,11 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await channelCategoryService.isExists([
-      { channelCategory },
-    ]);
+    let dataExist = await channelCategoryService.isExists(
+      [{ channelCategory }, { companyId }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
