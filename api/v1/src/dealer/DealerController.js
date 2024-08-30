@@ -44,6 +44,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
+const { getLedgerNo } = require("../ledger/LedgerHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -118,6 +119,8 @@ exports.add = async (req, res) => {
     let dataCreated = await dealerService.createNewData({ ...req.body });
 
     if (dataCreated._id) {
+      let ledgerNo = await getLedgerNo(ledgerType.dealerAmountCredited);
+
       let ledgerCreated = await ledgerService.createNewData({
         noteType: ledgerType.dealerAmountCredited,
         creditAmount: openingBalance,
@@ -126,6 +129,7 @@ exports.add = async (req, res) => {
         dealerId: dataCreated._id,
         companyId: companyId,
         balance: openingBalance,
+        ledgerNumber: ledgerNo,
       });
     }
 
