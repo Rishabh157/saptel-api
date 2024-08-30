@@ -48,6 +48,11 @@ exports.add = async (req, res) => {
     } = req.body;
 
     let lastObject = await vendorService.aggregateQuery([
+      {
+        $match: {
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
       { $sort: { _id: -1 } },
       { $limit: 1 },
     ]);
