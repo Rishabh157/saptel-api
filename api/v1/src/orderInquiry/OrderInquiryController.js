@@ -87,6 +87,10 @@ const {
   addToOrderFlow,
 } = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
+const {
+  addRemoveAvailableQuantity,
+  checkFreezeQuantity,
+} = require("../productGroupSummary/ProductGroupSummaryHelper");
 
 exports.add = async (req, res) => {
   try {
@@ -1519,139 +1523,134 @@ exports.updateOrderStatus = async (req, res) => {
 
 exports.warehouseOrderDispatch = async (req, res) => {
   try {
-    let { orderNumber, barcodes, type } = req.body;
+    const { orderNumber, barcodes, type } = req.body;
 
-    //------------------Find data-------------------
-    let datafound = await orderService.getOneByMultiField({
-      orderNumber: orderNumber,
+    // Find the order
+    const order = await orderService.getOneByMultiField({
+      orderNumber,
       orderStatus: productStatus.notDispatched,
     });
-    if (!datafound) {
+
+    if (!order) {
       throw new ApiError(
         httpStatus.OK,
-        `Order not found or already dispatched`
+        "Order not found or already dispatched"
       );
     }
-    console.log(type, "------------");
-    if (
-      type !== preferredCourierPartner.maersk &&
-      preferredCourierPartner.shipyaari
-    ) {
-      console.log("innnnn");
-      if (type === preferredCourierPartner.gpo) {
-        var awbNumberData = await awbMaster?.getOneByMultiField({
-          isUsed: false,
-          isGPOAWB: true,
-        });
-        if (!awbNumberData) {
-          throw new ApiError(httpStatus.OK, `No AWB found please add GPO AWB`);
-        }
-        await awbMaster?.getOneAndUpdate(
-          { awbNumber: awbNumberData.awbNumber },
-          {
-            $set: {
-              isUsed: true,
-              orderNumber: orderNumber,
-            },
-          }
-        );
-      } else {
-        var awbNumberData = await awbMaster?.getOneByMultiField({
-          isUsed: false,
-          isGPOAWB: false,
-          orderNumber: orderNumber,
-        });
-        if (!awbNumberData) {
-          throw new ApiError(httpStatus.OK, `No AWB found please add AWB`);
-        }
-        await awbMaster?.getOneAndUpdate(
-          { awbNumber: awbNumberData.awbNumber },
-          {
-            $set: {
-              isUsed: true,
-              orderNumber: orderNumber,
-            },
-          }
-        );
-      }
-    }
-    await Promise.all(
-      barcodes?.map(async (ele) => {
-        let foundBarcode = await barcodeService.getOneByMultiField({
-          _id: ele?.barcodeId,
-          isDeleted: false,
-          isUsed: true,
-          status: barcodeStatusType.atWarehouse,
-        });
-        if (!foundBarcode) {
-          throw new ApiError(httpStatus.OK, `Invalid barcode`);
-        } else {
-          const updatedBarcode = await barcodeService.getOneAndUpdate(
-            {
-              _id: new mongoose.Types.ObjectId(ele?.barcodeId),
-              isUsed: true,
-            },
-            {
-              $set: {
-                status: barcodeStatusType.inTransit,
-              },
-            }
-          );
 
-          await addToBarcodeFlow(
-            updatedBarcode,
-            `Barcode status marked as intransit and assigned to order number: ${orderNumber}`
+    // Check courier type and retrieve AWB data
+    const isGPO = type === preferredCourierPartner.gpo;
+    const awbFilter = isGPO
+      ? { isUsed: false, isGPOAWB: true }
+      : { isUsed: false, isGPOAWB: false, orderNumber };
+    const awbNumberData = await awbMaster.getOneByMultiField(awbFilter);
+
+    if (!awbNumberData) {
+      throw new ApiError(
+        httpStatus.OK,
+        `No AWB found, please add ${isGPO ? "GPO" : ""} AWB`
+      );
+    }
+
+    // Check product availability and update quantities
+    await Promise.all(
+      order.schemeProducts.map(async (product) => {
+        const freezeCheck = await checkFreezeQuantity(
+          req.userData.companyId,
+          order.assignWarehouseId,
+          product.productGroupId,
+          product.productQuantity
+        );
+
+        if (!freezeCheck.status) {
+          throw new ApiError(
+            httpStatus.NOT_IMPLEMENTED,
+            freezeCheck.msg || "Insufficient product in warehouse"
           );
         }
       })
     );
 
-    let dataToBeUpdate = [];
-    if (type === preferredCourierPartner.gpo) {
-      dataToBeUpdate.push({
-        barcodeData: barcodes,
-        status: orderStatusEnum.intransit,
-        orderStatus: productStatus.dispatched,
-        awbNumber: awbNumberData?.awbNumber,
-      });
-    } else if (type === preferredCourierPartner.shipyaari) {
-      dataToBeUpdate.push({
-        barcodeData: barcodes,
-        status: orderStatusEnum.intransit,
-        orderStatus: productStatus.dispatched,
-      });
-    } else {
-      dataToBeUpdate.push({
-        barcodeData: barcodes,
-        status: orderStatusEnum.intransit,
-        orderStatus: productStatus.dispatched,
-        awbNumber: awbNumberData?.awbNumber,
-      });
-    }
+    await Promise.all(
+      order.schemeProducts.map(async (product) => {
+        const quantityUpdate = await addRemoveAvailableQuantity(
+          req.userData.companyId,
+          order.assignWarehouseId,
+          product.productGroupId,
+          product.productQuantity,
+          "REMOVE"
+        );
 
-    let dataUpdated = await orderService.getOneAndUpdate(
-      {
-        orderNumber: orderNumber,
-        isDeleted: false,
-      },
-      {
-        $set: dataToBeUpdate[0],
-      }
+        if (!quantityUpdate.status) {
+          throw new ApiError(
+            httpStatus.NOT_IMPLEMENTED,
+            quantityUpdate.msg || "Error removing available quantity"
+          );
+        }
+      })
     );
 
-    await addToOrderFlow(dataUpdated);
+    // Update AWB data
+    await awbMaster.getOneAndUpdate(
+      { awbNumber: awbNumberData.awbNumber },
+      { $set: { isUsed: true, orderNumber } }
+    );
+
+    // Process barcodes
+    await Promise.all(
+      barcodes.map(async (barcodeItem) => {
+        const barcode = await barcodeService.getOneByMultiField({
+          _id: barcodeItem.barcodeId,
+          isDeleted: false,
+          isUsed: true,
+          status: barcodeStatusType.atWarehouse,
+        });
+
+        if (!barcode) {
+          throw new ApiError(httpStatus.OK, "Invalid barcode");
+        }
+
+        const updatedBarcode = await barcodeService.getOneAndUpdate(
+          { _id: barcodeItem.barcodeId, isUsed: true },
+          { $set: { status: barcodeStatusType.inTransit } }
+        );
+
+        await addToBarcodeFlow(
+          updatedBarcode,
+          `Barcode status marked as in-transit and assigned to order number: ${orderNumber}`
+        );
+      })
+    );
+
+    // Prepare data for order update
+    const orderUpdateData = {
+      barcodeData: barcodes,
+      status: orderStatusEnum.intransit,
+      orderStatus: productStatus.dispatched,
+    };
+
+    if (type !== preferredCourierPartner.shipyaari) {
+      orderUpdateData.awbNumber = awbNumberData.awbNumber;
+    }
+
+    const updatedOrder = await orderService.getOneAndUpdate(
+      { orderNumber, isDeleted: false },
+      { $set: orderUpdateData }
+    );
+
+    await addToOrderFlow(updatedOrder);
 
     return res.status(httpStatus.OK).send({
-      message: "Updated successfully.",
+      message: "Order dispatched successfully.",
       data: null,
       status: true,
       code: "OK",
       issue: null,
     });
   } catch (err) {
-    let errData = errorRes(err);
+    const errData = errorRes(err);
     logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
+    const { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });

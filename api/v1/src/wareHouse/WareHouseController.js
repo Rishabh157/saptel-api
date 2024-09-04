@@ -164,7 +164,11 @@ exports.update = async (req, res) => {
       isDefault: true,
     });
 
-    if (foundIsDefaultWarehouse && isDefault) {
+    if (
+      foundIsDefaultWarehouse &&
+      isDefault &&
+      foundIsDefaultWarehouse.wareHouseCode !== wareHouseCode
+    ) {
       throw new ApiError(
         httpStatus.NOT_ACCEPTABLE,
         "Can not set another Primary warehouse!"

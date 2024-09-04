@@ -58,6 +58,12 @@ const {
   addToOrderFlow,
 } = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 const XLSX = require("xlsx");
+const {
+  addRemoveAvailableQuantity,
+  checkFreezeQuantity,
+  addRemoveFreezeQuantity,
+  checkDispatchFreezeQuantity,
+} = require("../productGroupSummary/ProductGroupSummaryHelper");
 //add start
 exports.add = async (req, res) => {
   try {
@@ -3876,6 +3882,20 @@ exports.updateInventory = async (req, res) => {
       expiryDate: barcodedata[0]?.expiryDate,
     });
     if (updatedDataArray.length > 0) {
+      console.log(
+        "heree..................",
+        req.userData.companyId,
+        barcodedata[0]?.wareHouseId,
+        barcodedata[0]?.productGroupId,
+        allBarcodes.length
+      );
+      await addRemoveAvailableQuantity(
+        req.userData.companyId,
+        barcodedata[0]?.wareHouseId,
+        barcodedata[0]?.productGroupId,
+        allBarcodes.length,
+        "ADD"
+      );
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: updatedDataArray[0],
@@ -4965,11 +4985,36 @@ exports.wtsOutwardInventory = async (req, res) => {
       return result;
     }, {});
 
+    const aggregateProducts = (arr) => {
+      const result = arr.reduce((acc, curr) => {
+        // Find if the current productGroupId and warehouseId already exist in the accumulator
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+
+        if (existingItem) {
+          // If it exists, increment the quantity
+          existingItem.quantity += 1;
+        } else {
+          // If it doesn't exist, add it to the accumulator with a quantity of 1
+          acc.push({ ...curr, quantity: 1 });
+        }
+
+        return acc;
+      }, []);
+
+      return result;
+    };
+
+    const output = aggregateProducts(barcodedata);
+
     // Convert the grouped data into an array of objects (if needed)
     const groupedArray = Object.keys(groupedData).map((key) => ({
       outerBoxbarCodeNumber: key,
       items: groupedData[key],
     }));
+
+    let loopVisited = false;
     const promises = barcodedata?.map(async (ele) => {
       let allOuterBoxBarcode = await barCodeService.findCount({
         outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
@@ -4980,6 +5025,39 @@ exports.wtsOutwardInventory = async (req, res) => {
           return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
         }
       });
+      if (loopVisited) {
+        await Promise.all(
+          output.map(async (item) => {
+            const productSummary = await checkDispatchFreezeQuantity(
+              req.userData.companyId,
+              item.wareHouseId,
+              item.productGroupId,
+              item.quantity
+            );
+
+            if (!productSummary.status) {
+              throw new ApiError(httpStatus.OK, productSummary.msg);
+            }
+          })
+        );
+
+        await Promise.all(
+          output.map(async (item) => {
+            const createdData = await addRemoveFreezeQuantity(
+              req.userData.companyId,
+              item.wareHouseId,
+              item.productGroupId,
+              item.quantity,
+              "REMOVE"
+            );
+
+            if (!createdData.status) {
+              throw new ApiError(httpStatus.OK, createdData.msg);
+            }
+          })
+        );
+        loopVisited = true;
+      }
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(

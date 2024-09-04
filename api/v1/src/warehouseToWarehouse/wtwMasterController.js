@@ -30,6 +30,10 @@ const {
   actionType,
   approvalType,
 } = require("../../helper/enumUtils");
+const {
+  checkFreezeQuantity,
+  addRemoveFreezeQuantity,
+} = require("../productGroupSummary/ProductGroupSummaryHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -721,7 +725,7 @@ exports.statusChange = async (req, res) => {
 //update start
 exports.updateLevel = async (req, res) => {
   try {
-    let {
+    const {
       firstApprovedAt,
       secondApprovedAt,
       type,
@@ -733,40 +737,77 @@ exports.updateLevel = async (req, res) => {
       firstApproved,
     } = req.body;
 
-    let wtNumberToBeSearch = req.params.wtNumber;
+    const wtNumberToBeSearch = req.params.wtNumber;
 
-    let dataToSend = {};
+    // Find data
+    const datafound = await wtwMasterService.aggregateQuery([
+      {
+        $match: {
+          wtNumber: wtNumberToBeSearch,
+        },
+      },
+    ]);
+
+    if (!datafound.length) {
+      throw new ApiError(httpStatus.OK, "Request not found.");
+    }
+
+    const dataToSend = {};
+
     if (type === approvalType.second) {
-      (dataToSend.secondApprovedById = secondApprovedById),
-        (dataToSend.secondApprovedActionBy = secondApprovedActionBy),
-        (dataToSend.secondApprovedAt = secondApprovedAt);
-      dataToSend.secondApproved = secondApproved;
+      await Promise.all(
+        datafound.map(async (item) => {
+          const productSummary = await checkFreezeQuantity(
+            req.userData.companyId,
+            item.fromWarehouseId,
+            item.productSalesOrder.productGroupId,
+            item.productSalesOrder.quantity
+          );
+
+          if (!productSummary.status) {
+            throw new ApiError(httpStatus.OK, productSummary.msg);
+          }
+        })
+      );
+      await Promise.all(
+        datafound.map(async (item) => {
+          const createdData = await addRemoveFreezeQuantity(
+            req.userData.companyId,
+            item.fromWarehouseId,
+            item.productSalesOrder.productGroupId,
+            item.productSalesOrder.quantity,
+            "ADD"
+          );
+
+          if (!createdData.status) {
+            throw new ApiError(httpStatus.OK, createdData.msg);
+          }
+        })
+      );
+
+      Object.assign(dataToSend, {
+        secondApprovedById,
+        secondApprovedActionBy,
+        secondApprovedAt,
+        secondApproved,
+      });
     } else {
-      (dataToSend.firstApprovedById = firstApprovedById),
-        (dataToSend.firstApprovedActionBy = firstApprovedActionBy),
-        (dataToSend.firstApprovedAt = firstApprovedAt);
-      dataToSend.firstApproved = firstApproved;
+      Object.assign(dataToSend, {
+        firstApprovedById,
+        firstApprovedActionBy,
+        firstApprovedAt,
+        firstApproved,
+      });
     }
 
-    //------------------Find data-------------------
-    let datafound = await wtwMasterService.getOneByMultiField({
-      wtNumber: wtNumberToBeSearch,
-    });
-    if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Request not found.`);
-    }
-
+    // Update the WTW Master data
     const dataUpdated = await wtwMasterService.updateMany(
       {
         wtNumber: wtNumberToBeSearch,
         isDeleted: false,
       },
-      {
-        $set: dataToSend,
-      }
+      { $set: dataToSend }
     );
-
-    //------------------create data-------------------
 
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
@@ -777,12 +818,12 @@ exports.updateLevel = async (req, res) => {
         issue: null,
       });
     } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, "Something went wrong.");
     }
   } catch (err) {
-    let errData = errorRes(err);
+    const errData = errorRes(err);
     logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
+    const { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });

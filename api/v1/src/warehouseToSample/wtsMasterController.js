@@ -30,6 +30,10 @@ const {
   actionType,
   approvalType,
 } = require("../../helper/enumUtils");
+const {
+  checkFreezeQuantity,
+  addRemoveFreezeQuantity,
+} = require("../productGroupSummary/ProductGroupSummaryHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -727,13 +731,47 @@ exports.updateLevel = async (req, res) => {
     }
 
     //------------------Find data-------------------
-    let datafound = await wtsMasterService.getOneByMultiField({
-      wtsNumber: wtsNumberToBeSearch,
-    });
-    if (!datafound) {
+    let datafound = await wtsMasterService.aggregateQuery([
+      {
+        $match: {
+          wtsNumber: wtsNumberToBeSearch,
+        },
+      },
+    ]);
+    if (!datafound.length) {
       throw new ApiError(httpStatus.OK, `Request not found.`);
     }
+    if (type === approvalType.second) {
+      await Promise.all(
+        datafound.map(async (item) => {
+          const productSummary = await checkFreezeQuantity(
+            req.userData.companyId,
+            item.fromWarehouseId,
+            item.productSalesOrder.productGroupId,
+            item.productSalesOrder.quantity
+          );
 
+          if (!productSummary.status) {
+            throw new ApiError(httpStatus.OK, productSummary.msg);
+          }
+        })
+      );
+      await Promise.all(
+        datafound.map(async (item) => {
+          const createdData = await addRemoveFreezeQuantity(
+            req.userData.companyId,
+            item.fromWarehouseId,
+            item.productSalesOrder.productGroupId,
+            item.productSalesOrder.quantity,
+            "ADD"
+          );
+
+          if (!createdData.status) {
+            throw new ApiError(httpStatus.OK, createdData.msg);
+          }
+        })
+      );
+    }
     const dataUpdated = await wtsMasterService.updateMany(
       {
         wtsNumber: wtsNumberToBeSearch,

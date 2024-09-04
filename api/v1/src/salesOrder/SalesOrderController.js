@@ -44,6 +44,10 @@ const {
 const mongoose = require("mongoose");
 const { getInvoiceNumber } = require("../call/CallHelper");
 const { addSalesOrderToTally } = require("./SalesOrderHelper");
+const {
+  checkFreezeQuantity,
+  addRemoveFreezeQuantity,
+} = require("../productGroupSummary/ProductGroupSummaryHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -216,7 +220,7 @@ exports.update = async (req, res) => {
 //update start
 exports.updateLevel = async (req, res) => {
   try {
-    let {
+    const {
       dhApprovedAt,
       accApprovedAt,
       type,
@@ -229,215 +233,196 @@ exports.updateLevel = async (req, res) => {
       invoice,
     } = req.body;
 
-    let sonumberToBeSearch = req.params.sonumber;
+    const sonumberToBeSearch = req.params.sonumber;
 
-    //------------------Find data-------------------
-    let datafound = await salesOrderService.getOneByMultiField({
-      soNumber: sonumberToBeSearch,
-    });
-    if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Sales order not found.`);
+    // Find the sales order data
+    const datafound = await salesOrderService.aggregateQuery([
+      { $match: { soNumber: sonumberToBeSearch } },
+    ]);
+
+    if (!datafound.length) {
+      throw new ApiError(httpStatus.OK, "Sales order not found.");
     }
 
-    let branchdata = await branchService.getOneByMultiField({
+    // Get branch data
+    const branchdata = await branchService.getOneByMultiField({
       isDeleted: false,
-      _id: datafound?.branchId,
+      _id: datafound[0].branchId,
     });
+
     if (!branchdata) {
-      throw new ApiError(httpStatus.OK, `Something went wrong invalid branch!`);
+      throw new ApiError(httpStatus.OK, "Invalid branch!");
     }
 
-    let dataToSend = {};
+    const dataToSend =
+      type === "ACC"
+        ? {
+            accApprovedById,
+            accApprovedActionBy,
+            accApprovedAt,
+            accApproved,
+            invoice,
+            invoiceDate: new Date(),
+            invoiceNumber: await generateInvoiceString(
+              branchdata.branchCode,
+              await getInvoiceNumber(req.userData.companyId)
+            ),
+          }
+        : {
+            dhApprovedById,
+            dhApprovedActionBy,
+            dhApprovedAt,
+            dhApproved,
+            invoice,
+          };
+
+    // Process data based on type
     if (type === "ACC") {
-      let invoiceNumberIs = await getInvoiceNumber(req.userData.companyId);
-      let finalInvoiceNo = await generateInvoiceString(
-        branchdata?.branchCode,
-        invoiceNumberIs
-      );
-      dataToSend.accApprovedById = accApprovedById;
-      dataToSend.accApprovedActionBy = accApprovedActionBy;
-      dataToSend.accApprovedAt = accApprovedAt;
-      dataToSend.accApproved = accApproved;
-      dataToSend.invoice = invoice;
-      dataToSend.invoiceDate = new Date();
-      dataToSend.invoiceNumber = finalInvoiceNo;
-    } else {
-      dataToSend.dhApprovedById = dhApprovedById;
-      dataToSend.dhApprovedActionBy = dhApprovedActionBy;
-      dataToSend.dhApprovedAt = dhApprovedAt;
-      dataToSend.dhApproved = dhApproved;
-      dataToSend.invoice = invoice;
-    }
+      const [companyWarehouse, dealerWarehouse] = await Promise.all([
+        wareHouseService.getOneByMultiField({
+          isDeleted: false,
+          _id: datafound[0].companyWareHouseId,
+        }),
+        wareHouseService.getOneByMultiField({
+          isDeleted: false,
+          _id: datafound[0].dealerWareHouseId,
+        }),
+      ]);
 
-    const dataUpdated = await salesOrderService.updateMany(
-      {
-        soNumber: sonumberToBeSearch,
-        isDeleted: false,
-      },
-      {
-        $set: dataToSend,
-      }
-    );
-
-    if (type === "ACC") {
-      let companyWarehouseId = datafound.companyWareHouseId;
-      let dealerWarehouseId = datafound.dealerWareHouseId;
-
-      let companyWarehouse = await wareHouseService.getOneByMultiField({
-        isDeleted: false,
-        _id: companyWarehouseId,
-      });
-      let dealerWarehouse = await wareHouseService.getOneByMultiField({
-        isDeleted: false,
-        _id: dealerWarehouseId,
-      });
       if (!companyWarehouse || !dealerWarehouse) {
-        throw new ApiError(httpStatus.OK, `warehouse is invalid`);
+        throw new ApiError(httpStatus.OK, "Invalid warehouse");
       }
 
-      let companyWarehouseStateId =
-        companyWarehouse.registrationAddress.stateId;
-      let dealerWarehouseStateId = dealerWarehouse.registrationAddress.stateId;
-      let companyState = await stateService.getOneByMultiField({
-        isDeleted: false,
-        _id: companyWarehouseStateId,
-      });
-      let dealerState = await stateService.getOneByMultiField({
-        isDeleted: false,
-        _id: dealerWarehouseStateId,
-      });
+      const [companyState, dealerState] = await Promise.all([
+        stateService.getOneByMultiField({
+          isDeleted: false,
+          _id: companyWarehouse.registrationAddress.stateId,
+        }),
+        stateService.getOneByMultiField({
+          isDeleted: false,
+          _id: dealerWarehouse.registrationAddress.stateId,
+        }),
+      ]);
+      console.log(companyState, dealerState, "-------------------------");
       if (!companyState || !dealerState) {
-        throw new ApiError(httpStatus.OK, `state is invalid`);
+        throw new ApiError(httpStatus.OK, "Invalid state");
       }
+
+      await Promise.all(
+        datafound.map(async (item) => {
+          const productSummary = await checkFreezeQuantity(
+            req.userData.companyId,
+            item.companyWareHouseId,
+            item.productSalesOrder.productGroupId,
+            item.productSalesOrder.quantity
+          );
+
+          if (!productSummary.status) {
+            throw new ApiError(httpStatus.OK, productSummary.msg);
+          }
+        })
+      );
+
+      await Promise.all(
+        datafound.map(async (item) => {
+          const createdData = await addRemoveFreezeQuantity(
+            req.userData.companyId,
+            item.companyWareHouseId,
+            item.productSalesOrder.productGroupId,
+            item.productSalesOrder.quantity,
+            "ADD"
+          );
+
+          if (!createdData.status) {
+            throw new ApiError(httpStatus.OK, createdData.msg);
+          }
+        })
+      );
 
       const soData = await salesOrderService.findAllWithQuery({
         soNumber: sonumberToBeSearch,
         isDeleted: false,
       });
 
-      let productGroupId = soData?.map((ele) => ({
-        Id: ele?.productSalesOrder?.productGroupId,
-        quantity: ele?.productSalesOrder?.quantity,
-        rate: ele?.productSalesOrder?.rate,
-      }));
-
-      let salesOrderBalance = 0;
       let totalAmount = 0;
       let totalTaxAmount = 0;
+      const itemDataForTally = [];
 
-      let itemDataForTally = [];
-
-      if (Array.isArray(productGroupId) && productGroupId.length > 0) {
-        for (const ele of productGroupId) {
-          let productGroupData = await productGroupService.findAllWithQuery({
-            _id: ele?.Id,
+      await Promise.all(
+        soData.map(async (ele) => {
+          const productGroupData = await productGroupService.findAllWithQuery({
+            _id: ele.productSalesOrder.productGroupId,
           });
 
-          // Assigning data for tally
+          const rate = parseInt(ele.productSalesOrder.rate);
+          const quantity = parseInt(ele.productSalesOrder.quantity);
+          let salesOrderBalance = rate * quantity;
+          totalAmount += salesOrderBalance;
 
-          if (companyState.stateName === dealerState.stateName) {
-            salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
-            totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
-            salesOrderBalance +=
-              (salesOrderBalance *
-                (productGroupData[0].cgst + productGroupData[0].sgst)) /
-              100;
-            totalTaxAmount += salesOrderBalance;
+          const taxType =
+            companyState.stateName === dealerState.stateName
+              ? ["CGST", "SGST"]
+              : dealerState.isUnion
+              ? ["UTGST"]
+              : ["IGST"];
 
-            itemDataForTally.push({
-              itemNameForTally: productGroupData[0]?.groupName,
-              rateForTally: ele.rate,
-              quantityForTally: ele?.quantity,
-              taxTypeForTally: ["CGST", "SGST"],
-              taxPercentForTally: [
-                productGroupData[0].cgst,
-                productGroupData[0].sgst,
-              ],
-            });
-          } else if (companyState.stateName !== dealerState.stateName) {
-            if (dealerState.isUnion) {
-              salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
-              totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
-              salesOrderBalance +=
-                (salesOrderBalance * productGroupData[0].utgst) / 100;
-              totalTaxAmount += salesOrderBalance;
-              itemDataForTally.push({
-                itemNameForTally: productGroupData[0]?.groupName,
-                rateForTally: ele.rate,
-                quantityForTally: ele?.quantity,
-                taxTypeForTally: ["UTGST"],
-                taxPercentForTally: [productGroupData[0].utgst],
-              });
-            } else {
-              salesOrderBalance = parseInt(ele.rate) * parseInt(ele.quantity);
-              totalAmount += parseInt(ele.rate) * parseInt(ele.quantity);
-              salesOrderBalance +=
-                (salesOrderBalance * productGroupData[0].igst) / 100;
-              totalTaxAmount += salesOrderBalance;
-              itemDataForTally.push({
-                itemNameForTally: productGroupData[0]?.groupName,
-                rateForTally: ele.rate,
-                quantityForTally: ele?.quantity,
-                taxTypeForTally: ["IGST"],
-                taxPercentForTally: [productGroupData[0].igst],
-              });
-            }
-          }
-        }
-
-        // This code will execute after the loop is completed
-        if (soData[0].accApproved === true) {
-          const balance = await getBalance(
-            soData[0].dealerId,
-            0,
-            parseInt(totalTaxAmount)
+          const taxPercent = taxType.map(
+            (tax) => productGroupData[0][tax.toLowerCase()]
           );
+          const taxAmount = taxPercent.reduce((sum, tax) => sum + tax, 0);
 
-          let dealerData = await dealerService.getOneByMultiField({
-            _id: dealerWarehouse?.dealerId,
-            isDeleted: false,
+          salesOrderBalance += (salesOrderBalance * taxAmount) / 100;
+          totalTaxAmount += salesOrderBalance;
+
+          itemDataForTally.push({
+            itemNameForTally: productGroupData[0].groupName,
+            rateForTally: rate,
+            quantityForTally: quantity,
+            taxTypeForTally: taxType,
+            taxPercentForTally: taxPercent,
           });
+        })
+      );
 
-          let saleOrderTallyData = {
-            companyState: companyState.stateName,
-            partyName: dealerData?.firmName,
-            soNumber: sonumberToBeSearch,
-            itemDataForTally,
+      if (soData[0].accApproved) {
+        const balance = await getBalance(
+          soData[0].dealerId,
+          0,
+          parseInt(totalTaxAmount)
+        );
+        const dealerData = await dealerService.getOneByMultiField({
+          _id: dealerWarehouse.dealerId,
+          isDeleted: false,
+        });
 
-            expectedDeliveryDate: datafound?.expectedDeliveryDate,
-          };
+        await addSalesOrderToTally({
+          companyState: companyState.stateName,
+          partyName: dealerData.firmName,
+          soNumber: sonumberToBeSearch,
+          itemDataForTally,
+          expectedDeliveryDate: datafound[0].expectedDeliveryDate,
+        });
 
-          await addSalesOrderToTally(saleOrderTallyData);
-          console.log(
-            ledgerType.debit,
-            parseInt(totalTaxAmount - totalAmount),
-            0,
-            parseInt(totalTaxAmount),
-            "By Sales Order",
-            soData[0].companyId,
-            soData[0].dealerId,
-            balance.toExponential,
-            "printt"
-          );
-          let ledgerNumber = await getLedgerNo();
-          //------------------create data-------------------
-          let dataCreated = await ledgerService.createNewData({
-            noteType: ledgerType.debit,
-            taxAmount: parseInt(totalTaxAmount - totalAmount),
-            creditAmount: 0,
-            debitAmount: parseInt(totalTaxAmount),
-            remark: "By Sales Order",
-            companyId: soData[0].companyId,
-            dealerId: soData[0].dealerId,
-            balance: balance,
-
-            ledgerNumber: ledgerNumber,
-          });
-        }
+        await ledgerService.createNewData({
+          noteType: ledgerType.debit,
+          taxAmount: parseInt(totalTaxAmount - totalAmount),
+          creditAmount: 0,
+          debitAmount: parseInt(totalTaxAmount),
+          remark: "By Sales Order",
+          companyId: soData[0].companyId,
+          dealerId: soData[0].dealerId,
+          balance,
+          ledgerNumber: await getLedgerNo(),
+        });
       }
     }
 
-    //------------------create data-------------------
+    // Update the sales order data
+    const dataUpdated = await salesOrderService.updateMany(
+      { soNumber: sonumberToBeSearch, isDeleted: false },
+      { $set: dataToSend }
+    );
+
     if (dataUpdated) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -447,12 +432,12 @@ exports.updateLevel = async (req, res) => {
         issue: null,
       });
     } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, "Something went wrong.");
     }
   } catch (err) {
-    let errData = errorRes(err);
+    const errData = errorRes(err);
     logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
+    const { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });

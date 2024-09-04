@@ -109,6 +109,7 @@ const customerWHReturnRoute = require("./src/customerWHReturn/CustomerWHReturnRo
 const reprintOuterBoxRoute = require("./src/reprintOuterBox/ReprintOuterBoxRoute");
 const webLeadsRoute = require("./src/webLeads/WebLeadsRoute");
 const reportRoute = require("./src/reports/ReportsRoute");
+const productGroupSummaryRoute = require("./src/productGroupSummary/ProductGroupSummaryRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -558,6 +559,10 @@ const defaultRoutes = [
   {
     path: "/report",
     route: reportRoute,
+  },
+  {
+    path: "/productgroup-summary",
+    route: productGroupSummaryRoute,
   },
 ];
 // orderRoute;
