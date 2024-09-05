@@ -63,6 +63,7 @@ const {
   checkFreezeQuantity,
   addRemoveFreezeQuantity,
   checkDispatchFreezeQuantity,
+  addAvailableQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
 //add start
 exports.add = async (req, res) => {
@@ -1600,6 +1601,7 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
           barcodeNumber: barcodeToBeSearch,
           isUsed: true,
           status: status,
+          dealerId: new mongoose.Types.ObjectId(req.userData.Id),
           productGroupId: new mongoose.Types.ObjectId(productGroupId),
           companyId: new mongoose.Types.ObjectId(cid),
         },
@@ -3937,6 +3939,7 @@ exports.updateWarehouseInventory = async (req, res) => {
           },
         }
       );
+
       if (from === barcodeStatusType.wtw) {
         wId?.forEach(async (wtwid) => {
           await wtwMasterService.getOneAndUpdate(
@@ -4014,7 +4017,36 @@ exports.updateWarehouseInventory = async (req, res) => {
     });
 
     const updatedDataArray = await Promise.all(promises);
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
 
+    // Aggregate barcodedata
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addAvailableQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -4158,6 +4190,7 @@ exports.bulkUpload = async (req, res) => {
 
 exports.updateWarehouseInventoryDealer = async (req, res) => {
   try {
+    console.log("oooooooooooooooo");
     let { barcodedata, dtdRequestIds } = req.body;
 
     const promises = barcodedata?.map(async (ele) => {
@@ -4204,9 +4237,39 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
 
       return dataUpdated;
     });
-
+    console.log("uuuuuu");
     const updatedDataArray = await Promise.all(promises);
+    console.log(updatedDataArray, "................");
+    // Aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
 
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addAvailableQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -4232,7 +4295,7 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
 
 exports.outwardInventory = async (req, res) => {
   try {
-    let {
+    const {
       barcodedata,
       soId,
       transporterGST,
@@ -4248,71 +4311,122 @@ exports.outwardInventory = async (req, res) => {
       totalPackages,
       fileUrl,
     } = req.body;
-    const groupedData = barcodedata.reduce((result, item) => {
-      const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
 
-      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
+    // Group barcodedata by outerBoxbarCodeNumber
+    const groupedData = barcodedata.reduce((result, item) => {
+      const { outerBoxbarCodeNumber } = item;
+
       if (!result[outerBoxbarCodeNumber]) {
-        // If it doesn't exist, create an array for that key
         result[outerBoxbarCodeNumber] = [];
       }
-
-      // Push the current item into the array associated with the outerBoxbarCodeNumber key
       result[outerBoxbarCodeNumber].push(item);
 
       return result;
     }, {});
 
-    // Convert the grouped data into an array of objects (if needed)
-    const groupedArray = Object.keys(groupedData).map((key) => ({
+    // Convert grouped data into an array of objects
+    const groupedArray = Object.entries(groupedData).map(([key, items]) => ({
       outerBoxbarCodeNumber: key,
-      items: groupedData[key],
+      items,
     }));
-    const promises = barcodedata?.map(async (ele) => {
-      let allOuterBoxBarcode = await barCodeService.findCount({
-        outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
-        isUsed: true,
-      });
-      let foundObj = groupedArray?.find((fele) => {
-        if (fele?.outerBoxbarCodeNumber !== null) {
-          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
-        }
-      });
 
+    // Helper function to aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
+
+    // Aggregate the product data based on productGroupId
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+
+    // Process the aggregated product data before proceeding with barcodedata updates
+    await Promise.all(
+      output.map(async (item) => {
+        const productSummary = await checkDispatchFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!productSummary.status) {
+          throw new ApiError(httpStatus.OK, productSummary.msg);
+        }
+      })
+    );
+
+    // Update freeze quantity after validation
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addRemoveFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity,
+          "REMOVE"
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
+
+    // Helper function to update barcodes
+    const updateBarcodes = async (ele, allOuterBoxBarcode, foundObj) => {
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
           {
-            outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
+            outerBoxbarCodeNumber: ele.outerBoxbarCodeNumber,
             isUsed: true,
           },
           {
-            $set: {
-              outerBoxbarCodeNumber: null,
-            },
+            $set: { outerBoxbarCodeNumber: null },
           }
         );
-        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
-      const dataUpdated = await barCodeService.getOneAndUpdate(
-        {
-          _id: new mongoose.Types.ObjectId(ele?._id),
-          isUsed: true,
-        },
+      return barCodeService.getOneAndUpdate(
+        { _id: new mongoose.Types.ObjectId(ele._id), isUsed: true },
         {
           $set: {
             status: barcodeStatusType.inTransit,
             wareHouseId: null,
+            isFreezed: false,
           },
         }
       );
+    };
+
+    // Process each barcode and update sales orders
+    const promises = barcodedata.map(async (ele) => {
+      const allOuterBoxBarcode = await barCodeService.findCount({
+        outerBoxbarCodeNumber: ele.outerBoxbarCodeNumber,
+        isUsed: true,
+      });
+
+      const foundObj = groupedArray.find(
+        (fele) => fele.outerBoxbarCodeNumber === ele.outerBoxbarCodeNumber
+      );
+
+      const dataUpdated = await updateBarcodes(
+        ele,
+        allOuterBoxBarcode,
+        foundObj
+      );
+
       const updatedSOs = await Promise.all(
-        soId.map(async (soid) => {
-          const updatedSO = await salesOrderService.getOneAndUpdate(
-            {
-              _id: new mongoose.Types.ObjectId(soid),
-              isDeleted: false,
-            },
+        soId.map((soid) =>
+          salesOrderService.getOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(soid), isDeleted: false },
             {
               $set: {
                 status: productStatus.dispatched,
@@ -4330,15 +4444,16 @@ exports.outwardInventory = async (req, res) => {
                 fileUrl,
               },
             }
-          );
-
-          return updatedSO?.soNumber; // Return soNumber for each update
-        })
+          )
+        )
       );
 
+      const soNumber = updatedSOs[0]?.soNumber;
+
+      // Update barcode flow
       await addToBarcodeFlow(
         dataUpdated,
-        `Barcode is in-Transit Dispatched from warehouse to Dealer with respect to Sales order number: ${updatedSOs[0]}`
+        `Barcode is in-Transit Dispatched from warehouse to Dealer with respect to Sales order number: ${soNumber}`
       );
 
       return dataUpdated;
@@ -4354,13 +4469,14 @@ exports.outwardInventory = async (req, res) => {
         code: "OK",
         issue: null,
       });
-    } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
+
+    throw new ApiError(httpStatus.NOT_IMPLEMENTED, "Something went wrong.");
   } catch (err) {
-    let errData = errorRes(err);
+    const errData = errorRes(err);
+    const { message, status, data, code, issue } = errData.resData;
+
     logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });
@@ -4490,36 +4606,83 @@ exports.rtvOutwardInventory = async (req, res) => {
 exports.wtwOutwardInventory = async (req, res) => {
   try {
     let { barcodedata, wtwId } = req.body;
+
+    // Group data by outerBoxbarCodeNumber
     const groupedData = barcodedata.reduce((result, item) => {
       const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
-
-      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
       if (!result[outerBoxbarCodeNumber]) {
-        // If it doesn't exist, create an array for that key
         result[outerBoxbarCodeNumber] = [];
       }
-
-      // Push the current item into the array associated with the outerBoxbarCodeNumber key
       result[outerBoxbarCodeNumber].push(item);
-
       return result;
     }, {});
 
-    // Convert the grouped data into an array of objects (if needed)
+    // Aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
+
+    // Aggregate barcodedata
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+
+    // Convert groupedData into an array
     const groupedArray = Object.keys(groupedData).map((key) => ({
       outerBoxbarCodeNumber: key,
       items: groupedData[key],
     }));
-    const promises = barcodedata?.map(async (ele) => {
+
+    // Check dispatch freeze quantity for each aggregated product
+    await Promise.all(
+      output.map(async (item) => {
+        const productSummary = await checkDispatchFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!productSummary.status) {
+          throw new ApiError(httpStatus.OK, productSummary.msg);
+        }
+      })
+    );
+
+    // Update freeze quantity for each aggregated product
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addRemoveFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity,
+          "REMOVE"
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
+
+    // Process barcodedata for each barcode
+    const promises = barcodedata.map(async (ele) => {
       let allOuterBoxBarcode = await barCodeService.findCount({
         outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
         isUsed: true,
       });
-      let foundObj = groupedArray?.find((fele) => {
-        if (fele?.outerBoxbarCodeNumber !== null) {
-          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
-        }
-      });
+
+      let foundObj = groupedArray.find(
+        (fele) => fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber
+      );
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
@@ -4533,7 +4696,6 @@ exports.wtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4548,33 +4710,33 @@ exports.wtwOutwardInventory = async (req, res) => {
           },
         }
       );
+
+      // Update wtwMasterService for each wtwId
       let companyWarehouseId;
       let otherCompanyWarehouseId;
-      const promises = wtwId?.map(async (wtwid) => {
-        let wtwUpdatedData = await wtwMasterService.getOneAndUpdate(
-          {
-            _id: new mongoose.Types.ObjectId(wtwid),
-            isDeleted: false,
-          },
-          {
-            $set: {
-              status: productStatus.dispatched,
-            },
-          }
-        );
-        companyWarehouseId = wtwUpdatedData?.fromWarehouseId;
-        otherCompanyWarehouseId = wtwUpdatedData?.toWarehouseId;
-      });
-      await Promise.all(promises);
-      let companyWarehouseData = await WarehouseService?.getOneByMultiField({
+
+      await Promise.all(
+        wtwId.map(async (wtwid) => {
+          let wtwUpdatedData = await wtwMasterService.getOneAndUpdate(
+            { _id: new mongoose.Types.ObjectId(wtwid), isDeleted: false },
+            { $set: { status: productStatus.dispatched } }
+          );
+          companyWarehouseId = wtwUpdatedData?.fromWarehouseId;
+          otherCompanyWarehouseId = wtwUpdatedData?.toWarehouseId;
+        })
+      );
+
+      // Fetch warehouse data after updating wtwMasterService
+      const companyWarehouseData = await WarehouseService.getOneByMultiField({
         isDeleted: false,
         _id: companyWarehouseId,
       });
-      let otherCompanyWarehouseData =
-        await WarehouseService?.getOneByMultiField({
+      const otherCompanyWarehouseData =
+        await WarehouseService.getOneByMultiField({
           isDeleted: false,
           _id: otherCompanyWarehouseId,
         });
+
       await addToBarcodeFlow(
         dataUpdated,
         `Barcode Dispatched from ${companyWarehouseData?.wareHouseName} to Other company warehouse named ${otherCompanyWarehouseData?.wareHouseName}`
@@ -4665,7 +4827,7 @@ exports.dtdOutwardInventory = async (req, res) => {
           $set: {
             status: barcodeStatusType.dtd,
             wareHouseId: null,
-            dealerId: null,
+            dealerId: ele.toDealerId,
           },
         }
       );
@@ -4708,6 +4870,40 @@ exports.dtdOutwardInventory = async (req, res) => {
     });
 
     const updatedDataArray = await Promise.all(promises);
+    // Aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
+
+    // Aggregate barcodedata
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+
+    // Update freeze quantity for each aggregated product
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addRemoveAvailableQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity,
+          "REMOVE"
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
 
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
@@ -4790,6 +4986,7 @@ exports.dtwOutwardInventory = async (req, res) => {
           $set: {
             status: barcodeStatusType.dtw,
             wareHouseId: ele.wareHouseId,
+            dealerId: null,
           },
         }
       );
@@ -4835,6 +5032,40 @@ exports.dtwOutwardInventory = async (req, res) => {
     });
 
     const updatedDataArray = await Promise.all(promises);
+    // Aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
+
+    // Aggregate barcodedata
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+
+    // Update freeze quantity for each aggregated product
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addRemoveAvailableQuantity(
+          req.userData.companyId,
+          item.dealerWareHouseId,
+          item.productGroupId,
+          item.quantity,
+          "REMOVE"
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
 
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
@@ -4862,26 +5093,75 @@ exports.dtwOutwardInventory = async (req, res) => {
 exports.wtcOutwardInventory = async (req, res) => {
   try {
     let { barcodedata, wtcId } = req.body;
+
+    // Group data by outerBoxbarCodeNumber
     const groupedData = barcodedata.reduce((result, item) => {
       const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
 
-      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
       if (!result[outerBoxbarCodeNumber]) {
-        // If it doesn't exist, create an array for that key
         result[outerBoxbarCodeNumber] = [];
       }
-
-      // Push the current item into the array associated with the outerBoxbarCodeNumber key
       result[outerBoxbarCodeNumber].push(item);
-
       return result;
     }, {});
 
-    // Convert the grouped data into an array of objects (if needed)
+    // Aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
+
+    // Aggregate barcodedata
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+
+    // Convert the grouped data into an array of objects
     const groupedArray = Object.keys(groupedData).map((key) => ({
       outerBoxbarCodeNumber: key,
       items: groupedData[key],
     }));
+
+    // Check dispatch freeze quantity for each aggregated product
+    await Promise.all(
+      output.map(async (item) => {
+        const productSummary = await checkDispatchFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!productSummary.status) {
+          throw new ApiError(httpStatus.OK, productSummary.msg);
+        }
+      })
+    );
+
+    // Update freeze quantity for each aggregated product
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addRemoveFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity,
+          "REMOVE"
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
+
+    // Process each barcode
     const promises = barcodedata?.map(async (ele) => {
       let allOuterBoxBarcode = await barCodeService.findCount({
         outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
@@ -4905,7 +5185,6 @@ exports.wtcOutwardInventory = async (req, res) => {
             },
           }
         );
-        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
@@ -4921,19 +5200,24 @@ exports.wtcOutwardInventory = async (req, res) => {
           },
         }
       );
-      wtcId?.forEach(async (wtcid) => {
-        await wtcMasterService.getOneAndUpdate(
-          {
-            _id: new mongoose.Types.ObjectId(wtcid),
-            isDeleted: false,
-          },
-          {
-            $set: {
-              status: productStatus.dispatched,
+
+      // Update wtcMasterService for each wtcId
+      await Promise.all(
+        wtcId?.map(async (wtcid) => {
+          await wtcMasterService.getOneAndUpdate(
+            {
+              _id: new mongoose.Types.ObjectId(wtcid),
+              isDeleted: false,
             },
-          }
-        );
-      });
+            {
+              $set: {
+                status: productStatus.dispatched,
+              },
+            }
+          );
+        })
+      );
+
       await addToBarcodeFlow(
         dataUpdated,
         "Barcode Dispatched from warehouse to other company"
@@ -4966,139 +5250,103 @@ exports.wtcOutwardInventory = async (req, res) => {
 };
 
 // wts outward
-
 exports.wtsOutwardInventory = async (req, res) => {
   try {
     let { barcodedata, wtsId } = req.body;
+
+    // Group the barcodedata by outerBoxbarCodeNumber
     const groupedData = barcodedata.reduce((result, item) => {
       const outerBoxbarCodeNumber = item.outerBoxbarCodeNumber;
-
-      // Check if the outerBoxbarCodeNumber already exists as a key in the result object
       if (!result[outerBoxbarCodeNumber]) {
-        // If it doesn't exist, create an array for that key
         result[outerBoxbarCodeNumber] = [];
       }
-
-      // Push the current item into the array associated with the outerBoxbarCodeNumber key
       result[outerBoxbarCodeNumber].push(item);
-
       return result;
     }, {});
 
     const aggregateProducts = (arr) => {
-      const result = arr.reduce((acc, curr) => {
-        // Find if the current productGroupId and warehouseId already exist in the accumulator
+      return arr.reduce((acc, curr) => {
         const existingItem = acc.find(
           (item) => item.productGroupId === curr.productGroupId
         );
-
         if (existingItem) {
-          // If it exists, increment the quantity
           existingItem.quantity += 1;
         } else {
-          // If it doesn't exist, add it to the accumulator with a quantity of 1
           acc.push({ ...curr, quantity: 1 });
         }
-
         return acc;
       }, []);
-
-      return result;
     };
 
     const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
 
-    // Convert the grouped data into an array of objects (if needed)
+    // Convert groupedData into an array
     const groupedArray = Object.keys(groupedData).map((key) => ({
       outerBoxbarCodeNumber: key,
       items: groupedData[key],
     }));
 
-    let loopVisited = false;
-    const promises = barcodedata?.map(async (ele) => {
+    // Process the output once outside the map loop
+    await Promise.all(
+      output.map(async (item) => {
+        const productSummary = await checkDispatchFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!productSummary.status) {
+          throw new ApiError(httpStatus.OK, productSummary.msg);
+        }
+      })
+    );
+
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addRemoveFreezeQuantity(
+          req.userData.companyId,
+          item.wareHouseId,
+          item.productGroupId,
+          item.quantity,
+          "REMOVE"
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
+
+    // Process barcodedata asynchronously
+    const promises = barcodedata.map(async (ele) => {
       let allOuterBoxBarcode = await barCodeService.findCount({
         outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
         isUsed: true,
       });
-      let foundObj = groupedArray?.find((fele) => {
-        if (fele?.outerBoxbarCodeNumber !== null) {
-          return fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber;
-        }
-      });
-      if (loopVisited) {
-        await Promise.all(
-          output.map(async (item) => {
-            const productSummary = await checkDispatchFreezeQuantity(
-              req.userData.companyId,
-              item.wareHouseId,
-              item.productGroupId,
-              item.quantity
-            );
 
-            if (!productSummary.status) {
-              throw new ApiError(httpStatus.OK, productSummary.msg);
-            }
-          })
-        );
-
-        await Promise.all(
-          output.map(async (item) => {
-            const createdData = await addRemoveFreezeQuantity(
-              req.userData.companyId,
-              item.wareHouseId,
-              item.productGroupId,
-              item.quantity,
-              "REMOVE"
-            );
-
-            if (!createdData.status) {
-              throw new ApiError(httpStatus.OK, createdData.msg);
-            }
-          })
-        );
-        loopVisited = true;
-      }
+      let foundObj = groupedArray.find(
+        (fele) => fele?.outerBoxbarCodeNumber === ele?.outerBoxbarCodeNumber
+      );
 
       if (foundObj?.items?.length !== allOuterBoxBarcode) {
         await barCodeService.updateMany(
-          {
-            outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber,
-            isUsed: true,
-          },
-          {
-            $set: {
-              outerBoxbarCodeNumber: null,
-            },
-          }
+          { outerBoxbarCodeNumber: ele?.outerBoxbarCodeNumber, isUsed: true },
+          { $set: { outerBoxbarCodeNumber: null } }
         );
-        // await addToBarcodeFlow(ele, "Barcode outerBox Opened");
       }
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
-        {
-          _id: new mongoose.Types.ObjectId(ele?._id),
-          isUsed: true,
-        },
-        {
-          $set: {
-            status: barcodeStatusType.wts,
-            wareHouseId: null,
-          },
-        }
+        { _id: new mongoose.Types.ObjectId(ele?._id), isUsed: true },
+        { $set: { status: barcodeStatusType.wts, wareHouseId: null } }
       );
-      wtsId?.forEach(async (wtsid) => {
+
+      wtsId.forEach(async (wtsid) => {
         await wtsMasterService.getOneAndUpdate(
-          {
-            _id: new mongoose.Types.ObjectId(wtsid),
-            isDeleted: false,
-          },
-          {
-            $set: {
-              status: productStatus.dispatched,
-            },
-          }
+          { _id: new mongoose.Types.ObjectId(wtsid), isDeleted: false },
+          { $set: { status: productStatus.dispatched } }
         );
       });
+
       await addToBarcodeFlow(
         dataUpdated,
         "Barcode dispatched from warehouse to sample testing"
@@ -5428,6 +5676,37 @@ exports.dealerInwardInventory = async (req, res) => {
 
     const updatedDataArray = await Promise.all(promises);
 
+    // Aggregate barcodedata
+    // Aggregate products by productGroupId
+    const aggregateProducts = (arr) => {
+      return arr.reduce((acc, curr) => {
+        const existingItem = acc.find(
+          (item) => item.productGroupId === curr.productGroupId
+        );
+        if (existingItem) {
+          existingItem.quantity += 1;
+        } else {
+          acc.push({ ...curr, quantity: 1 });
+        }
+        return acc;
+      }, []);
+    };
+
+    const output = aggregateProducts(barcodedata);
+    console.log(output, "output");
+    await Promise.all(
+      output.map(async (item) => {
+        const createdData = await addAvailableQuantity(
+          req.userData.companyId,
+          dealerWarehouse._id,
+          item.productGroupId,
+          item.quantity
+        );
+        if (!createdData.status) {
+          throw new ApiError(httpStatus.OK, createdData.msg);
+        }
+      })
+    );
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",

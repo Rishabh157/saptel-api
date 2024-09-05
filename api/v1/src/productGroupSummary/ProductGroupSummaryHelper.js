@@ -52,6 +52,69 @@ const addRemoveAvailableQuantity = async (
   }
 };
 
+// add available quantity for new company for WTC transfer
+const addAvailableQuantity = async (
+  companyId,
+  warehouseId,
+  productGroupId,
+  quantity
+) => {
+  try {
+    let foundProductCategorySummary =
+      await productGroupSummaryService?.getOneByMultiField({
+        companyId,
+        warehouseId,
+        productGroupId,
+      });
+
+    if (!foundProductCategorySummary) {
+      console.log(
+        "......................",
+        companyId,
+        warehouseId,
+        productGroupId,
+        quantity
+      );
+      const createdSummary = await productGroupSummaryService.createNewData({
+        companyId,
+        warehouseId,
+        productGroupId,
+        freezeQuantity: 0,
+        avaliableQuantity: quantity,
+      });
+      console.log(createdSummary, "createdSummary");
+      if (!createdSummary) {
+        return {
+          status: false,
+          msg: "Something went wrong while creating inventory",
+        };
+      }
+      return {
+        status: true,
+        msg: "",
+      };
+    } else {
+      const updatedSummary = await productGroupSummaryService.getOneAndUpdate(
+        { companyId, warehouseId, productGroupId },
+        { $inc: { avaliableQuantity: quantity } }
+      );
+      if (!updatedSummary) {
+        return {
+          status: false,
+          msg: "Something went wrong while updating inventory",
+        };
+      }
+      return {
+        status: true,
+        msg: "",
+      };
+    }
+  } catch (err) {
+    console.log(err, ",,,,,,,,,,,,,,,,,,,,,,,,");
+    return { status: false, msg: "Something went wrong" };
+  }
+};
+
 const addRemoveFreezeQuantity = async (
   companyId,
   warehouseId,
@@ -100,7 +163,6 @@ const addRemoveFreezeQuantity = async (
         {
           $inc: {
             freezeQuantity: -quantity,
-            avaliableQuantity: quantity,
           },
         }
       );
@@ -187,4 +249,5 @@ module.exports = {
   addRemoveFreezeQuantity,
   checkFreezeQuantity,
   checkDispatchFreezeQuantity,
+  addAvailableQuantity,
 };

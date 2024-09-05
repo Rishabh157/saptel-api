@@ -110,6 +110,7 @@ const reprintOuterBoxRoute = require("./src/reprintOuterBox/ReprintOuterBoxRoute
 const webLeadsRoute = require("./src/webLeads/WebLeadsRoute");
 const reportRoute = require("./src/reports/ReportsRoute");
 const productGroupSummaryRoute = require("./src/productGroupSummary/ProductGroupSummaryRoute");
+const ecomMasterRoute = require("./src/ecomMaster/EcomMasterRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -563,6 +564,10 @@ const defaultRoutes = [
   {
     path: "/productgroup-summary",
     route: productGroupSummaryRoute,
+  },
+  {
+    path: "/ecom-master",
+    route: ecomMasterRoute,
   },
 ];
 // orderRoute;

@@ -97,7 +97,8 @@ const updateWarehouseInventoryDealer = {
   body: Joi.object().keys({
     barcodedata: Joi.array().items({
       _id: Joi.string().custom(commonValidation.objectId).required(),
-      wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      wareHouseId: Joi.string().custom(commonValidation.objectId).required(),
+      productGroupId: Joi.string().custom(commonValidation.objectId).required(),
     }),
     dtdRequestIds: Joi.array().items(Joi.string().required()).required(),
   }),
@@ -189,6 +190,7 @@ const dtdOutwardInventory = {
       isUsed: Joi.boolean(),
       wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
       dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      toDealerId: Joi.string().custom(commonValidation.objectId).required(),
       barcodeNumber: Joi.string().required(),
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
@@ -208,6 +210,9 @@ const dtwOutwardInventory = {
       lotNumber: Joi.string().required(),
       isUsed: Joi.boolean(),
       wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerWareHouseId: Joi.string()
+        .custom(commonValidation.objectId)
+        .required(),
       dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
       barcodeNumber: Joi.string().required(),
       companyId: Joi.string().custom(commonValidation.objectId).required(),
