@@ -66,7 +66,10 @@ exports.update = async (req, res) => {
     let ecomName = ecomDisplayName.toUpperCase().replaceAll(" ", "_");
 
     let idToBeSearch = req.params.id;
-    let dataExist = await ecomMasterService.isExists([{ ecomName }]);
+    let dataExist = await ecomMasterService.isExists(
+      [{ ecomName }],
+      idToBeSearch
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
