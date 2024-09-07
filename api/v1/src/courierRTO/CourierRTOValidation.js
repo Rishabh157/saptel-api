@@ -129,6 +129,7 @@ const changeStatus = {
   }),
   body: Joi.object().keys({
     requestStatus: Joi.string().required(),
+    currentStatus: Joi.string().required(),
   }),
 };
 module.exports = {

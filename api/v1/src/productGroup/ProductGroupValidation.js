@@ -10,6 +10,7 @@ const create = {
   body: Joi.object().keys({
     groupName: Joi.string().lowercase().required(),
     dealerSalePrice: Joi.number().required(),
+    productGroupCode: Joi.string().uppercase().required(),
     gst: Joi.number(),
     cgst: Joi.number(),
     sgst: Joi.number(),

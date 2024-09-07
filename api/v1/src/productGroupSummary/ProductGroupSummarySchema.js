@@ -7,6 +7,16 @@ const ProductGroupSummarySchema = new mongoose.Schema(
     productGroupId: { type: ObjectId, required: true, trim: true },
     freezeQuantity: { type: Number, required: true, trim: true },
     avaliableQuantity: { type: Number, required: true, trim: true },
+    avaliableUsedQuantity: { type: Number, default: 0, trim: true },
+    damageQuantity: { type: Number, default: 0, trim: true },
+    fakeQuantity: { type: Number, default: 0, trim: true },
+    lostQuantity: { type: Number, default: 0, trim: true },
+    destroyedQuantity: { type: Number, default: 0, trim: true },
+    missingQuantity: { type: Number, default: 0, trim: true },
+    closedQuantity: { type: Number, default: 0, trim: true },
+    expiredQuantity: { type: Number, default: 0, trim: true },
+    rtvQuantity: { type: Number, default: 0, trim: true },
+
     isDeleted: {
       type: Boolean,
       default: false,

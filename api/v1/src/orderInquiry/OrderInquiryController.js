@@ -3165,8 +3165,14 @@ exports.getByMobileNumber = async (req, res) => {
     let { barcode, contactNumber, complaintNumber, email, orderNumber } =
       req.body;
 
+    // let matchQuery = {
+    //   companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+    // };
+
     let matchQuery = {
-      companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+      $and: [
+        { companyId: new mongoose.Types.ObjectId(req.userData.companyId) },
+      ],
     };
 
     if (contactNumber) {
@@ -3181,7 +3187,8 @@ exports.getByMobileNumber = async (req, res) => {
       matchQuery.emailId = email;
     }
     if (orderNumber) {
-      matchQuery.orderNumber = orderNumber;
+      // matchQuery.orderNumber = orderNumber;
+      matchQuery.$and.push({ orderNumber: orderNumber });
     }
     if (barcode) {
       let barcodeData = await barcodeService.getOneByMultiField({

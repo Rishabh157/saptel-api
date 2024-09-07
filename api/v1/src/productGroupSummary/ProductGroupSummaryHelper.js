@@ -1,4 +1,5 @@
 const ApiError = require("../../../utils/apiErrorUtils");
+const { courierRTOType } = require("../../helper/enumUtils");
 const productGroupSummaryService = require("./ProductGroupSummaryService");
 const httpStatus = require("http-status");
 
@@ -111,6 +112,99 @@ const addAvailableQuantity = async (
     }
   } catch (err) {
     console.log(err, ",,,,,,,,,,,,,,,,,,,,,,,,");
+    return { status: false, msg: "Something went wrong" };
+  }
+};
+
+// add fresh used quantity
+const addReturnQuantity = async (
+  companyId,
+  warehouseId,
+  productGroupId,
+  quantity,
+  type,
+  curStatus
+) => {
+  try {
+    console.log(
+      companyId,
+      warehouseId,
+      productGroupId,
+      quantity,
+      type,
+      curStatus,
+      "-------"
+    );
+
+    let queryObj = {};
+    let removequeryObj = {};
+
+    // Handling the current status to remove quantities
+    if (curStatus) {
+      switch (curStatus) {
+        case courierRTOType.fresh:
+          removequeryObj = { avaliableUsedQuantity: -quantity };
+          break;
+        case courierRTOType.damage:
+          removequeryObj = { damageQuantity: -quantity };
+          break;
+        case courierRTOType.fake:
+          removequeryObj = { fakeQuantity: -quantity };
+          break;
+        case courierRTOType.lost:
+          removequeryObj = { lostQuantity: -quantity };
+          break;
+        case courierRTOType.destroyed:
+          removequeryObj = { destroyedQuantity: -quantity };
+          break;
+        default:
+          throw new Error("Invalid current status type");
+      }
+    }
+
+    // Handling the new status to add quantities
+    switch (type) {
+      case courierRTOType.fresh:
+        queryObj = { avaliableUsedQuantity: quantity };
+        break;
+      case courierRTOType.damage:
+        queryObj = { damageQuantity: quantity };
+        break;
+      case courierRTOType.fake:
+        queryObj = { fakeQuantity: quantity };
+        break;
+      case courierRTOType.lost:
+        queryObj = { lostQuantity: quantity };
+        break;
+      case courierRTOType.destroyed:
+        removequeryObj = { destroyedQuantity: quantity };
+        break;
+      default:
+        throw new Error("Invalid return type");
+    }
+
+    // Logging the remove query
+    console.log(removequeryObj, "Remove Query -------------");
+
+    // Combining the queries and updating inventory
+    const updatedSummary = await productGroupSummaryService.getOneAndUpdate(
+      { companyId, warehouseId, productGroupId },
+      { $inc: { ...queryObj, ...removequeryObj } }
+    );
+
+    if (!updatedSummary) {
+      return {
+        status: false,
+        msg: "Something went wrong while updating inventory",
+      };
+    }
+
+    return {
+      status: true,
+      msg: "Inventory updated successfully",
+    };
+  } catch (err) {
+    console.error(err, "Error in addReturnQuantity");
     return { status: false, msg: "Something went wrong" };
   }
 };
@@ -250,4 +344,5 @@ module.exports = {
   checkFreezeQuantity,
   checkDispatchFreezeQuantity,
   addAvailableQuantity,
+  addReturnQuantity,
 };

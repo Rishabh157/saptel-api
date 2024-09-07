@@ -5,6 +5,7 @@ const BarCodeFlowSchema = new mongoose.Schema(
   {
     productGroupId: { type: ObjectId, required: true, trim: true },
     barcodeNumber: { type: String, required: true, trim: true },
+    upperBarcodeNumber: { type: String, required: true, trim: true },
     outerBoxbarCodeNumber: { type: String, default: null },
     cartonBoxId: { type: ObjectId, default: null },
     barcodeGroupNumber: { type: String, required: true, trim: true },
@@ -39,6 +40,8 @@ const BarCodeFlowSchema = new mongoose.Schema(
       ],
       default: "",
     },
+    isUsedFresh: { type: Boolean, default: false },
+
     expiryDate: { type: String, required: true },
     barcodeLog: { type: String, required: true },
     companyId: { type: ObjectId, required: true, trim: true },

@@ -29,118 +29,125 @@ const {
 const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const XLSX = require("xlsx");
 const { default: mongoose } = require("mongoose");
+const {
+  addReturnQuantity,
+} = require("../productGroupSummary/ProductGroupSummaryHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let { shippingProvider, requestStatus, orderNumber, comment, warehouseId } =
-      req.body;
-    /**
-     * check duplicate exist
-     */
+    const {
+      shippingProvider,
+      requestStatus,
+      orderNumber,
+      comment,
+      warehouseId,
+    } = req.body;
 
-    let dataExist = await courierRTOService.isExists([{ orderNumber }]);
+    // Check if the order already exists
+    const dataExist = await courierRTOService.isExists([{ orderNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
-    let orderNumberIs;
-    let orderData = await orderInquiryService?.getOneByMultiField({
-      orderNumber: orderNumber,
-      assignWarehouseId: warehouseId,
-      assignDealerId: null,
-      orderAssignedToCourier: shippingProvider,
-    });
-    orderNumberIs = orderData?.orderNumber;
-    if (!orderData) {
-      let orderDataByAWB = await orderInquiryService?.getOneByMultiField({
+
+    // Helper function to fetch order data by different criteria
+    const fetchOrderData = async (criteria) => {
+      return await orderInquiryService?.getOneByMultiField(criteria);
+    };
+
+    // Fetch order data based on various fields
+    let orderData =
+      (await fetchOrderData({
+        orderNumber,
+        assignWarehouseId: warehouseId,
+        assignDealerId: null,
+        orderAssignedToCourier: shippingProvider,
+      })) ||
+      (await fetchOrderData({
         awbNumber: orderNumber,
         assignWarehouseId: warehouseId,
         assignDealerId: null,
         orderAssignedToCourier: shippingProvider,
-      });
-      orderNumberIs = orderDataByAWB?.orderNumber;
+      })) ||
+      (await fetchOrderData({
+        "barcodeData.barcode": { $in: [orderNumber] },
+        assignWarehouseId: warehouseId,
+        assignDealerId: null,
+        orderAssignedToCourier: shippingProvider,
+      }));
 
-      if (!orderDataByAWB) {
-        let orderDataByBarcode = await orderInquiryService?.getOneByMultiField({
-          "barcodeData.barcode": { $in: [orderNumber] },
-          assignWarehouseId: warehouseId,
-          assignDealerId: null,
-          orderAssignedToCourier: shippingProvider,
-        });
-        orderNumberIs = orderDataByBarcode?.orderNumber;
-        console.log(orderDataByBarcode, "orderDataByBarcode");
-        if (!orderDataByBarcode) {
-          throw new ApiError(httpStatus.OK, "Invaid Order");
-        }
-      }
+    if (!orderData) {
+      throw new ApiError(httpStatus.OK, "Invalid Order");
     }
 
-    //------------------create data-------------------
-    let dataCreated = await courierRTOService.createNewData({
+    const orderNumberIs = orderData?.orderNumber;
+
+    // Create new courier RTO data
+    const dataCreated = await courierRTOService.createNewData({
       ...req.body,
       orderNumber: orderNumberIs,
       companyId: req.userData.companyId,
     });
-    let updateOrder;
-    let orderDataByOrderNo = await orderInquiryService?.getOneAndUpdate(
-      { orderNumber: orderNumber },
-      {
-        $set: {
-          status: orderStatusEnum.rto,
-        },
-      }
-    );
-    updateOrder = orderDataByOrderNo;
-    if (!orderDataByOrderNo) {
-      var orderDataByAwbNo = await orderInquiryService?.getOneAndUpdate(
-        { awbNumber: orderNumber },
-        {
-          $set: {
-            status: orderStatusEnum.rto,
-          },
-        }
-      );
-      updateOrder = orderDataByAwbNo;
-    }
-    if (!orderDataByAwbNo) {
-      var orderDataByBarcode = await orderInquiryService?.getOneAndUpdate(
-        { "barcodeData.barcode": orderNumber },
-        {
-          $set: {
-            status: orderStatusEnum.rto,
-          },
-        }
-      );
-      updateOrder = orderDataByBarcode;
+
+    // Helper function to update the order status
+    const updateOrderStatus = async (criteria) => {
+      return await orderInquiryService?.getOneAndUpdate(criteria, {
+        $set: { status: orderStatusEnum.rto },
+      });
+    };
+
+    // Update order status by orderNumber, awbNumber, or barcode
+    const updateOrder =
+      (await updateOrderStatus({ orderNumber })) ||
+      (await updateOrderStatus({ awbNumber: orderNumber })) ||
+      (await updateOrderStatus({ "barcodeData.barcode": orderNumber }));
+
+    if (!updateOrder) {
+      throw new ApiError(httpStatus.OK, "Order update failed");
     }
 
+    // Add to order flow
     await addToOrderFlow(updateOrder);
-    let barcodeStatus = "";
-    if (requestStatus === courierRTOType.fresh) {
-      barcodeStatus = barcodeStatusType.atWarehouse;
-    } else if (requestStatus === courierRTOType.damage) {
-      barcodeStatus = barcodeStatusType.damage;
-    } else if (requestStatus === courierRTOType.fake) {
-      barcodeStatus = barcodeStatusType.fake;
-    } else if (requestStatus === courierRTOType.lost) {
-      barcodeStatus = barcodeStatusType.missing;
-    }
 
-    updateOrder?.barcodeData?.map(async (ele) => {
-      let updatedBarcode = await barcodeService?.getOneAndUpdate(
-        { barcodeNumber: ele?.barcode },
-        {
-          $set: {
-            status: barcodeStatus,
-          },
-        }
-      );
-      await addToBarcodeFlow(
-        updatedBarcode,
-        `Barcode returned from Customer, Barcode status is: ${barcodeStatus}`
-      );
-    });
+    // Determine barcode status based on requestStatus
+    const barcodeStatusMap = {
+      [courierRTOType.fresh]: barcodeStatusType.atWarehouse,
+      [courierRTOType.damage]: barcodeStatusType.damage,
+      [courierRTOType.fake]: barcodeStatusType.fake,
+      [courierRTOType.lost]: barcodeStatusType.missing,
+    };
+    const barcodeStatus = barcodeStatusMap[requestStatus] || "";
+    const isUsedFresh = requestStatus === courierRTOType.fresh;
 
+    // Update barcode data in parallel
+    await Promise.all(
+      updateOrder?.barcodeData?.map(async (ele) => {
+        const updatedBarcode = await barcodeService?.getOneAndUpdate(
+          { barcodeNumber: ele?.barcode },
+          { $set: { status: barcodeStatus, isUsedFresh } }
+        );
+        await addToBarcodeFlow(
+          updatedBarcode,
+          `Barcode returned from Customer, Barcode status is: ${barcodeStatus}`
+        );
+      })
+    );
+
+    // Update scheme products quantities in parallel
+    await Promise.all(
+      updateOrder?.schemeProducts?.map(async (ele) => {
+        await addReturnQuantity(
+          req.userData.companyId,
+          updateOrder?.assignWarehouseId,
+          ele?.productGroupId,
+          ele?.productQuantity,
+          requestStatus,
+          null
+        );
+      })
+    );
+
+    // Send success response
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
@@ -150,12 +157,12 @@ exports.add = async (req, res) => {
         issue: null,
       });
     } else {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
+      throw new ApiError(httpStatus.NOT_IMPLEMENTED, "Something went wrong.");
     }
   } catch (err) {
-    let errData = errorRes(err);
+    const errData = errorRes(err);
+    const { message, status, data, code, issue } = errData.resData;
     logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });
@@ -638,19 +645,20 @@ exports.deleteDocument = async (req, res) => {
 //statusChange
 exports.statusChange = async (req, res) => {
   try {
-    const _id = req.params.id;
-    const requestStatus = req.body.requestStatus;
+    const { id: _id } = req.params;
+    const { requestStatus, currentStatus } = req.body;
 
+    // Check if data exists
     const dataExist = await courierRTOService.getOneByMultiField({ _id });
     if (!dataExist) {
       throw new ApiError(httpStatus.NOT_FOUND, "Data not found.");
     }
 
+    // Update the request status
     const statusChanged = await courierRTOService.getOneAndUpdate(
       { _id },
       { requestStatus }
     );
-
     if (!statusChanged) {
       throw new ApiError(
         httpStatus.INTERNAL_SERVER_ERROR,
@@ -658,67 +666,82 @@ exports.statusChange = async (req, res) => {
       );
     }
 
-    const orderdata = await orderInquiryService.getOneByMultiField({
+    // Fetch the associated order data
+    const orderData = await orderInquiryService.getOneByMultiField({
       orderNumber: statusChanged.orderNumber,
     });
+    if (!orderData || !orderData.barcodeData) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Order data not found.");
+    }
 
-    if (orderdata && orderdata.barcodeData) {
-      for (const ele of orderdata.barcodeData) {
-        const barcodeData = await barcodeService.getOneByMultiField({
-          barcodeNumber: ele.barcode,
-          status: {
-            $in: [
-              barcodeStatusType.atWarehouse,
-              barcodeStatusType.damage,
-              barcodeStatusType.missing,
-            ],
-          },
-        });
+    // Helper function to check barcode status validity
+    const checkBarcodesInWarehouse = async () => {
+      const barcodeNumbers = orderData.barcodeData.map((ele) => ele.barcode);
+      const barcodes = await barcodeService.findAllWithQuery({
+        barcodeNumber: { $in: barcodeNumbers },
+        status: {
+          $in: [
+            barcodeStatusType.atWarehouse,
+            barcodeStatusType.damage,
+            barcodeStatusType.missing,
+            barcodeStatusType.fake,
+          ],
+        },
+      });
 
-        if (!barcodeData) {
-          throw new ApiError(
-            httpStatus.NOT_FOUND,
-            "Barcode not present in warehouse."
-          );
-        }
+      if (barcodes.length !== orderData.barcodeData.length) {
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          "One or more barcodes not present in the warehouse."
+        );
       }
-    }
+    };
 
-    let barcodeStatus;
-    switch (requestStatus) {
-      case courierRTOType.fresh:
-        barcodeStatus = barcodeStatusType.atWarehouse;
-        break;
-      case courierRTOType.damage:
-        barcodeStatus = barcodeStatusType.damage;
-        break;
-      case courierRTOType.fake:
-        barcodeStatus = barcodeStatusType.fake;
-        break;
-      case courierRTOType.lost:
-        barcodeStatus = barcodeStatusType.missing;
-        break;
-      default:
-        barcodeStatus = barcodeStatusType.unknown; // Assuming there's an unknown status, adjust if necessary
-    }
+    await checkBarcodesInWarehouse();
 
-    if (orderdata && orderdata.barcodeData) {
-      for (const ele of orderdata.barcodeData) {
+    // Determine the barcode status and freshness
+    const barcodeStatusMap = {
+      [courierRTOType.fresh]: barcodeStatusType.atWarehouse,
+      [courierRTOType.damage]: barcodeStatusType.damage,
+      [courierRTOType.fake]: barcodeStatusType.fake,
+      [courierRTOType.lost]: barcodeStatusType.missing,
+    };
+    const barcodeStatus =
+      barcodeStatusMap[requestStatus] || barcodeStatusType.unknown;
+    const isUsedFresh = requestStatus === courierRTOType.fresh;
+
+    // Helper function to update barcodes
+    const updateBarcodes = async () => {
+      const barcodeUpdates = orderData.barcodeData.map(async (ele) => {
         const updatedBarcode = await barcodeService.getOneAndUpdate(
           { barcodeNumber: ele.barcode },
-          {
-            $set: { status: barcodeStatus },
-          }
+          { $set: { status: barcodeStatus, isUsedFresh } }
         );
-
         if (updatedBarcode) {
           await addToBarcodeFlow(
             updatedBarcode,
             `Barcode status marked incorrect, Correct Barcode status is: ${barcodeStatus}`
           );
         }
-      }
-    }
+      });
+      await Promise.all(barcodeUpdates);
+    };
+
+    await updateBarcodes();
+
+    // Update scheme products in parallel
+    await Promise.all(
+      orderData.schemeProducts.map(async (ele) => {
+        await addReturnQuantity(
+          req.userData.companyId,
+          orderData.assignWarehouseId,
+          ele.productGroupId,
+          ele.productQuantity,
+          requestStatus,
+          currentStatus
+        );
+      })
+    );
 
     return res.status(httpStatus.OK).send({
       message: "Successful.",

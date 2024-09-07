@@ -10,7 +10,7 @@ const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
  * get one document (if query) / all documents
  */
 router.get(
-  "/",
+  "/warehouseid/:wid",
   authCheckMiddleware,
   validate(productGroupSummaryValidation.get),
   productGroupSummaryController.get

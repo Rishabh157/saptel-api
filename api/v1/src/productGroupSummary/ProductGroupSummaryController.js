@@ -16,18 +16,49 @@ const {
   getLimitAndTotalCount,
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
+const { default: mongoose } = require("mongoose");
 
 //get api
 exports.get = async (req, res) => {
   try {
+    const wid = req.params.wid;
     //if no default query then pass {}
-    let matchQuery = { isDeleted: false };
+    let matchQuery = {
+      isDeleted: false,
+      warehouseId: new mongoose.Types.ObjectId(wid),
+    };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
     }
 
-    let dataExist = await productGroupSummaryService.findAllWithQuery(
-      matchQuery
+    let additionalQuery = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productGroupId",
+          foreignField: "_id",
+          as: "product_group",
+          pipeline: [
+            { $match: { isDeleted: false } },
+            { $project: { groupName: 1 } },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          productGroupLabel: {
+            $arrayElemAt: ["$product_group.groupName", 0],
+          },
+          // wareHouseLabel: {
+          //   $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
+          // },
+        },
+      },
+      { $unset: ["product_group"] },
+    ];
+    let dataExist = await productGroupSummaryService.aggregateQuery(
+      additionalQuery
     );
 
     if (!dataExist || !dataExist.length) {

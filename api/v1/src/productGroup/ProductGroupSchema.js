@@ -8,6 +8,12 @@ const ProductGroupSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    productGroupCode: {
+      type: String,
+      required: true,
+      trim: true,
+      uppercase: true,
+    },
     dealerSalePrice: {
       type: Number,
       required: true,

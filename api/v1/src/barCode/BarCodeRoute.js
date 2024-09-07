@@ -88,7 +88,7 @@ router.post(
 );
 
 router.get(
-  "/productgroupid/:productgroupid/barcode/:barcode/status/:status",
+  "/productgroupid/:productgroupid/barcode/:barcode/status/:status/:isSendingToDealer",
   authCheckMiddleware,
   validate(barCodeValidation.getBarcodeForOutward),
   barCodeController.getByBarcode

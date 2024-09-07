@@ -52,6 +52,7 @@ const {
   productStatus,
   orderStatusEnum,
   preferredCourierPartner,
+  courierRTOType,
 } = require("../../helper/enumUtils");
 const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const {
@@ -64,6 +65,7 @@ const {
   addRemoveFreezeQuantity,
   checkDispatchFreezeQuantity,
   addAvailableQuantity,
+  addReturnQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
 //add start
 exports.add = async (req, res) => {
@@ -77,6 +79,25 @@ exports.add = async (req, res) => {
       invoiceNumber,
       status,
     } = req.body;
+
+    const isCompanyExists = await companyService.getOneByMultiField({
+      _id: req.userData.companyId,
+      isDeleted: false,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isProductGroupExists = await ProductGroupService.getOneByMultiField({
+      _id: productGroupId,
+      isDeleted: false,
+      isActive: true,
+    });
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Product Group");
+    }
+
+    console.log(isProductGroupExists, "--------------");
 
     /**
      * check duplicate exist
@@ -92,6 +113,7 @@ exports.add = async (req, res) => {
       {
         $match: {
           lotNumber: lotNumber,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
         },
       },
       { $sort: { _id: -1 } },
@@ -110,9 +132,15 @@ exports.add = async (req, res) => {
 
     let currentBarcode = "";
     console.log(lastObject, "lastObject");
+
     if (lastObject.length) {
-      currentBarcode = parseInt(lastObject[0]?.barcodeNumber) + 1;
+      // Extract the numeric part from the existing barcode and increment it
+      currentBarcode =
+        parseInt(
+          lastObject[0]?.barcodeNumber.replace(isCompanyExists?.companyCode, "")
+        ) + 1;
     } else {
+      // Start with the initial barcode if no previous barcode exists
       currentBarcode = lotNumber + "000001";
     }
 
@@ -122,14 +150,25 @@ exports.add = async (req, res) => {
     for (let i = 0; i < quantity; i++) {
       if (i > 0) {
         console.log(currentBarcode, "currentBarcode");
-        paddeeBarcode = JSON.stringify(parseInt(currentBarcode) + 1);
-        console.log(paddeeBarcode, "paddeeBarcode");
-        currentBarcode = paddeeBarcode.toString().padStart(6, "0");
+        // Increment and pad the numeric part of the barcode
+        currentBarcode = (parseInt(currentBarcode) + 1)
+          .toString()
+          .padStart(6, "0");
       }
+
+      // Prepend "CODE" to the barcode and include it in the output
+      let fullBarcode = `${isCompanyExists?.companyCode}${currentBarcode}`;
+
       output.push({
         productGroupId,
         barcodeGroupNumber,
-        barcodeNumber: currentBarcode,
+        barcodeNumber: fullBarcode,
+        upperBarcodeNumber:
+          lotNumber +
+          "/" +
+          isProductGroupExists.productGroupCode +
+          "/" +
+          invoiceNumber,
         lotNumber,
         wareHouseId: null,
         companyId: req.userData.companyId,
@@ -137,10 +176,17 @@ exports.add = async (req, res) => {
         expiryDate,
         status: "",
       });
+
       barcodeFlowData.push({
         productGroupId,
         barcodeGroupNumber,
-        barcodeNumber: lotNumber + currentBarcode,
+        barcodeNumber: fullBarcode,
+        upperBarcodeNumber:
+          lotNumber +
+          "/" +
+          isProductGroupExists.productGroupCode +
+          "/" +
+          invoiceNumber,
         lotNumber,
         wareHouseId: null,
         companyId: req.userData.companyId,
@@ -1095,32 +1141,31 @@ exports.getById = async (req, res) => {
 //single view api
 exports.getByBarcode = async (req, res) => {
   try {
-    const barcodeToBeSearch = req.params.barcode;
-    const productGroupId = req.params.productgroupid;
-    const status = req.params.status;
+    const {
+      barcode,
+      productgroupid: productGroupId,
+      status,
+      isSendingToDealer,
+    } = req.params;
     const cid = req.userData.companyId;
 
-    const barcodeFlowData = await barcodeFlowService?.aggregateQuery([
-      {
-        $match: {
-          barcodeNumber: barcodeToBeSearch,
-        },
-      },
+    const barcodeFlowData = await barcodeFlowService.aggregateQuery([
+      { $match: { barcodeNumber: barcode } },
       { $sort: { _id: -1 } },
       { $limit: 1 },
     ]);
 
-    let additionalQueryForAll = [
-      {
-        $match: {
-          outerBoxbarCodeNumber: barcodeToBeSearch,
-          isUsed: true,
-          status: status,
-          productGroupId: new mongoose.Types.ObjectId(productGroupId),
-          companyId: new mongoose.Types.ObjectId(cid),
-          isFreezed: false,
-        },
-      },
+    const matchCondition = {
+      barcodeNumber: barcode,
+      isUsed: true,
+      status,
+      productGroupId: new mongoose.Types.ObjectId(productGroupId),
+      companyId: new mongoose.Types.ObjectId(cid),
+      isFreezed: false,
+    };
+
+    const basePipeline = [
+      { $match: matchCondition },
       {
         $lookup: {
           from: "productgroups",
@@ -1133,7 +1178,6 @@ exports.getByBarcode = async (req, res) => {
           ],
         },
       },
-
       {
         $lookup: {
           from: "warehouses",
@@ -1142,20 +1186,13 @@ exports.getByBarcode = async (req, res) => {
           as: "warehouse_data",
           pipeline: [
             { $match: { isDeleted: false } },
-            {
-              $project: {
-                wareHouseName: 1,
-              },
-            },
+            { $project: { wareHouseName: 1 } },
           ],
         },
       },
-
       {
         $addFields: {
-          productGroupLabel: {
-            $arrayElemAt: ["$product_group.groupName", 0],
-          },
+          productGroupLabel: { $arrayElemAt: ["$product_group.groupName", 0] },
           wareHouseLabel: {
             $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
           },
@@ -1163,98 +1200,62 @@ exports.getByBarcode = async (req, res) => {
       },
       { $unset: ["product_group", "warehouse_data"] },
     ];
-    let additionalQueryForOne = [
-      {
-        $match: {
-          barcodeNumber: barcodeToBeSearch,
-          isUsed: true,
-          status: status,
-          productGroupId: new mongoose.Types.ObjectId(productGroupId),
-          companyId: new mongoose.Types.ObjectId(cid),
-          isFreezed: false,
-        },
-      },
-      {
-        $lookup: {
-          from: "productgroups",
-          localField: "productGroupId",
-          foreignField: "_id",
-          as: "product_group",
-          pipeline: [
-            { $match: { isDeleted: false } },
-            { $project: { groupName: 1 } },
-          ],
-        },
-      },
 
-      {
-        $lookup: {
-          from: "warehouses",
-          localField: "wareHouseId",
-          foreignField: "_id",
-          as: "warehouse_data",
-          pipeline: [
-            { $match: { isDeleted: false } },
-            {
-              $project: {
-                wareHouseName: 1,
-              },
-            },
-          ],
-        },
-      },
-
-      {
-        $addFields: {
-          productGroupLabel: {
-            $arrayElemAt: ["$product_group.groupName", 0],
-          },
-          wareHouseLabel: {
-            $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
-          },
-        },
-      },
-      { $unset: ["product_group", "warehouse_data"] },
-    ];
+    // Query to find all matching barcodes
+    const dataExist = await barCodeService.aggregateQuery([
+      ...basePipeline,
+      { $match: { outerBoxbarCodeNumber: barcode } },
+    ]);
     let ResponseData = [];
-    const dataExist = await barCodeService.aggregateQuery(
-      additionalQueryForAll
-    );
 
     if (dataExist.length === 0) {
-      const foundBarcode = await barCodeService.aggregateQuery(
-        additionalQueryForOne
-      );
-      if (foundBarcode[0] !== null && foundBarcode[0] !== undefined) {
+      // Query to find a single matching barcode if none found in the first query
+      const foundBarcode = await barCodeService.aggregateQuery(basePipeline);
+
+      if (isSendingToDealer && foundBarcode[0]?.isUsedFresh) {
+        throw new ApiError(
+          httpStatus.NOT_ACCEPTABLE,
+          "Can't send used products to dealer!"
+        );
+      }
+
+      if (foundBarcode.length) {
         ResponseData.push(foundBarcode[0]);
       }
     } else {
+      if (isSendingToDealer) {
+        dataExist.forEach((ele) => {
+          if (ele?.isUsedFresh) {
+            throw new ApiError(
+              httpStatus.NOT_ACCEPTABLE,
+              "Can't send used products to dealer!"
+            );
+          }
+        });
+      }
       ResponseData = dataExist;
     }
 
     if (ResponseData.length === 0) {
-      console.log(barcodeFlowData, "barcodeFlowData");
       throw new ApiError(
         httpStatus.OK,
-        `${
-          barcodeFlowData.length
-            ? barcodeFlowData[0]?.barcodeLog
-            : "Invalid barcode"
-        }`
+        barcodeFlowData.length
+          ? barcodeFlowData[0]?.barcodeLog
+          : "Invalid barcode"
       );
-    } else {
-      return res.status(httpStatus.OK).send({
-        message: "Successful.",
-        status: true,
-        data: ResponseData,
-        code: "OK",
-        issue: null,
-      });
     }
+
+    return res.status(httpStatus.OK).send({
+      message: "Successful.",
+      status: true,
+      data: ResponseData,
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
-    let errData = errorRes(err);
+    const errData = errorRes(err);
     logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
+    const { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });
@@ -2200,15 +2201,7 @@ exports.getInventory = async (req, res) => {
               ],
             },
           },
-          totalUsedFreshCount: {
-            $sum: {
-              $cond: [
-                { $eq: ["$status", barcodeStatusType.atWarehouseButUsed] },
-                1,
-                0,
-              ],
-            },
-          },
+
           totalDamageCount: {
             $sum: {
               $cond: [{ $eq: ["$status", barcodeStatusType.damage] }, 1, 0],
@@ -2257,7 +2250,6 @@ exports.getInventory = async (req, res) => {
           productGroupLabel: 1,
           wareHouseLabel: 1,
           totalFreshCount: 1, // Include the totalFreshCount field
-          totalUsedFreshCount: 1,
           totalDamageCount: 1, // Include the totalDamageCount field
           totalMissingCount: 1, // Include the totalMissingCount field
           totalRtvCount: 1,
@@ -3802,6 +3794,26 @@ exports.courierReturnProduct = async (req, res) => {
       { isCompleted: true }
     );
 
+    const productStatus = {
+      [barcodeStatusType.atWarehouse]: courierRTOType.fresh,
+      [barcodeStatusType.damage]: courierRTOType.damage,
+      [barcodeStatusType.destroyed]: courierRTOType.destroyed,
+    };
+
+    // Update scheme products quantities in parallel
+    await Promise.all(
+      orderInquiry?.schemeProducts?.map(async (ele, index) => {
+        await addReturnQuantity(
+          req.userData.companyId,
+          orderInquiry?.assignWarehouseId,
+          ele?.productGroupId,
+          ele?.productQuantity,
+          productStatus[barcodeData[index]?.condition],
+          null
+        );
+      })
+    );
+
     return res.status(httpStatus.OK).send({
       message: "Successful.",
       status: true,
@@ -4400,6 +4412,7 @@ exports.outwardInventory = async (req, res) => {
           $set: {
             status: barcodeStatusType.inTransit,
             wareHouseId: null,
+            dealerId: ele?.dealerId,
             isFreezed: false,
           },
         }

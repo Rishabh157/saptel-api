@@ -10,6 +10,7 @@ const get = {
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
+      wid: Joi.string().custom(commonValidation.objectId),
     })
     .optional(),
 };

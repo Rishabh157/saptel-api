@@ -115,7 +115,7 @@ const outwardInventory = {
       lotNumber: Joi.string().required(),
       isUsed: Joi.boolean(),
       wareHouseId: Joi.string().custom(commonValidation.objectId).allow(null),
-      dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+      dealerId: Joi.string().custom(commonValidation.objectId).required(),
       barcodeNumber: Joi.string().required(),
       companyId: Joi.string().custom(commonValidation.objectId).required(),
     }),
@@ -414,8 +414,8 @@ const getDispatchBarcode = {
 const getBarcodeForOutward = {
   params: Joi.object().keys({
     barcode: Joi.string(),
-
     productgroupid: Joi.string(),
+    isSendingToDealer: Joi.boolean(),
     status: Joi.string(),
   }),
 };
