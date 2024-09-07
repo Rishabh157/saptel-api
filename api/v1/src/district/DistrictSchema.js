@@ -26,7 +26,7 @@ const DistrictSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    // companyId: { type: ObjectId, required: true, trim: true },
+    companyId: { type: ObjectId, required: true, trim: true },
     isFixed: {
       type: Boolean,
       default: false,

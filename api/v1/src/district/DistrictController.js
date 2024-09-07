@@ -73,7 +73,10 @@ exports.add = async (req, res) => {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
     //------------------create data-------------------
-    let dataCreated = await districtService.createNewData({ ...req.body });
+    let dataCreated = await districtService.createNewData({
+      ...req.body,
+      companyId: req.userData.companyId,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({

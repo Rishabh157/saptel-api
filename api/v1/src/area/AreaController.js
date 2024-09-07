@@ -97,7 +97,10 @@ exports.add = async (req, res) => {
     // }
 
     //------------------create data-------------------
-    let dataCreated = await areaService.createNewData({ ...req.body });
+    let dataCreated = await areaService.createNewData({
+      ...req.body,
+      companyId: req.userData.companyId,
+    });
 
     if (dataCreated) {
       return res.status(httpStatus.CREATED).send({
