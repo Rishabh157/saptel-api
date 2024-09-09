@@ -564,7 +564,7 @@ const webLeadPaymentStatus = Object.freeze({
 const webLeadType = Object.freeze({
   web: "WEB",
   amazon: "AMAZON",
-  flipcart: "FLIPCART",
+  flipkart: "FLIPKART",
 });
 
 const courierType = Object.freeze({

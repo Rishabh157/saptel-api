@@ -64,7 +64,7 @@ const WebLeadsSchema = new mongoose.Schema(
     },
     leadType: {
       type: String,
-      enum: [webLeadType.web, webLeadType.amazon, webLeadType.flipcart],
+      enum: [webLeadType.web, webLeadType.amazon, webLeadType.flipkart],
       required: true,
     },
     leadStatus: {

@@ -111,6 +111,8 @@ const webLeadsRoute = require("./src/webLeads/WebLeadsRoute");
 const reportRoute = require("./src/reports/ReportsRoute");
 const productGroupSummaryRoute = require("./src/productGroupSummary/ProductGroupSummaryRoute");
 const ecomMasterRoute = require("./src/ecomMaster/EcomMasterRoute");
+const amazonOrderRoute = require("./src/amazonOrder/AmazonOrderRoute");
+const flipkartOrderRoute = require("./src/flipkartOrder/FlipkartOrderRoute");
 
 const devRoutes = [
   // routes available only in development mode
@@ -568,6 +570,14 @@ const defaultRoutes = [
   {
     path: "/ecom-master",
     route: ecomMasterRoute,
+  },
+  {
+    path: "/amazon-order",
+    route: amazonOrderRoute,
+  },
+  {
+    path: "/flipkart-order",
+    route: flipkartOrderRoute,
   },
 ];
 // orderRoute;

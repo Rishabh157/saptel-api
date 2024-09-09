@@ -21,6 +21,8 @@ const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
 const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const ProductGroupService = require("../productGroup/ProductGroupService");
+const amazonOrderService = require("../amazonOrder/AmazonOrderService");
+const flipkartOrderService = require("../flipkartOrder/FlipkartOrderService");
 const rtvMasterService = require("../rtvMaster/RtvMasterService");
 const { searchKeys } = require("./BarCodeSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -53,6 +55,7 @@ const {
   orderStatusEnum,
   preferredCourierPartner,
   courierRTOType,
+  webLeadType,
 } = require("../../helper/enumUtils");
 const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const {
@@ -1796,7 +1799,7 @@ exports.getDispatchBarcode = async (req, res) => {
 
     // query change according to courier
     let query;
-    if (status === preferredCourierPartner.maersk) {
+    if (status === preferredCourierPartner.shipyaari) {
       query = {
         "schemeProducts.productGroupId": barcode[0]?.productGroupId,
         orderStatus: productStatus.notDispatched,
@@ -1833,6 +1836,85 @@ exports.getDispatchBarcode = async (req, res) => {
           orderNumber: orderData?.orderNumber,
           customerName: orderData?.customerName,
           address: orderData?.autoFillingShippingAddress,
+        },
+
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+//get ecom orders barcode and order
+
+exports.getDispatchBarcodeOfEcom = async (req, res) => {
+  try {
+    const barcodeToBeSearch = req.params.barcode;
+    const type = req.params.type;
+
+    let additionalQuery = [
+      {
+        $match: {
+          barcodeNumber: barcodeToBeSearch,
+          isUsed: true,
+        },
+      },
+    ];
+    let barcode = [];
+    const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
+    if (foundBarcode !== null) {
+      barcode.push(foundBarcode[0]);
+    }
+    console.log(barcode, "00000000000");
+
+    console.log(barcode[0]?.productGroupId, "--------");
+    let productGroupData = await ProductGroupService.getOneByMultiField({
+      _id: barcode[0]?.productGroupId,
+    });
+    console.log(productGroupData, "------");
+    // query change according to courier
+    let amazonQuery;
+    let flipkartQuery;
+    let orderData;
+    if (type === webLeadType.amazon) {
+      amazonQuery = {
+        productCode: productGroupData?.productGroupCode,
+        isDispatched: false,
+      };
+      orderData = await amazonOrderService?.getOneByMultiField(amazonQuery);
+      console.log(orderData, "orderData");
+    } else if (type === webLeadType.flipkart) {
+      flipkartQuery = {
+        productCode: productGroupData?.productGroupCode,
+        isDispatched: false,
+      };
+      orderData = await flipkartOrderService?.getOneByMultiField(flipkartQuery);
+    }
+
+    if (!orderData) {
+      throw new ApiError(httpStatus.OK, "No orders for this product");
+    }
+
+    if (barcode.length === 0 || barcode[0] === undefined) {
+      throw new ApiError(httpStatus.OK, "Invalid barcode");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: {
+          barcode: barcode[0],
+          quantity: orderData?.quantity,
+          productCode: orderData?.productCode,
+          orderId: orderData?.amazonOrderId || orderData?.order_id,
+          orderNumber: orderData?.orderNumber,
+          itemPrice: orderData?.itemPrice,
         },
 
         code: "OK",

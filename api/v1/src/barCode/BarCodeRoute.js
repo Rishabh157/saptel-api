@@ -152,6 +152,12 @@ router.get(
   validate(barCodeValidation.getDispatchBarcode),
   barCodeController.getDispatchBarcode
 );
+router.get(
+  "/dispatch-ecom-order-barcode/:barcode/type/:type",
+  authCheckMiddleware,
+  validate(barCodeValidation.getDispatchBarcodeOfEcom),
+  barCodeController.getDispatchBarcodeOfEcom
+);
 
 router.post(
   "/inventory/warehouseid/:wid/status/:status",

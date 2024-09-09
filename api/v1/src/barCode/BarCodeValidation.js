@@ -411,6 +411,13 @@ const getDispatchBarcode = {
   }),
 };
 
+const getDispatchBarcodeOfEcom = {
+  params: Joi.object().keys({
+    barcode: Joi.string(),
+    type: Joi.string(),
+  }),
+};
+
 const getBarcodeForOutward = {
   params: Joi.object().keys({
     barcode: Joi.string(),
@@ -648,4 +655,5 @@ module.exports = {
   updateBarcodeToClose,
   getDamageExpireBarcode,
   getInventoryVendor,
+  getDispatchBarcodeOfEcom,
 };
