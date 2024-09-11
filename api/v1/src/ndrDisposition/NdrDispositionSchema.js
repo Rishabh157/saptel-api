@@ -5,6 +5,7 @@ const {
   smsType,
   subDispositionNDR,
 } = require("../../helper/enumUtils");
+const { ObjectId } = require("mongodb");
 const NdrDispositionSchema = new mongoose.Schema(
   {
     ndrDisposition: {
@@ -115,6 +116,8 @@ const NdrDispositionSchema = new mongoose.Schema(
       ],
       required: true,
     },
+    companyId: { type: ObjectId, required: true, trim: true },
+
     isDeleted: {
       type: Boolean,
       default: false,

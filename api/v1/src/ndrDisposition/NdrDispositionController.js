@@ -35,6 +35,7 @@ exports.add = async (req, res) => {
       ...req.body,
       ndrDisposition,
       displayName,
+      companyId: req.userData.companyId,
     });
 
     if (dataCreated) {
@@ -179,7 +180,7 @@ exports.allFilterPagination = async (req, res) => {
      */
     let booleanFields = [];
     let numberFileds = [];
-    let objectIdFields = [];
+    let objectIdFields = ["companyId"];
     const filterQuery = getFilterQuery(
       filterBy,
       booleanFields,
