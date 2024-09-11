@@ -41,10 +41,10 @@ const CompanySchema = new mongoose.Schema(
           },
           accountType: {
             type: String,
-            enum: [accountEnum.saving, accountEnum.current],
+            enum: [accountEnum.saving, accountEnum.current, ""],
             trim: true,
             uppercase: true,
-            default: accountEnum.saving,
+            default: "",
           },
         },
       ],
