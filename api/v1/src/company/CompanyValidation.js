@@ -13,6 +13,7 @@ const create = {
     companyLogo: Joi.string(),
     gstNo: Joi.string().required(),
     address: Joi.string().lowercase().required(),
+    panNumber: Joi.string().allow(""),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
       Joi.object().keys({
@@ -39,6 +40,7 @@ const update = {
     websiteUrl: Joi.string().uri().allow(""),
     companyLogo: Joi.string().uri().allow(""),
     gstNo: Joi.string().required(),
+    phoneNo: Joi.string().allow(""),
     address: Joi.string().lowercase().required(),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(

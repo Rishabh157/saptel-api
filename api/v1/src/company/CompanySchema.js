@@ -8,6 +8,7 @@ const CompanySchema = new mongoose.Schema(
     websiteUrl: { type: String, required: false, trim: true },
     companyLogo: { type: String, required: false, trim: true },
     gstNo: { type: String, required: true, trim: true },
+    panNumber: { type: String, default: "", trim: true },
     address: { type: String, required: true, trim: true, lowercase: true },
     phoneNo: { type: String, required: false, trim: true },
     maskedPhoneNo: {
@@ -37,7 +38,6 @@ const CompanySchema = new mongoose.Schema(
             type: String,
             default: "",
             trim: true,
-            lowercase: true,
           },
           accountType: {
             type: String,
