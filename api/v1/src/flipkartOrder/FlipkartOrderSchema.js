@@ -222,6 +222,8 @@ const FlipkartOrderSchema = new mongoose.Schema(
       ],
       default: null,
     },
+    status: { type: String, deault: "", trim: true, uppercase: true },
+
     isDeleted: {
       type: Boolean,
       default: false,

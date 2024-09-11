@@ -160,6 +160,20 @@ router.get(
 );
 
 router.post(
+  "/dispatch-ecom-orders",
+  authCheckMiddleware,
+  validate(barCodeValidation.dispatchEcomOrder),
+  barCodeController.dispatchEcomOrder
+);
+
+router.post(
+  "/ecom-rto",
+  authCheckMiddleware,
+  validate(barCodeValidation.ecomRTO),
+  barCodeController.ecomRTO
+);
+
+router.post(
   "/inventory/warehouseid/:wid/status/:status",
   authCheckMiddleware,
   validate(barCodeValidation.getInventory),

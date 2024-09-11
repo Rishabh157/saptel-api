@@ -22,33 +22,66 @@ const addRemoveAvailableQuantity = async (
       if (status === "REMOVE") {
         return { status: false, msg: "Warehouse doesn't have this product" };
       } else if (status === "ADD") {
-        console.log("......................");
         const createdSummary = await productGroupSummaryService.createNewData({
           companyId,
           warehouseId,
           productGroupId,
           freezeQuantity: 0,
           avaliableQuantity: quantity,
+          avaliableUsedQuantity: 0, // Initialize this field
         });
-        console.log(createdSummary, "createdSummary");
         return {
           status: !!createdSummary,
           msg: createdSummary ? "" : "Failed to create summary",
         };
       }
     } else {
-      const update = status === "ADD" ? quantity : -quantity;
-      const updatedSummary = await productGroupSummaryService.getOneAndUpdate(
-        { companyId, warehouseId, productGroupId },
-        { $inc: { avaliableQuantity: update } }
-      );
-      return {
-        status: !!updatedSummary,
-        msg: updatedSummary ? "" : "Failed to update summary",
-      };
+      if (status === "REMOVE") {
+        // Check availableQuantity first
+        if (foundProductCategorySummary.avaliableQuantity >= quantity) {
+          const updatedSummary =
+            await productGroupSummaryService.getOneAndUpdate(
+              { companyId, warehouseId, productGroupId },
+              { $inc: { avaliableQuantity: -quantity } }
+            );
+          return {
+            status: !!updatedSummary,
+            msg: updatedSummary ? "" : "Failed to update available quantity",
+          };
+        }
+        // If availableQuantity is insufficient, check availableUsedQuantity
+        else if (
+          foundProductCategorySummary.avaliableUsedQuantity >= quantity
+        ) {
+          const updatedSummary =
+            await productGroupSummaryService.getOneAndUpdate(
+              { companyId, warehouseId, productGroupId },
+              { $inc: { avaliableUsedQuantity: -quantity } }
+            );
+          return {
+            status: !!updatedSummary,
+            msg: updatedSummary
+              ? ""
+              : "Failed to update available used quantity",
+          };
+        }
+        // If both availableQuantity and availableUsedQuantity are insufficient
+        else {
+          return { status: false, msg: "No products available in inventory" };
+        }
+      } else if (status === "ADD") {
+        const updatedSummary = await productGroupSummaryService.getOneAndUpdate(
+          { companyId, warehouseId, productGroupId },
+          { $inc: { avaliableQuantity: quantity } }
+        );
+        return {
+          status: !!updatedSummary,
+          msg: updatedSummary ? "" : "Failed to update available quantity",
+        };
+      }
     }
   } catch (err) {
-    console.log(err, ",,,,,,,,,,,,,,,,,,,,,,,,");
+    console.log(err, "Error in addRemoveAvailableQuantity");
     return { status: false, msg: "Something went wrong" };
   }
 };

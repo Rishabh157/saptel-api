@@ -1864,6 +1864,8 @@ exports.getDispatchBarcodeOfEcom = async (req, res) => {
         $match: {
           barcodeNumber: barcodeToBeSearch,
           isUsed: true,
+          isFreezed: false,
+          status: barcodeStatusType.atWarehouse,
         },
       },
     ];
@@ -1925,6 +1927,199 @@ exports.getDispatchBarcodeOfEcom = async (req, res) => {
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// dispatch ecom orders
+exports.dispatchEcomOrder = async (req, res) => {
+  try {
+    const { barcodes, orderNumber, type, warehouseId } = req.body;
+    let orderData;
+    let query, orderService;
+
+    // Define service and query based on type
+    switch (type) {
+      case webLeadType.amazon:
+        orderService = amazonOrderService;
+        query = { orderNumber, isDispatched: false };
+        break;
+      case webLeadType.flipkart:
+        orderService = flipkartOrderService;
+        query = { orderNumber, isDispatched: false };
+        break;
+      default:
+        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid order type");
+    }
+
+    // Fetch order data
+    orderData = await orderService?.getOneByMultiField(query);
+    if (!orderData) {
+      throw new ApiError(httpStatus.NOT_FOUND, "No order found");
+    }
+
+    // Update the order with barcode data
+    await orderService?.getOneAndUpdate(
+      { orderNumber },
+      {
+        $set: {
+          barcodeData: barcodes,
+          isDispatched: true,
+          status: orderStatusEnum.intransit,
+        },
+      }
+    );
+
+    // Update barcode status
+    const barcodePromises = barcodes?.map((ele) =>
+      barCodeService?.getOneAndUpdate(
+        { _id: ele?.barcodeId },
+        { $set: { isFreezed: false, status: barcodeStatusType.inTransit } }
+      )
+    );
+    await Promise.all(barcodePromises);
+
+    // Validate and process barcode data
+    const barcodeData = await barCodeService?.getOneByMultiField({
+      _id: barcodes[0]?.barcodeId,
+    });
+
+    if (!barcodeData || barcodes.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid barcode");
+    }
+
+    console.log(
+      req.userData.companyId,
+      warehouseId,
+      barcodeData?.productGroupId,
+      barcodes.length,
+      "-------"
+    );
+
+    console.log(req.userData, "========");
+
+    // Update available quantity
+    await addRemoveAvailableQuantity(
+      req.userData.companyId,
+      warehouseId,
+      barcodeData?.productGroupId,
+      barcodes.length,
+      "REMOVE"
+    );
+
+    // Respond with success
+    return res.status(httpStatus.OK).json({
+      message: "Dispatched Successfully",
+      status: true,
+      data: null,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    // Centralized error handling
+    const errData = errorRes(err);
+    logger.info(errData.resData);
+    const { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// Ecom RTO
+
+exports.ecomRTO = async (req, res) => {
+  try {
+    const { barcodes, orderNumber, type, warehouseId } = req.body;
+
+    // Validate request data
+    if (!barcodes || barcodes.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "No barcodes provided");
+    }
+
+    let orderData;
+    let query, orderService;
+
+    // Select the correct service and query based on order type
+    switch (type) {
+      case webLeadType.amazon:
+        orderService = amazonOrderService;
+        query = { orderNumber, isDispatched: true };
+        break;
+      case webLeadType.flipkart:
+        orderService = flipkartOrderService;
+        query = { orderNumber, isDispatched: true };
+        break;
+      default:
+        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid order type");
+    }
+
+    // Fetch the order data
+    orderData = await orderService?.getOneByMultiField(query);
+    if (!orderData) {
+      throw new ApiError(
+        httpStatus.NOT_FOUND,
+        "Order not found or not dispatched"
+      );
+    }
+
+    // Update the order with barcode data and mark the order as closed
+    await orderService?.getOneAndUpdate(
+      { orderNumber },
+      {
+        $set: {
+          barcodeData: barcodes,
+          status: orderStatusEnum.closed,
+        },
+      }
+    );
+
+    // Update each barcode's status to `atWarehouse` and unfreeze
+    const barcodePromises = barcodes.map((ele) =>
+      barCodeService?.getOneAndUpdate(
+        { _id: ele?.barcodeId },
+        { $set: { isFreezed: false, status: barcodeStatusType.atWarehouse } }
+      )
+    );
+    await Promise.all(barcodePromises);
+
+    // Validate and fetch barcode data for further processing
+    const barcodeData = await barCodeService?.getOneByMultiField({
+      _id: barcodes[0]?.barcodeId,
+    });
+
+    if (!barcodeData) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid barcode");
+    }
+
+    // Update available quantity for each barcode
+    await Promise.all(
+      barcodes.map((ele) =>
+        addReturnQuantity(
+          req.userData.companyId,
+          warehouseId,
+          barcodeData?.productGroupId,
+          1,
+          ele?.condition
+        )
+      )
+    );
+
+    // Respond with success
+    return res.status(httpStatus.OK).json({
+      message: "Dispatched Successfully",
+      status: true,
+      data: null,
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    // Centralized error handling
+    const errData = errorRes(err);
+    logger.info(errData.resData);
+    const { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });

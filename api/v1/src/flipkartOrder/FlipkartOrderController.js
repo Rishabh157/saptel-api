@@ -60,15 +60,8 @@ exports.add = async (req, res) => {
       return { ...row, orderNumber: startingOrderNumber + index };
     });
 
-    // Create a new worksheet with the updated data
-    const updatedSheet = xlsx.utils.json_to_sheet(updatedSheetData);
-
     // Replace the old sheet with the updated one
     workbook.Sheets[sheetName] = updatedSheet;
-
-    // Write the updated workbook back to a file (optional, if needed)
-    const updatedFilePath = "path-to-save-updated-file.xlsx";
-    xlsx.writeFile(workbook, updatedFilePath);
 
     // Function to handle individual row processing
     const processRow = async (row) => {
@@ -184,6 +177,7 @@ exports.add = async (req, res) => {
         orderNumber,
         itemPrice,
         isDispatched: false,
+        status: "",
       });
     };
 
@@ -195,7 +189,6 @@ exports.add = async (req, res) => {
       status: true,
       code: null,
       issue: null,
-      file: updatedFilePath, // Provide the path to the updated file if needed
     });
   } catch (err) {
     let errData = errorRes(err);

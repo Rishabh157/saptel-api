@@ -418,6 +418,31 @@ const getDispatchBarcodeOfEcom = {
   }),
 };
 
+const dispatchEcomOrder = {
+  body: Joi.object().keys({
+    barcodes: Joi.array().items({
+      barcode: Joi.string().required(),
+      barcodeId: Joi.string().custom(commonValidation.objectId),
+    }),
+    orderNumber: Joi.number().required(),
+    type: Joi.string().required(),
+    warehouseId: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
+const ecomRTO = {
+  body: Joi.object().keys({
+    barcodes: Joi.array().items({
+      barcode: Joi.string().required(),
+      barcodeId: Joi.string().custom(commonValidation.objectId),
+      condition: Joi.string().required(),
+    }),
+    orderNumber: Joi.number().required(),
+    type: Joi.string().required(),
+    warehouseId: Joi.string().custom(commonValidation.objectId),
+  }),
+};
+
 const getBarcodeForOutward = {
   params: Joi.object().keys({
     barcode: Joi.string(),
@@ -656,4 +681,6 @@ module.exports = {
   getDamageExpireBarcode,
   getInventoryVendor,
   getDispatchBarcodeOfEcom,
+  dispatchEcomOrder,
+  ecomRTO,
 };

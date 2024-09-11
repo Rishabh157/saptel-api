@@ -44,6 +44,18 @@ router.post(
   //   validate(amazonOrderValidation.create),
   amazonOrderController.add
 );
+
+/**
+ * update status
+ */
+router.post(
+  "/update-status",
+
+  authCheckMiddleware,
+  upload.single("file"),
+  //   validate(amazonOrderValidation.create),
+  amazonOrderController.updateStatus
+);
 /**
  * update document
  */

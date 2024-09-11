@@ -3,6 +3,8 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const amazonOrderService = require("./AmazonOrderService");
+const flipkartOrderService = require("../flipkartOrder/FlipkartOrderService");
+
 const { searchKeys } = require("./AmazonOrderSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -20,6 +22,7 @@ const {
   getOrderByAndItsValue,
 } = require("../../helper/paginationFilterHelper");
 const { getOrderNumber } = require("./AmazonOrderHelper");
+const { webLeadType, orderStatusEnum } = require("../../helper/enumUtils");
 
 const limitConcurrency = async (items, limit, asyncFunc) => {
   const results = [];
@@ -117,6 +120,7 @@ exports.add = async (req, res) => {
         pincode,
         orderNumber, // Use the orderNumber assigned to the row
         isDispatched: false,
+        status: "",
       });
     };
 
@@ -125,6 +129,68 @@ exports.add = async (req, res) => {
 
     return res.status(httpStatus.CREATED).send({
       message: "All records added successfully.",
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// update status
+
+exports.updateStatus = async (req, res) => {
+  try {
+    // Read the uploaded Excel file
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    if (!sheetData || sheetData.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Empty file or invalid data.");
+    }
+
+    // Function to handle individual row processing
+    const processRow = async (row) => {
+      let { Agent, OrderId, Status } = row;
+
+      if (!Agent || !OrderId || !Status) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          `Missing required fields for row: ${JSON.stringify(row)}`
+        );
+      }
+      if (Agent.toUpperCase() === webLeadType.amazon) {
+        return amazonOrderService.getOneAndUpdate(
+          {
+            amazonOrderId: OrderId,
+            isDispatched: true,
+            status: { $ne: orderStatusEnum.closed },
+          },
+          { $set: { status: Status } }
+        );
+      } else if (Agent.toUpperCase() === webLeadType.flipkart) {
+        return flipkartOrderService.getOneAndUpdate(
+          {
+            order_id: OrderId,
+            isDispatched: true,
+            status: { $ne: orderStatusEnum.closed },
+          },
+          { $set: { status: Status } }
+        );
+      }
+    };
+    // Process the sheet data with concurrency limit
+    await limitConcurrency(sheetData, 10, processRow);
+
+    return res.status(httpStatus.CREATED).send({
+      message: "All records status updated successfully.",
       status: true,
       code: null,
       issue: null,
