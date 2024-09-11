@@ -16,12 +16,12 @@ const create = {
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
       Joi.object().keys({
-        bankName: Joi.string().lowercase().required(),
-        branchName: Joi.string().lowercase().required(),
-        accountHolderName: Joi.string().lowercase().required(),
-        accountNumber: Joi.number().required(),
-        ifscNumber: Joi.string().required(),
-        accountType: Joi.string().required(),
+        bankName: Joi.string().allow(""),
+        branchName: Joi.string().allow(""),
+        accountHolderName: Joi.string().allow(""),
+        accountNumber: Joi.number().allow(""),
+        ifscNumber: Joi.string().allow(""),
+        accountType: Joi.string().allow(""),
       })
     ),
   }),
@@ -43,12 +43,12 @@ const update = {
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
       Joi.object().keys({
-        bankName: Joi.string().lowercase().required(),
-        branchName: Joi.string().lowercase().required(),
-        accountHolderName: Joi.string().lowercase().required(),
-        accountNumber: Joi.number().required(),
-        ifscNumber: Joi.string().required(),
-        accountType: Joi.string().required(),
+        bankName: Joi.string().allow(""),
+        branchName: Joi.string().allow(""),
+        accountHolderName: Joi.string().allow(""),
+        accountNumber: Joi.number().allow(""),
+        ifscNumber: Joi.string().allow(""),
+        accountType: Joi.string().allow(""),
       })
     ),
   }),

@@ -19,26 +19,23 @@ const CompanySchema = new mongoose.Schema(
         {
           bankName: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
           branchName: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
           accountHolderName: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
-          accountNumber: { type: Number, required: true },
+          accountNumber: { type: Number, default: "" },
           ifscNumber: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
             lowercase: true,
           },
