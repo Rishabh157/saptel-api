@@ -204,15 +204,24 @@ const DealerSchema = new mongoose.Schema(
         },
         adharCardNumber: {
           type: String,
-          required: true,
+          default: "",
         },
         adharCard: {
           type: String,
-          required: true,
+          default: "",
+          trim: true,
+        },
+        panNumber: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+        panCard: {
+          type: String,
+          default: "",
           trim: true,
         },
       },
-      required: true,
     },
     otherDocument: {
       type: [

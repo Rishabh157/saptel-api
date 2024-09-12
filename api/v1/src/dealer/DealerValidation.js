@@ -48,8 +48,10 @@ const create = {
     document: Joi.object().keys({
       gstNumber: Joi.string().allow(""),
       gstCertificate: Joi.string().allow(""),
-      adharCardNumber: Joi.string().required(),
-      adharCard: Joi.string().required(),
+      adharCardNumber: Joi.string().allow(""),
+      adharCard: Joi.string().allow(""),
+      panNumber: Joi.string().allow(""),
+      panCard: Joi.string().allow(""),
     }),
     otherDocument: Joi.array().items({
       documentName: Joi.string().allow(""),
@@ -116,8 +118,10 @@ const update = {
     document: Joi.object().keys({
       gstNumber: Joi.string().allow(""),
       gstCertificate: Joi.string().allow(""),
-      adharCardNumber: Joi.string().required(),
-      adharCard: Joi.string().required(),
+      adharCardNumber: Joi.string().allow(""),
+      adharCard: Joi.string().allow(""),
+      panNumber: Joi.string().allow(""),
+      panCard: Joi.string().allow(""),
     }),
     otherDocument: Joi.array().items({
       documentName: Joi.string().allow(""),
@@ -193,7 +197,6 @@ const refreshTokenValid = {
  * get either all data or single document
  */
 const get = {
-
   query: Joi.object()
     .keys({
       _id: Joi.string().custom(commonValidation.objectId).optional(),
