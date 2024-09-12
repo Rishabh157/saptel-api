@@ -175,41 +175,36 @@ const VendorSchema = new mongoose.Schema(
         {
           bankName: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
 
           bankBranchName: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
           accountHolderName: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
           ifscNumber: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
           accountNumber: {
             type: String,
-            required: true,
+            default: "",
             trim: true,
-            lowercase: true,
           },
           accountType: {
             type: String,
-            enum: [accountEnum.saving, accountEnum.current],
+            enum: [accountEnum.saving, accountEnum.current, ""],
             trim: true,
             uppercase: true,
-            default: accountEnum.saving,
+            default: "",
           },
           cancelledCheque: {
             type: String,
@@ -218,7 +213,6 @@ const VendorSchema = new mongoose.Schema(
           },
         },
       ],
-      required: true,
     },
     companyId: { type: ObjectId, required: true, trim: true },
     openingBalance: {
