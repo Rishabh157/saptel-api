@@ -1333,7 +1333,7 @@ exports.getAllUsers = async (req, res) => {
         allSeniorRoles.push(seniorUserRole);
       }
     }
-    allSeniorRoles.push(userEnum.admin);
+    // allSeniorRoles.push(userEnum.admin);
 
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
@@ -1363,13 +1363,17 @@ exports.getAllUsers = async (req, res) => {
     let dataExist = await userService.aggregateQuery([
       { $match: flag ? newMatchQuery : matchQuery },
     ]);
-    if (!dataExist || !dataExist.length) {
+    let adminUser = await userService?.findAllWithQuery({
+      userRole: userEnum.admin,
+      userType: userEnum.admin,
+    });
+    if (!dataExist.length && !adminUser.length) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: dataExist,
+        data: [...dataExist, ...adminUser],
         code: "OK",
         issue: null,
       });
