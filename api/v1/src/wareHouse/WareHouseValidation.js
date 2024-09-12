@@ -22,6 +22,8 @@ const create = {
       stateId: Joi.string().custom(commonValidation.objectId).required(),
       districtId: Joi.string().custom(commonValidation.objectId).required(),
       pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
     }),
     billingAddress: Joi.object().keys({
       phone: Joi.string().required(),
@@ -69,6 +71,8 @@ const update = {
       stateId: Joi.string().custom(commonValidation.objectId).required(),
       districtId: Joi.string().custom(commonValidation.objectId).required(),
       pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+      gstNumber: Joi.string().allow(""),
+      gstCertificate: Joi.string().allow(""),
     }),
     billingAddress: Joi.object().keys({
       phone: Joi.string().required(),

@@ -39,6 +39,8 @@ const create = {
     document: Joi.object().keys({
       gstNumber: Joi.string().allow(""),
       gstCertificate: Joi.string().allow(""),
+      panNumber: Joi.string().allow(""),
+      panCard: Joi.string().allow(""),
       declarationForm: Joi.string().allow(""),
     }),
     bankInformation: Joi.array().items({
@@ -94,6 +96,8 @@ const update = {
     document: Joi.object().keys({
       gstNumber: Joi.string().allow(""),
       gstCertificate: Joi.string().allow(""),
+      panNumber: Joi.string().allow(""),
+      panCard: Joi.string().allow(""),
       declarationForm: Joi.string().allow(""),
     }),
     bankInformation: Joi.array().items({

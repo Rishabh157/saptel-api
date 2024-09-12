@@ -161,6 +161,16 @@ const VendorSchema = new mongoose.Schema(
           default: "",
           trim: true,
         },
+        panNumber: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+        panCard: {
+          type: String,
+          default: "",
+          trim: true,
+        },
         declarationForm: {
           type: String,
           required: false,
