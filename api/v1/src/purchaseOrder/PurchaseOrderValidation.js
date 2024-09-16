@@ -13,9 +13,9 @@ const create = {
     wareHouseId: Joi.string().custom(commonValidation.objectId).required(),
     purchaseOrder: Joi.array().items({
       itemId: Joi.string().custom(commonValidation.objectId).required(),
-      rate: Joi.number().required(),
+      rate: Joi.number(),
       quantity: Joi.number().required(),
-      estReceivingDate: Joi.string().required(),
+      estReceivingDate: Joi.string().allow(null),
     }),
     isEditable: Joi.boolean(),
 
@@ -37,9 +37,9 @@ const update = {
     purchaseOrder: Joi.object().keys({
       id: Joi.required().custom(commonValidation.objectId),
       itemId: Joi.string().custom(commonValidation.objectId).required(),
-      rate: Joi.number().required(),
+      rate: Joi.number(),
       quantity: Joi.number().required(),
-      estReceivingDate: Joi.string().required(),
+      estReceivingDate: Joi.string().allow(null),
     }),
     isEditable: Joi.boolean(),
 

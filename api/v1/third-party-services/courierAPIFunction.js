@@ -174,7 +174,7 @@ const assignOrderToCourier = async (
       return {
         isApi: false,
         data: null,
-        courierName: "DefaultCourier", // Use a default courier or a predefined value
+        courierName: "GPO", // Use a default courier or a predefined value
         apiStatus: false,
       };
     }

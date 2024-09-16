@@ -44,6 +44,7 @@ let {
   MAERKS_API_BASE_URL,
   MAERKS_API_KEY,
   MAERKS_API_USERNAME,
+  DIALER_URL,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -91,6 +92,7 @@ let envObj = {
   MAERKS_API_BASE_URL,
   MAERKS_API_KEY,
   MAERKS_API_USERNAME,
+  DIALER_URL,
   // MERCHANT_ID,
   // ACCESS_CODE,
   // WORKING_KEY,
@@ -175,6 +177,8 @@ const envVarsSchema = Joi.object().keys({
   MAERKS_API_USERNAME: Joi.string()
     .required()
     .label("MAERKS_API_USERNAME is required"),
+  DIALER_URL: Joi.string().required().label("DIALER_URL is required"),
+
   // MERCHANT_ID: Joi.string().required().label("MERCHANT_ID required"),
   // ACCESS_CODE: Joi.string().required().label("ACCESS_CODE required"),
   // WORKING_KEY: Joi.string().required().label("WORKING_KEY required"),
@@ -246,7 +250,7 @@ module.exports = {
   maerksApiBaseUrl: envVars.MAERKS_API_BASE_URL,
   maerksApiKey: envVars.MAERKS_API_KEY,
   maerksApiUserName: envVars.MAERKS_API_USERNAME,
-
+  dialer_url: envVars.DIALER_URL,
   // merchantId: envVars.MERCHANT_ID,
   // accessCode: envVars.ACCESS_CODE,
   // workingKey: envVars.WORKING_KEY,

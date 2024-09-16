@@ -13,6 +13,7 @@ const BarCodeFlowSchema = new mongoose.Schema(
     isUsed: { type: Boolean, default: false },
     wareHouseId: { type: ObjectId, default: null, trim: true },
     vendorId: { type: ObjectId, default: null, trim: true },
+    vendorLabel: { type: String, required: true, trim: true },
     dealerId: { type: ObjectId, default: null, trim: true },
     invoiceNumber: { type: String, required: true, trim: true },
 
@@ -42,7 +43,7 @@ const BarCodeFlowSchema = new mongoose.Schema(
     },
     isUsedFresh: { type: Boolean, default: false },
 
-    expiryDate: { type: String, required: true },
+    expiryDate: { type: String, default: null },
     barcodeLog: { type: String, required: true },
     companyId: { type: ObjectId, required: true, trim: true },
     isFreezed: {

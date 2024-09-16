@@ -17,7 +17,7 @@ const ReprintOuterBoxSchema = new mongoose.Schema(
     createdBy: { type: String, required: true, trim: true },
     batchNumber: { type: String, required: true, trim: true },
     productId: { type: ObjectId, required: true, trim: true },
-    expiryDate: { type: String, required: true, trim: true },
+    expiryDate: { type: String, default: null, trim: true },
 
     isDeleted: {
       type: Boolean,

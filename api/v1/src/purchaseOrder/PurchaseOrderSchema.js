@@ -14,7 +14,7 @@ const PurchaseOrderSchema = new mongoose.Schema(
         },
         rate: {
           type: Number,
-          required: true,
+          default: 0,
         },
         quantity: {
           type: Number,
@@ -22,7 +22,7 @@ const PurchaseOrderSchema = new mongoose.Schema(
         },
         estReceivingDate: {
           type: String,
-          required: true,
+          default: null,
           trim: true,
         },
       },
@@ -77,6 +77,6 @@ const PurchaseOrderSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["poCode", "vendorId", "wareHouseId", "purchaseOrder"];
+const searchKeys = ["poCode"];
 module.exports = mongoose.model("PurchaseOrder", PurchaseOrderSchema);
 module.exports.searchKeys = [...searchKeys];

@@ -11,7 +11,7 @@ const create = {
     didNo: Joi.string().required(),
     ageGroup: Joi.string().allow(""),
     // agentId: Joi.string().custom(commonValidation.objectId).required(),
-    // companyId: Joi.string().custom(commonValidation.objectId).required(),
+    companyCode: Joi.string().required(),
     agentName: Joi.string().required(),
 
     mobileNo: Joi.string().required(),

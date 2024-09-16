@@ -80,6 +80,7 @@ exports.add = async (req, res) => {
       lotNumber,
       expiryDate,
       invoiceNumber,
+      vendorLabel,
       status,
     } = req.body;
 
@@ -96,11 +97,9 @@ exports.add = async (req, res) => {
       isDeleted: false,
       isActive: true,
     });
-    if (!isCompanyExists) {
+    if (!isProductGroupExists) {
       throw new ApiError(httpStatus.OK, "Invalid Product Group");
     }
-
-    console.log(isProductGroupExists, "--------------");
 
     /**
      * check duplicate exist
@@ -117,6 +116,7 @@ exports.add = async (req, res) => {
         $match: {
           lotNumber: lotNumber,
           companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+          productGroupId: new mongoose.Types.ObjectId(productGroupId),
         },
       },
       { $sort: { _id: -1 } },
@@ -140,11 +140,14 @@ exports.add = async (req, res) => {
       // Extract the numeric part from the existing barcode and increment it
       currentBarcode =
         parseInt(
-          lastObject[0]?.barcodeNumber.replace(isCompanyExists?.companyCode, "")
+          lastObject[0]?.barcodeNumber.replace(
+            isProductGroupExists?.productGroupCode,
+            ""
+          )
         ) + 1;
     } else {
       // Start with the initial barcode if no previous barcode exists
-      currentBarcode = lotNumber + "000001";
+      currentBarcode = lotNumber + "00001";
     }
 
     let output = [];
@@ -160,14 +163,14 @@ exports.add = async (req, res) => {
       }
 
       // Prepend "CODE" to the barcode and include it in the output
-      let fullBarcode = `${isCompanyExists?.companyCode}${currentBarcode}`;
+      let fullBarcode = `${isProductGroupExists?.productGroupCode}${currentBarcode}`;
 
       output.push({
         productGroupId,
         barcodeGroupNumber,
         barcodeNumber: fullBarcode,
         upperBarcodeNumber:
-          lotNumber +
+          isCompanyExists?.companyCode +
           "/" +
           isProductGroupExists.productGroupCode +
           "/" +
@@ -178,6 +181,7 @@ exports.add = async (req, res) => {
         invoiceNumber,
         expiryDate,
         status: "",
+        vendorLabel: vendorLabel,
       });
 
       barcodeFlowData.push({
@@ -197,6 +201,7 @@ exports.add = async (req, res) => {
         expiryDate,
         status: "",
         barcodeLog: "Barcode created in warehouse",
+        vendorLabel: vendorLabel,
       });
     }
 
@@ -314,13 +319,10 @@ exports.allFilterPagination = async (req, res) => {
     let searchIn = req.body.params;
     let filterBy = req.body.filterBy;
     let rangeFilterBy = req.body.rangeFilterBy;
-    let isPaginationRequired = req.body.isPaginationRequired
-      ? req.body.isPaginationRequired
-      : true;
+    let isPaginationRequired = req.body.isPaginationRequired ?? true;
     let finalAggregateQuery = [];
-    let matchQuery = {
-      $and: [{ isDeleted: false }],
-    };
+    let matchQuery = { $and: [] };
+
     /**
      * to send only active data on web
      */
@@ -334,18 +336,15 @@ exports.allFilterPagination = async (req, res) => {
     );
 
     //----------------------------
-
     /**
      * check search keys valid
      **/
-
     let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
 
     if (searchQueryCheck && !searchQueryCheck.status) {
-      return res.status(httpStatus.OK).send({
-        ...searchQueryCheck,
-      });
+      return res.status(httpStatus.OK).send({ ...searchQueryCheck });
     }
+
     /**
      * get searchQuery
      */
@@ -353,6 +352,7 @@ exports.allFilterPagination = async (req, res) => {
     if (searchQuery && searchQuery.length) {
       matchQuery.$and.push({ $or: searchQuery });
     }
+
     //----------------------------
     /**
      * get range filter query
@@ -379,12 +379,12 @@ exports.allFilterPagination = async (req, res) => {
     if (filterQuery && filterQuery.length) {
       matchQuery.$and.push(...filterQuery);
     }
+
     //----------------------------
     //calander filter
     /**
      * ToDo : for date filter
      */
-
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
     const datefilterQuery = await getDateFilterQuery(
@@ -395,12 +395,27 @@ exports.allFilterPagination = async (req, res) => {
       matchQuery.$and.push(...datefilterQuery);
     }
 
-    //calander filter
     //----------------------------
+    // Apply $match filter early
+    finalAggregateQuery.push({ $match: matchQuery });
 
-    /**
-     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
-     */
+    // Calculate pagination first
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        await barCodeService.findCount(matchQuery), // Direct count query to improve speed
+        req.body.isPaginationRequired
+      );
+
+    // Apply pagination early in the pipeline
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
+    // Additional aggregation stages after limiting the data
     let additionalQuery = [
       {
         $lookup: {
@@ -422,15 +437,10 @@ exports.allFilterPagination = async (req, res) => {
           as: "warehouse_data",
           pipeline: [
             { $match: { isDeleted: false } },
-            {
-              $project: {
-                wareHouseName: 1,
-              },
-            },
+            { $project: { wareHouseName: 1 } },
           ],
         },
       },
-
       {
         $addFields: {
           productGroupLabel: {
@@ -444,39 +454,17 @@ exports.allFilterPagination = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    finalAggregateQuery.push({
-      $match: matchQuery,
-    });
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
 
-    //-----------------------------------
-    let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
-    if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found`);
-    }
-
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
-    }
+    let result = await barCodeService.aggregateQuery(finalAggregateQuery);
     let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.barcode,
       userRoleData,
       actionType.pagination
     );
-    let result = await barCodeService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
 
     if (allowedFields?.length) {
@@ -503,96 +491,76 @@ exports.allFilterPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 // all filter pagination api
 exports.allFilterGroupPagination = async (req, res) => {
   try {
-    var dateFilter = req.body.dateFilter;
-    let searchValue = req.body.searchValue;
-    let searchIn = req.body.params;
-    let filterBy = req.body.filterBy;
-    let rangeFilterBy = req.body.rangeFilterBy;
-    let isPaginationRequired = req.body.isPaginationRequired
-      ? req.body.isPaginationRequired
-      : true;
-    let finalAggregateQuery = [];
+    const {
+      dateFilter,
+      searchValue,
+      params: searchIn,
+      filterBy,
+      rangeFilterBy,
+      isPaginationRequired = true,
+      orderBy,
+      orderByValue,
+      limit: reqLimit,
+      page: reqPage,
+    } = req.body;
+
+    const finalAggregateQuery = [];
     let matchQuery = {
       $and: [{ isDeleted: false }],
     };
-    /**
-     * to send only active data on web
-     */
-    if (req.path.includes("/app/") || req.path.includes("/app")) {
+
+    // Active data only for certain paths
+    if (req.path.includes("/app/")) {
       matchQuery.$and.push({ isActive: true });
     }
 
-    let { orderBy, orderByValue } = getOrderByAndItsValue(
-      req.body.orderBy,
-      req.body.orderByValue
-    );
+    const { orderBy: finalOrderBy, orderByValue: finalOrderByValue } =
+      getOrderByAndItsValue(orderBy, orderByValue);
 
-    //----------------------------
-
-    /**
-     * check search keys valid
-     **/
-
-    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
-
+    // Validate and construct search query
+    const searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
     if (searchQueryCheck && !searchQueryCheck.status) {
-      return res.status(httpStatus.OK).send({
-        ...searchQueryCheck,
-      });
+      return res.status(httpStatus.OK).send({ ...searchQueryCheck });
     }
-    /**
-     * get searchQuery
-     */
+
     const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
-    if (searchQuery && searchQuery.length) {
+    if (searchQuery?.length) {
       matchQuery.$and.push({ $or: searchQuery });
     }
-    //----------------------------
-    /**
-     * get range filter query
-     */
+
+    // Range filter query
     const rangeQuery = getRangeQuery(rangeFilterBy);
-    if (rangeQuery && rangeQuery.length) {
+    if (rangeQuery?.length) {
       matchQuery.$and.push(...rangeQuery);
     }
 
-    //----------------------------
-    /**
-     * get filter query
-     */
-    let booleanFields = [];
-    let numberFileds = ["productGroupId"];
-
-    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFileds);
-    if (filterQuery && filterQuery.length) {
+    // Filter query
+    const booleanFields = [];
+    const numberFields = ["productGroupId"];
+    const filterQuery = getFilterQuery(filterBy, booleanFields, numberFields);
+    if (filterQuery?.length) {
       matchQuery.$and.push(...filterQuery);
     }
-    //----------------------------
-    //calander filter
-    /**
-     * ToDo : for date filter
-     */
 
-    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
-
-    const datefilterQuery = await getDateFilterQuery(
+    // Date filter query
+    const allowedDateFilterKeys = ["createdAt", "updatedAt"];
+    const dateFilterQuery = await getDateFilterQuery(
       dateFilter,
-      allowedDateFiletrKeys
+      allowedDateFilterKeys
     );
-    if (datefilterQuery && datefilterQuery.length) {
-      matchQuery.$and.push(...datefilterQuery);
+    if (dateFilterQuery?.length) {
+      matchQuery.$and.push(...dateFilterQuery);
     }
 
-    //calander filter
-    //----------------------------
+    // Add match query to the aggregate pipeline
+    finalAggregateQuery.push({ $match: matchQuery });
 
-    /**
-     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
-     */
-    let additionalQuery = [
+    // Add lookups and additional fields
+    const additionalQuery = [
       {
         $lookup: {
           from: "productgroups",
@@ -605,7 +573,6 @@ exports.allFilterGroupPagination = async (req, res) => {
           ],
         },
       },
-
       {
         $lookup: {
           from: "warehouses",
@@ -614,20 +581,13 @@ exports.allFilterGroupPagination = async (req, res) => {
           as: "warehouse_data",
           pipeline: [
             { $match: { isDeleted: false } },
-            {
-              $project: {
-                wareHouseName: 1,
-              },
-            },
+            { $project: { wareHouseName: 1 } },
           ],
         },
       },
-
       {
         $addFields: {
-          productGroupLabel: {
-            $arrayElemAt: ["$product_group.groupName", 0],
-          },
+          productGroupLabel: { $arrayElemAt: ["$product_group.groupName", 0] },
           wareHouseLabel: {
             $arrayElemAt: ["$warehouse_data.wareHouseName", 0],
           },
@@ -636,44 +596,44 @@ exports.allFilterGroupPagination = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    if (additionalQuery.length) {
-      finalAggregateQuery.push(...additionalQuery);
-    }
+    finalAggregateQuery.push(...additionalQuery);
 
-    finalAggregateQuery.push({
-      $match: matchQuery,
-    });
-    finalAggregateQuery.push({
-      $group: {
-        _id: "$barcodeGroupNumber",
-        // data: { $push: "$$ROOT" },
-        barcodeGroupNumber: { $first: "$barcodeGroupNumber" },
-        companyId: { $first: "$companyId" },
-        createdAt: { $first: "$createdAt" },
-        productGroupLabel: { $first: "$productGroupLabel" },
-      },
-    });
-    //-----------------------------------
-    let dataFound = await barCodeService.aggregateQuery(finalAggregateQuery);
-    if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found`);
-    }
-
+    // Pagination logic
     let { limit, page, totalData, skip, totalpages } =
       await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
+        reqLimit,
+        reqPage,
+        await barCodeService.findCount(matchQuery), // Use count query here to avoid fetching all records
+        isPaginationRequired
       );
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+
+    // Sort before pagination
+    finalAggregateQuery.push({
+      $sort: { [finalOrderBy]: parseInt(finalOrderByValue) },
+    });
+
+    // Apply pagination (skip and limit)
     if (isPaginationRequired) {
       finalAggregateQuery.push({ $skip: skip });
       finalAggregateQuery.push({ $limit: limit });
     }
 
-    // return res.send(finalAggregateQuery);
+    // Group after pagination
+    finalAggregateQuery.push({
+      $group: {
+        _id: "$barcodeGroupNumber",
+        barcodeGroupNumber: { $first: "$barcodeGroupNumber" },
+        companyId: { $first: "$companyId" },
+        createdAt: { $first: "$createdAt" },
+        productGroupLabel: { $first: "$productGroupLabel" },
+        vendorLabel: { $first: "$vendorLabel" },
+        barcodeLength: { $sum: 1 },
+      },
+    });
+
+    // Execute aggregation
     let result = await barCodeService.aggregateQuery(finalAggregateQuery);
+
     if (result.length) {
       return res.status(httpStatus.OK).send({
         data: result,
@@ -698,6 +658,7 @@ exports.allFilterGroupPagination = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
 //get api
 exports.get = async (req, res) => {
   try {
@@ -1697,6 +1658,7 @@ exports.getBarcode = async (req, res) => {
         $match: {
           barcodeNumber: barcodeToBeSearch,
           isUsed: false,
+          isFreezed: false,
         },
       },
       {
@@ -4138,6 +4100,7 @@ exports.updateInventory = async (req, res) => {
             outerBoxbarCodeNumber: outerBoxCode,
             wareHouseId: ele?.wareHouseId,
             vendorId: ele?.vendorId,
+            vendorLabel: ele?.vendorLabel,
           },
         }
       );

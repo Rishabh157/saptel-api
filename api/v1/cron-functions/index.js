@@ -64,6 +64,7 @@ exports.UpdateExpiredBarcode = async () => {
       isUsed: true,
       expiryDate: {
         $lte: todaysDate.split("T")[0],
+        $ne: null, // Ensure expiryDate is not null
       },
     },
     {

@@ -1749,18 +1749,18 @@ exports.assignOrder = async (req, res) => {
     let { dealerId, warehouseId, orderId } = req.body;
 
     if (dealerId !== null) {
-      const isDealerExists = await dealerService.findCount({
+      var isDealerExists = await dealerService.getOneByMultiField({
         _id: dealerId,
-        isDeleted: false,
+        isActive: true,
       });
       if (!isDealerExists) {
         throw new ApiError(httpStatus.OK, "Invalid Dealer.");
       }
     }
     if (warehouseId !== null) {
-      const isWarehouseExists = await warehouseService.findCount({
+      var isWarehouseExists = await warehouseService.getOneByMultiField({
         _id: warehouseId,
-        isDeleted: false,
+        isActive: true,
       });
       if (!isWarehouseExists) {
         throw new ApiError(httpStatus.OK, "Invalid company warehouse");
@@ -1786,6 +1786,9 @@ exports.assignOrder = async (req, res) => {
             assignDealerId: dealerId,
             assignWarehouseId: warehouseId,
             isOrderAssigned: true,
+            assignWarehouseLabel: isWarehouseExists?.wareHouseName || "",
+            assignDealerLabel:
+              `${isDealerExists?.firstName} ${isDealerExists?.lastName}` || "",
           },
         }
       )
@@ -3594,7 +3597,7 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * get filter query
      */
-    let booleanFields = ["firstCallApproval", "isUrgentOrder"];
+    let booleanFields = ["firstCallApproval", "isUrgentOrder", "approved"];
     let numberFileds = ["orderNumber", "inquiryNumber"];
     let objectIdFields = [
       "dispositionLevelTwoId",
@@ -3673,9 +3676,22 @@ exports.allFilterPagination = async (req, res) => {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
 
-    //calander filter
-    //----------------------------
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        await orderService.findCount(matchQuery),
+        req.body.isPaginationRequired
+      );
 
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
@@ -3763,29 +3779,12 @@ exports.allFilterPagination = async (req, res) => {
       finalAggregateQuery.push(...additionalQuery);
     }
 
-    finalAggregateQuery.push({
-      $match: matchQuery,
-    });
-
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
-    }
     let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.order,

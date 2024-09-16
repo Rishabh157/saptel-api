@@ -65,6 +65,7 @@ const { default: axios } = require("axios");
 const {
   addToOrderFlow,
 } = require("../orderInquiryFlow/OrderInquiryFlowHelper");
+const { addOrder } = require("./OrderQueue");
 
 //add start
 exports.add = async (req, res) => {
@@ -79,14 +80,25 @@ exports.add = async (req, res) => {
       agentName,
       dispositionLevelTwoId,
       dispositionLevelThreeId,
+      companyCode,
     } = req.body;
     // ===============check id Exist in DB==========
 
+    const isCompanyExists = await companyService.getOneByMultiField({
+      companyCode,
+      isDeleted: false,
+      isActive: true,
+    });
+
+    if (!isCompanyExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
     const isUserExists =
       agentName !== null
         ? await userService.findCount({
             userName: agentName,
             isDeleted: false,
+            companyId: isCompanyExists?._id,
           })
         : null;
     if (agentName !== null && !isUserExists) {
@@ -423,209 +435,42 @@ exports.update = async (req, res) => {
     }
 
     // let dispositionThreeId = dataCreated.dispositionLevelThreeId;
-
-    let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
-      _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
-    });
-
-    // ---------map for order-------
-    let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
-    let prepaidOrderFlag = await isPrepaid(
-      dispositionThreeData[0]?.applicableCriteria
+    let orderQueue = addOrder({ ...req.body, idToBeSearch });
+    await axios.post(
+      config.dialer_url,
+      {
+        user: agentName + config.dialer_domain,
+        phone_number: mobileNo,
+        unique_id: mobileNo,
+        disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          XAuth: config.server_auth_key,
+        },
+      }
     );
 
-    // dealers who serves on this pincode
-    let dealerServingPincode = [];
-    if (!prepaidOrderFlag) {
-      let dealerServingPincodeData = await dealerSurvingPincode(
-        isPincodeExists?.pincode,
-        companyId,
-        schemeId
-      );
-      dealerServingPincode = dealerServingPincodeData;
-    }
-    if (dealerServingPincode?.length === 1) {
-      let isInventoryExists = await checkDealerHaveInventory(
-        schemeId,
-        dealerServingPincode[0]?.dealerId
-      );
-      console.log(isInventoryExists, "isInventoryExists");
-      if (isInventoryExists) {
-        var assidnedDealerData = await dealerService?.getOneByMultiField({
-          _id: dealerServingPincode[0]?.dealerId,
-        });
-      } else {
-        dealerServingPincode = [];
-      }
-    }
-    console.log(assidnedDealerData, "assidnedDealerData");
-    console.log(dealerServingPincode, "dealerServingPincode");
-    // getting warehouse ID
-    const servingWarehouse = await getAssignWarehouse(companyId);
-    const orderNumber = await getOrderNumber();
-    const inquiryNumber = await getInquiryNumber();
-    if (flag || prepaidOrderFlag) {
-      await webLeadService?.getOneAndUpdate(
-        { phone: mobileNo },
-        { $set: { leadStatus: webLeadStatusEnum.complete } }
-      );
-    } else if (
-      dispositionLevelThreeLabel.toLowerCase() ===
-      fakeOrderDisposition.toLowerCase()
-    ) {
-      await webLeadService?.getOneAndUpdate(
-        { phone: mobileNo },
-        { $set: { leadStatus: webLeadStatusEnum.fake } }
-      );
-    } else {
-      await webLeadService?.getOneAndUpdate(
-        { phone: mobileNo },
-        { $set: { leadStatus: webLeadStatusEnum.inquiry } }
-      );
-    }
-    try {
-      const orderInquiry = await orderService.createNewData({
-        ...req.body,
-        status: flag
-          ? status
-          : prepaidOrderFlag
-          ? orderStatusEnum.prepaid
-          : orderStatusEnum.inquiry,
-        orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
-        inquiryNumber: inquiryNumber,
-        isOrderAssigned:
-          dealerServingPincode?.length > 1 || servingWarehouse === undefined
-            ? false
-            : true,
-        assignDealerId:
-          dealerServingPincode?.length === 1
-            ? dealerServingPincode[0]?.dealerId
-            : null,
-        assignDealerLabel:
-          dealerServingPincode?.length === 1
-            ? assidnedDealerData?.firstName + " " + assidnedDealerData?.lastName
-            : "",
-        assignDealerCode:
-          dealerServingPincode?.length === 1
-            ? assidnedDealerData?.dealerCode
-            : "",
-        assignDealerStatus:
-          dealerServingPincode?.length === 1
-            ? assidnedDealerData?.isActive
-            : "",
-        assignWarehouseId:
-          dealerServingPincode?.length === 0 ? servingWarehouse?._id : null,
-        assignWarehouseLabel:
-          dealerServingPincode?.length === 0
-            ? servingWarehouse?.wareHouseName
-            : "",
-        approved: flag ? true : prepaidOrderFlag ? false : true,
-        agentId: isUserExists?.agentId,
-        agentName: agentName,
-        recordingStartTime: recordingStartTime,
-        recordingEndTime: recordingEndTime,
-        callCenterId: isUserExists?.callCenterId,
-        branchId: isUserExists?.branchId,
-        paymentMode: prepaidOrderFlag
-          ? paymentModeType.UPI_ONLINE
-          : paymentModeType.COD,
-        isUrgentOrder:
-          dispositionThreeData[0]?.applicableCriteria ===
-          applicableCriteria.isUrgent,
-        countryLabel,
-        stateLabel,
-        districtLabel,
-        tehsilLabel,
-        pincodeLabel,
-        areaLabel,
-        dispositionLevelTwoLabel,
-        dispositionLevelThreeLabel,
-        productGroupLabel,
-        hsnCode: subCatData?.hsnCode,
-        companyAddress: iscompanyExists?.address,
-        schemeProducts: schemeProductsForOrder,
-        // dealerAssignedId: dealerId,
-      });
+    return res.status(httpStatus.OK).send({
+      message: "Updated successfully.",
+      data: null,
+      status: true,
+      code: "OK",
+      issue: null,
+    });
+    // }
+  } catch (error) {
+    console.log(error);
 
-      await addToOrderFlow(orderInquiry);
-      if (flag || prepaidOrderFlag) {
-        await axios.post(
-          `https://pgapi.vispl.in/fe/api/v1/send?username=${config.messageApiUserName}&password=${config.messageApiPassword}&unicode=false&from=${config.messageApiFrom}&to=${mobileNo}&text=Thank you ${customerName} ji for booking ${schemeName}, your order no. is ${orderNumber}. For delivery, dealer details will be updated shortly. TELEMART&dltContentId=${config.messageApiContentId}`
-        );
-      }
-
-      const dataUpdated = await callService.getOneAndUpdate(
-        {
-          _id: idToBeSearch,
-          isDeleted: false,
-        },
-        {
-          $set: {
-            status: inquiryNumber ? orderStatusEnum.inquiry : status,
-            ...req.body,
-          },
-        }
-      );
-
-      if (dataUpdated) {
-        await axios.post(
-          "https://uat.onetelemart.com/agent/v2/click-2-hangup",
-          {
-            user: agentName + config.dialer_domain,
-            phone_number: mobileNo,
-            unique_id: mobileNo,
-            disposition: `DEFAULT:${isDispositionThreeExists?.dispositionName}`,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              XAuth: config.server_auth_key,
-            },
-          }
-        );
-
-        return res.status(httpStatus.OK).send({
-          message: "Updated successfully.",
-          data: dataUpdated,
-          status: true,
-          code: "OK",
-          issue: null,
-        });
-      }
-    } catch (error) {
-      // Rollback logic
-      // if (orderInquiry) {
-      //   // Delete created order inquiry
-      //   await orderService.getByIdAndDelete(orderInquiry._id);
-      // }
-
-      // if (orderInquiryFlow) {
-      //   // Delete created order inquiry flow
-      //   await orderInquiryFlowService.getByIdAndDelete(orderInquiryFlow._id);
-      // }
-
-      // // Handle status rollback for call service
-      // await callService.getOneAndUpdate(
-      //   { _id: idToBeSearch, isDeleted: false },
-      //   { $set: { status: status } }
-      // );
-
-      // Handle error response
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-        message: "Something went wrong!",
-        data: null,
-        status: false,
-        code: "ERROR",
-        issue: "API call failed",
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
+    // Handle error response
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+      message: "Something went wrong!",
+      data: null,
+      status: false,
+      code: "ERROR",
+      issue: "API call failed",
+    });
   }
 };
 
