@@ -5268,7 +5268,7 @@ exports.dealerOrderStatusChange = async (req, res) => {
             "REMOVE"
           );
           await barcodeService?.getOneAndUpdate(
-            { barcode },
+            { barcode: ele?.barcode },
             { $set: { status: barcodeStatusType.delivered } }
           );
         })
