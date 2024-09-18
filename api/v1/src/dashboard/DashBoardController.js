@@ -1576,14 +1576,17 @@ exports.getSalesDashboard = async (req, res) => {
     var dateFilter = req.body.dateFilter;
     let { Id, userRole } = req.userData;
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
-
+    let matchQuery = {
+      $and: [],
+    };
     const datefilterQuery = await getDateFilterQuery(
       dateFilter,
       allowedDateFiletrKeys
     );
-    let matchQuery = {
-      $and: [{ isDeleted: false }],
-    };
+
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
 
     let userDataFound = await userService.getOneByMultiField({
       isDeleted: false,
@@ -1793,7 +1796,16 @@ exports.getSalesDashboard = async (req, res) => {
               $count: "count",
             },
           ],
-
+          prepaidOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.prepaid,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
           deliveredOrders: [
             {
               $match: {
@@ -1824,6 +1836,36 @@ exports.getSalesDashboard = async (req, res) => {
               $count: "count",
             },
           ],
+          pscOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.psc,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          unaOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.una,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          pndOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.pnd,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
 
           urgentOrders: [
             {
@@ -1840,6 +1882,66 @@ exports.getSalesDashboard = async (req, res) => {
             {
               $match: {
                 status: orderStatusEnum.intransit,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          inquiryOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.inquiry,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          nonActionOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.nonAction,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          rtoOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.rto,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          reattemptOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.reattempt,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          deliveryOutOfNetworkOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.deliveryOutOfNetwork,
+              },
+            },
+            {
+              $count: "count",
+            },
+          ],
+          ndrOrders: [
+            {
+              $match: {
+                status: orderStatusEnum.ndr,
               },
             },
             {
