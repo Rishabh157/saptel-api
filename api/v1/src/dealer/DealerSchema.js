@@ -106,6 +106,16 @@ const DealerSchema = new mongoose.Schema(
           required: true,
           trim: true,
         },
+        gstNumber: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+        gstCertificate: {
+          type: String,
+          default: "",
+          trim: true,
+        },
       },
       required: true,
     },
@@ -144,6 +154,16 @@ const DealerSchema = new mongoose.Schema(
         pincodeId: {
           type: ObjectId,
           required: true,
+          trim: true,
+        },
+        gstNumber: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+        gstCertificate: {
+          type: String,
+          default: "",
           trim: true,
         },
       },

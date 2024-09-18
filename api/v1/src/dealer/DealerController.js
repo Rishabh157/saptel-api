@@ -45,6 +45,7 @@ const {
 } = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
 const { getLedgerNo } = require("../ledger/LedgerHelper");
+const { getDealerWarehouseCode } = require("../wareHouse/WarehouseHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -134,6 +135,16 @@ exports.add = async (req, res) => {
     }
 
     if (dataCreated) {
+      let wareHouseCode = await getDealerWarehouseCode();
+
+      await warehouseService?.createNewData({
+        wareHouseCode,
+        wareHouseName: firmName,
+        registrationAddress: req.body.registrationAddress,
+        billingAddress: req.body.billingAddress,
+        companyId: req.userData.companyId,
+        dealerId: dataCreated?._id,
+      });
       return res.status(httpStatus.CREATED).send({
         message: "Added successfully.",
         data: dataCreated,
@@ -735,7 +746,7 @@ exports.get = async (req, res) => {
     //if no default query then pass {}
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
-      isDeleted: false,
+      isActive: true,
     };
     if (req.query && Object.keys(req.query).length) {
       matchQuery = getQuery(matchQuery, req.query);
@@ -1230,7 +1241,7 @@ exports.getSchemeWiseDealer = async (req, res) => {
     }
     let additionalQuery = [
       { $match: matchQuery },
-      { $project: { firstName: 1, lastName: 1 } },
+      { $project: { firstName: 1, lastName: 1, dealerCode: 1 } },
     ];
 
     let userRoleData = await getUserRoleData(req);
@@ -1255,12 +1266,24 @@ exports.getSchemeWiseDealer = async (req, res) => {
         if (dealerSchemeFound) {
           alreadyHaveScheme.push({
             value: ele?._id,
-            label: ele?.firstName + " " + ele?.lastName,
+            label:
+              ele?.firstName +
+              " " +
+              ele?.lastName +
+              "( " +
+              ele?.dealerCode +
+              " )",
           });
         } else {
           notAssignedScheme.push({
             value: ele?._id,
-            label: ele?.firstName + " " + ele?.lastName,
+            label:
+              ele?.firstName +
+              " " +
+              ele?.lastName +
+              "( " +
+              ele?.dealerCode +
+              " )",
           });
         }
       })

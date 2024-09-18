@@ -6,7 +6,7 @@ const CompanySchema = new mongoose.Schema(
     companyName: { type: String, required: true, trim: true, lowercase: true },
     companyCode: { type: String, required: true, trim: true, uppercase: true },
     websiteUrl: { type: String, required: false, trim: true },
-    companyLogo: { type: String, required: false, trim: true },
+    companyLogo: { type: String, default: "", trim: true },
     gstNo: { type: String, required: true, trim: true },
     panNumber: { type: String, default: "", trim: true },
     address: { type: String, required: true, trim: true, lowercase: true },

@@ -225,6 +225,14 @@ router.post(
   orderController.allFilterPagination
 );
 
+//===============get all batch pagination filter===============
+router.post(
+  "/get-batch",
+  authCheckMiddleware,
+  validate(orderValidation.getAllFilter),
+  orderController.getBatchFilterPagination
+);
+
 //===============get all pagination filter===============
 router.post(
   "/warehouse-first-call",

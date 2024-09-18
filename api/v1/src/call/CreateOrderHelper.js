@@ -214,12 +214,16 @@ const createOrderInQueue = async (data) => {
           ? servingWarehouse?.wareHouseName
           : "",
       approved: flag ? true : prepaidOrderFlag ? false : true,
+
+      callCenterId: isUserExists?.callCenterId,
+      branchId: isUserExists?.branchId,
       paymentMode: prepaidOrderFlag
         ? paymentModeType.UPI_ONLINE
         : paymentModeType.COD,
       isUrgentOrder:
         dispositionThreeData[0]?.applicableCriteria[0] ===
         applicableCriteria.isUrgent,
+
       hsnCode: subCatData?.hsnCode,
       companyAddress: isCompanyExists?.address,
       schemeProducts: schemeProductsForOrder,
@@ -229,11 +233,11 @@ const createOrderInQueue = async (data) => {
     await addToOrderFlow(orderInquiry);
 
     // Send confirmation message if needed
-    if (flag || prepaidOrderFlag) {
-      await axios.post(
-        `https://pgapi.vispl.in/fe/api/v1/send?username=${config.messageApiUserName}&password=${config.messageApiPassword}&unicode=false&from=${config.messageApiFrom}&to=${mobileNo}&text=Thank you ${customerName} ji for booking ${schemeName}, your order no. is ${orderNumber}. For delivery, dealer details will be updated shortly. TELEMART&dltContentId=${config.messageApiContentId}`
-      );
-    }
+    // if (flag || prepaidOrderFlag) {
+    //   await axios.post(
+    //     `https://pgapi.vispl.in/fe/api/v1/send?username=${config.messageApiUserName}&password=${config.messageApiPassword}&unicode=false&from=${config.messageApiFrom}&to=${mobileNo}&text=Thank you ${customerName} ji for booking ${schemeName}, your order no. is ${orderNumber}. For delivery, dealer details will be updated shortly. TELEMART&dltContentId=${config.messageApiContentId}`
+    //   );
+    // }
 
     // Update the original call entry
     await callService.getOneAndUpdate(

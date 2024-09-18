@@ -521,6 +521,14 @@ const dealerOrderStatusChange = {
       .custom(commonValidation.objectId)
       .allow(null),
     callBackDate: Joi.string().allow(""),
+    barcodeData: Joi.array()
+      .items({
+        barcodeId: Joi.string().custom(commonValidation.objectId),
+        barcode: Joi.string(),
+        dealerWareHouseId: Joi.string().custom(commonValidation.objectId),
+        productGroupId: Joi.string().custom(commonValidation.objectId),
+      })
+      .allow(),
   }),
 };
 

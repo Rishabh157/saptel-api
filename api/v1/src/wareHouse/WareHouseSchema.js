@@ -13,9 +13,7 @@ const WareHouseSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
-    pincodes: { type: [ObjectId], required: false, default: [] },
-    country: { type: ObjectId, required: true, trim: true },
-    email: { type: String, required: true, trim: true, lowercase: true },
+    email: { type: String, default: "", trim: true, lowercase: true },
     registrationAddress: {
       type: {
         phone: {

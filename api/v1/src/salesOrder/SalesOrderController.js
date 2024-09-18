@@ -292,7 +292,6 @@ exports.updateLevel = async (req, res) => {
       if (!companyWarehouse || !dealerWarehouse) {
         throw new ApiError(httpStatus.OK, "Invalid warehouse");
       }
-
       const [companyState, dealerState] = await Promise.all([
         stateService.getOneByMultiField({
           isDeleted: false,
@@ -303,7 +302,6 @@ exports.updateLevel = async (req, res) => {
           _id: dealerWarehouse.registrationAddress.stateId,
         }),
       ]);
-      console.log(companyState, dealerState, "-------------------------");
       if (!companyState || !dealerState) {
         throw new ApiError(httpStatus.OK, "Invalid state");
       }

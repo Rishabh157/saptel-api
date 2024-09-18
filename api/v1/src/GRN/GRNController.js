@@ -30,42 +30,35 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      poCode,
-      itemId,
-      receivedQuantity,
-      goodQuantity,
-      defectiveQuantity,
-      companyId,
-    } = req.body;
+    let { poCode, itemId, receivedQuantity, goodQuantity, defectiveQuantity } =
+      req.body;
 
-    const isCompanyExists = await companyService.findCount({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!isCompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Company");
-    }
-
-    /**
-     * check duplicate exist
-     */
-
-    await purchaseOrderService.getOneAndUpdate(
+    let updatedPurchaseOrder = await purchaseOrderService.getOneAndUpdate(
       {
         poCode: poCode,
         "purchaseOrder.itemId": new mongoose.Types.ObjectId(itemId),
       },
       { $set: { isEditable: false } }
     );
+    let totalQuantity = updatedPurchaseOrder?.purchaseOrder?.quantity;
+    let dataExist = await goodReceivedNoteService?.aggregateQuery([
+      { $match: { poCode: poCode } },
+    ]);
+    let receivedQuantityIs = 0;
+    dataExist?.map((ele) => {
+      receivedQuantityIs += ele?.goodQuantity;
+    });
 
-    let dataExist = await goodReceivedNoteService.isExists([]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
+    if (receivedQuantity + receivedQuantityIs > totalQuantity) {
+      throw new ApiError(
+        httpStatus.NOT_ACCEPTABLE,
+        `Receive quantity can't be more than requested quantity`
+      );
     }
     //------------------create data-------------------
     let dataCreated = await goodReceivedNoteService.createNewData({
       ...req.body,
+      companyId: req.userData.companyId,
     });
 
     if (dataCreated) {
@@ -96,13 +89,37 @@ exports.update = async (req, res) => {
       req.body;
 
     let idToBeSearch = req.params.id;
-
     //------------------Find data-------------------
     let datafound = await goodReceivedNoteService.getOneByMultiField({
       _id: idToBeSearch,
     });
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `GoodReceivedNote not found.`);
+    }
+    console.log(poCode, itemId);
+    let foundPO = await purchaseOrderService.getOneByMultiField({
+      poCode: poCode,
+      "purchaseOrder.itemId": new mongoose.Types.ObjectId(itemId),
+    });
+    console.log(foundPO, "foundPO");
+    let totalQuantity = foundPO?.purchaseOrder?.quantity;
+    let dataExist = await goodReceivedNoteService?.aggregateQuery([
+      { $match: { poCode: poCode } },
+    ]);
+
+    let receivedQuantityIs = 0;
+    dataExist?.map((ele) => {
+      receivedQuantityIs += ele?.goodQuantity;
+    });
+
+    if (
+      receivedQuantity + (receivedQuantityIs - datafound?.receivedQuantity) >
+      totalQuantity
+    ) {
+      throw new ApiError(
+        httpStatus.NOT_ACCEPTABLE,
+        `Receive quantity can't be more than requested quantity`
+      );
     }
 
     let dataUpdated = await goodReceivedNoteService.getOneAndUpdate(

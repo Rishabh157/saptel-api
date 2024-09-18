@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const GoodReceivedNoteSchema = new mongoose.Schema(
   {
-    poCode: { type: String, required: true, trim: true, lowercase: true },
+    poCode: { type: String, required: true, trim: true },
     itemId: { type: ObjectId, required: true, trim: true, lowercase: true },
     receivedQuantity: { type: Number, required: true, trim: true },
     goodQuantity: { type: Number, required: true, trim: true },

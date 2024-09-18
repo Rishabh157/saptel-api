@@ -10,7 +10,7 @@ const create = {
   body: Joi.object().keys({
     companyName: Joi.string().lowercase().required(),
     websiteUrl: Joi.string(),
-    companyLogo: Joi.string(),
+    companyLogo: Joi.string().allow(""),
     gstNo: Joi.string().required(),
     address: Joi.string().lowercase().required(),
     panNumber: Joi.string().allow(""),
@@ -38,10 +38,11 @@ const update = {
   body: Joi.object().keys({
     companyName: Joi.string().lowercase().required(),
     websiteUrl: Joi.string().uri().allow(""),
-    companyLogo: Joi.string().uri().allow(""),
+    companyLogo: Joi.string().uri().allow("").allow(""),
     gstNo: Joi.string().required(),
     phoneNo: Joi.string().allow(""),
     address: Joi.string().lowercase().required(),
+    panNumber: Joi.string().allow(""),
     phoneNo: Joi.string().required(),
     bankDetails: Joi.array().items(
       Joi.object().keys({

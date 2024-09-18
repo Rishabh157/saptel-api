@@ -3,7 +3,10 @@ const productGroupSummaryController = require("./ProductGroupSummaryController")
 const validate = require("../../middleware/validate");
 const productGroupSummaryValidation = require("./ProductGroupSummaryValidation");
 
-const { authCheckMiddleware } = require("../../middleware/authenticationCheck");
+const {
+  authCheckMiddleware,
+  authCheckDealerMiddleware,
+} = require("../../middleware/authenticationCheck");
 
 //-----------------------------------------------------
 /**
@@ -16,4 +19,13 @@ router.get(
   productGroupSummaryController.get
 );
 
+/**
+ * get one document (if query) / all documents
+ */
+router.get(
+  "/dealer/warehouseid/:wid",
+  authCheckDealerMiddleware,
+  validate(productGroupSummaryValidation.get),
+  productGroupSummaryController.get
+);
 module.exports = router;

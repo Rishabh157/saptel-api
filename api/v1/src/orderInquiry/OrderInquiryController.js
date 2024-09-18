@@ -3467,7 +3467,7 @@ exports.allFilterPagination = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Agent ");
     }
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [],
     };
 
     // if order number given
@@ -3675,7 +3675,7 @@ exports.allFilterPagination = async (req, res) => {
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
-
+    console.log(matchQuery, "matchQuery");
     finalAggregateQuery.push({
       $match: matchQuery,
     });
@@ -3793,7 +3793,8 @@ exports.allFilterPagination = async (req, res) => {
     );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
-
+    console.log(result, "result");
+    console.log(allowedFields, "allowedFields");
     let finalData = [];
     // check for zonal manager and zonal exicutive
 
@@ -3834,6 +3835,280 @@ exports.allFilterPagination = async (req, res) => {
     if (dataToShow?.length) {
       return res.status(200).send({
         data: dataToShow,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// ====================== get all batch filter pagination =============
+
+exports.getBatchFilterPagination = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+    var dateFilter = req.body.dateFilter;
+    let searchValue = req.body.searchValue;
+
+    let searchIn = req.body.searchIn;
+    let filterBy = req.body.filterBy;
+    let rangeFilterBy = req.body.rangeFilterBy;
+    let orderNumber = req.body.orderNumber;
+
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+
+    let matchQuery = {
+      $and: [
+        { assignDealerId: null },
+        { assignWarehouseId: null },
+        { batchId: null },
+      ],
+    };
+    // if order number given
+    if (orderNumber) {
+      matchQuery.$and.push({ orderNumber: parseInt(orderNumber) });
+    }
+
+    /**
+     * to send only active data on web
+     */
+    if (req.path.includes("/app/") || req.path.includes("/app")) {
+      matchQuery.$and.push({ isActive: true });
+    }
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    //----------------------------
+
+    /**
+     * check search keys valid
+     **/
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+    const rangeQuery = getRangeQuery(rangeFilterBy);
+    if (rangeQuery && rangeQuery.length) {
+      matchQuery.$and.push(...rangeQuery);
+    }
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = ["firstCallApproval", "isUrgentOrder", "approved"];
+    let numberFileds = ["orderNumber", "inquiryNumber"];
+    let objectIdFields = [
+      "dispositionLevelTwoId",
+      "dispositionLevelThreeId",
+      "countryId",
+      "companyId",
+      "stateId",
+      "schemeId",
+      "districtId",
+      "tehsilId",
+      "pincodeId",
+      "areaId",
+      "channel",
+      "agentDistrictId",
+      "batchId",
+      "assignDealerId",
+      "assignWarehouseId",
+      "schemeProducts.productGroupId",
+    ];
+
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+
+    //----------------------------
+    //calander filter
+    /**
+     * ToDo : for date filter
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    // const datefilterQuery = await getDateFilterQuery(
+    //   dateFilter,
+    //   allowedDateFiletrKeys
+    // );
+    const datefilterQuery = await getDateFilterQueryForTask(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        await orderService.findCount(matchQuery),
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterdata",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
+          foreignField: "_id",
+          as: "deleivery_by_data",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "didmanagements",
+          localField: "didNo",
+          foreignField: "didNumber",
+          as: "did_data",
+          pipeline: [
+            {
+              $lookup: {
+                from: "channelmasters",
+                localField: "channelId",
+                foreignField: "_id",
+                as: "channel_data",
+                pipeline: [
+                  {
+                    $project: {
+                      channelName: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          channelLabel: {
+            $arrayElemAt: ["$did_data.channel_data.channelName", 0],
+          },
+
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
+
+          callCenterLabel: {
+            $arrayElemAt: ["$callcenterdata.callCenterName", 0],
+          },
+        },
+      },
+
+      {
+        $unset: ["did_data", "callcenterdata", "deleivery_by_data"],
+      },
+    ];
+    // let additionalQuery = [];
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    //-----------------------------------
+    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.order,
+    //   userRoleData,
+    //   actionType.pagination
+    // );
+    let result = await orderService.aggregateQuery(finalAggregateQuery);
+    // let allowedFields = getAllowedField(fieldsToDisplay, result);
+    console.log(result, "result");
+
+    // check for zonal manager and zonal exicutive
+
+    if (result?.length) {
+      return res.status(200).send({
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -4958,24 +5233,51 @@ exports.orderStatusChange = async (req, res) => {
 exports.dealerOrderStatusChange = async (req, res) => {
   try {
     let _id = req.params.id;
-    let { status, remark, dealerReason, dealerFirstCaller, callBackDate } =
-      req.body;
+    let {
+      status,
+      remark,
+      dealerReason,
+      dealerFirstCaller,
+      callBackDate,
+      barcodeData,
+    } = req.body;
     if (!(await orderService.getOneByMultiField({ _id }))) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     }
     let pscDate = status === orderStatusEnum.psc ? new Date() : "";
 
+    let dataToUpdate = {
+      status: status,
+      remark,
+      preShipCancelationDate: pscDate,
+      dealerReason,
+      dealerFirstCaller,
+      firstCallCallBackDate: callBackDate,
+    };
+    if (status === orderStatusEnum.delivered) {
+      dataToUpdate.barcodeData = barcodeData?.map((ele) => {
+        return { barcodeId: ele.barcodeId, barcode: ele?.barcode };
+      });
+      await Promise.all(
+        barcodeData?.map(async (ele) => {
+          await addRemoveAvailableQuantity(
+            req.userData.companyId,
+            ele?.dealerWareHouseId,
+            ele?.productGroupId,
+            1,
+            "REMOVE"
+          );
+          await barcodeService?.getOneAndUpdate(
+            { barcode },
+            { $set: { status: barcodeStatusType.delivered } }
+          );
+        })
+      );
+    }
     let orderUpdated = await orderService.getOneAndUpdate(
       { _id },
       {
-        $set: {
-          status: status,
-          remark,
-          preShipCancelationDate: pscDate,
-          dealerReason,
-          dealerFirstCaller,
-          firstCallCallBackDate: callBackDate,
-        },
+        $set: dataToUpdate,
       }
     );
     if (!orderUpdated) {

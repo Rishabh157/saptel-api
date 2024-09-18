@@ -30,6 +30,10 @@ const {
 } = require("../../helper/paginationFilterHelper");
 const mongoose = require("mongoose");
 const { moduleType, actionType } = require("../../helper/enumUtils");
+const {
+  getWarehouseCode,
+  getDealerWarehouseCode,
+} = require("./WarehouseHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -51,20 +55,13 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let lastObject = await wareHouseService.aggregateQuery([
-      { $sort: { _id: -1 } },
-      { $limit: 1 },
-    ]);
-
-    let wareHouseCode = "";
-    if (!lastObject.length) {
-      wareHouseCode = "WH00001";
+    let wareHouseCode;
+    if (dealerId === null) {
+      wareHouseCode = await getWarehouseCode();
     } else {
-      const lastSchemeCode = lastObject[0]?.wareHouseCode || "WH00000";
-      const lastNumber = parseInt(lastSchemeCode.replace("WH", ""), 10);
-      const nextNumber = lastNumber + 1;
-      wareHouseCode = "WH" + String(nextNumber).padStart(5, "0");
+      wareHouseCode = await getDealerWarehouseCode();
     }
+
     let dataExist = await wareHouseService.isExists([
       { wareHouseCode },
       { wareHouseName },
@@ -76,6 +73,8 @@ exports.add = async (req, res) => {
     // check isDefault should be true on one warehouse only
     let foundIsDefaultWarehouse = await wareHouseService.findCount({
       isDefault: true,
+      companyId: req.userData.companyId,
+      dealerId: null,
     });
 
     if (foundIsDefaultWarehouse && isDefault) {
@@ -162,6 +161,8 @@ exports.update = async (req, res) => {
     // check isDefault should be true on one warehouse only
     let foundIsDefaultWarehouse = await wareHouseService.findCount({
       isDefault: true,
+      companyId: req.userData.companyId,
+      dealerId: null,
     });
 
     if (

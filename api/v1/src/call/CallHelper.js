@@ -177,7 +177,7 @@ exports.checkDealerHaveInventory = async (schemeId, dealerId) => {
         {
           $match: {
             productGroupId: ele?.productGroupId,
-            wareHouseId: null,
+            // wareHouseId: null,
             dealerId: new mongoose.Types.ObjectId(dealerId),
             status: barcodeStatusType.atDealerWarehouse,
           },
