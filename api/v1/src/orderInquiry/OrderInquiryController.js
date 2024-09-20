@@ -5283,24 +5283,71 @@ exports.orderStatusChange = async (req, res) => {
       { _id },
       { orderStatus: productStatus.complete }
     );
-    await addToOrderFlow(
-      updatedOrder?._id,
-      updatedOrder?.orderNumber,
-      `Order completed`,
-      updatedOrder.status,
-      req.userData.userName
-    );
-    if (!deleted) {
-      throw new ApiError(httpStatus.OK, "Some thing went wrong.");
+    if (updatedOrder) {
+      await addToOrderFlow(
+        updatedOrder?._id,
+        updatedOrder?.orderNumber,
+        `Order completed`,
+        updatedOrder.status,
+        req.userData.userName
+      );
+
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully",
+        status: true,
+        data: null,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// mark as delivered
+
+exports.markAsDelivered = async (req, res) => {
+  try {
+    let _id = req.params.id;
+    if (
+      !(await orderService.getOneByMultiField({
+        _id,
+        status: orderStatusEnum.intransit,
+      }))
+    ) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
     }
 
-    return res.status(httpStatus.OK).send({
-      message: deleteRefCheck.message,
-      status: deleteRefCheck.status,
-      data: null,
-      code: "OK",
-      issue: null,
-    });
+    let updatedOrder = await orderService.getOneAndUpdate(
+      { _id },
+      {
+        status: orderStatusEnum.delivered,
+        deliveredBy: req.userData.userName,
+      }
+    );
+    if (updatedOrder) {
+      await addToOrderFlow(
+        updatedOrder?._id,
+        updatedOrder?.orderNumber,
+        `Order Delivered by ${req.userData.userName}`,
+        updatedOrder.status,
+        req.userData.userName
+      );
+
+      return res.status(httpStatus.OK).send({
+        message: "Updated successfully",
+        status: true,
+        data: null,
+        code: "OK",
+        issue: null,
+      });
+    }
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

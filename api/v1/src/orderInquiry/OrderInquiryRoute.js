@@ -372,6 +372,14 @@ router.put(
   orderController.orderStatusChange
 );
 
+//===============Mark as delivered===============
+router.put(
+  "/mark-as-delivered/:id",
+  authCheckMiddleware,
+  validate(orderValidation.orderStatusChange),
+  orderController.markAsDelivered
+);
+
 //===============dealer change order status===============
 router.put(
   "/dealer/change-order-status/:id",
