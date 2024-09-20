@@ -241,16 +241,6 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      let wareHouseCode = await getDealerWarehouseCode();
-
-      await warehouseService?.createNewData({
-        wareHouseCode,
-        wareHouseName: firmName,
-        registrationAddress: dataUpdated.registrationAddress,
-        billingAddress: dataUpdated.billingAddress,
-        companyId: req.userData.companyId,
-        dealerId: dataUpdated?._id,
-      });
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
