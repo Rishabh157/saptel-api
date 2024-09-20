@@ -133,7 +133,7 @@ const update = {
     }),
     otherDocument: Joi.array().items({
       documentName: Joi.string().allow(""),
-      documentFile: Joi.string().uri().allow(""),
+      documentFile: Joi.string().allow(""),
     }),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     zonalManagerId: Joi.string().custom(commonValidation.objectId).allow(null),
