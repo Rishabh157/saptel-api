@@ -765,7 +765,6 @@ exports.checkBarcode = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Barcode not found");
     }
     let orderInquiryData = await orderInquiryService.getOneByMultiField({
-      isDeleted: false,
       _id: orderId,
     });
     if (!orderInquiryData) {
@@ -797,7 +796,13 @@ exports.checkBarcode = async (req, res) => {
           },
         }
       );
-      await addToOrderFlow(orderInquiry);
+      await addToOrderFlow(
+        orderInquiry?._id,
+        orderInquiry?.orderNumber,
+        "",
+        status,
+        req.userData.userName
+      );
 
       if (!orderInquiry) {
         throw new ApiError(
@@ -895,7 +900,13 @@ exports.checkBarcodeDealerApp = async (req, res) => {
           },
         }
       );
-      await addToOrderFlow(orderInquiry);
+      await addToOrderFlow(
+        orderInquiry?._id,
+        orderInquiry?.orderNumber,
+        "",
+        status,
+        req.userData.userName
+      );
 
       if (!orderInquiry) {
         throw new ApiError(
@@ -3998,7 +4009,13 @@ exports.courierReturnProduct = async (req, res) => {
       { orderNumber: orderNumber },
       { $set: { status: orderStatusEnum.closed } }
     );
-    await addToOrderFlow(orderInquiry);
+    await addToOrderFlow(
+      orderInquiry?._id,
+      orderInquiry?.orderNumber,
+      "",
+      orderStatusEnum.closed,
+      req.userData.userName
+    );
     console.log("yha tak");
     const updates = await Promise.all(
       barcodeData.map(async (ele) => {
@@ -5720,9 +5737,13 @@ exports.orderDispatch = async (req, res) => {
       }
     );
 
-    if (updatedOrder) {
-      await addToOrderFlow(updatedOrder);
-    }
+    await addToOrderFlow(
+      updatedOrder?._id,
+      updatedOrder?.orderNumber,
+      "Order dispatched",
+      updatedOrder.status,
+      req.userData.userName
+    );
     if (updatedDataArray.length > 0) {
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
@@ -5854,7 +5875,13 @@ exports.dealerOrderDispatch = async (req, res) => {
     );
 
     if (updatedOrder) {
-      await addToOrderFlow(updatedOrder);
+      await addToOrderFlow(
+        updatedOrder?._id,
+        updatedOrder?.orderNumber,
+        "Deliveryboy assigned",
+        updatedOrder.status,
+        req.userData.userName
+      );
     }
     if (updatedOrder) {
       return res.status(httpStatus.OK).send({

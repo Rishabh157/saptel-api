@@ -235,7 +235,13 @@ exports.cancelOrder = async (req, res) => {
       }
     );
 
-    await addToOrderFlow(updatedOrder);
+    await addToOrderFlow(
+      updatedOrder?._id,
+      updatedOrder?.orderNumber,
+      `Order maked as cancelled!`,
+      updatedOrder.status,
+      req.userData.userName
+    );
     await orderCancelRequestService.getOneAndUpdate(
       { _id: cancelRequestId },
       { $set: { status: "COMPLETED", cancelDate: new Date() } }

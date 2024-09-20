@@ -92,87 +92,92 @@ const {
   checkFreezeQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
 
-exports.add = async (req, res) => {
-  try {
-    const orderNumber = await getOrderNumber();
-    const inquiryNumber = await getInquiryNumber();
+// exports.add = async (req, res) => {
+//   try {
+//     const orderNumber = await getOrderNumber();
+//     const inquiryNumber = await getInquiryNumber();
 
-    const { idToBeSearch, isOrder, ...rest } = req.body;
+//     const { idToBeSearch, isOrder, ...rest } = req.body;
 
-    try {
-      const orderInquiry = await orderService.createNewData({
-        ...rest,
-        orderNumber: isOrder ? orderNumber : null,
-        inquiryNumber: inquiryNumber,
-      });
+//     try {
+//       const orderInquiry = await orderService.createNewData({
+//         ...rest,
+//         orderNumber: isOrder ? orderNumber : null,
+//         inquiryNumber: inquiryNumber,
+//       });
 
-      await addToOrderFlow(orderInquiry);
+//       await addToOrderFlow(
+//         orderInquiry?._id,
+//         orderInquiry?.orderNumber,
+//         "E-com order created",
+//         orderInquiry.status,
+//         req.userData.userName
+//       );
+//       const dataUpdated = await callService.getOneAndUpdate(
+//         {
+//           _id: idToBeSearch,
+//           isDeleted: false,
+//         },
+//         {
+//           $set: {
+//             status: rest.status,
+//           },
+//         }
+//       );
 
-      const dataUpdated = await callService.getOneAndUpdate(
-        {
-          _id: idToBeSearch,
-          isDeleted: false,
-        },
-        {
-          $set: {
-            status: rest.status,
-          },
-        }
-      );
+//       return res.status(httpStatus.OK).send({
+//         message: "created successfully.",
+//         data: null,
+//         status: true,
+//         code: "OK",
+//         issue: null,
+//       });
+//     } catch (error) {
+//       throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
-      return res.status(httpStatus.OK).send({
-        message: "created successfully.",
-        data: null,
-        status: true,
-        code: "OK",
-        issue: null,
-      });
-    } catch (error) {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
-    }
-  } catch (err) {
-    let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+// exports.bulkAdd = async (req, res) => {
+//   try {
+//     const orderNumber = await getOrderNumber();
+//     const inquiryNumber = await getInquiryNumber();
 
-exports.bulkAdd = async (req, res) => {
-  try {
-    const orderNumber = await getOrderNumber();
-    const inquiryNumber = await getInquiryNumber();
+//     try {
+//       const orderInquiry = await orderService.createNewData({
+//         ...req.body,
+//         orderNumber: orderNumber,
+//         inquiryNumber: inquiryNumber,
+//       });
 
-    try {
-      const orderInquiry = await orderService.createNewData({
-        ...req.body,
-        orderNumber: orderNumber,
-        inquiryNumber: inquiryNumber,
-      });
+//       await addToOrderFlow(orderInquiry);
 
-      await addToOrderFlow(orderInquiry);
-
-      return res.status(httpStatus.OK).send({
-        message: "created successfully.",
-        data: null,
-        status: true,
-        code: "OK",
-        issue: null,
-      });
-    } catch (error) {
-      throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
-    }
-  } catch (err) {
-    let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//       return res.status(httpStatus.OK).send({
+//         message: "created successfully.",
+//         data: null,
+//         status: true,
+//         code: "OK",
+//         issue: null,
+//       });
+//     } catch (error) {
+//       throw new ApiError(httpStatus.NOT_IMPLEMENTED, error.message);
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err); // Assuming it's errorResponse instead of errorRes
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 // // get label
 // exports.getOrderLabel = async (req, res) => {
 //   try {
@@ -668,7 +673,13 @@ exports.updateCourierNdr = async (req, res) => {
     );
 
     if (dataUpdated) {
-      await addToOrderFlow(orderInquiry);
+      await addToOrderFlow(
+        dataUpdated?._id,
+        dataUpdated?.orderNumber,
+        `Order maked for Reattept!`,
+        dataUpdated.status,
+        ndrApprovedBy
+      );
 
       // await axios.post(
       //   "https://uat.onetelemart.com/agent/v2/click-2-hangup",
@@ -925,7 +936,13 @@ exports.approveFirstCallDirectly = async (req, res) => {
             },
           }
         );
-        await addToOrderFlow(orderUpdateCourier);
+        await addToOrderFlow(
+          orderUpdateCourier?._id,
+          orderUpdateCourier?.orderNumber,
+          `First call approved order assigned to courier ${orderUpdateCourier?.orderAssignedToCourier}`,
+          orderUpdateCourier.status,
+          req.userData.userName
+        );
       } else if (
         isOrderAssignedToCourier.courierName === preferredCourierPartner.maersk
       ) {
@@ -944,7 +961,13 @@ exports.approveFirstCallDirectly = async (req, res) => {
             },
           }
         );
-        await addToOrderFlow(orderUpdateCourier);
+        await addToOrderFlow(
+          orderUpdateCourier?._id,
+          orderUpdateCourier?.orderNumber,
+          `First call approved order assigned to courier ${orderUpdateCourier?.orderAssignedToCourier}`,
+          orderUpdateCourier.status,
+          req.userData.userName
+        );
       }
     } else {
       let orderUpdateToOther = await orderService.getOneAndUpdate(
@@ -963,7 +986,13 @@ exports.approveFirstCallDirectly = async (req, res) => {
           },
         }
       );
-      await addToOrderFlow(orderUpdateToOther);
+      await addToOrderFlow(
+        orderUpdateToOther?._id,
+        orderUpdateToOther?.orderNumber,
+        `First call approved order assigned to courier ${orderUpdateToOther?.orderAssignedToCourier}`,
+        orderUpdateToOther.status,
+        req.userData.userName
+      );
     }
 
     if (dataUpdated) {
@@ -1148,7 +1177,13 @@ exports.firstCallConfirmation = async (req, res) => {
               },
             }
           );
-          await addToOrderFlow(orderUpdateCourier);
+          await addToOrderFlow(
+            orderUpdateCourier?._id,
+            orderUpdateCourier?.orderNumber,
+            `First call approved order assigned to courier ${orderUpdateCourier?.orderAssignedToCourier}`,
+            orderUpdateCourier.status,
+            req.userData.userName
+          );
         } else if (
           isOrderAssignedToCourier.courierName ===
           preferredCourierPartner.maersk
@@ -1168,7 +1203,13 @@ exports.firstCallConfirmation = async (req, res) => {
               },
             }
           );
-          await addToOrderFlow(orderUpdateCourier);
+          await addToOrderFlow(
+            orderUpdateCourier?._id,
+            orderUpdateCourier?.orderNumber,
+            `First call approved order assigned to courier ${orderUpdateCourier?.orderAssignedToCourier}`,
+            orderUpdateCourier.status,
+            req.userData.userName
+          );
         }
       } else {
         let orderUpdateToOther = await orderService.getOneAndUpdate(
@@ -1187,7 +1228,13 @@ exports.firstCallConfirmation = async (req, res) => {
             },
           }
         );
-        await addToOrderFlow(orderUpdateToOther);
+        await addToOrderFlow(
+          orderUpdateToOther?._id,
+          orderUpdateToOther?.orderNumber,
+          `First call approved order assigned to courier ${orderUpdateToOther?.orderAssignedToCourier}`,
+          orderUpdateToOther.status,
+          req.userData.userName
+        );
       }
       // geting deleverable courier partner
       return res.status(httpStatus.OK).send({
@@ -1342,7 +1389,6 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
         let orderUpdateCourier = await orderService.getOneAndUpdate(
           {
             _id: idToBeSearch,
-            isDeleted: false,
           },
           {
             $set: {
@@ -1356,14 +1402,19 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
             },
           }
         );
-        await addToOrderFlow(orderUpdateCourier);
+        await addToOrderFlow(
+          orderUpdateCourier?._id,
+          orderUpdateCourier?.orderNumber,
+          `First call approved order assigned to courier ${orderUpdateCourier?.orderAssignedToCourier}`,
+          orderUpdateCourier.status,
+          approvedBy
+        );
       } else if (
         isOrderAssignedToCourier.courierName === preferredCourierPartner.maersk
       ) {
         let orderUpdateCourier = await orderService.getOneAndUpdate(
           {
             _id: idToBeSearch,
-            isDeleted: false,
           },
           {
             $set: {
@@ -1375,7 +1426,13 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
             },
           }
         );
-        await addToOrderFlow(orderUpdateCourier);
+        await addToOrderFlow(
+          orderUpdateCourier?._id,
+          orderUpdateCourier?.orderNumber,
+          `First call approved order assigned to courier ${orderUpdateCourier?.orderAssignedToCourier}`,
+          orderUpdateCourier.status,
+          approvedBy
+        );
       }
     } else {
       let orderUpdateToOther = await orderService.getOneAndUpdate(
@@ -1394,7 +1451,13 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
           },
         }
       );
-      await addToOrderFlow(orderUpdateToOther);
+      await addToOrderFlow(
+        orderUpdateToOther?._id,
+        orderUpdateToOther?.orderNumber,
+        `First call approved order assigned to courier ${orderUpdateToOther?.orderAssignedToCourier}`,
+        orderUpdateToOther.status,
+        approvedBy
+      );
     }
 
     if (dataUpdated) {
@@ -1484,7 +1547,6 @@ exports.updateOrderStatus = async (req, res) => {
       .getOneAndUpdate(
         {
           _id: orderId,
-          isDeleted: false,
         },
         {
           $set: {
@@ -1498,8 +1560,13 @@ exports.updateOrderStatus = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        await addToOrderFlow(ress);
-
+        await addToOrderFlow(
+          ress?._id,
+          ress?.orderNumber,
+          ``,
+          ress.status,
+          req.userData.userName
+        );
         return res.status(httpStatus.OK).send({
           message: "Updated successfully.",
           data: null,
@@ -1638,8 +1705,13 @@ exports.warehouseOrderDispatch = async (req, res) => {
       { $set: orderUpdateData }
     );
 
-    await addToOrderFlow(updatedOrder);
-
+    await addToOrderFlow(
+      updatedOrder?._id,
+      updatedOrder?.orderNumber,
+      `Order dispatched from warehouse`,
+      updatedOrder.status,
+      req.userData.userName
+    );
     return res.status(httpStatus.OK).send({
       message: "Order dispatched successfully.",
       data: null,
@@ -1722,8 +1794,13 @@ exports.warehouseManualOrderDispatch = async (req, res) => {
       }
     );
 
-    await addToOrderFlow(dataUpdated);
-
+    await addToOrderFlow(
+      dataUpdated?._id,
+      dataUpdated?.orderNumber,
+      `Order dispatched from warehouse manually`,
+      dataUpdated.status,
+      req.userData.userName
+    );
     return res.status(httpStatus.OK).send({
       message: "Updated successfully.",
       data: null,
@@ -1793,7 +1870,17 @@ exports.assignOrder = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        await addToOrderFlow(ress);
+        await addToOrderFlow(
+          ress?._id,
+          ress?.orderNumber,
+          ress?.assignWarehouseLabel
+            ? `Order assigned to ${ress?.assignWarehouseLabel} warehouse from batch`
+            : ress?.assignDealerLabel
+            ? `Order assigned to ${ress?.assignDealerLabel} dealer from batch`
+            : "",
+          ress.status,
+          req.userData.userName
+        );
         return res.status(httpStatus.OK).send({
           message: "Updated successfully.",
           data: null,
@@ -1846,7 +1933,13 @@ exports.assignOrderToDeliveryBoy = async (req, res) => {
         }
       )
       .then(async (ress) => {
-        await addToOrderFlow(ress);
+        await addToOrderFlow(
+          ress?._id,
+          ress?.orderNumber,
+          `Order assigned toDeliveryboy`,
+          ress.status,
+          req.userData.userName
+        );
 
         return res.status(httpStatus.OK).send({
           message: "Updated successfully.",
@@ -4287,29 +4380,31 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
 
     let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
 
-    const datefilterQuery = await getDateFilterQuery(
+    const datefilterQuery = await getDateFilterQueryForTask(
       dateFilter,
       allowedDateFiletrKeys
     );
+
     if (datefilterQuery && datefilterQuery.length) {
       matchQuery.$and.push(...datefilterQuery);
     }
 
-    let allowedCallbackDateFiletrKeys = ["firstCallCallBackDate"];
-
-    const datefilterCallbackQuery =
-      await getDateFilterQueryCallBackAndPreferedDate(
-        callbackDateFilter,
-        allowedCallbackDateFiletrKeys
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        await orderService.findCount(matchQuery),
+        req.body.isPaginationRequired
       );
-    //
-    if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
-      matchQuery.$and.push(...datefilterCallbackQuery);
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
     }
-
-    //calander filter
-    //----------------------------
-
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
@@ -4387,18 +4482,15 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
           },
         },
       },
+
       {
         $unset: ["did_data", "callcenterdata", "deleivery_by_data"],
       },
     ];
-
+    // let additionalQuery = [];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
     }
-
-    finalAggregateQuery.push({
-      $match: matchQuery,
-    });
 
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
@@ -4406,31 +4498,16 @@ exports.allFilterPaginationFirstCall = async (req, res) => {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
-    }
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.order,
-      userRoleData,
-      actionType.pagination
-    );
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.order,
+    //   userRoleData,
+    //   actionType.pagination
+    // );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, result);
-
-    if (allowedFields?.length) {
+    if (result?.length) {
       return res.status(200).send({
-        data: allowedFields,
+        data: result,
         totalPage: totalpages,
         status: true,
         currentPage: page,
@@ -5206,8 +5283,13 @@ exports.orderStatusChange = async (req, res) => {
       { _id },
       { orderStatus: productStatus.complete }
     );
-    await addToOrderFlow(updatedOrder);
-
+    await addToOrderFlow(
+      updatedOrder?._id,
+      updatedOrder?.orderNumber,
+      `Order completed`,
+      updatedOrder.status,
+      req.userData.userName
+    );
     if (!deleted) {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
@@ -5255,6 +5337,7 @@ exports.dealerOrderStatusChange = async (req, res) => {
       firstCallCallBackDate: callBackDate,
     };
     if (status === orderStatusEnum.delivered) {
+      dataToUpdate.deliveredBy = req.userData.userName;
       dataToUpdate.barcodeData = barcodeData?.map((ele) => {
         return { barcodeId: ele.barcodeId, barcode: ele?.barcode };
       });
@@ -5284,8 +5367,13 @@ exports.dealerOrderStatusChange = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Some thing went wrong.");
     }
 
-    await addToOrderFlow(orderUpdated);
-
+    await addToOrderFlow(
+      orderUpdated?._id,
+      orderUpdated?.orderNumber,
+      `Dealer changed order status to ${orderUpdated.status}`,
+      orderUpdated.status,
+      req.userData.userName
+    );
     return res.status(httpStatus.OK).send({
       message: "Updated successfully!",
       status: true,
@@ -5319,8 +5407,14 @@ exports.prePaidApprove = async (req, res) => {
         transactionId: transactionId,
       }
     );
-    await addToOrderFlow(updatedOrder);
 
+    await addToOrderFlow(
+      updatedOrder?._id,
+      updatedOrder?.orderNumber,
+      `Prepaid order approved transaction ID is : ${updatedOrder?.transactionId}`,
+      updatedOrder.status,
+      req.userData.userName
+    );
     return res.status(httpStatus.OK).send({
       message: "Approved!",
       status: true,

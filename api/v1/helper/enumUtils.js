@@ -213,6 +213,30 @@ const orderStatusEnum = Object.freeze({
   cancel: "CANCEL",
 });
 
+const orderFlowStatusEnum = Object.freeze({
+  fresh: "FRESH",
+  all: "ALL",
+  prepaid: "PREPAID",
+  delivered: "DELIVERED",
+  doorCancelled: "DOORCANCELLED",
+  hold: "HOLD",
+  psc: "PSC",
+  una: "UNA",
+  pnd: "PND",
+  urgent: "URGENT",
+  nonAction: "NON_ACTION",
+  rto: "RTO",
+  inquiry: "INQUIRY",
+  reattempt: "REATTEMPT",
+  deliveryOutOfNetwork: "DELIVERYOUTOFNETWORK",
+  intransit: "INTRANSIT",
+  ndr: "NDR",
+  closed: "CLOSED",
+  cancel: "CANCEL",
+  autoMappedTODealer: "AUTOMAPPEDTODEALER",
+  autoMappedTOWarehouse: "AUTOMAPPEDTOWAREHOUSE",
+});
+
 const dealerReasonEnum = Object.freeze({
   deliveredSuccessfully: "DELIVEREDSUCCESSFULLY",
   deliveryOutOfNetwork: "DELIVERYOUTOFNETWORK",
@@ -677,4 +701,5 @@ module.exports = {
   webLeadType,
   courierType,
   transportType,
+  orderFlowStatusEnum,
 };

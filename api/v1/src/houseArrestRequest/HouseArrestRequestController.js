@@ -164,15 +164,20 @@ exports.add = async (req, res) => {
 
     // updating order with mbk number
     let updatedOrder = await orderInquiryService?.getOneAndUpdate(
-      { orderNumber: parseInt(orderNumber), isActive: true, isDeleted: false },
+      { orderNumber: parseInt(orderNumber) },
       {
         $set: {
           orderMBKNumber: mbkNumber,
         },
       }
     );
-    await addToOrderFlow(updatedOrder);
-
+    await addToOrderFlow(
+      updatedOrder?._id,
+      updatedOrder?.orderNumber,
+      `House arrest case order MBK Number is : ${mbkNumber}`,
+      updatedOrder.status,
+      req.userData.userName
+    );
     //------------------create data-------------------
     let dataCreated = await houseArrestRequestService.createNewData({
       orderNumber,

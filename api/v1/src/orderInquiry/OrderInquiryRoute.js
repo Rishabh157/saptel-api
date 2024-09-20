@@ -280,28 +280,28 @@ router.post(
 );
 
 //===============create new document===============
-router.post(
-  "/add",
-  authCheckMiddleware,
-  // validate(orderValidation.create),
-  orderController.add
-);
+// router.post(
+//   "/add",
+//   authCheckMiddleware,
+//   // validate(orderValidation.create),
+//   orderController.add
+// );
 
 // bilk upload
-router.post(
-  "/bulk-upload",
-  // authCheckMiddleware,
-  // validate(orderValidation.create),
-  orderController.bulkAdd
-);
+// router.post(
+//   "/bulk-upload",
+//   // authCheckMiddleware,
+//   // validate(orderValidation.create),
+//   orderController.bulkAdd
+// );
 
 // order add for e-commerce
-router.put(
-  "/e-commerce/add",
-  authCheckMiddleware,
-  validate(orderValidation.ecomValidation),
-  orderController.add
-);
+// router.put(
+//   "/e-commerce/add",
+//   authCheckMiddleware,
+//   validate(orderValidation.ecomValidation),
+//   orderController.add
+// );
 //===============update document===============
 
 router.put(

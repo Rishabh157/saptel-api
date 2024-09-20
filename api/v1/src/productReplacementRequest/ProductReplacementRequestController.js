@@ -878,7 +878,13 @@ exports.accountApproval = async (req, res) => {
           companyId: updatedData?.companyId,
         });
 
-        await addToOrderFlow(updatedData);
+        await addToOrderFlow(
+          orderInquiry?._id,
+          orderInquiry?.orderNumber,
+          `FRESH Replacement order created against complaint number : ${complaintNumber}`,
+          orderInquiry.status,
+          req.userData.userName
+        );
       } else {
         await complaintService?.getOneAndUpdate(
           { complaintNumber: complaintNumber },

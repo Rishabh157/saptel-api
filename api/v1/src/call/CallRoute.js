@@ -59,7 +59,7 @@ router.put(
   "/auth/:id",
   authCheckMiddleware,
   validate(callValidation.update),
-  callController.updateAuth
+  callController.update
 );
 
 /**

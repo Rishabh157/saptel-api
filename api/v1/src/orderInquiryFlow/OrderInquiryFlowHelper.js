@@ -5,15 +5,20 @@ const { errorRes } = require("../../../utils/resError");
 const ApiError = require("../../../utils/apiErrorUtils");
 const orderFlowService = require("./OrderInquiryFlowService");
 
-const addToOrderFlow = async (order) => {
+const addToOrderFlow = async (
+  orderId,
+  orderReferenceNumber,
+  remark,
+  status,
+  createdBy
+) => {
   try {
-    order = JSON.parse(JSON.stringify(order));
-    order["orderId"] = order._id;
-
-    delete order._id;
-
     let addOrderLog = await orderFlowService.createNewData({
-      ...order,
+      orderId,
+      orderReferenceNumber,
+      remark,
+      status,
+      createdBy,
     });
     if (!addOrderLog) {
       throw new ApiError(httpStatus.OK, "Something went wrong..");

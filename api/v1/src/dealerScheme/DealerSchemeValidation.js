@@ -111,6 +111,20 @@ const get = {
     .optional(),
 };
 
+// get by pincode
+
+const geserviceability = {
+  body: Joi.object().keys({
+    pincode: Joi.string().allow(null),
+    dealerId: Joi.string().custom(commonValidation.objectId).allow(null),
+    schemeId: Joi.string().custom(commonValidation.objectId).allow(null),
+  }),
+  query: Joi.object().keys({
+    page: Joi.number(),
+    limit: Joi.number(),
+  }),
+};
+
 /**
  * get a document
  */
@@ -166,4 +180,5 @@ module.exports = {
   getDealerBySchemeAndPincode,
   schemeToDealer,
   DealerToscheme,
+  geserviceability,
 };

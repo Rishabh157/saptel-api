@@ -18,6 +18,14 @@ router.get(
   dealerSchemeController.get
 );
 
+// get all by pincode
+router.post(
+  "/check-serviceability",
+  authCheckMiddleware,
+  validate(dealerSchemeValidation.geserviceability),
+  dealerSchemeController.geserviceability
+);
+
 /**
  * get one document
  */

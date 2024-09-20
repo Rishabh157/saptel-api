@@ -674,6 +674,9 @@ exports.allFilterPagination = async (req, res) => {
           "b_pincode_name",
         ],
       },
+      {
+        $project: { password: 0 },
+      },
     ];
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
@@ -913,6 +916,9 @@ exports.get = async (req, res) => {
           "b_district_name",
           "b_pincode_name",
         ],
+      },
+      {
+        $project: { password: 0 },
       },
     ];
 

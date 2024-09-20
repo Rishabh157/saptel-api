@@ -33,6 +33,7 @@ const {
   paymentModeType,
   fakeOrderDisposition,
   webLeadStatusEnum,
+  orderFlowStatusEnum,
 } = require("../../helper/enumUtils");
 
 const {
@@ -230,8 +231,17 @@ const createOrderInQueue = async (data) => {
     });
 
     // Add order to the order flow
-    await addToOrderFlow(orderInquiry);
-
+    let orderFlow = await addToOrderFlow(
+      orderInquiry?._id,
+      orderInquiry?.orderNumber,
+      orderInquiry?.assignDealerId
+        ? "Order automapped to dealer"
+        : orderInquiry?.assignWarehouseId
+        ? "Order automapped to warehouse"
+        : "Order added in batch for further mapping!",
+      orderInquiry.status,
+      agentName
+    );
     // Send confirmation message if needed
     // if (flag || prepaidOrderFlag) {
     //   await axios.post(

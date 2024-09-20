@@ -35,6 +35,6 @@ const DealerSchemeSchema = new mongoose.Schema(
   }
 );
 
-const searchKeys = ["dealerId", "details", "schemeName", "price"];
+const searchKeys = ["schemeName"];
 module.exports = mongoose.model("DealerScheme", DealerSchemeSchema);
 module.exports.searchKeys = [...searchKeys];

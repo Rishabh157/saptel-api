@@ -643,6 +643,152 @@ exports.get = async (req, res) => {
   }
 };
 
+// get by pincode
+exports.geserviceability = async (req, res) => {
+  try {
+    const { pincode, dealerId, schemeId } = req.body;
+    const { companyId } = req.userData;
+
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1; // Default page is 1
+    const limit = parseInt(req.query.limit) || 10; // Default limit is 10
+    const skip = (page - 1) * limit; // Skip logic
+
+    // Build the match query dynamically
+    let matchQuery = {
+      companyId: new mongoose.Types.ObjectId(companyId),
+    };
+
+    // Add conditions only if they exist
+    if (pincode != null) {
+      matchQuery.pincodes = {
+        $in: Array.isArray(pincode) ? pincode : [pincode],
+      };
+    }
+
+    if (dealerId != null) {
+      matchQuery.dealerId = new mongoose.Types.ObjectId(dealerId);
+    }
+
+    if (schemeId != null) {
+      matchQuery.schemeId = new mongoose.Types.ObjectId(schemeId);
+    }
+
+    // Count total documents for pagination
+    const totalDocuments = await dealerSchemeService.findCount(matchQuery);
+
+    // Run aggregation query with pagination
+    let dataExist = await dealerSchemeService.aggregateQuery([
+      { $match: matchQuery },
+      { $skip: skip }, // Skip previous pages
+      { $limit: limit }, // Limit results to the page size
+      {
+        $lookup: {
+          from: "schemes",
+          localField: "schemeId",
+          foreignField: "_id",
+          as: "scheme_data",
+          pipeline: [
+            {
+              $project: {
+                schemeName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "dealers",
+          localField: "dealerId",
+          foreignField: "_id",
+          as: "dealer_data",
+          pipeline: [
+            {
+              $project: {
+                dealerCode: 1,
+                firstName: 1,
+                lastName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          schemeName: {
+            $arrayElemAt: ["$scheme_data.schemeName", 0],
+          },
+          dealerCode: {
+            $arrayElemAt: ["$dealer_data.dealerCode", 0],
+          },
+          dealerName: {
+            $concat: [
+              { $arrayElemAt: ["$dealer_data.firstName", 0] },
+              " ",
+              { $arrayElemAt: ["$dealer_data.lastName", 0] },
+            ],
+          },
+        },
+      },
+      {
+        $unset: ["scheme_data", "dealer_data"],
+      },
+      {
+        $project: {
+          dealerId: 1,
+          schemeId: 1,
+          companyId: 1,
+          isDeleted: 1,
+          isActive: 1,
+          schemeName: 1,
+          dealerCode: 1,
+          dealerName: 1,
+          pincodes: {
+            $cond: {
+              if: { $and: [{ $ne: [pincode, null] }, { $ne: [pincode, []] }] }, // If pincode is provided (non-null and non-empty array)
+              then: {
+                $filter: {
+                  input: "$pincodes",
+                  as: "pincode",
+                  cond: { $eq: ["$$pincode", pincode] }, // Show only the matching pincode
+                },
+              },
+              else: "$pincodes", // Otherwise, show all pincodes
+            },
+          },
+        },
+      },
+    ]);
+
+    // Check if data exists
+    if (!dataExist.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    }
+
+    // Return paginated response
+    return res.status(httpStatus.OK).send({
+      data: dataExist,
+      totalPage: Math.ceil(totalDocuments / limit),
+      status: true,
+      currentPage: page,
+      totalItem: totalDocuments,
+      pageSize: limit,
+      message: "Data Found",
+      code: "OK",
+      issue: null,
+    });
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.error(errData.resData); // Use error logging for better visibility
+    const { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //single view api
 exports.getById = async (req, res) => {
   try {

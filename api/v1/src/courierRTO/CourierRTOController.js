@@ -107,7 +107,13 @@ exports.add = async (req, res) => {
     }
 
     // Add to order flow
-    await addToOrderFlow(updateOrder);
+    await addToOrderFlow(
+      updateOrder?._id,
+      updateOrder?.orderNumber,
+      "RTO marked",
+      updateOrder.status,
+      req.userData.userName
+    );
 
     // Determine barcode status based on requestStatus
     const barcodeStatusMap = {
@@ -234,7 +240,13 @@ exports.bulkUpload = async (req, res) => {
         { $set: { status: orderStatusEnum.rto } }
       );
       if (updateOrder) {
-        await addToOrderFlow(updateOrder);
+        await addToOrderFlow(
+          updateOrder?._id,
+          updateOrder?.orderNumber,
+          "RTO marked",
+          updateOrder.status,
+          req.userData.userName
+        );
       }
 
       let barcodeStatus;

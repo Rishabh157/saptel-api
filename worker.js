@@ -33,9 +33,6 @@ const {
 } = require("./api/v1/helper/enumUtils");
 const { default: axios } = require("axios");
 
-const {
-  addToOrderFlow,
-} = require("./api/v1/src/orderInquiryFlow/OrderInquiryFlowHelper");
 const { createOrderInQueue } = require("./api/v1/src/call/CreateOrderHelper");
 // Configure the Redis connection
 const orderWorker = new Worker(

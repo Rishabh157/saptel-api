@@ -398,6 +398,11 @@ const OrderInquirySchema = new mongoose.Schema(
       type: ObjectId,
       default: null,
     },
+    deliveredBy: {
+      // on delivery boy app use this key when boy deliver order
+      type: String,
+      default: "",
+    },
     preffered_delivery_end_time: {
       type: String,
       required: false,
