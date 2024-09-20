@@ -6,7 +6,6 @@ const DealerSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      lowercase: true,
     },
     firmName: {
       type: String,
