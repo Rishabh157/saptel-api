@@ -75,6 +75,7 @@ const {
 const {
   getCustomerReputation,
   getDateFilterQueryCallBackAndPreferedDate,
+  generateOrderInvoice,
 } = require("./OrderInquiryHelper");
 const { default: axios } = require("axios");
 const {
@@ -1694,6 +1695,8 @@ exports.warehouseOrderDispatch = async (req, res) => {
       barcodeData: barcodes,
       status: orderStatusEnum.intransit,
       orderStatus: productStatus.dispatched,
+      orderInvoice: generateOrderInvoice(order?.orderNumber),
+      orderInvoiceDate: new Date(),
     };
 
     if (type !== preferredCourierPartner.shipyaari) {
@@ -3501,8 +3504,79 @@ exports.getByOrderNumberForInvoice = async (req, res) => {
       {
         $match: {
           orderNumber: parseInt(ordernumber),
-          isDeleted: false,
-          // status: orderStatusEnum.delivered,
+        },
+      },
+      {
+        $lookup: {
+          from: "companies",
+          localField: "companyId",
+          foreignField: "_id",
+          as: "companyDetail",
+        },
+      },
+
+      {
+        $addFields: {
+          itemName: {
+            $arrayElemAt: ["$item_name.itemName", 0],
+          },
+          companyDetails: {
+            $arrayElemAt: ["$companyDetail", 0],
+          },
+        },
+      },
+      {
+        $unset: ["item_name", "companyDetail"],
+      },
+      {
+        $unwind: {
+          path: "$schemeProducts",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no schemeProducts
+        },
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "schemeProducts.productGroupId",
+          foreignField: "_id",
+          as: "productInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$productInfo",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
+        },
+      },
+      {
+        $addFields: {
+          // Add product details directly into schemeProducts
+          "schemeProducts.dealerSalePrice": "$productInfo.dealerSalePrice",
+          "schemeProducts.gst": "$productInfo.gst",
+          "schemeProducts.cgst": "$productInfo.cgst",
+          "schemeProducts.sgst": "$productInfo.sgst",
+          "schemeProducts.igst": "$productInfo.igst",
+          "schemeProducts.utgst": "$productInfo.utgst",
+        },
+      },
+      {
+        $group: {
+          _id: "$_id", // Group by order ID
+          schemeProducts: { $push: "$schemeProducts" },
+          // Include all other fields from the original document
+          mergedData: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              "$mergedData", // Original order document
+              {
+                schemeProducts: "$schemeProducts", // Updated schemeProducts array
+              },
+            ],
+          },
         },
       },
     ];
@@ -4996,20 +5070,14 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       ? req.body.isPaginationRequired
       : true;
     let finalAggregateQuery = [];
+
     let matchQuery = {
       $and: [
         {
-          isDeleted: false,
           assignDealerId: new mongoose.Types.ObjectId(dealerId),
         },
       ],
     };
-    /**
-     * to send only active data on web
-     */
-    if (req.path.includes("/app/") || req.path.includes("/app")) {
-      matchQuery.$and.push({ isActive: true });
-    }
 
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
@@ -5120,6 +5188,32 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
+
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    console.log(finalAggregateQuery, "finalAggregateQuery");
+
+    //-----------------------------------
+    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    console.log(dataFound, "dataFound");
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found here`);
+    }
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        dataFound.length,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
     let additionalQuery = [
       {
         $lookup: {
@@ -5179,30 +5273,6 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
 
     if (additionalQuery.length) {
       finalAggregateQuery.push(...additionalQuery);
-    }
-
-    finalAggregateQuery.push({
-      $match: matchQuery,
-    });
-
-    //-----------------------------------
-    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
-    if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found here`);
-    }
-
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
     }
 
     let result = await orderService.aggregateQuery(finalAggregateQuery);

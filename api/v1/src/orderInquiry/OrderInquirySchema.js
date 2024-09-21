@@ -159,6 +159,11 @@ const OrderInquirySchema = new mongoose.Schema(
       required: false,
       default: "",
     },
+    orderInvoiceDate: {
+      type: String,
+      required: false,
+      default: "",
+    },
     deliveryTimeAndDate: {
       type: String,
       required: false,
@@ -214,6 +219,11 @@ const OrderInquirySchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: false,
+      default: "",
+    },
+    schemeCode: {
+      type: String,
+      trim: true,
       default: "",
     },
     pincodeId: {

@@ -460,17 +460,16 @@ exports.update = async (req, res) => {
       issue: null,
     });
     // }
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
 
     // Handle error response
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-      message: "Something went wrong!",
-      data: null,
-      status: false,
-      code: "ERROR",
-      issue: "API call failed",
-    });
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
   }
 };
 

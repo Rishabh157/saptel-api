@@ -228,6 +228,7 @@ const createOrderInQueue = async (data) => {
       hsnCode: subCatData?.hsnCode,
       companyAddress: isCompanyExists?.address,
       schemeProducts: schemeProductsForOrder,
+      schemeCode: isSchemeExists?.schemeCode,
     });
 
     // Add order to the order flow

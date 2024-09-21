@@ -79,3 +79,13 @@ exports.getDateFilterQueryCallBackAndPreferedDate = (
 
   return queryArray.length ? queryArray : null;
 };
+
+exports.generateOrderInvoice = async (orderNumber) => {
+  const year = new Date().getFullYear().toString().slice(-2); // Get last two digits of the current year
+  const paddedOrderNumber =
+    orderNumber < 100000
+      ? String(orderNumber).padStart(6, "0") // Pad with zeros to ensure 6 digits
+      : orderNumber.toString();
+
+  return `RI-Y${year}-${paddedOrderNumber}`;
+};
