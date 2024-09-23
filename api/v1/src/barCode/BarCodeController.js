@@ -1629,9 +1629,11 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
       additionalQueryForAll
     );
     if (dataExist.length === 0) {
+      console.log(additionalQueryForOne, "additionalQueryForOne");
       const foundBarcode = await barCodeService.aggregateQuery(
         additionalQueryForOne
       );
+      console.log(foundBarcode, "foundBarcode");
       if (foundBarcode[0] !== null && foundBarcode[0] !== undefined) {
         ResponseData.push(foundBarcode[0]);
       }
@@ -1949,7 +1951,13 @@ exports.dispatchEcomOrder = async (req, res) => {
     const barcodePromises = barcodes?.map((ele) =>
       barCodeService?.getOneAndUpdate(
         { _id: ele?.barcodeId },
-        { $set: { isFreezed: false, status: barcodeStatusType.inTransit } }
+        {
+          $set: {
+            isFreezed: false,
+            status: barcodeStatusType.inTransit,
+            isFreezed: false,
+          },
+        }
       )
     );
     await Promise.all(barcodePromises);
@@ -3952,7 +3960,7 @@ exports.freezeBarcode = async (req, res) => {
     return res.status(httpStatus.OK).send({
       message: "Successful.",
       status: true,
-      data: successes,
+      data: null,
       code: "OK",
       issue: null,
     });
@@ -4026,6 +4034,7 @@ exports.courierReturnProduct = async (req, res) => {
               status: ele?.condition,
               wareHouseId: whid,
               dealerId: null,
+              isFreezed: false,
             },
           }
         );
@@ -4118,6 +4127,7 @@ exports.updateInventory = async (req, res) => {
             wareHouseId: ele?.wareHouseId,
             vendorId: ele?.vendorId,
             vendorLabel: ele?.vendorLabel,
+            isFreezed: false,
           },
         }
       );
@@ -4205,6 +4215,7 @@ exports.updateWarehouseInventory = async (req, res) => {
             status: barcodeStatusType.atWarehouse,
             wareHouseId: ele?.wareHouseId,
             companyId: ele?.fromCompanyId,
+            isFreezed: false,
           },
         }
       );
@@ -4813,6 +4824,7 @@ exports.rtvOutwardInventory = async (req, res) => {
           $set: {
             status: barcodeStatusType.rtv,
             vendorId: new mongoose.Types.ObjectId(ele?.vendorId),
+            isFreezed: false,
             // wareHouseId: null,
           },
         }
@@ -4977,6 +4989,7 @@ exports.wtwOutwardInventory = async (req, res) => {
           $set: {
             status: barcodeStatusType.wtw,
             wareHouseId: null,
+            isFreezed: false,
           },
         }
       );
@@ -5467,6 +5480,7 @@ exports.wtcOutwardInventory = async (req, res) => {
             status: barcodeStatusType.wtc,
             wareHouseId: null,
             companyId: ele?.toCompanyId,
+            isFreezed: false,
           },
         }
       );
@@ -5607,7 +5621,13 @@ exports.wtsOutwardInventory = async (req, res) => {
 
       const dataUpdated = await barCodeService.getOneAndUpdate(
         { _id: new mongoose.Types.ObjectId(ele?._id), isUsed: true },
-        { $set: { status: barcodeStatusType.wts, wareHouseId: null } }
+        {
+          $set: {
+            status: barcodeStatusType.wts,
+            wareHouseId: null,
+            isFreezed: false,
+          },
+        }
       );
 
       wtsId.forEach(async (wtsid) => {

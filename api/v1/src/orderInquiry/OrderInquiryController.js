@@ -1680,7 +1680,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
 
         const updatedBarcode = await barcodeService.getOneAndUpdate(
           { _id: barcodeItem.barcodeId, isUsed: true },
-          { $set: { status: barcodeStatusType.inTransit } }
+          { $set: { status: barcodeStatusType.inTransit, isFreezed: false } }
         );
 
         await addToBarcodeFlow(
@@ -1768,6 +1768,7 @@ exports.warehouseManualOrderDispatch = async (req, res) => {
             {
               $set: {
                 status: barcodeStatusType.inTransit,
+                isFreezed: false,
               },
             }
           );
@@ -3514,7 +3515,57 @@ exports.getByOrderNumberForInvoice = async (req, res) => {
           as: "companyDetail",
         },
       },
-
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "assignWarehouseId",
+          foreignField: "_id",
+          as: "warehouseData",
+          pipeline: [
+            {
+              $project: {
+                billingAddress: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "warehouseData.billingAddress.countryId",
+          foreignField: "_id",
+          as: "country_name",
+          pipeline: [{ $project: { countryName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "warehouseData.billingAddress.stateId",
+          foreignField: "_id",
+          as: "state_name",
+          pipeline: [{ $project: { stateName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "warehouseData.billingAddress.districtId",
+          foreignField: "_id",
+          as: "district_name",
+          pipeline: [{ $project: { districtName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "warehouseData.billingAddress.pincodeId",
+          foreignField: "_id",
+          as: "pincode_name",
+          pipeline: [{ $project: { pincode: 1 } }],
+        },
+      },
       {
         $addFields: {
           itemName: {
@@ -3523,10 +3574,39 @@ exports.getByOrderNumberForInvoice = async (req, res) => {
           companyDetails: {
             $arrayElemAt: ["$companyDetail", 0],
           },
+          warehouseBillingInfo: {
+            $mergeObjects: [
+              {
+                $arrayElemAt: ["$warehouseData.billingAddress", 0],
+              },
+              {
+                countryLable: {
+                  $arrayElemAt: ["$country_name.countryName", 0],
+                },
+                stateLable: {
+                  $arrayElemAt: ["$state_name.stateName", 0],
+                },
+                districtLable: {
+                  $arrayElemAt: ["$district_name.districtName", 0],
+                },
+                pincodeLable: {
+                  $arrayElemAt: ["$pincode_name.pincode", 0],
+                },
+              },
+            ],
+          },
         },
       },
       {
-        $unset: ["item_name", "companyDetail"],
+        $unset: [
+          "item_name",
+          "companyDetail",
+          "warehouseData",
+          "country_name",
+          "state_name",
+          "district_name",
+          "pincode_name",
+        ],
       },
       {
         $unwind: {
@@ -3579,6 +3659,7 @@ exports.getByOrderNumberForInvoice = async (req, res) => {
           },
         },
       },
+      { $unset: ["productInfo"] },
     ];
 
     let dataExist = await orderService.aggregateQuery(additionalQuery);
