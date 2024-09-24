@@ -1685,6 +1685,14 @@ exports.getDealerInvoice = async (req, res) => {
       },
       {
         $lookup: {
+          from: "companies",
+          localField: "companyId",
+          foreignField: "_id",
+          as: "companyDetail",
+        },
+      },
+      {
+        $lookup: {
           from: "dealers",
           localField: "dealerId",
           foreignField: "_id",
@@ -1693,6 +1701,7 @@ exports.getDealerInvoice = async (req, res) => {
             {
               $project: {
                 dealerName: { $concat: ["$firstName", " ", "$lastName"] },
+                "document.panNumber": 1,
               },
             },
           ],
@@ -1752,16 +1761,41 @@ exports.getDealerInvoice = async (req, res) => {
           from: "warehouses",
           localField: "dealerWareHouseId",
           foreignField: "_id",
-          as: "warehouses_name",
+          as: "dealer_warehouse",
           pipeline: [
-            { $project: { wareHouseName: 1, billingAddress: 1, email: 1 } },
+            {
+              $project: {
+                wareHouseName: 1,
+                billingAddress: 1,
+                email: 1,
+                wareHouseCode: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "companyWareHouseId",
+          foreignField: "_id",
+          as: "company_warehouse",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                billingAddress: 1,
+                email: 1,
+                wareHouseCode: 1,
+              },
+            },
           ],
         },
       },
       {
         $lookup: {
           from: "countries",
-          localField: "dealerWareHouseId.billingAddress.countryId",
+          localField: "dealer_warehouse.billingAddress.countryId",
           foreignField: "_id",
           as: "dealer_country_name",
         },
@@ -1769,7 +1803,7 @@ exports.getDealerInvoice = async (req, res) => {
       {
         $lookup: {
           from: "states",
-          localField: "dealerWareHouseId.billingAddress.stateId",
+          localField: "dealer_warehouse.billingAddress.stateId",
           foreignField: "_id",
           as: "dealer_state_name",
         },
@@ -1777,7 +1811,7 @@ exports.getDealerInvoice = async (req, res) => {
       {
         $lookup: {
           from: "districts",
-          localField: "dealerWareHouseId.billingAddress.districtId",
+          localField: "dealer_warehouse.billingAddress.districtId",
           foreignField: "_id",
           as: "dealer_district_name",
         },
@@ -1785,7 +1819,7 @@ exports.getDealerInvoice = async (req, res) => {
       {
         $lookup: {
           from: "pincodes",
-          localField: "dealerWareHouseId.billingAddress.pincodeId",
+          localField: "dealer_warehouse.billingAddress.pincodeId",
           foreignField: "_id",
           as: "dealer_pincode_name",
         },
@@ -1802,14 +1836,51 @@ exports.getDealerInvoice = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "productGroup.productSubCategoryId",
+          foreignField: "_id",
+          as: "productSubCategoryInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$productSubCategoryInfo",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
+        },
+      },
+      {
+        $unwind: {
+          path: "$productGroup",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
+        },
+      },
+      {
         $addFields: {
-          "productSalesOrder.gst": { $arrayElemAt: ["$productGroup.gst", 0] },
-          "productSalesOrder.sgst": { $arrayElemAt: ["$productGroup.sgst", 0] },
-          "productSalesOrder.igst": { $arrayElemAt: ["$productGroup.igst", 0] },
-          "productSalesOrder.cgst": { $arrayElemAt: ["$productGroup.cgst", 0] },
-          "productSalesOrder.ugst": { $arrayElemAt: ["$productGroup.ugst", 0] },
-          "productSalesOrder.gstin": {
-            $arrayElemAt: ["$productGroup.gstin", 0],
+          "productSalesOrder.dealerSalePrice": "$productGroup.dealerSalePrice",
+          "productSalesOrder.gst": "$productGroup.gst",
+          "productSalesOrder.cgst": "$productGroup.cgst",
+          "productSalesOrder.sgst": "$productGroup.sgst",
+          "productSalesOrder.igst": "$productGroup.igst",
+          "productSalesOrder.utgst": "$productGroup.utgst",
+          "productSalesOrder.productGroupLabel": "$productGroup.groupName",
+          "productSalesOrder.productSubCategory":
+            "$productSubCategoryInfo.subCategoryName",
+          "productSalesOrder.hsnCode": "$productSubCategoryInfo.hsnCode",
+          "dealer_warehouse.billingAddress.dealerCountryName": {
+            $arrayElemAt: ["$dealer_country_name.countryName", 0],
+          },
+          "dealer_warehouse.billingAddress.dealerStateName": {
+            $arrayElemAt: ["$dealer_state_name.stateName", 0],
+          },
+          "dealer_warehouse.billingAddress.dealerDistrictName": {
+            $arrayElemAt: ["$dealer_district_name.districtName", 0],
+          },
+          "dealer_warehouse.billingAddress.dealerPincodeName": {
+            $arrayElemAt: ["$dealer_pincode_name.pincode", 0],
+          },
+          "dealer_warehouse.billingAddress.panNumber": {
+            $arrayElemAt: ["$dealer_name.document.panNumber", 0],
           },
         },
       },
@@ -1819,15 +1890,20 @@ exports.getDealerInvoice = async (req, res) => {
           productSalesOrder: { $push: "$productSalesOrder" },
           dealer_name: { $first: "$dealer_name" },
           companyWarehouseName: { $first: "$companyWarehouseName" },
-          warehouses_name: { $first: "$warehouses_name" },
+          dealer_warehouse: { $first: "$dealer_warehouse" },
+          company_warehouse: { $first: "$company_warehouse" },
           country_name: { $first: "$country_name" },
           state_name: { $first: "$state_name" },
           district_name: { $first: "$district_name" },
           pincode_name: { $first: "$pincode_name" },
-          dealer_country_name: { $first: "$country_name" },
-          dealer_state_name: { $first: "$state_name" },
-          dealer_district_name: { $first: "$district_name" },
-          dealer_pincode_name: { $first: "$pincode_name" },
+          // dealer_country_name: { $first: "$country_name" },
+          // dealer_state_name: { $first: "$state_name" },
+          // dealer_district_name: { $first: "$district_name" },
+          // dealer_pincode_name: { $first: "$pincode_name" },
+          companyDetail: { $first: "$companyDetail" },
+          invoiceDate: { $first: "$invoiceDate" },
+          invoiceNumber: { $first: "$invoiceNumber" },
+          soNumber: { $first: "$soNumber" },
         },
       },
       {
@@ -1835,6 +1911,12 @@ exports.getDealerInvoice = async (req, res) => {
           dealerLabel: { $arrayElemAt: ["$dealer_name.dealerName", 0] },
           companyWarehouseLabel: {
             $arrayElemAt: ["$companyWarehouseName.wareHouseName", 0],
+          },
+          dealerWarehouse: {
+            $arrayElemAt: ["$dealer_warehouse", 0],
+          },
+          companyWarehouse: {
+            $arrayElemAt: ["$company_warehouse", 0],
           },
           companyWarehouseBillingAddress: {
             $arrayElemAt: ["$companyWarehouseName.billingAddress", 0],
@@ -1874,13 +1956,16 @@ exports.getDealerInvoice = async (req, res) => {
           warehouseEmail: {
             $arrayElemAt: ["$warehouses_name.email", 0],
           },
+          companyDetails: {
+            $arrayElemAt: ["$companyDetail", 0],
+          },
         },
       },
       {
         $unset: [
           "dealer_name",
           "companyWarehouseName",
-          "warehouses_name",
+          "dealer_warehouse",
           "country_name",
           "state_name",
           "district_name",
@@ -1890,6 +1975,7 @@ exports.getDealerInvoice = async (req, res) => {
           "dealer_district_name",
           "dealer_pincode_name",
           "productGroup",
+          "companyDetail",
         ],
       },
     ];

@@ -3622,9 +3622,24 @@ exports.getByOrderNumberForInvoice = async (req, res) => {
           as: "productInfo",
         },
       },
+
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "productInfo.productSubCategoryId",
+          foreignField: "_id",
+          as: "productSubCategoryInfo",
+        },
+      },
       {
         $unwind: {
           path: "$productInfo",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
+        },
+      },
+      {
+        $unwind: {
+          path: "$productSubCategoryInfo",
           preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
         },
       },
@@ -3637,6 +3652,9 @@ exports.getByOrderNumberForInvoice = async (req, res) => {
           "schemeProducts.sgst": "$productInfo.sgst",
           "schemeProducts.igst": "$productInfo.igst",
           "schemeProducts.utgst": "$productInfo.utgst",
+          "schemeProducts.productSubCategory":
+            "$productSubCategoryInfo.subCategoryName",
+          "schemeProducts.hsnCode": "$productSubCategoryInfo.hsnCode",
         },
       },
       {

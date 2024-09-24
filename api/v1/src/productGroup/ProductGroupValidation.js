@@ -11,6 +11,7 @@ const create = {
     groupName: Joi.string().lowercase().required(),
     dealerSalePrice: Joi.number().required(),
     productGroupCode: Joi.string().uppercase().max(4).required(),
+    productSubCategoryId: Joi.required().custom(commonValidation.objectId),
     gst: Joi.number(),
     cgst: Joi.number(),
     sgst: Joi.number(),
@@ -30,6 +31,7 @@ const update = {
   body: Joi.object().keys({
     groupName: Joi.string().lowercase().required(),
     dealerSalePrice: Joi.number().required(),
+    productSubCategoryId: Joi.required().custom(commonValidation.objectId),
     gst: Joi.number(),
     cgst: Joi.number(),
     sgst: Joi.number(),

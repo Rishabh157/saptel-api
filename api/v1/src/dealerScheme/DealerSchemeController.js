@@ -763,13 +763,21 @@ exports.geserviceability = async (req, res) => {
     ]);
 
     // Check if data exists
+    let defaultWarehouse;
     if (!dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Data not found.");
+      defaultWarehouse = await warehouseService?.aggregateQuery([
+        {
+          $match: {
+            isDefault: true,
+            companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+          },
+        },
+      ]);
     }
 
     // Return paginated response
     return res.status(httpStatus.OK).send({
-      data: dataExist,
+      data: dataExist?.length ? dataExist : defaultWarehouse,
       totalPage: Math.ceil(totalDocuments / limit),
       status: true,
       currentPage: page,

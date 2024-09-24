@@ -8,6 +8,11 @@ const ProductGroupSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    productSubCategoryId: {
+      type: ObjectId,
+      required: true,
+      trim: true,
+    },
     productGroupCode: {
       type: String,
       required: true,

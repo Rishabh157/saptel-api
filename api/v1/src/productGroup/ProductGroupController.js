@@ -3,6 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const productGroupService = require("./ProductGroupService");
+const productSubCategoryService = require("../productSubCategory/ProductSubCategoryService");
 const companyService = require("../company/CompanyService");
 const { searchKeys } = require("./ProductGroupSchema");
 const { errorRes } = require("../../../utils/resError");
@@ -33,7 +34,8 @@ const { moduleType, actionType } = require("../../helper/enumUtils");
 //add start
 exports.add = async (req, res) => {
   try {
-    let { groupName, companyId, dealerSalePrice } = req.body;
+    let { groupName, companyId, dealerSalePrice, productSubCategoryId } =
+      req.body;
 
     const isCompanyExists = await companyService.findCount({
       _id: companyId,
@@ -41,6 +43,15 @@ exports.add = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+
+    const isProductSubCategoryExists =
+      await productSubCategoryService.findCount({
+        _id: productSubCategoryId,
+        isDeleted: false,
+      });
+    if (!isProductSubCategoryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid ProductSubCategory");
     }
 
     /**
@@ -77,7 +88,7 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { groupName, companyId } = req.body;
+    let { groupName, companyId, productSubCategoryId } = req.body;
 
     let idToBeSearch = req.params.id;
 
@@ -87,6 +98,14 @@ exports.update = async (req, res) => {
     });
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
+    }
+    const isProductSubCategoryExists =
+      await productSubCategoryService.findCount({
+        _id: productSubCategoryId,
+        isDeleted: false,
+      });
+    if (!isProductSubCategoryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid ProductSubCategory");
     }
 
     let dataExist = await productGroupService.isExists(
