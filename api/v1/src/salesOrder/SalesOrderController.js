@@ -1918,9 +1918,9 @@ exports.getDealerInvoice = async (req, res) => {
           companyWarehouse: {
             $arrayElemAt: ["$company_warehouse", 0],
           },
-          companyWarehouseBillingAddress: {
-            $arrayElemAt: ["$companyWarehouseName.billingAddress", 0],
-          },
+          // companyWarehouseBillingAddress: {
+          //   $arrayElemAt: ["$companyWarehouseName.billingAddress", 0],
+          // },
           warehouseLabel: {
             $arrayElemAt: ["$warehouses_name.wareHouseName", 0],
           },
@@ -1965,6 +1965,7 @@ exports.getDealerInvoice = async (req, res) => {
         $unset: [
           "dealer_name",
           "companyWarehouseName",
+          "company_warehouse",
           "dealer_warehouse",
           "country_name",
           "state_name",
