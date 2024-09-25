@@ -229,6 +229,7 @@ const createOrderInQueue = async (data) => {
       companyAddress: isCompanyExists?.address,
       schemeProducts: schemeProductsForOrder,
       schemeCode: isSchemeExists?.schemeCode,
+      isFreezed: false,
     });
 
     // Add order to the order flow

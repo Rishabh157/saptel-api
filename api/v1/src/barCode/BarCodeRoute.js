@@ -147,11 +147,12 @@ router.get(
 );
 
 router.get(
-  "/dispatch-warehouse-order-barcode/:wid/barcode/:barcode/status/:status",
+  "/dispatch-warehouse-order-barcode/:wid/barcode/:barcode/status/:status/:getorder",
   authCheckMiddleware,
   validate(barCodeValidation.getDispatchBarcode),
   barCodeController.getDispatchBarcode
 );
+
 router.get(
   "/dispatch-ecom-order-barcode/:barcode/type/:type",
   authCheckMiddleware,

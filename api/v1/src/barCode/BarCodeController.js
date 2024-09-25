@@ -1748,6 +1748,7 @@ exports.getDispatchBarcode = async (req, res) => {
     const barcodeToBeSearch = req.params.barcode;
     const warehouseId = req.params.wid;
     const status = req.params.status;
+    const getorder = req.params.getorder;
     console.log(
       barcodeToBeSearch,
       barcodeStatusType.atWarehouse,
@@ -1773,29 +1774,36 @@ exports.getDispatchBarcode = async (req, res) => {
     console.log(barcode[0]?.productGroupId, "--------");
 
     // query change according to courier
-    let query;
-    if (status === preferredCourierPartner.shipyaari) {
-      query = {
-        "schemeProducts.productGroupId": barcode[0]?.productGroupId,
-        orderStatus: productStatus.notDispatched,
-        assignDealerId: null,
-        assignWarehouseId: warehouseId,
-        orderAssignedToCourier: status,
-      };
-    } else {
-      query = {
-        "schemeProducts.productGroupId": barcode[0]?.productGroupId,
-        orderStatus: productStatus.notDispatched,
-        assignDealerId: null,
-        assignWarehouseId: warehouseId,
-        orderAssignedToCourier: status,
-        awbNumber: "NA",
-      };
-    }
+    let orderData;
+    if (getorder) {
+      let query;
+      if (status === preferredCourierPartner.shipyaari) {
+        query = {
+          "schemeProducts.productGroupId": barcode[0]?.productGroupId,
+          orderStatus: productStatus.notDispatched,
+          assignDealerId: null,
+          assignWarehouseId: warehouseId,
+          orderAssignedToCourier: status,
+          isFreezed: false,
+        };
+      } else {
+        query = {
+          "schemeProducts.productGroupId": barcode[0]?.productGroupId,
+          orderStatus: productStatus.notDispatched,
+          assignDealerId: null,
+          assignWarehouseId: warehouseId,
+          orderAssignedToCourier: status,
+          awbNumber: "NA",
+          isFreezed: false,
+        };
+      }
 
-    let orderData = await orderInquiryService?.getOneByMultiField(query);
-    if (!orderData) {
-      throw new ApiError(httpStatus.OK, "No orders for this product");
+      orderData = await orderInquiryService?.getOneAndUpdate(query, {
+        $set: { isFreezed: true },
+      });
+      if (!orderData) {
+        throw new ApiError(httpStatus.OK, "No orders for this product");
+      }
     }
 
     if (barcode.length === 0 || barcode[0] === undefined) {
@@ -1806,11 +1814,11 @@ exports.getDispatchBarcode = async (req, res) => {
         status: true,
         data: {
           barcode: barcode[0],
-          products: orderData?.schemeProducts,
-          schemeQuantity: orderData?.shcemeQuantity,
-          orderNumber: orderData?.orderNumber,
-          customerName: orderData?.customerName,
-          address: orderData?.autoFillingShippingAddress,
+          products: orderData?.schemeProducts || null,
+          schemeQuantity: orderData?.shcemeQuantity || null,
+          orderNumber: orderData?.orderNumber || null,
+          customerName: orderData?.customerName || null,
+          address: orderData?.autoFillingShippingAddress || null,
         },
 
         code: "OK",

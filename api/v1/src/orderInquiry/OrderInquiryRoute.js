@@ -23,6 +23,14 @@ router.put(
   orderController.warehouseOrderDispatch
 );
 
+//unfreeze order
+router.put(
+  "/unfreeze-order/:ordernumber",
+  authCheckMiddleware,
+  validate(orderValidation.unfreezeOrder),
+  orderController.unfreezeOrder
+);
+
 router.put(
   "/warehouse-manual-order-dispatch",
   authCheckMiddleware,

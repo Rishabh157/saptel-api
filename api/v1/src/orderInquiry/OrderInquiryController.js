@@ -1592,7 +1592,7 @@ exports.updateOrderStatus = async (req, res) => {
 exports.warehouseOrderDispatch = async (req, res) => {
   try {
     const { orderNumber, barcodes, type } = req.body;
-
+    console.log("----------");
     // Find the order
     const order = await orderService.getOneByMultiField({
       orderNumber,
@@ -1697,6 +1697,7 @@ exports.warehouseOrderDispatch = async (req, res) => {
       orderStatus: productStatus.dispatched,
       orderInvoice: generateOrderInvoice(order?.orderNumber),
       orderInvoiceDate: new Date(),
+      isFreezed: false,
     };
 
     if (type !== preferredCourierPartner.shipyaari) {
@@ -1726,6 +1727,41 @@ exports.warehouseOrderDispatch = async (req, res) => {
     const errData = errorRes(err);
     logger.info(errData.resData);
     const { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// unfreeze order
+
+exports.unfreezeOrder = async (req, res) => {
+  try {
+    const orderNumber = req.params.ordernumber;
+
+    orderData = await orderService?.getOneAndUpdate(
+      { orderNumber: orderNumber },
+      {
+        $set: { isFreezed: false },
+      }
+    );
+
+    if (!orderData.length) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successful.",
+        status: true,
+        data: null,
+
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });

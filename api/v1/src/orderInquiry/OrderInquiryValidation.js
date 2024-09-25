@@ -502,6 +502,12 @@ const orderStatusChange = {
   }),
 };
 
+const unfreezeOrder = {
+  params: Joi.object().keys({
+    ordernumber: Joi.number(),
+  }),
+};
+
 const dealerOrderStatusChange = {
   params: Joi.object().keys({
     id: Joi.string().custom(commonValidation.objectId),
@@ -590,4 +596,5 @@ module.exports = {
   generateOrderInvoice,
   warehouseOrderDispatch,
   warehouseManualOrderDispatch,
+  unfreezeOrder,
 };

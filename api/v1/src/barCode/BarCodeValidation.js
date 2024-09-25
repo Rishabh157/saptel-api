@@ -410,6 +410,7 @@ const getDispatchBarcode = {
     barcode: Joi.string(),
     status: Joi.string(),
     wid: Joi.string().custom(commonValidation.objectId),
+    getorder: Joi.boolean(),
   }),
 };
 

@@ -38,6 +38,7 @@ router.get(
   validate(salesOrderValidation.getDocument),
   salesOrderController.getDealerInvoice
 );
+
 /**
  * get by dealer id
  */
