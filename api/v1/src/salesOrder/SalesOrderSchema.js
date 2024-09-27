@@ -147,10 +147,7 @@ const SalesOrderSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    lrNo: {
-      type: String,
-      default: "",
-    },
+
     totalWeight: {
       type: Number,
       default: null,

@@ -34,12 +34,12 @@ const {
   checkFreezeQuantity,
   addRemoveFreezeQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
+const { getWTWCode } = require("./wtwMasterHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
     let {
-      wtNumber,
       fromWarehouseId,
       companyId,
       toWarehouseId,
@@ -74,10 +74,8 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await wtwMasterService.isExists([{ wtNumber }]);
-    if (dataExist.exists && dataExist.existsSummary) {
-      throw new ApiError(httpStatus.OK, dataExist.existsSummary);
-    }
+    let wtNumber = await getWTWCode(companyId);
+
     const output = productSalesOrder.map((po) => {
       return {
         wtNumber: wtNumber,

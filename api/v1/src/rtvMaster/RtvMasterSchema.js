@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { productStatus } = require("../../helper/enumUtils");
 const RtvMasterSchema = new mongoose.Schema(
   {
-    rtvNumber: { type: String, required: false, trim: true, lowercase: true },
+    rtvNumber: { type: String, required: false, trim: true },
     vendorId: { type: ObjectId, required: true, trim: true },
     warehouseId: { type: ObjectId, required: true, trim: true },
     firstApprovedById: {

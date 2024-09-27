@@ -34,12 +34,12 @@ const {
   checkFreezeQuantity,
   addRemoveFreezeQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
+const { getWTCCode } = require("./wtcMasterHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
     let {
-      wtcNumber,
       fromWarehouseId,
       companyId,
       toCompanyId,
@@ -82,6 +82,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
+    let wtcNumber = await getWTCCode(companyId);
     let dataExist = await wtcMasterService.isExists([{ wtcNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);

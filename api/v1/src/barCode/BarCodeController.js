@@ -1749,11 +1749,7 @@ exports.getDispatchBarcode = async (req, res) => {
     const warehouseId = req.params.wid;
     const status = req.params.status;
     const getorder = req.params.getorder;
-    console.log(
-      barcodeToBeSearch,
-      barcodeStatusType.atWarehouse,
-      ",,,,,,,,,,,,,,,,,,,,,,,,,"
-    );
+
     let additionalQuery = [
       {
         $match: {
@@ -1765,13 +1761,9 @@ exports.getDispatchBarcode = async (req, res) => {
     ];
     let barcode = [];
     const foundBarcode = await barCodeService.aggregateQuery(additionalQuery);
-    console.log(foundBarcode, "////////////");
     if (foundBarcode !== null) {
       barcode.push(foundBarcode[0]);
     }
-    console.log(barcode, "00000000000");
-
-    console.log(barcode[0]?.productGroupId, "--------");
 
     // query change according to courier
     let orderData;
@@ -4594,7 +4586,7 @@ exports.outwardInventory = async (req, res) => {
       transportDocNo,
       documnetDate,
       roadPermitNumber,
-      lrNo,
+
       totalWeight,
       totalPackages,
       fileUrl,
@@ -4727,7 +4719,7 @@ exports.outwardInventory = async (req, res) => {
                 transportDocNo,
                 documnetDate,
                 roadPermitNumber,
-                lrNo,
+
                 totalWeight,
                 totalPackages,
                 fileUrl,

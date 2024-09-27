@@ -34,18 +34,13 @@ const {
   checkFreezeQuantity,
   addRemoveFreezeQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
+const { getWTSCode } = require("./wtsMasterHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      wtsNumber,
-      fromWarehouseId,
-      companyId,
-      toName,
-      productSalesOrder,
-      remark,
-    } = req.body;
+    let { fromWarehouseId, companyId, toName, productSalesOrder, remark } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -67,6 +62,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
+    let wtsNumber = await getWTSCode(companyId);
     let dataExist = await wtsMasterService.isExists([{ wtsNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);

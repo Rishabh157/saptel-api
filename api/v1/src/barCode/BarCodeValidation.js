@@ -131,7 +131,6 @@ const outwardInventory = {
     transportDocNo: Joi.string().required(),
     documnetDate: Joi.string().required(),
     roadPermitNumber: Joi.string().allow(""),
-    lrNo: Joi.string().allow(""),
     totalWeight: Joi.string().allow(""),
     totalPackages: Joi.string().allow(""),
     fileUrl: Joi.string().allow(""),

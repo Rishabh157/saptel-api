@@ -8,7 +8,6 @@ const commonValidation = require("../../helper/CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    wtsNumber: Joi.string(),
     fromWarehouseId: Joi.custom(commonValidation.objectId).required(),
     toName: Joi.string().required(),
     firstApproved: Joi.boolean().allow(null),

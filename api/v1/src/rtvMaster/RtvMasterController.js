@@ -28,18 +28,13 @@ const {
   actionType,
   approvalType,
 } = require("../../helper/enumUtils");
+const { getrtvCode } = require("./RtvMasterHelper");
 
 //add start
 exports.add = async (req, res) => {
   try {
-    let {
-      rtvNumber,
-      vendorId,
-      warehouseId,
-      companyId,
-      remark,
-      productSalesOrder,
-    } = req.body;
+    let { vendorId, warehouseId, companyId, remark, productSalesOrder } =
+      req.body;
     /**
      * check duplicate exist
      */
@@ -54,6 +49,7 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
+    let rtvNumber = await getrtvCode(companyId);
     let dataExist = await rtvMasterService.isExists([{ rtvNumber }]);
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
