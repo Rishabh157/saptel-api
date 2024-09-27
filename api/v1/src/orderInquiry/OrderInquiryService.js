@@ -41,6 +41,14 @@ const getOneAndUpdate = async (matchObj, updateBody) => {
     { new: true }
   );
 };
+
+const updateMany = async (matchObj, updateBody) => {
+  return OrderSchema.updateMany(
+    { ...matchObj },
+    { ...updateBody },
+    { new: true }
+  );
+};
 //-------------------------------------------
 
 const onlyUpdateOne = async (matchObj, updateBody) => {
@@ -142,6 +150,7 @@ module.exports = {
   createNewData,
   getById,
   getByIdAndUpdate,
+  updateMany,
   getOneAndUpdate,
   getByIdAndDelete,
   getOneAndDelete,

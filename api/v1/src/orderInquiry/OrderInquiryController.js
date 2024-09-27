@@ -71,6 +71,7 @@ const {
   paymentModeType,
   barcodeStatusType,
   orderTypeEnum,
+  courierRTOType,
 } = require("../../helper/enumUtils");
 const {
   getCustomerReputation,
@@ -91,6 +92,7 @@ const { addToBarcodeFlow } = require("../barCodeFlow/BarCodeFlowHelper");
 const {
   addRemoveAvailableQuantity,
   checkFreezeQuantity,
+  addReturnQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
 
 // exports.add = async (req, res) => {
@@ -5681,5 +5683,113 @@ exports.prePaidApprove = async (req, res) => {
     return res
       .status(errData.statusCode)
       .send({ message, status, data, code, issue });
+  }
+};
+
+// bulk status change
+
+exports.bulkStatusChange = async (req, res) => {
+  try {
+    const warehouseId = req.params.wid;
+    const { companyId } = req.userData;
+    const { orderNumbers, courierType, status, condition } = req.body;
+
+    // Prepare update object for orders based on status and condition
+    let barcodeUpdateObject = {};
+    if (status === orderStatusEnum.rto) {
+      barcodeUpdateObject.status =
+        condition === courierRTOType.fresh
+          ? barcodeStatusType.atWarehouse
+          : condition;
+    }
+
+    // Loop through all order numbers and perform bulk operations
+    for (const orderNumber of orderNumbers) {
+      try {
+        console.log("in for loop");
+        // Update order status
+
+        const orderUpdated = await orderService?.getOneAndUpdate(
+          {
+            orderNumber: parseInt(orderNumber),
+            orderAssignedToCourier: courierType,
+            orderStatus: productStatus.dispatched,
+            companyId,
+          },
+          { $set: { orderStatus: productStatus.complete, status } }
+        );
+        if (!orderUpdated || !orderUpdated?.barcodeData?.length) {
+          continue; // Skip if no barcodes or order not found
+        }
+        if (status === orderStatusEnum.rto) {
+          console.log("inside");
+
+          // Perform batch update on barcodes
+          const barcodes = orderUpdated.barcodeData?.map((ele) => {
+            return ele?.barcode;
+          });
+          console.log(barcodes, "barcodes");
+          const updateResult = await barcodeService.updateMany(
+            {
+              barcodeNumber: { $in: barcodes },
+              isUsed: true,
+              wareHouseId: warehouseId,
+              companyId: companyId,
+            },
+            { $set: barcodeUpdateObject }
+          );
+
+          console.log(updateResult, "----------");
+
+          // Process barcode flows and return quantities only for valid updates
+          if (updateResult.matchedCount > 0) {
+            console.log("in");
+            await Promise.all(
+              barcodes.map(async (barcode) => {
+                const updatedBarcode = await barcodeService.getOneByMultiField({
+                  barcodeNumber: barcode,
+                  isUsed: true,
+                  wareHouseId: warehouseId,
+                  companyId: companyId,
+                });
+
+                if (updatedBarcode) {
+                  await addToBarcodeFlow(
+                    updatedBarcode,
+                    "Barcode discontinued as it was Damaged or Expired"
+                  );
+
+                  await addReturnQuantity(
+                    companyId,
+                    warehouseId,
+                    updatedBarcode.productGroupId,
+                    1,
+                    condition,
+                    null
+                  );
+                }
+              })
+            );
+          }
+        }
+      } catch (orderErr) {
+        logger.error(
+          `Failed to update order ${orderNumber}: ${orderErr.message}`
+        );
+      }
+    }
+
+    res.status(httpStatus.CREATED).send({
+      message: "Updated successfully!",
+      data: null,
+      status: true,
+      code: null,
+      issue: null,
+    });
+  } catch (err) {
+    const errData = errorRes(err);
+    logger.info(errData.resData);
+    const { message, status, data, code, issue } = errData.resData;
+    res.status(errData.statusCode).send({ message, status, data, code, issue });
   }
 };

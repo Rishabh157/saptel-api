@@ -277,7 +277,7 @@ exports.updateLevel = async (req, res) => {
           };
 
     // Process data based on type
-    if (type === "ACC") {
+    if (type === "ACC" && accApproved) {
       const [companyWarehouse, dealerWarehouse] = await Promise.all([
         wareHouseService.getOneByMultiField({
           isDeleted: false,

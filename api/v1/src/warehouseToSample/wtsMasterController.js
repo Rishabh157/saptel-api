@@ -737,7 +737,7 @@ exports.updateLevel = async (req, res) => {
     if (!datafound.length) {
       throw new ApiError(httpStatus.OK, `Request not found.`);
     }
-    if (type === approvalType.second) {
+    if (type === approvalType.second && secondApproved) {
       await Promise.all(
         datafound.map(async (item) => {
           const productSummary = await checkFreezeQuantity(

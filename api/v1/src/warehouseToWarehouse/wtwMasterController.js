@@ -752,7 +752,7 @@ exports.updateLevel = async (req, res) => {
 
     const dataToSend = {};
 
-    if (type === approvalType.second) {
+    if (type === approvalType.second && secondApproved) {
       await Promise.all(
         datafound.map(async (item) => {
           const productSummary = await checkFreezeQuantity(

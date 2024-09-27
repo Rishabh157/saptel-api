@@ -4429,6 +4429,7 @@ exports.bulkUpload = async (req, res) => {
           isDeleted: false,
           isUsed: true,
           wareHouseId: warehouseId,
+          companyId: req.userData.companyId,
           status: {
             $in: [barcodeStatusType.damage, barcodeStatusType.expired],
           },

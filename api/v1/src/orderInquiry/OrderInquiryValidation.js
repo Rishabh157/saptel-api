@@ -2,7 +2,7 @@ const Joi = require("joi").extend(require("@joi/date"));
 Joi.joiDate = require("@joi/date")(Joi);
 Joi.joiObjectId = require("joi-objectid")(Joi);
 const commonValidation = require("../../helper/CommonValidation");
-const { orderStatusEnum } = require("../../helper/enumUtils");
+const { orderStatusEnum, courierRTOType } = require("../../helper/enumUtils");
 
 /**
  * create new document
@@ -507,6 +507,28 @@ const unfreezeOrder = {
     ordernumber: Joi.number(),
   }),
 };
+const bulkStatusChange = {
+  body: Joi.object().keys({
+    orderNumbers: Joi.array().items(Joi.string().required()),
+    courierType: Joi.string().required(),
+    status: Joi.string()
+      .required()
+      .valid(orderStatusEnum.delivered, orderStatusEnum.rto), // Only DELIVERED or RTO
+    condition: Joi.string().when("status", {
+      is: orderStatusEnum.rto, // If status is RTO
+      then: Joi.required().valid(
+        courierRTOType.fresh,
+        courierRTOType.damage,
+        courierRTOType.destroyed,
+        courierRTOType.lost
+      ), // condition is required and must be one of these values
+      otherwise: Joi.string().allow(null), // Otherwise, condition should not be provided
+    }),
+  }),
+  params: Joi.object().keys({
+    wid: Joi.required().custom(commonValidation.objectId),
+  }),
+};
 
 const dealerOrderStatusChange = {
   params: Joi.object().keys({
@@ -597,4 +619,5 @@ module.exports = {
   warehouseOrderDispatch,
   warehouseManualOrderDispatch,
   unfreezeOrder,
+  bulkStatusChange,
 };

@@ -351,6 +351,14 @@ router.put(
   orderController.approveFirstCallDirectly
 );
 
+// bulk upload barcode to change Status Delivered or RTO without excel
+router.post(
+  "/bulk-upload/status-change/:wid",
+  authCheckMiddleware,
+  validate(orderValidation.bulkStatusChange),
+  orderController.bulkStatusChange
+);
+
 // approve first call confirmation
 router.put(
   "/first-call-confirmation/:id",
