@@ -20,6 +20,17 @@ const getWTWCode = async (companyId) => {
   return wtNumber;
 };
 
+const getWTWInvoiceNumber = async (wtwNumber) => {
+  const year = new Date().getFullYear().toString().slice(-2);
+  const lastNumber = parseInt(wtwNumber.replace("WTW", ""), 10);
+  const nextNumber = lastNumber + 1;
+  let invoiceNumber =
+    `BRA-Y${year}` + "-" + String(nextNumber).padStart(6, "0");
+  console.log(invoiceNumber, "--------------");
+  return invoiceNumber;
+};
+
 module.exports = {
   getWTWCode,
+  getWTWInvoiceNumber,
 };

@@ -1864,6 +1864,8 @@ exports.getDealerInvoice = async (req, res) => {
           "productSalesOrder.igst": "$productGroup.igst",
           "productSalesOrder.utgst": "$productGroup.utgst",
           "productSalesOrder.productGroupLabel": "$productGroup.groupName",
+          "productSalesOrder.productGroupCode":
+            "$productGroup.productGroupCode",
           "productSalesOrder.productSubCategory":
             "$productSubCategoryInfo.subCategoryName",
           "productSalesOrder.hsnCode": "$productSubCategoryInfo.hsnCode",
@@ -1872,6 +1874,9 @@ exports.getDealerInvoice = async (req, res) => {
           },
           "dealer_warehouse.billingAddress.dealerStateName": {
             $arrayElemAt: ["$dealer_state_name.stateName", 0],
+          },
+          "dealer_warehouse.billingAddress.isUnion": {
+            $arrayElemAt: ["$dealer_state_name.isUnion", 0],
           },
           "dealer_warehouse.billingAddress.dealerDistrictName": {
             $arrayElemAt: ["$dealer_district_name.districtName", 0],
@@ -1882,6 +1887,9 @@ exports.getDealerInvoice = async (req, res) => {
           "dealer_warehouse.billingAddress.panNumber": {
             $arrayElemAt: ["$dealer_name.document.panNumber", 0],
           },
+          // "dealer_warehouse.billingAddress.gstNumber": {
+          //   $arrayElemAt: ["$dealer_name.document.gstNumber", 0],
+          // },
         },
       },
       {

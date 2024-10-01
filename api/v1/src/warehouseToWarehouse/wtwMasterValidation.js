@@ -175,6 +175,13 @@ const updateWtwStatus = {
   }),
 };
 
+// get invoice
+
+const getWtInvoice = {
+  params: Joi.object().keys({
+    wtnumber: Joi.string().required(),
+  }),
+};
 /**
  * change status of document
  */
@@ -193,4 +200,5 @@ module.exports = {
   getById,
   updateApproval,
   updateWtwStatus,
+  getWtInvoice,
 };

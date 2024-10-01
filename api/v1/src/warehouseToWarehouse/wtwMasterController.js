@@ -34,7 +34,7 @@ const {
   checkFreezeQuantity,
   addRemoveFreezeQuantity,
 } = require("../productGroupSummary/ProductGroupSummaryHelper");
-const { getWTWCode } = require("./wtwMasterHelper");
+const { getWTWCode, getWTWInvoiceNumber } = require("./wtwMasterHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -788,6 +788,8 @@ exports.updateLevel = async (req, res) => {
         secondApprovedActionBy,
         secondApprovedAt,
         secondApproved,
+        invoiceDate: new Date(),
+        invoiceNumber: await getWTWInvoiceNumber(wtNumberToBeSearch),
       });
     } else {
       Object.assign(dataToSend, {
@@ -853,6 +855,286 @@ exports.updatewtwStatus = async (req, res) => {
         status: true,
         data: dataUpdated,
         code: null,
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.getWtInvoice = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let wtToBeSearch = req.params.wtnumber;
+    console.log(wtToBeSearch, "wtToBeSearch");
+    let additionalQuery = [
+      {
+        $match: {
+          wtNumber: wtToBeSearch,
+        },
+      },
+      {
+        $lookup: {
+          from: "companies",
+          localField: "companyId",
+          foreignField: "_id",
+          as: "companyDetail",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "fromWarehouseId",
+          foreignField: "_id",
+          as: "fromWarehouseData",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                billingAddress: 1,
+                email: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "warehouses",
+          localField: "toWarehouseId",
+          foreignField: "_id",
+          as: "toWarehouseData",
+          pipeline: [
+            {
+              $project: {
+                wareHouseName: 1,
+                billingAddress: 1,
+                email: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "countries",
+          localField: "fromWarehouseData.billingAddress.countryId",
+          foreignField: "_id",
+          as: "from_country_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "fromWarehouseData.billingAddress.stateId",
+          foreignField: "_id",
+          as: "from_state_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "fromWarehouseData.billingAddress.districtId",
+          foreignField: "_id",
+          as: "from_district_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "fromWarehouseData.billingAddress.pincodeId",
+          foreignField: "_id",
+          as: "from_pincode_name",
+        },
+      },
+
+      {
+        $lookup: {
+          from: "countries",
+          localField: "toWarehouseData.billingAddress.countryId",
+          foreignField: "_id",
+          as: "to_country_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "states",
+          localField: "toWarehouseData.billingAddress.stateId",
+          foreignField: "_id",
+          as: "to_state_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "districts",
+          localField: "toWarehouseData.billingAddress.districtId",
+          foreignField: "_id",
+          as: "to_district_name",
+        },
+      },
+      {
+        $lookup: {
+          from: "pincodes",
+          localField: "toWarehouseData.billingAddress.pincodeId",
+          foreignField: "_id",
+          as: "to_pincode_name",
+        },
+      },
+      {
+        $unwind: "$productSalesOrder",
+      },
+      {
+        $lookup: {
+          from: "productgroups",
+          localField: "productSalesOrder.productGroupId",
+          foreignField: "_id",
+          as: "productGroup",
+        },
+      },
+      {
+        $lookup: {
+          from: "productsubcategories",
+          localField: "productGroup.productSubCategoryId",
+          foreignField: "_id",
+          as: "productSubCategoryInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$productSubCategoryInfo",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
+        },
+      },
+      {
+        $unwind: {
+          path: "$productGroup",
+          preserveNullAndEmptyArrays: true, // Keep orders even if no productInfo
+        },
+      },
+      {
+        $addFields: {
+          "productSalesOrder.dealerSalePrice": "$productGroup.dealerSalePrice",
+          "productSalesOrder.gst": "$productGroup.gst",
+          "productSalesOrder.cgst": "$productGroup.cgst",
+          "productSalesOrder.sgst": "$productGroup.sgst",
+          "productSalesOrder.igst": "$productGroup.igst",
+          "productSalesOrder.utgst": "$productGroup.utgst",
+          "productSalesOrder.productGroupLabel": "$productGroup.groupName",
+          "productSalesOrder.productGroupCode":
+            "$productGroup.productGroupCode",
+          "productSalesOrder.productSubCategory":
+            "$productSubCategoryInfo.subCategoryName",
+          "productSalesOrder.hsnCode": "$productSubCategoryInfo.hsnCode",
+          "fromWarehouseData.billingAddress.countryName": {
+            $arrayElemAt: ["$from_country_name.countryName", 0],
+          },
+          "fromWarehouseData.billingAddress.stateName": {
+            $arrayElemAt: ["$from_state_name.stateName", 0],
+          },
+          "fromWarehouseData.billingAddress.isUnion": {
+            $arrayElemAt: ["$from_state_name.isUnion", 0],
+          },
+          "fromWarehouseData.billingAddress.districtName": {
+            $arrayElemAt: ["$from_district_name.districtName", 0],
+          },
+          "fromWarehouseData.billingAddress.pincodeName": {
+            $arrayElemAt: ["$from_pincode_name.pincode", 0],
+          },
+          "fromWarehouseData.billingAddress.panNumber": {
+            $arrayElemAt: ["$from_name.document.panNumber", 0],
+          },
+
+          "toWarehouseData.billingAddress.countryName": {
+            $arrayElemAt: ["$to_country_name.countryName", 0],
+          },
+          "toWarehouseData.billingAddress.stateName": {
+            $arrayElemAt: ["$to_state_name.stateName", 0],
+          },
+          "toWarehouseData.billingAddress.isUnion": {
+            $arrayElemAt: ["$to_state_name.isUnion", 0],
+          },
+          "toWarehouseData.billingAddress.districtName": {
+            $arrayElemAt: ["$to_district_name.districtName", 0],
+          },
+          "toWarehouseData.billingAddress.pincodeName": {
+            $arrayElemAt: ["$to_pincode_name.pincode", 0],
+          },
+          "toWarehouseData.billingAddress.panNumber": {
+            $arrayElemAt: ["$to_name.document.panNumber", 0],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          productSalesOrder: { $push: "$productSalesOrder" },
+          toWarehouseData: { $first: "$toWarehouseData" },
+          fromWarehouseData: { $first: "$fromWarehouseData" },
+
+          companyDetails: { $first: "$companyDetail" },
+          invoiceDate: { $first: "$invoiceDate" },
+          invoiceNumber: { $first: "$invoiceNumber" },
+        },
+      },
+      {
+        $addFields: {
+          companyDetails: {
+            $arrayElemAt: ["$companyDetails", 0],
+          },
+          toWarehouseData: {
+            $arrayElemAt: ["$toWarehouseData", 0],
+          },
+          fromWarehouseData: {
+            $arrayElemAt: ["$fromWarehouseData", 0],
+          },
+        },
+      },
+      {
+        $unset: [
+          "from_country_name",
+          "from_state_name",
+          "from_district_name",
+          "from_pincode_name",
+          "to_country_name",
+          "to_state_name",
+          "to_district_name",
+          "to_pincode_name",
+        ],
+      },
+    ];
+
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.saleOrder,
+    //   userRoleData,
+    //   actionType.view
+    // );
+    let dataExist = await wtwMasterService.aggregateQuery(additionalQuery);
+    let newData = {};
+    let newProductSalesOrder = [];
+    dataExist?.map((ele) => {
+      const { productSalesOrder, ...rest } = ele;
+      newData = { ...rest };
+      newProductSalesOrder.push(...productSalesOrder);
+    });
+    newData.productSalesOrder = newProductSalesOrder;
+    // let allowedFields = getAllowedField(fieldsToDisplay, newData);
+
+    if (!newData) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: newData,
+        code: "OK",
         issue: null,
       });
     }

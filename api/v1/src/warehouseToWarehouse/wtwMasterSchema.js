@@ -6,6 +6,8 @@ const WtwMasterSchema = new mongoose.Schema(
     wtNumber: { type: String, required: false, trim: true },
     fromWarehouseId: { type: ObjectId, required: true },
     toWarehouseId: { type: ObjectId, required: true },
+    invoiceDate: { type: String, default: "" },
+    invoiceNumber: { type: String, default: "" },
     firstApprovedById: {
       type: ObjectId,
       default: null,

@@ -97,4 +97,14 @@ router.get(
   validate(wtwMasterValidation.updateWtwStatus),
   wtwMasterController.updatewtwStatus
 );
+/**
+ * get one document for invoice
+ */
+router.get(
+  "/get-wtw-invoice/:wtnumber",
+  authCheckMiddleware,
+  validate(wtwMasterValidation.getWtInvoice),
+  wtwMasterController.getWtInvoice
+);
+
 module.exports = router;
