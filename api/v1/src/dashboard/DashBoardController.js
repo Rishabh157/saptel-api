@@ -17,6 +17,10 @@ const wtcService = require("../warehouseToCompany/wtcMasterService");
 const dtwService = require("../dealerToWarehouse/dtwMasterService");
 const barCodeService = require("../barCode/BarCodeService");
 const dealerPincodeService = require("../dealerPincode/DealerPincodeService");
+const vendorService = require("../vendor/VendorService");
+const warehouseService = require("../wareHouse/WareHouseService");
+const productGroupService = require("../productGroup/ProductGroupService");
+const schemeService = require("../scheme/SchemeService");
 
 const { errorRes } = require("../../../utils/resError");
 
@@ -2023,6 +2027,83 @@ exports.getSalesDashboard = async (req, res) => {
         issue: null,
       });
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// ADMIN dashboard info
+exports.getAdminBasicInfo = async (req, res) => {
+  try {
+    let totalActiveDealer = await dealerService.aggregateQuery([
+      {
+        $match: {
+          isActive: true,
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+    ]);
+
+    let totalActiveVendor = await vendorService.aggregateQuery([
+      {
+        $match: {
+          isActive: true,
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+    ]);
+
+    let totalActiveWarehouse = await warehouseService.aggregateQuery([
+      {
+        $match: {
+          isActive: true,
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+          dealerId: null,
+        },
+      },
+    ]);
+
+    let totalActiveProducts = await productGroupService.aggregateQuery([
+      {
+        $match: {
+          isActive: true,
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+    ]);
+
+    let totalActiveSchemes = await schemeService.aggregateQuery([
+      {
+        $match: {
+          isActive: true,
+          isDeleted: false,
+          companyId: new mongoose.Types.ObjectId(req.userData.companyId),
+        },
+      },
+    ]);
+
+    return res.status(httpStatus.OK).send({
+      message: "Successfull.",
+      status: true,
+      data: {
+        totalActiveDealer: totalActiveDealer?.length,
+        totalActiveVendor: totalActiveVendor?.length,
+        totalActiveWarehouse: totalActiveWarehouse?.length,
+        totalActiveProducts: totalActiveProducts?.length,
+        totalActiveSchemes: totalActiveSchemes?.length,
+      },
+      code: "OK",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);

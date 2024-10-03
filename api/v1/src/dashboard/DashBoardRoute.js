@@ -105,4 +105,12 @@ router.post(
   DashBoardController.getSalesDashboard
 );
 
+// =============== Admin Dashboard Total number of active dealer, active vendor, company warehouse =================
+router.get(
+  "/admin-basicinfo",
+  authCheckMiddleware,
+  // validate(DashBoardValidation.getDvwInfo),
+  DashBoardController.getAdminBasicInfo
+);
+
 module.exports = router;
