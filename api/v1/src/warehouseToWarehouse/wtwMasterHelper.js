@@ -26,7 +26,6 @@ const getWTWInvoiceNumber = async (wtwNumber) => {
   const nextNumber = lastNumber + 1;
   let invoiceNumber =
     `BRA-Y${year}` + "-" + String(nextNumber).padStart(6, "0");
-  console.log(invoiceNumber, "--------------");
   return invoiceNumber;
 };
 

@@ -549,7 +549,6 @@ exports.getByProductGroup = async (req, res) => {
       .replace('"', "")
       .replaceAll("-", "/");
 
-    console.log(todaysDate, "date");
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,
@@ -637,7 +636,6 @@ exports.getByProductGroupAuth = async (req, res) => {
       .replace('"', "")
       .replaceAll("-", "/");
 
-    console.log(todaysDate, "date");
     let matchQuery = {
       companyId: new mongoose.Types.ObjectId(companyId),
       isDeleted: false,

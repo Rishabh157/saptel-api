@@ -38,9 +38,7 @@ const { createOrderInQueue } = require("./api/v1/src/call/CreateOrderHelper");
 const orderWorker = new Worker(
   "add-order",
   async (job) => {
-    console.log("-----------");
     await createOrderInQueue(job.data);
-    console.log("job done");
   },
   {
     connection: {

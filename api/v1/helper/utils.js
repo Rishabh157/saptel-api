@@ -104,7 +104,6 @@ exports.generateInvoiceString = async (branchCode, invoiceNumber) => {
 
   // Generating the string in the specified format
   const invoiceString = `${branchCode}-${financialYear}-${formattedInvoiceNumber}`;
-  console.log(invoiceString, "-----------------", invoiceString);
   return invoiceString;
 };
 

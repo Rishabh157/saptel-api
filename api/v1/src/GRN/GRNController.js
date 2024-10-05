@@ -96,12 +96,10 @@ exports.update = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `GoodReceivedNote not found.`);
     }
-    console.log(poCode, itemId);
     let foundPO = await purchaseOrderService.getOneByMultiField({
       poCode: poCode,
       "purchaseOrder.itemId": new mongoose.Types.ObjectId(itemId),
     });
-    console.log(foundPO, "foundPO");
     let totalQuantity = foundPO?.purchaseOrder?.quantity;
     let dataExist = await goodReceivedNoteService?.aggregateQuery([
       { $match: { poCode: poCode } },

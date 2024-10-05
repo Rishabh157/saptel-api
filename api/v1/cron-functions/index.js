@@ -54,7 +54,6 @@ exports.addSlotEveryDayFun = async () => {
 };
 
 exports.UpdateExpiredBarcode = async () => {
-  console.log("expiry");
   let todaysDate = JSON.stringify(
     new Date(`${moment().format("YYYY-MM-DD")}`)
   ).replace('"', "");

@@ -17,7 +17,6 @@ const {
   getShipyaariToken,
 } = require("./api/v1/third-party-services/ShipyaariService");
 
-console.log(totalCPU, "----------->  CPU");
 // cron for slot add
 cron.schedule("0 12 * * *", async () => {
   await getShipyaariToken();

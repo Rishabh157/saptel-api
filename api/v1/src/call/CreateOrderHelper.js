@@ -77,8 +77,6 @@ const createOrderInQueue = async (data) => {
       idToBeSearch: _id,
     } = data;
 
-    console.log("Creating order in queue...");
-
     // Fetch related data concurrently
     const [
       dispositionThreeData,
@@ -176,7 +174,7 @@ const createOrderInQueue = async (data) => {
         { $set: { leadStatus: webLeadStatusEnum.inquiry } }
       );
     }
-    console.log(dispositionThreeData[0], "..............");
+
     const orderInquiry = await orderService.createNewData({
       ...data,
       status: flag

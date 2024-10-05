@@ -49,23 +49,17 @@ class ClickPostServices {
       data,
       params,
     };
-    console.log("here2-----------------------------");
 
     try {
       const response = await axios(config);
-      console.log("here3-----------------------------");
 
       return response.data;
     } catch (error) {
-      console.log("here4-----------------------------");
-
       this.handleError(error);
     }
   }
 
   async createOrder(data) {
-    console.log("here1-----------------------------");
-
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -82,11 +76,9 @@ class ClickPostServices {
           headers,
         }
       );
-      console.log("here3-----------------------------", response.data);
 
       return response.data;
     } catch (error) {
-      console.log("here4-----------------------------", error);
       return error;
     }
   }

@@ -161,7 +161,6 @@ const assignOrderToCourier = async (
   categorydata
 ) => {
   try {
-    console.log(preferredCourier, "preferredCourier");
     let orderAssigned = {
       isApi: false,
       data: null,
@@ -185,8 +184,6 @@ const assignOrderToCourier = async (
         isDeleted: false,
         _id: ele?.courierId,
       });
-
-      console.log(foundCourier, "foundCourier");
 
       if (foundCourier?.courierType === courierType.api) {
         switch (foundCourier?.courierName) {
@@ -434,10 +431,7 @@ const assignOrderToCourier = async (
 
             let orderAssignedTomaersk = await createOrder(maerskOrderData);
 
-            console.log(orderAssignedTomaersk, "---------------------");
-
             if (orderAssignedTomaersk?.meta?.success) {
-              console.log("response success");
               return {
                 isApi: true,
                 data: orderAssignedTomaersk,

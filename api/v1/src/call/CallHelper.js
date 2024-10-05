@@ -74,7 +74,7 @@ exports.getInquiryNumber = async () => {
 
 exports.getInvoiceNumber = async (companyId) => {
   let invoiceNumber = 0;
-  console.log(companyId, "companyId");
+
   let lastObject = await salesOrderService.aggregateQuery([
     {
       $match: {
@@ -85,7 +85,6 @@ exports.getInvoiceNumber = async (companyId) => {
     { $sort: { _id: -1 } },
     { $limit: 1 },
   ]);
-  console.log(lastObject, "lastObject");
   if (lastObject.length) {
     invoiceNumber =
       parseInt(
@@ -96,7 +95,6 @@ exports.getInvoiceNumber = async (companyId) => {
   } else {
     invoiceNumber = 1;
   }
-  console.log(invoiceNumber.toString().padStart(4, "0"), "-------------");
   // Formatting the invoice number with leading zeros
   return invoiceNumber.toString().padStart(4, "0");
 };
@@ -159,7 +157,6 @@ exports.isPrepaid = async (applicableCriteriaList) => {
 };
 
 exports.checkDealerHaveInventory = async (schemeId, dealerId) => {
-  console.log(schemeId, dealerId, "data---------------------");
   let schemeData = await schemeService?.getOneByMultiField({ _id: schemeId });
   let productInfo = schemeData?.productInformation?.map((ele) => {
     return {
@@ -167,7 +164,6 @@ exports.checkDealerHaveInventory = async (schemeId, dealerId) => {
       quantity: ele?.productQuantity,
     };
   });
-  console.log(productInfo, "==============================");
 
   let validQuantity = true;
 
@@ -183,13 +179,8 @@ exports.checkDealerHaveInventory = async (schemeId, dealerId) => {
           },
         },
       ]);
-      console.log(
-        foundBarcode.length,
-        ele?.quantity,
-        "length ................................"
-      );
+
       if (foundBarcode.length < ele?.quantity) {
-        console.log("match //////////////////////////////////");
         validQuantity = false;
       }
     })

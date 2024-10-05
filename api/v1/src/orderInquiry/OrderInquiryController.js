@@ -799,7 +799,6 @@ exports.approveFirstCallDirectly = async (req, res) => {
     let productData = req.body.productData;
     let warehouseId = req.body.warehouseId;
 
-    console.log(status, "status");
     // Example usage
     const handleProductData = async (
       productData,
@@ -814,7 +813,6 @@ exports.approveFirstCallDirectly = async (req, res) => {
           wareHouseId: warehouseId,
           status: barcodeStatus,
         });
-        console.log(foundBarcode, "foundBarcode");
 
         if (!foundBarcode) {
           return Promise.reject(
@@ -912,10 +910,6 @@ exports.approveFirstCallDirectly = async (req, res) => {
       categorydata
     );
 
-    console.log(
-      isOrderAssignedToCourier,
-      "-----------------------isOrderAssignedToCourier-----------------------"
-    );
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
       if (
@@ -1046,7 +1040,6 @@ exports.firstCallConfirmation = async (req, res) => {
           wareHouseId: warehouseId,
           status: barcodeStatus,
         });
-        console.log(foundBarcode, "foundBarcode");
 
         if (!foundBarcode) {
           return Promise.reject(
@@ -1152,7 +1145,7 @@ exports.firstCallConfirmation = async (req, res) => {
         wareHouseData,
         categorydata
       );
-      console.log(isOrderAssignedToCourier, "isOrderAssignedToCourier");
+
       // if true the hit shipment API else GPO
       if (
         isOrderAssignedToCourier.apiStatus &&
@@ -1289,7 +1282,6 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
           wareHouseId: warehouseId,
           status: barcodeStatus,
         });
-        console.log(foundBarcode, "foundBarcode");
 
         if (!foundBarcode) {
           return Promise.reject(
@@ -1594,7 +1586,7 @@ exports.updateOrderStatus = async (req, res) => {
 exports.warehouseOrderDispatch = async (req, res) => {
   try {
     const { orderNumber, barcodes, type } = req.body;
-    console.log("----------");
+
     // Find the order
     const order = await orderService.getOneByMultiField({
       orderNumber,
@@ -2057,7 +2049,7 @@ exports.getAmazoneOrder = async (req, res) => {
         "amzn1.oa2-cs.v1.fcb81f1ac8c896cc08e625b95431a92d375661b21aeae4a4bfe3da7da",
       region: "ap-south-1",
     });
-    console.log(sts, "sts");
+
     // Parameters for AssumeRole
     const params = {
       RoleArn:
@@ -2069,12 +2061,8 @@ exports.getAmazoneOrder = async (req, res) => {
     // Assume the role
     sts.assumeRole(params, (err, data) => {
       if (err) {
-        console.log("Error assuming role:", err);
       } else {
         const { Credentials } = data;
-        console.log("Access Key:", Credentials.AccessKeyId);
-        console.log("Secret Access Key:", Credentials.SecretAccessKey);
-        console.log("Session Token:", Credentials.SessionToken);
       }
     });
     return res.status(httpStatus.OK).send({
@@ -3979,7 +3967,7 @@ exports.allFilterPagination = async (req, res) => {
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
-    console.log(matchQuery, "matchQuery");
+    
     finalAggregateQuery.push({
       $match: matchQuery,
     });
@@ -4097,8 +4085,8 @@ exports.allFilterPagination = async (req, res) => {
     );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
-    console.log(result, "result");
-    console.log(allowedFields, "allowedFields");
+    
+    
     let finalData = [];
     // check for zonal manager and zonal exicutive
 
@@ -4406,7 +4394,7 @@ exports.getBatchFilterPagination = async (req, res) => {
     // );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     // let allowedFields = getAllowedField(fieldsToDisplay, result);
-    console.log(result, "result");
+    
 
     // check for zonal manager and zonal exicutive
 
@@ -5329,11 +5317,11 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    console.log(finalAggregateQuery, "finalAggregateQuery");
+    
 
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
-    console.log(dataFound, "dataFound");
+    
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found here`);
     }
@@ -5706,7 +5694,7 @@ exports.bulkStatusChange = async (req, res) => {
     // Loop through all order numbers and perform bulk operations
     for (const orderNumber of orderNumbers) {
       try {
-        console.log("in for loop");
+        
         // Update order status
 
         const orderUpdated = await orderService?.getOneAndUpdate(
@@ -5722,13 +5710,11 @@ exports.bulkStatusChange = async (req, res) => {
           continue; // Skip if no barcodes or order not found
         }
         if (status === orderStatusEnum.rto) {
-          console.log("inside");
-
           // Perform batch update on barcodes
           const barcodes = orderUpdated.barcodeData?.map((ele) => {
             return ele?.barcode;
           });
-          console.log(barcodes, "barcodes");
+
           const updateResult = await barcodeService.updateMany(
             {
               barcodeNumber: { $in: barcodes },
@@ -5739,11 +5725,8 @@ exports.bulkStatusChange = async (req, res) => {
             { $set: barcodeUpdateObject }
           );
 
-          console.log(updateResult, "----------");
-
           // Process barcode flows and return quantities only for valid updates
           if (updateResult.matchedCount > 0) {
-            console.log("in");
             await Promise.all(
               barcodes.map(async (barcode) => {
                 const updatedBarcode = await barcodeService.getOneByMultiField({

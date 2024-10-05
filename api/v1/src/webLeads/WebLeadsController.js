@@ -73,7 +73,6 @@ exports.add = async (req, res) => {
     let dataUpdated;
     let isAdded = true;
 
-    console.log(dataFound, isPrepaidOrder, "-------");
     if (!dataFound && !isPrepaidOrder) {
       dataUpdated = await webLeadsService.createNewData({
         ...req.body,
@@ -94,7 +93,6 @@ exports.add = async (req, res) => {
       );
     }
 
-    console.log("uuuuuuuuuuu", dataUpdated);
     if (dataUpdated) {
       const message = isAdded ? "Added successfully." : "Updated successfully.";
       const code = isAdded ? "CREATED" : "UPDATED";
@@ -112,7 +110,7 @@ exports.add = async (req, res) => {
     let errData = errorRes(err);
     logger.info(errData.resData);
     let { message, status, data, code, issue } = errData.resData;
-    console.log(name, phone, product_name, message);
+
     await webLeadsErrorSchema.create({
       name: name,
       phone: phone,

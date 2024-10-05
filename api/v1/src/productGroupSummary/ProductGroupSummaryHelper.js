@@ -81,7 +81,6 @@ const addRemoveAvailableQuantity = async (
       }
     }
   } catch (err) {
-    console.log(err, "Error in addRemoveAvailableQuantity");
     return { status: false, msg: "Something went wrong" };
   }
 };
@@ -102,13 +101,6 @@ const addAvailableQuantity = async (
       });
 
     if (!foundProductCategorySummary) {
-      console.log(
-        "......................",
-        companyId,
-        warehouseId,
-        productGroupId,
-        quantity
-      );
       const createdSummary = await productGroupSummaryService.createNewData({
         companyId,
         warehouseId,
@@ -116,7 +108,7 @@ const addAvailableQuantity = async (
         freezeQuantity: 0,
         avaliableQuantity: quantity,
       });
-      console.log(createdSummary, "createdSummary");
+
       if (!createdSummary) {
         return {
           status: false,
@@ -144,7 +136,6 @@ const addAvailableQuantity = async (
       };
     }
   } catch (err) {
-    console.log(err, ",,,,,,,,,,,,,,,,,,,,,,,,");
     return { status: false, msg: "Something went wrong" };
   }
 };
@@ -159,16 +150,6 @@ const addReturnQuantity = async (
   curStatus
 ) => {
   try {
-    console.log(
-      companyId,
-      warehouseId,
-      productGroupId,
-      quantity,
-      type,
-      curStatus,
-      "-------"
-    );
-
     let queryObj = {};
     let removequeryObj = {};
 
@@ -217,7 +198,6 @@ const addReturnQuantity = async (
     }
 
     // Logging the remove query
-    console.log(removequeryObj, "Remove Query -------------");
 
     // Combining the queries and updating inventory
     const updatedSummary = await productGroupSummaryService.getOneAndUpdate(

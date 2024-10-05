@@ -533,7 +533,7 @@ exports.allFilterGroupPagination = async (req, res) => {
     finalAggregateQuery.push(groupBywtNumber);
 
     //-----------------------------------
-    console.log(finalAggregateQuery, "finalAggregateQuery");
+
     let dataFound = await wtwMasterService.aggregateQuery(finalAggregateQuery);
 
     if (dataFound.length === 0) {
@@ -872,7 +872,7 @@ exports.getWtInvoice = async (req, res) => {
   try {
     //if no default query then pass {}
     let wtToBeSearch = req.params.wtnumber;
-    console.log(wtToBeSearch, "wtToBeSearch");
+
     let additionalQuery = [
       {
         $match: {

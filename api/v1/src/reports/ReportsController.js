@@ -26,7 +26,6 @@ exports.agentOrderStatus = async (req, res) => {
       allowedDateFiletrKeys
     );
     if (datefilterQuery && datefilterQuery.length) {
-      console.log(datefilterQuery, "datefilterQuery");
       matchQuery.$and.push(...datefilterQuery);
     }
     const isCallCenterExists = await callCenterService.findCount({
@@ -131,7 +130,7 @@ exports.agentOrderStatus = async (req, res) => {
     ];
 
     let result = await orderInquiryService.aggregateQuery(pipeline);
-    console.log(result, "result");
+
     if (result?.length) {
       return res.status(httpStatus.OK).send({
         data: result,
@@ -166,7 +165,6 @@ exports.agentWiseComplaint = async (req, res) => {
       allowedDateFiletrKeys
     );
     if (datefilterQuery && datefilterQuery.length) {
-      console.log(datefilterQuery, "datefilterQuery");
       matchQuery.$and.push(...datefilterQuery);
     }
 

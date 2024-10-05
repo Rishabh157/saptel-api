@@ -134,7 +134,6 @@ exports.add = async (req, res) => {
     }
 
     let currentBarcode = "";
-    console.log(lastObject, "lastObject");
 
     if (lastObject.length) {
       // Extract the numeric part from the existing barcode and increment it
@@ -155,7 +154,6 @@ exports.add = async (req, res) => {
 
     for (let i = 0; i < quantity; i++) {
       if (i > 0) {
-        console.log(currentBarcode, "currentBarcode");
         // Increment and pad the numeric part of the barcode
         currentBarcode = (parseInt(currentBarcode) + 1)
           .toString()
@@ -1297,12 +1295,9 @@ exports.getBarcodeForCustomerReturn = async (req, res) => {
       { $unset: ["product_group", "warehouse_data"] },
     ];
 
-    console.log(additionalQueryForOne, "additionalQueryForOne");
-
     const foundBarcode = await barCodeService.aggregateQuery(
       additionalQueryForOne
     );
-    console.log(foundBarcode, "foundBarcode");
 
     if (foundBarcode.length === 0) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -1331,7 +1326,7 @@ exports.getBarcodeForCustomerReturnFromOrderNumber = async (req, res) => {
   try {
     const orderno = req.params.orderno;
     const cid = req.userData.companyId;
-    console.log(cid, "company");
+
     const orderData = await orderInquiryService.getOneByMultiField({
       orderNumber: orderno,
     });
@@ -1340,10 +1335,7 @@ exports.getBarcodeForCustomerReturnFromOrderNumber = async (req, res) => {
       throw new ApiError(httpStatus.NOT_FOUND, "Order not found.");
     }
 
-    console.log(orderData, "orderData");
-
     let orderBarcode = orderData?.barcodeData?.map((ele) => ele?.barcode);
-    console.log(orderBarcode, "orderBarcode");
 
     if (!orderBarcode || orderBarcode.length === 0) {
       throw new ApiError(
@@ -1354,8 +1346,6 @@ exports.getBarcodeForCustomerReturnFromOrderNumber = async (req, res) => {
 
     let allBarcodes = [];
     for (const ele of orderBarcode) {
-      console.log(`Processing barcode: ${ele}`);
-
       const additionalQueryForOne = [
         {
           $match: {
@@ -1404,7 +1394,6 @@ exports.getBarcodeForCustomerReturnFromOrderNumber = async (req, res) => {
       const foundBarcode = await barCodeService.aggregateQuery(
         additionalQueryForOne
       );
-      console.log(foundBarcode, "foundBarcode");
 
       if (foundBarcode.length > 0) {
         allBarcodes.push(foundBarcode[0]);
@@ -1629,11 +1618,10 @@ exports.getByBarcodeAtDealerWarehouse = async (req, res) => {
       additionalQueryForAll
     );
     if (dataExist.length === 0) {
-      console.log(additionalQueryForOne, "additionalQueryForOne");
       const foundBarcode = await barCodeService.aggregateQuery(
         additionalQueryForOne
       );
-      console.log(foundBarcode, "foundBarcode");
+
       if (foundBarcode[0] !== null && foundBarcode[0] !== undefined) {
         ResponseData.push(foundBarcode[0]);
       }
@@ -1849,13 +1837,11 @@ exports.getDispatchBarcodeOfEcom = async (req, res) => {
     if (foundBarcode !== null) {
       barcode.push(foundBarcode[0]);
     }
-    console.log(barcode, "00000000000");
 
-    console.log(barcode[0]?.productGroupId, "--------");
     let productGroupData = await ProductGroupService.getOneByMultiField({
       _id: barcode[0]?.productGroupId,
     });
-    console.log(productGroupData, "------");
+
     // query change according to courier
     let amazonQuery;
     let flipkartQuery;
@@ -1866,7 +1852,6 @@ exports.getDispatchBarcodeOfEcom = async (req, res) => {
         isDispatched: false,
       };
       orderData = await amazonOrderService?.getOneByMultiField(amazonQuery);
-      console.log(orderData, "orderData");
     } else if (type === webLeadType.flipkart) {
       flipkartQuery = {
         productCode: productGroupData?.productGroupCode,
@@ -1970,14 +1955,6 @@ exports.dispatchEcomOrder = async (req, res) => {
     if (!barcodeData || barcodes.length === 0) {
       throw new ApiError(httpStatus.BAD_REQUEST, "Invalid barcode");
     }
-
-    console.log(
-      req.userData.companyId,
-      warehouseId,
-      barcodeData?.productGroupId,
-      barcodes.length,
-      "-------"
-    );
 
     console.log(req.userData, "========");
 
