@@ -395,11 +395,14 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
     }
 
-    const isAreaExists = await areaService.findCount({
-      _id: areaId,
-      isDeleted: false,
-    });
-    if (!isAreaExists) {
+    const isAreaExists =
+      areaId !== null
+        ? await areaService.findCount({
+            _id: areaId,
+            isDeleted: false,
+          })
+        : null;
+    if (areaId !== null && !isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid Area.");
     }
 
@@ -3967,7 +3970,7 @@ exports.allFilterPagination = async (req, res) => {
     if (datefilterCallbackQuery && datefilterCallbackQuery.length) {
       matchQuery.$and.push(...datefilterCallbackQuery);
     }
-    
+
     finalAggregateQuery.push({
       $match: matchQuery,
     });
@@ -4085,8 +4088,7 @@ exports.allFilterPagination = async (req, res) => {
     );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     let allowedFields = getAllowedField(fieldsToDisplay, result);
-    
-    
+
     let finalData = [];
     // check for zonal manager and zonal exicutive
 
@@ -4394,7 +4396,6 @@ exports.getBatchFilterPagination = async (req, res) => {
     // );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     // let allowedFields = getAllowedField(fieldsToDisplay, result);
-    
 
     // check for zonal manager and zonal exicutive
 
@@ -5317,11 +5318,10 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     finalAggregateQuery.push({
       $match: matchQuery,
     });
-    
 
     //-----------------------------------
     let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
-    
+
     if (dataFound.length === 0) {
       throw new ApiError(httpStatus.OK, `No data Found here`);
     }
@@ -5694,7 +5694,6 @@ exports.bulkStatusChange = async (req, res) => {
     // Loop through all order numbers and perform bulk operations
     for (const orderNumber of orderNumbers) {
       try {
-        
         // Update order status
 
         const orderUpdated = await orderService?.getOneAndUpdate(

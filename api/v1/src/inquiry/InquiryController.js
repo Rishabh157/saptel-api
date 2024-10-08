@@ -127,11 +127,14 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
     }
 
-    const isAreaExists = await areaService.findCount({
-      _id: areaId,
-      isDeleted: false,
-    });
-    if (!isAreaExists) {
+    const isAreaExists =
+      areaId !== null
+        ? await areaService.findCount({
+            _id: areaId,
+            isDeleted: false,
+          })
+        : null;
+    if (areaId !== null && !isAreaExists) {
       throw new ApiError(httpStatus.OK, "Invalid Area.");
     }
 
