@@ -1028,6 +1028,7 @@ exports.firstCallConfirmation = async (req, res) => {
       alternateNo,
       productData,
       warehouseId,
+      areaId,
     } = req.body;
 
     const handleProductData = async (
@@ -1081,6 +1082,11 @@ exports.firstCallConfirmation = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
+
+    let foundArea = await areaService.getOneByMultiField({ _id: areaId });
+    if (!foundArea) {
+      throw new ApiError(httpStatus.OK, `Invalid area`);
+    }
     let approveStatus = status === firstCallDispositions.approved;
 
     let dataUpdated = await orderService.getOneAndUpdate(
@@ -1097,6 +1103,8 @@ exports.firstCallConfirmation = async (req, res) => {
           alternateNo: alternateNo,
           firstCallCallBackDate: callbackDate,
           firstCallApprovedBy: req.userData?.userName,
+          areaId,
+          areaLabel: foundArea?.area,
         },
       }
     );

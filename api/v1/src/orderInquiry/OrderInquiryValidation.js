@@ -443,6 +443,7 @@ const firstCallConfirmation = {
   body: Joi.object().keys({
     address: Joi.string().required(),
     remark: Joi.string().required(),
+    areaId: Joi.string().required(),
     callbackDate: Joi.string().allow(""),
     status: Joi.string().required(),
     alternateNo: Joi.string().required(),
