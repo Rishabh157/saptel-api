@@ -18,6 +18,20 @@ const create = {
   }),
 };
 
+// add multiple area
+
+const createMultiple = {
+  body: Joi.object().keys({
+    area: Joi.array().items(Joi.string().lowercase().required()),
+    pincodeId: Joi.string().custom(commonValidation.objectId).required(),
+    tehsilId: Joi.string().custom(commonValidation.objectId).required(),
+    districtId: Joi.string().custom(commonValidation.objectId).required(),
+    stateId: Joi.string().custom(commonValidation.objectId).required(),
+    countryId: Joi.string().custom(commonValidation.objectId).required(),
+    // companyId: Joi.string().custom(commonValidation.objectId).required(),
+  }),
+};
+
 /**
  * update existing document
  */
@@ -137,4 +151,5 @@ module.exports = {
   changeStatus,
   getDocument,
   getAreaByPincode,
+  createMultiple,
 };

@@ -72,6 +72,17 @@ router.post(
   validate(areaValidation.create),
   areaController.add
 );
+
+/**
+ * create new document miltiple
+ */
+router.post(
+  "/multi-add",
+
+  authCheckMiddleware,
+  validate(areaValidation.createMultiple),
+  areaController.createMultiple
+);
 /**
  * update document
  */

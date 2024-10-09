@@ -43,7 +43,11 @@ exports.add = async (req, res) => {
     /**
      * check duplicate exist
      */
-    let dataExist = await areaService.isExists([{ area }, { pincodeId }]);
+    let dataExist = await areaService.isExists(
+      [{ area }, { pincodeId }, { tehsilId }, { districtId }, { stateId }],
+      false,
+      true
+    );
     if (dataExist.exists && dataExist.existsSummary) {
       throw new ApiError(httpStatus.OK, dataExist.existsSummary);
     }
@@ -113,6 +117,121 @@ exports.add = async (req, res) => {
     } else {
       throw new ApiError(httpStatus.NOT_IMPLEMENTED, `Something went wrong.`);
     }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+// add multiple
+
+exports.createMultiple = async (req, res) => {
+  try {
+    let { area, pincodeId, tehsilId, districtId, stateId, countryId } =
+      req.body;
+
+    if (!Array.isArray(area) || area.length === 0) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Area must be a non-empty array."
+      );
+    }
+
+    // Check if all Id's exist
+    const isPincodeExists = await pincodeService.findCount({
+      _id: pincodeId,
+      isDeleted: false,
+    });
+    if (!isPincodeExists) {
+      throw new ApiError(httpStatus.OK, "Invalid PinCode");
+    }
+
+    const isTehsilExists = await tehsilService.findCount({
+      _id: tehsilId,
+      isDeleted: false,
+    });
+    if (!isTehsilExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Tehsil");
+    }
+
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid District");
+    }
+
+    const isStateExists = await stateService.findCount({
+      _id: stateId,
+      isDeleted: false,
+    });
+    if (!isStateExists) {
+      throw new ApiError(httpStatus.OK, "Invalid State");
+    }
+
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
+
+    // Prepare an array to store the created areas
+    let createdAreas = [];
+
+    // Iterate over the area array and create each one
+    for (const areaName of area) {
+      // Check if the current area already exists
+      let dataExist = await areaService.isExists(
+        [
+          { area: areaName },
+          { pincodeId },
+          { tehsilId },
+          { districtId },
+          { stateId },
+        ],
+        false,
+        true
+      );
+      if (dataExist.exists && dataExist.existsSummary) {
+        throw new ApiError(httpStatus.OK, `Area "${areaName}" already exists.`);
+      }
+
+      // Create new area data
+      let dataCreated = await areaService.createNewData({
+        area: areaName,
+        pincodeId,
+        tehsilId,
+        districtId,
+        stateId,
+        countryId,
+        companyId: req.userData.companyId,
+      });
+
+      if (dataCreated) {
+        createdAreas.push(dataCreated);
+      } else {
+        throw new ApiError(
+          httpStatus.NOT_IMPLEMENTED,
+          `Failed to create area "${areaName}".`
+        );
+      }
+    }
+
+    // Return the response with all created areas
+    return res.status(httpStatus.CREATED).send({
+      message: "Areas added successfully.",
+      data: createdAreas,
+      status: true,
+      code: "CREATED",
+      issue: null,
+    });
   } catch (err) {
     let errData = errorRes(err);
     logger.info(errData.resData);
