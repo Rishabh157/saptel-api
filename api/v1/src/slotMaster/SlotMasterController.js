@@ -288,6 +288,22 @@ exports.allFilterPagination = async (req, res) => {
       matchQuery.$and.push(...datefilterQuery);
     }
 
+    let totalCount = await slotMasterService.findCount(matchQuery);
+
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        totalCount,
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
     //calander filter
     //----------------------------
 
@@ -372,19 +388,6 @@ exports.allFilterPagination = async (req, res) => {
       throw new ApiError(httpStatus.OK, `No data Found`);
     }
 
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
-    }
     let userRoleData = await getUserRoleData(req);
     let fieldsToDisplay = getFieldsToDisplay(
       moduleType.slotManagement,

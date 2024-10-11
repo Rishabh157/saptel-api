@@ -245,8 +245,7 @@ exports.createMultiple = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { area, pincodeId, tehsilId, districtId, stateId, countryId } =
-      req.body;
+    let { pincodeId, tehsilId, districtId, stateId, countryId } = req.body;
 
     let idToBeSearch = req.params.id;
 

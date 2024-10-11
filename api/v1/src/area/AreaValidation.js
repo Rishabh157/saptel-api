@@ -40,7 +40,6 @@ const update = {
     id: Joi.required().custom(commonValidation.objectId),
   }),
   body: Joi.object().keys({
-    area: Joi.string().lowercase().required(),
     pincodeId: Joi.string().custom(commonValidation.objectId).required(),
     tehsilId: Joi.string().custom(commonValidation.objectId).required(),
     districtId: Joi.string().custom(commonValidation.objectId).required(),
