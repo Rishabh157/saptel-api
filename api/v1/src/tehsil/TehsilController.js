@@ -3,7 +3,7 @@ const logger = require("../../../../config/logger");
 const httpStatus = require("http-status");
 const ApiError = require("../../../utils/apiErrorUtils");
 const tehsilService = require("./TehsilService");
-const companyService = require("../company/CompanyService");
+const areaService = require("../area/AreaService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
 const districtService = require("../district/DistrictService");
@@ -109,10 +109,33 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { preferredCourier, isFixed } = req.body;
+    let { preferredCourier, isFixed, districtId, stateId, countryId } =
+      req.body;
 
     let idToBeSearch = req.params.id;
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
 
+    const isStateExists = await stateService.findCount({
+      _id: stateId,
+      isDeleted: false,
+    });
+    if (!isStateExists) {
+      throw new ApiError(httpStatus.OK, "Invalid State");
+    }
+
+    const isDistrictExists = await districtService.findCount({
+      _id: districtId,
+      isDeleted: false,
+    });
+    if (!isDistrictExists) {
+      throw new ApiError(httpStatus.OK, "Invalid district");
+    }
     //------------------Find data-------------------
     let datafound = await tehsilService.getOneByMultiField({
       _id: idToBeSearch,
@@ -124,12 +147,10 @@ exports.update = async (req, res) => {
     let dataUpdated = await tehsilService.getOneAndUpdate(
       {
         _id: idToBeSearch,
-        isDeleted: false,
       },
       {
         $set: {
-          preferredCourier,
-          isFixed,
+          ...req.body,
         },
       }
     );
@@ -140,8 +161,15 @@ exports.update = async (req, res) => {
         $set: {
           preferredCourier,
           isFixed,
+          districtId,
+          stateId,
+          countryId,
         },
       }
+    );
+    await areaService.updateMany(
+      { tehsilId: idToBeSearch },
+      { districtId, stateId, countryId }
     );
 
     if (dataUpdated) {

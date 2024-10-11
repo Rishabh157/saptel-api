@@ -35,6 +35,9 @@ const update = {
       courierName: Joi.string().required(),
       priority: Joi.number().required(),
     }),
+    stateId: Joi.string().custom(commonValidation.objectId).required(),
+    countryId: Joi.string().custom(commonValidation.objectId).required(),
+
     isFixed: Joi.boolean(),
   }),
 };

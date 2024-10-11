@@ -6,9 +6,12 @@ const districtService = require("./DistrictService");
 const pincodeService = require("../pincode/PincodeService");
 
 const tehsilService = require("../tehsil/TehsilService");
-const companyService = require("../company/CompanyService");
+const areaService = require("../area/AreaService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
+const wharehouseService = require("../wareHouse/WareHouseService");
+const dealerService = require("../dealer/DealerService");
+const vendorService = require("../vendor/VendorService");
 const { searchKeys } = require("./DistrictSchema");
 const { errorRes } = require("../../../utils/resError");
 const {
@@ -102,10 +105,25 @@ exports.add = async (req, res) => {
 //update start
 exports.update = async (req, res) => {
   try {
-    let { preferredCourier, isFixed } = req.body;
+    let { preferredCourier, isFixed, stateId, countryId } = req.body;
 
     let idToBeSearch = req.params.id;
 
+    const isCountryExists = await countryService.findCount({
+      _id: countryId,
+      isDeleted: false,
+    });
+    if (!isCountryExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Country");
+    }
+
+    const isStateExists = await stateService.findCount({
+      _id: stateId,
+      isDeleted: false,
+    });
+    if (!isStateExists) {
+      throw new ApiError(httpStatus.OK, "Invalid State");
+    }
     //------------------Find data-------------------
     let datafound = await districtService.getOneByMultiField({
       _id: idToBeSearch,
@@ -121,8 +139,7 @@ exports.update = async (req, res) => {
       },
       {
         $set: {
-          preferredCourier,
-          isFixed,
+          ...req.body,
         },
       }
     );
@@ -133,6 +150,8 @@ exports.update = async (req, res) => {
         $set: {
           preferredCourier,
           isFixed,
+          stateId,
+          countryId,
         },
       }
     );
@@ -142,8 +161,45 @@ exports.update = async (req, res) => {
         $set: {
           preferredCourier,
           isFixed,
+          stateId,
+          countryId,
         },
       }
+    );
+
+    await areaService.updateMany(
+      { districtId: idToBeSearch },
+      { stateId, countryId }
+    );
+
+    // get warehouse and update address
+
+    await wharehouseService.updateMany(
+      { "registrationAddress.districtId": idToBeSearch },
+      { "registrationAddress.stateId": stateId }
+    );
+    await wharehouseService.updateMany(
+      { "billingAddress.districtId": idToBeSearch },
+      { "billingAddress.stateId": stateId }
+    );
+    // get dealer and update address
+    await dealerService.updateMany(
+      { "registrationAddress.districtId": idToBeSearch },
+      { "registrationAddress.stateId": stateId }
+    );
+    await dealerService.updateMany(
+      { "billingAddress.districtId": idToBeSearch },
+      { "billingAddress.stateId": stateId }
+    );
+    // get vendor and update address
+
+    await vendorService.updateMany(
+      { "registrationAddress.districtId": idToBeSearch },
+      { "registrationAddress.stateId": stateId }
+    );
+    await vendorService.updateMany(
+      { "billingAddress.districtId": idToBeSearch },
+      { "billingAddress.stateId": stateId }
     );
 
     if (dataUpdated) {
