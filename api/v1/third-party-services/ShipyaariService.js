@@ -1,4 +1,5 @@
-const { default: axios } = require("axios");
+const axios = require("axios");
+
 const qs = require("qs");
 const config = require("../../../config/config");
 const courierPartnerTokenService = require("../src/courierPartnerToken/CourierPartnerTokenService");
@@ -38,15 +39,18 @@ const confirmOrderShipYaari = async (data) => {
     let shipyaariToken = await courierPartnerTokenService?.getOneByMultiField({
       courierPartnerName: preferredCourierPartner.shipyaari,
     });
+    console.log(shipyaariToken, "shipyaariToken");
+    console.log(data, "data");
     const HEADER = {
       "Content-Type": "application/json", // Set the content type
       Authorization: `Bearer ${shipyaariToken?.token}`,
     };
     let response = await axios.post(
-      `${config.shipyaari_baseurl}/api/v1/order/placeOrderApiV3`,
+      `https://sysellerconsoledev.yaarilabs.com/api/v1/order/placeOrderApiV3`,
       data,
       { headers: HEADER }
     );
+    console.log(response, "response");
 
     if (response) {
       return { data: response?.data, status: true };

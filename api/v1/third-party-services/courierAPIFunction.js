@@ -271,9 +271,15 @@ const assignOrderToCourier = async (
                 courierName: foundCourier?.courierName,
                 apiStatus: true,
               };
+            } else {
+              return {
+                isApi: true,
+                data: JSON.stringify(orderAssignedToShipYaari?.data),
+                courierName: null,
+                apiStatus: false,
+              };
             }
 
-            break;
           case preferredCourierPartner.maersk:
             let pickUpState = await stateService?.getOneByMultiField({
               isDeleted: false,

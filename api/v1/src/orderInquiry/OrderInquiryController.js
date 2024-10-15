@@ -902,7 +902,16 @@ exports.approveFirstCallDirectly = async (req, res) => {
     let categorydata = await productCategoryService?.getOneByMultiField({
       _id: schemeData?.category,
     });
-
+    console.log(
+      toPincodeData,
+      fromPincodeData,
+      schemeData,
+      dataUpdated,
+      preferredCourier,
+      wareHouseData,
+      categorydata,
+      "0000"
+    );
     let isOrderAssignedToCourier = await assignOrderToCourier(
       toPincodeData,
       fromPincodeData,
@@ -912,6 +921,31 @@ exports.approveFirstCallDirectly = async (req, res) => {
       wareHouseData,
       categorydata
     );
+
+    if (
+      isOrderAssignedToCourier?.apiStatus === false &&
+      isOrderAssignedToCourier.courierName === null
+    ) {
+      await orderService.getOneAndUpdate(
+        {
+          _id: idToBeSearch,
+        },
+        {
+          $set: {
+            shipyaariResponse: isOrderAssignedToCourier?.data,
+            firstCallState: "",
+            firstCallApproval: false,
+            firstCallApprovedBy: "",
+          },
+        }
+      );
+      throw new ApiError(
+        httpStatus.NOT_IMPLEMENTED,
+        isOrderAssignedToCourier?.data
+      );
+    }
+
+    console.log(isOrderAssignedToCourier, "isOrderAssignedToCourier");
 
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
@@ -978,11 +1012,12 @@ exports.approveFirstCallDirectly = async (req, res) => {
         {
           $set: {
             isGPO:
-              isOrderAssignedToCourier?.courierName ===
-              preferredCourierPartner.gpo
+              isOrderAssignedToCourier?.courierName ||
+              "GPO" === preferredCourierPartner.gpo
                 ? true
                 : false,
-            orderAssignedToCourier: isOrderAssignedToCourier?.courierName,
+            orderAssignedToCourier:
+              isOrderAssignedToCourier?.courierName || "GPO",
           },
         }
       );

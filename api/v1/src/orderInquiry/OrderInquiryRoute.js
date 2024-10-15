@@ -215,6 +215,12 @@ router.get(
 
   orderController.getUnAuthGetByPhNumber
 );
+// get order data by number auth
+router.get(
+  "/:phno/get-by-phnumber",
+  authCheckMiddleware,
+  orderController.getUnAuthGetByPhNumber
+);
 
 // get active order data by number
 router.get("/unauth/get-active-order/:phno", orderController.getActiveOrder);

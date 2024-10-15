@@ -785,6 +785,7 @@ exports.updateAuth = async (req, res) => {
         hsnCode: subCatData?.hsnCode,
         companyAddress: iscompanyExists?.address,
         schemeProducts: schemeProductsForOrder,
+        isFreezed: false,
         // dealerAssignedId: dealerId,
       });
 
