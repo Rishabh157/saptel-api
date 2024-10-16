@@ -748,91 +748,106 @@ exports.checkBarcode = async (req, res) => {
 
     let { barcode, orderId, status, latitude, longitude } = req.body;
 
-    let additionalQuery = [
-      {
-        $match: {
-          isDeleted: false,
-          barcodeNumber: barcode,
-          dealerId: new mongoose.Types.ObjectId(req.userData.dealerId),
+    let requiredBarcode = [];
+    let barcodeData = [];
+    barcode?.map(async (ele) => {
+      let dataExist = await barCodeService.aggregateQuery([
+        {
+          $match: {
+            isDeleted: false,
+            barcodeNumber: ele,
+            dealerId: new mongoose.Types.ObjectId(req.userData.dealerId),
+          },
         },
-      },
-    ];
+      ]);
+      if (!dataExist.length) {
+        throw new ApiError(httpStatus.OK, "Barcode not found");
+      }
+      barcodeData?.push({ barcodeId: dataExist?._id, barcode: ele });
+      let existingBarcode = requiredBarcode.find(
+        (item) => item.productGroupId === ele
+      );
 
-    let dataExist = await barCodeService.aggregateQuery(additionalQuery);
-    if (!dataExist.length) {
-      throw new ApiError(httpStatus.OK, "Barcode not found");
-    }
+      if (existingBarcode) {
+        // If it exists, increment its quantity
+        existingBarcode.quantity += 1;
+      } else {
+        // If it doesn't exist, add it with quantity 1
+        requiredBarcode.push({ productGroupId: ele, quantity: 1 });
+      }
+    });
+
     let orderInquiryData = await orderInquiryService.getOneByMultiField({
       _id: orderId,
     });
     if (!orderInquiryData) {
       throw new ApiError(httpStatus.OK, "Order not found");
     }
-    if (
-      dataExist[0]?.productGroupId?.toString() !==
-      orderInquiryData?.productGroupId?.toString()
-    ) {
+
+    const isSameAsMyObj = (requiredBarcode, orderInquiryData) => {
+      return requiredBarcode.every((requiredItem) => {
+        const matchingItem = orderInquiryData?.find(
+          (objItem) => objItem.productGroupId === requiredItem.productGroupId
+        );
+        return matchingItem && matchingItem.quantity === requiredItem.quantity;
+      });
+    };
+    if (!isSameAsMyObj(requiredBarcode, orderInquiryData?.schemeProducts)) {
       throw new ApiError(httpStatus.OK, "Invalid Barcode");
     }
 
-    if (dataExist) {
-      let orderInquiry = await orderInquiryService.getOneAndUpdate(
+    let orderInquiry = await orderInquiryService.getOneAndUpdate(
+      {
+        _id: new mongoose.Types.ObjectId(orderId),
+      },
+      {
+        $set: {
+          status,
+          latitude,
+          longitude,
+        },
+        $push: {
+          barcodeData: {
+            ...barcodeData,
+          },
+        },
+      }
+    );
+    await addToOrderFlow(
+      orderInquiry?._id,
+      orderInquiry?.orderNumber,
+      `Order delivered by ${req.userData.userName}`,
+      status,
+      req.userData.userName
+    );
+
+    if (!orderInquiry) {
+      throw new ApiError(httpStatus.OK, "Barcode with this orderId not found");
+    } else {
+      let dataUpdated = await barCodeService.getOneAndUpdate(
         {
-          _id: new mongoose.Types.ObjectId(orderId),
+          isDeleted: false,
+          barcodeNumber: barcode,
+          dealerId: new mongoose.Types.ObjectId(req.userData.dealerId),
         },
         {
           $set: {
-            status,
-            latitude,
-            longitude,
-          },
-          $push: {
-            barcodeData: {
-              barcodeId: dataExist[0]?._id,
-              barcode: dataExist[0]?.barcodeNumber,
-            },
+            status: barcodeStatusType.delivered,
           },
         }
       );
-      await addToOrderFlow(
-        orderInquiry?._id,
-        orderInquiry?.orderNumber,
-        "",
-        status,
-        req.userData.userName
+
+      await addToBarcodeFlow(
+        dataUpdated,
+        `Barcode status updated to Delivered`
       );
-
-      if (!orderInquiry) {
-        throw new ApiError(
-          httpStatus.OK,
-          "Barcode with this orderId not found"
-        );
-      } else {
-        let dataUpdated = await barCodeService.getOneAndUpdate(
-          {
-            isDeleted: false,
-            barcodeNumber: barcode,
-            dealerId: new mongoose.Types.ObjectId(req.userData.dealerId),
-          },
-          {
-            $set: {
-              status: barcodeStatusType.delivered,
-            },
-          }
-        );
-
-        await addToBarcodeFlow(
-          dataUpdated,
-          `Barcode status updated to Delivered`
-        );
-        return res.status(httpStatus.OK).send({
-          message: "Successfull.",
-          status: true,
-          data: dataExist,
-          code: "OK",
-          issue: null,
-        });
-      }
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
     }
   } catch (err) {
     let errData = errorRes(err);

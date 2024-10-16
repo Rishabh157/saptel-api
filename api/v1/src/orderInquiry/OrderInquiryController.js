@@ -17,6 +17,7 @@ const dealerService = require("../dealer/DealerService");
 const deliveryBoyService = require("../deliveryBoy/DeliveryBoyService");
 const tehsilService = require("../tehsil/TehsilService");
 const warehouseService = require("../wareHouse/WareHouseService");
+const productSummaryService = require("../productGroupSummary/ProductGroupSummaryService");
 const CourierPartnerToken = require("../courierPartnerToken/CourierPartnerTokenService");
 const awbMaster = require("../awbMaster/AwbMasterService");
 
@@ -1905,6 +1906,16 @@ exports.assignOrder = async (req, res) => {
   try {
     let { dealerId, warehouseId, orderId } = req.body;
 
+    //------------------Find data-------------------
+    let datafound = await orderService.getOneByMultiField({
+      _id: orderId,
+    });
+    if (!datafound) {
+      throw new ApiError(httpStatus.OK, `Orders not found.`);
+    }
+    let allProducts = datafound?.schemeProducts?.map((ele) => {
+      return ele?.productGroupId;
+    });
     if (dealerId !== null) {
       var isDealerExists = await dealerService.getOneByMultiField({
         _id: dealerId,
@@ -1912,6 +1923,20 @@ exports.assignOrder = async (req, res) => {
       });
       if (!isDealerExists) {
         throw new ApiError(httpStatus.OK, "Invalid Dealer.");
+      }
+      var isWarehouseExists = await warehouseService.getOneByMultiField({
+        dealerId: isDealerExists?._id,
+        isActive: true,
+      });
+      if (!isWarehouseExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Warehouse.");
+      }
+      let foundInventory = await productSummaryService?.getOneByMultiField({
+        warehouseId: isWarehouseExists?._id,
+        productGroupId: { $in: allProducts },
+      });
+      if (!foundInventory) {
+        throw new ApiError(httpStatus.OK, "Dealer don't have inventory");
       }
     }
     if (warehouseId !== null) {
@@ -1922,14 +1947,6 @@ exports.assignOrder = async (req, res) => {
       if (!isWarehouseExists) {
         throw new ApiError(httpStatus.OK, "Invalid company warehouse");
       }
-    }
-
-    //------------------Find data-------------------
-    let datafound = await orderService.getOneByMultiField({
-      _id: orderId,
-    });
-    if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
 
     let dataUpdated = await orderService

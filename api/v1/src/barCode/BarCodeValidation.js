@@ -369,7 +369,7 @@ const get = {
 
 const checkBarcode = {
   body: Joi.object().keys({
-    barcode: Joi.string().required(),
+    barcode: Joi.array().items(Joi.string().required()),
     orderId: Joi.string().custom(commonValidation.objectId).required(),
     status: Joi.string().required(),
     latitude: Joi.string().required(),
