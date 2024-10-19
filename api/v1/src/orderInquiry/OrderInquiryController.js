@@ -968,6 +968,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
               secondaryCourierPartner:
                 isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
                   ?.partnerName,
+              status: orderStatusEnum.intransit,
             },
           }
         );
@@ -1217,6 +1218,7 @@ exports.firstCallConfirmation = async (req, res) => {
                 secondaryCourierPartner:
                   isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
                     ?.partnerName,
+                status: orderStatusEnum.intransit,
               },
             }
           );
@@ -1441,6 +1443,7 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
               secondaryCourierPartner:
                 isOrderAssignedToCourier?.data?.data?.[0]?.awbs[0]?.charges
                   ?.partnerName,
+              status: orderStatusEnum.intransit,
             },
           }
         );

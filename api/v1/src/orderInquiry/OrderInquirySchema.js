@@ -625,6 +625,10 @@ const OrderInquirySchema = new mongoose.Schema(
       type: Object,
       default: "",
     },
+    shipyaariStatus: {
+      type: String,
+      default: "",
+    },
     maerksResponse: {
       type: Object,
       default: "",

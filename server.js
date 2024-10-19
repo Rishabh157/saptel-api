@@ -15,10 +15,12 @@ const {
 } = require("./api/v1/cron-functions");
 const {
   getShipyaariToken,
+  updateShipyaariStatus,
 } = require("./api/v1/third-party-services/ShipyaariService");
 
 // cron for slot add
 cron.schedule("0 12 * * *", async () => {
+  await updateShipyaariStatus();
   await getShipyaariToken();
   await addSlotEveryDayFun();
   await UpdateExpiredBarcode();

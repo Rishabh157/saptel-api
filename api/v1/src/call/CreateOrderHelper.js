@@ -228,6 +228,7 @@ const createOrderInQueue = async (data) => {
       schemeProducts: schemeProductsForOrder,
       schemeCode: isSchemeExists?.schemeCode,
       isFreezed: false,
+      shipyaariStatus: "",
     });
 
     // Add order to the order flow

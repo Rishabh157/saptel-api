@@ -256,7 +256,7 @@ const assignOrderToCourier = async (
               gstNumber: "",
               orderId: orderData?.orderNumber.toString(),
               eWayBillNo: 0,
-              brandName: "Telemart",
+              brandName: "Skyteleshop",
               brandLogo: "",
             };
 

@@ -786,6 +786,7 @@ exports.updateAuth = async (req, res) => {
         companyAddress: iscompanyExists?.address,
         schemeProducts: schemeProductsForOrder,
         isFreezed: false,
+        shipyaariStatus: "",
         // dealerAssignedId: dealerId,
       });
 
