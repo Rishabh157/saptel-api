@@ -20,10 +20,10 @@ const {
 
 // cron for slot add
 cron.schedule("0 12 * * *", async () => {
-  await updateShipyaariStatus();
   await getShipyaariToken();
   await addSlotEveryDayFun();
   await UpdateExpiredBarcode();
+  await updateShipyaariStatus();
 });
 //-------------------------------
 //start server
