@@ -18,4 +18,12 @@ router.post(
   reportController.agentWiseComplaint
 );
 
+//===============get all inquiry pagination filter===============
+router.post(
+  "/all-inquiry",
+  authCheckMiddleware,
+  validate(reportValidation.getAllInquiryFilter),
+  reportController.allInquiryFilterPagination
+);
+
 module.exports = router;

@@ -78,6 +78,7 @@ const {
   getCustomerReputation,
   getDateFilterQueryCallBackAndPreferedDate,
   generateOrderInvoice,
+  getTomorrowDate,
 } = require("./OrderInquiryHelper");
 const { default: axios } = require("axios");
 const {
@@ -4214,6 +4215,8 @@ exports.allFilterPagination = async (req, res) => {
   }
 };
 
+// =================== all inquiry ===============
+
 // ====================== get all batch filter pagination =============
 
 exports.getBatchFilterPagination = async (req, res) => {
@@ -5260,6 +5263,9 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       : true;
     let finalAggregateQuery = [];
 
+    let tomorrowData = getTomorrowDate();
+    console.log(tomorrowData, "tomorrowData");
+
     let matchQuery = {
       $and: [
         {
@@ -5267,6 +5273,47 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
         },
       ],
     };
+
+    //----------------------------
+    /**
+     * get filter query
+     */
+    let booleanFields = [];
+    let numberFileds = [];
+    let objectIdFields = [
+      "dispositionLevelTwoId",
+      "dispositionLevelThreeId",
+      "countryId",
+      "stateId",
+      "schemeId",
+      "districtId",
+      "tehsilId",
+      "pincodeId",
+      "areaId",
+      "channel",
+      "agentDistrictId",
+      "delivery_boy_id",
+    ];
+
+    const filterQuery = getFilterQuery(
+      filterBy,
+      booleanFields,
+      numberFileds,
+      objectIdFields
+    );
+    if (filterQuery && filterQuery.length) {
+      matchQuery.$and.push(...filterQuery);
+    }
+    matchQuery.$and.push({
+      $or: [
+        // Condition 1: preferred_delivery_date is less than or equal to tomorrow
+        { preffered_delivery_date: { $lte: new Date(tomorrowData) } },
+
+        // Condition 2: preffered_delivery_date is empty, null, or does not exist
+
+        { preffered_delivery_date: "" },
+      ],
+    });
 
     let { orderBy, orderByValue } = getOrderByAndItsValue(
       req.body.orderBy,
@@ -5302,36 +5349,6 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
       matchQuery.$and.push(...rangeQuery);
     }
 
-    //----------------------------
-    /**
-     * get filter query
-     */
-    let booleanFields = [];
-    let numberFileds = [];
-    let objectIdFields = [
-      "dispositionLevelTwoId",
-      "dispositionLevelThreeId",
-      "countryId",
-      "stateId",
-      "schemeId",
-      "districtId",
-      "tehsilId",
-      "pincodeId",
-      "areaId",
-      "channel",
-      "agentDistrictId",
-      "delivery_boy_id",
-    ];
-
-    const filterQuery = getFilterQuery(
-      filterBy,
-      booleanFields,
-      numberFileds,
-      objectIdFields
-    );
-    if (filterQuery && filterQuery.length) {
-      matchQuery.$and.push(...filterQuery);
-    }
     //----------------------------
     //calander filter
     /**
@@ -5383,17 +5400,18 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     });
 
     //-----------------------------------
-    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    // let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
 
-    if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found here`);
-    }
+    // if (dataFound.length === 0) {
+    //   throw new ApiError(httpStatus.OK, `No data Found here`);
+    // }
 
     let { limit, page, totalData, skip, totalpages } =
       await getLimitAndTotalCount(
         req.body.limit,
         req.body.page,
-        dataFound.length,
+        await orderService.findCount(matchQuery),
+
         req.body.isPaginationRequired
       );
 

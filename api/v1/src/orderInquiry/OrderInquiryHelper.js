@@ -80,6 +80,18 @@ exports.getDateFilterQueryCallBackAndPreferedDate = (
   return queryArray.length ? queryArray : null;
 };
 
+exports.getTomorrowDate = () => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const year = tomorrow.getFullYear();
+  const month = String(tomorrow.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+  const day = String(tomorrow.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 exports.generateOrderInvoice = (orderNumber) => {
   const year = new Date().getFullYear().toString().slice(-2); // Get last two digits of the current year
   const paddedOrderNumber =

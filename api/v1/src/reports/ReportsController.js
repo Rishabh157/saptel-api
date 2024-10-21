@@ -9,9 +9,27 @@ const complaintService = require("../complain/ComplainService");
 const { errorRes } = require("../../../utils/resError");
 
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
-const { getDateFilterQuery } = require("../../helper/paginationFilterHelper");
+const {
+  checkInvalidParams,
+  getSearchQuery,
+  getDateFilterQuery,
+  getLimitAndTotalCount,
+  getOrderByAndItsValue,
+} = require("../../helper/paginationFilterHelper");
 const { default: mongoose } = require("mongoose");
-const { orderStatusEnum } = require("../../helper/enumUtils");
+const {
+  orderStatusEnum,
+  userEnum,
+  moduleType,
+  actionType,
+  userRoleType,
+} = require("../../helper/enumUtils");
+const {
+  getUserRoleData,
+  getFieldsToDisplay,
+  getAllowedField,
+} = require("../../helper/utils");
+const { searchKeys } = require("../orderInquiry/OrderInquirySchema");
 
 exports.agentOrderStatus = async (req, res) => {
   try {
@@ -214,6 +232,231 @@ exports.agentWiseComplaint = async (req, res) => {
       return res.status(httpStatus.OK).send({
         data: result,
         status: true,
+        message: "Data Found",
+        code: "OK",
+        issue: null,
+      });
+    } else {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
+exports.allInquiryFilterPagination = async (req, res) => {
+  try {
+    const { Id } = req.userData;
+
+    var dateFilter = req.body.dateFilter;
+    let searchValue = req.body.searchValue;
+
+    let searchIn = req.body.searchIn;
+
+    let isPaginationRequired = req.body.isPaginationRequired
+      ? req.body.isPaginationRequired
+      : true;
+    let finalAggregateQuery = [];
+
+    const isUserExists = await userService.getOneByMultiField({
+      _id: Id,
+      isDeleted: false,
+      isActive: true,
+    });
+
+    if (!isUserExists) {
+      throw new ApiError(httpStatus.OK, "Invalid Agent ");
+    }
+    let matchQuery = {
+      $and: [],
+    };
+    console.log(isUserExists.userType === userEnum.admin, ";;;;;");
+    if (isUserExists.userType === userEnum.admin) {
+      matchQuery.$and.push({ orderNumber: null });
+    } else {
+      matchQuery.$and.push({
+        orderNumber: null,
+        agentId: new mongoose.Types.ObjectId(Id),
+      });
+    }
+
+    /**
+     * check search keys valid
+     **/
+
+    let { orderBy, orderByValue } = getOrderByAndItsValue(
+      req.body.orderBy,
+      req.body.orderByValue
+    );
+
+    let searchQueryCheck = checkInvalidParams(searchIn, searchKeys);
+
+    if (searchQueryCheck && !searchQueryCheck.status) {
+      return res.status(httpStatus.OK).send({
+        ...searchQueryCheck,
+      });
+    }
+    /**
+     * get searchQuery
+     */
+    const searchQuery = getSearchQuery(searchIn, searchKeys, searchValue);
+    if (searchQuery && searchQuery.length) {
+      matchQuery.$and.push({ $or: searchQuery });
+    }
+    //----------------------------
+    /**
+     * get range filter query
+     */
+
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    // const datefilterQuery = await getDateFilterQuery(
+    //   dateFilter,
+    //   allowedDateFiletrKeys
+    // );
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
+    //
+    console.log(matchQuery, "matchQuery");
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        await orderInquiryService.findCount(matchQuery),
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+    /**
+     * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
+     */
+    let additionalQuery = [
+      {
+        $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterdata",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "deliveryboys",
+          localField: "delivery_boy_id",
+          foreignField: "_id",
+          as: "deleivery_by_data",
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $lookup: {
+          from: "didmanagements",
+          localField: "didNo",
+          foreignField: "didNumber",
+          as: "did_data",
+          pipeline: [
+            {
+              $lookup: {
+                from: "channelmasters",
+                localField: "channelId",
+                foreignField: "_id",
+                as: "channel_data",
+                pipeline: [
+                  {
+                    $project: {
+                      channelName: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+
+      {
+        $addFields: {
+          channelLabel: {
+            $arrayElemAt: ["$did_data.channel_data.channelName", 0],
+          },
+
+          deleiveryBoyLabel: {
+            $arrayElemAt: ["$deleivery_by_data.name", 0],
+          },
+
+          callCenterLabel: {
+            $arrayElemAt: ["$callcenterdata.callCenterName", 0],
+          },
+        },
+      },
+
+      {
+        $unset: ["did_data", "callcenterdata", "deleivery_by_data"],
+      },
+    ];
+    // let additionalQuery = [];
+    if (additionalQuery.length) {
+      finalAggregateQuery.push(...additionalQuery);
+    }
+
+    //-----------------------------------
+    let dataFound = await orderInquiryService.aggregateQuery(
+      finalAggregateQuery
+    );
+    if (dataFound.length === 0) {
+      throw new ApiError(httpStatus.OK, `No data Found`);
+    }
+
+    let userRoleData = await getUserRoleData(req);
+    let fieldsToDisplay = getFieldsToDisplay(
+      moduleType.order,
+      userRoleData,
+      actionType.pagination
+    );
+    let result = await orderInquiryService.aggregateQuery(finalAggregateQuery);
+    let allowedFields = getAllowedField(fieldsToDisplay, result);
+
+    if (allowedFields?.length) {
+      return res.status(200).send({
+        data: allowedFields,
+        totalPage: totalpages,
+        status: true,
+        currentPage: page,
+        totalItem: totalData,
+        pageSize: limit,
         message: "Data Found",
         code: "OK",
         issue: null,
