@@ -3505,7 +3505,7 @@ exports.getByOrderNumber = async (req, res) => {
       {
         $match: {
           orderNumber: parseInt(ordernumber),
-          isDeleted: false,
+
           status: orderStatusEnum.delivered,
         },
       },

@@ -19,7 +19,7 @@ const {
 } = require("./api/v1/third-party-services/ShipyaariService");
 
 // cron for slot add
-cron.schedule("0 12 * * *", async () => {
+cron.schedule("0 0 * * *", async () => {
   await getShipyaariToken();
   await addSlotEveryDayFun();
   await UpdateExpiredBarcode();
