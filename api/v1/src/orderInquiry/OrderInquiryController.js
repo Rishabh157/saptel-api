@@ -904,16 +904,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
     let categorydata = await productCategoryService?.getOneByMultiField({
       _id: schemeData?.category,
     });
-    console.log(
-      toPincodeData,
-      fromPincodeData,
-      schemeData,
-      dataUpdated,
-      preferredCourier,
-      wareHouseData,
-      categorydata,
-      "0000"
-    );
+
     let isOrderAssignedToCourier = await assignOrderToCourier(
       toPincodeData,
       fromPincodeData,
@@ -946,8 +937,6 @@ exports.approveFirstCallDirectly = async (req, res) => {
         isOrderAssignedToCourier?.data
       );
     }
-
-    console.log(isOrderAssignedToCourier, "isOrderAssignedToCourier");
 
     // if true the hit shipment API else GPO
     if (isOrderAssignedToCourier.apiStatus && isOrderAssignedToCourier?.isApi) {
@@ -1609,7 +1598,7 @@ exports.updateOrderStatus = async (req, res) => {
         await addToOrderFlow(
           ress?._id,
           ress?.orderNumber,
-          ``,
+          `Order status changed to ${status}`,
           ress.status,
           req.userData.userName
         );
@@ -5264,7 +5253,6 @@ exports.allFilterDealerOrderPagination = async (req, res) => {
     let finalAggregateQuery = [];
 
     let tomorrowData = getTomorrowDate();
-    console.log(tomorrowData, "tomorrowData");
 
     let matchQuery = {
       $and: [

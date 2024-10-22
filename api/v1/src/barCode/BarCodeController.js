@@ -324,8 +324,14 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * to send only active data on web
      */
-    if (req.path.includes("/app/") || req.path.includes("/app")) {
-      matchQuery.$and.push({ isActive: true });
+    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
+
+    const datefilterQuery = await getDateFilterQuery(
+      dateFilter,
+      allowedDateFiletrKeys
+    );
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
     }
 
     let { orderBy, orderByValue } = getOrderByAndItsValue(
@@ -383,15 +389,6 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * ToDo : for date filter
      */
-    let allowedDateFiletrKeys = ["createdAt", "updatedAt"];
-
-    const datefilterQuery = await getDateFilterQuery(
-      dateFilter,
-      allowedDateFiletrKeys
-    );
-    if (datefilterQuery && datefilterQuery.length) {
-      matchQuery.$and.push(...datefilterQuery);
-    }
 
     //----------------------------
     // Apply $match filter early
@@ -1971,8 +1968,6 @@ exports.dispatchEcomOrder = async (req, res) => {
       throw new ApiError(httpStatus.BAD_REQUEST, "Invalid barcode");
     }
 
-    console.log(req.userData, "========");
-
     // Update available quantity
     await addRemoveAvailableQuantity(
       req.userData.companyId,
@@ -2251,7 +2246,6 @@ exports.getDamageExpireBarcode = async (req, res) => {
     if (foundBarcode !== null && foundBarcode[0] !== undefined) {
       barcode.push(foundBarcode[0]);
     }
-    console.log(barcode, "barcode");
 
     if (barcode.length === 0) {
       throw new ApiError(httpStatus.OK, "Data not found.");
@@ -3969,7 +3963,6 @@ exports.freezeBarcode = async (req, res) => {
 //courier return products
 exports.courierReturnProduct = async (req, res) => {
   try {
-    console.log("here");
     let barcodeData = req.body.barcode;
     let whid = req.params.whid;
     let id = req.params.id;
@@ -4012,11 +4005,11 @@ exports.courierReturnProduct = async (req, res) => {
     await addToOrderFlow(
       orderInquiry?._id,
       orderInquiry?.orderNumber,
-      "",
+      `Returned from courier ${orderInquiry?.orderAssignedToCourier}, assigned to order number: ${orderInquiry?.orderNumber}, Received in ${updated.condition} Condition`,
       orderStatusEnum.closed,
       req.userData.userName
     );
-    console.log("yha tak");
+
     const updates = await Promise.all(
       barcodeData.map(async (ele) => {
         return barCodeService.getOneAndUpdate(
@@ -4123,12 +4116,12 @@ exports.updateInventory = async (req, res) => {
           },
         }
       );
-      console.log(ele?.wareHouseId, ele?.productGroupId, "ele?.wareHouseId");
+
       let warehouseData = await WarehouseService?.getOneByMultiField({
         isDeleted: false,
         _id: new mongoose.Types.ObjectId(ele?.wareHouseId),
       });
-      console.log(warehouseData, "warehouseData");
+
       let productGroupData = await ProductGroupService?.getOneByMultiField({
         isDeleted: false,
         _id: new mongoose.Types.ObjectId(ele?.productGroupId),
@@ -4155,13 +4148,6 @@ exports.updateInventory = async (req, res) => {
       expiryDate: barcodedata[0]?.expiryDate,
     });
     if (updatedDataArray.length > 0) {
-      console.log(
-        "heree..................",
-        req.userData.companyId,
-        barcodedata[0]?.wareHouseId,
-        barcodedata[0]?.productGroupId,
-        allBarcodes.length
-      );
       await addRemoveAvailableQuantity(
         req.userData.companyId,
         barcodedata[0]?.wareHouseId,
@@ -4305,7 +4291,7 @@ exports.updateWarehouseInventory = async (req, res) => {
 
     // Aggregate barcodedata
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
+
     await Promise.all(
       output.map(async (item) => {
         const createdData = await addAvailableQuantity(
@@ -4463,7 +4449,6 @@ exports.bulkUpload = async (req, res) => {
 
 exports.updateWarehouseInventoryDealer = async (req, res) => {
   try {
-    console.log("oooooooooooooooo");
     let { barcodedata, dtdRequestIds } = req.body;
 
     const promises = barcodedata?.map(async (ele) => {
@@ -4510,9 +4495,9 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
 
       return dataUpdated;
     });
-    console.log("uuuuuu");
+
     const updatedDataArray = await Promise.all(promises);
-    console.log(updatedDataArray, "................");
+
     // Aggregate products by productGroupId
     const aggregateProducts = (arr) => {
       return arr.reduce((acc, curr) => {
@@ -4529,7 +4514,7 @@ exports.updateWarehouseInventoryDealer = async (req, res) => {
     };
 
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
+
     await Promise.all(
       output.map(async (item) => {
         const createdData = await addAvailableQuantity(
@@ -4620,7 +4605,6 @@ exports.outwardInventory = async (req, res) => {
 
     // Aggregate the product data based on productGroupId
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
 
     // Process the aggregated product data before proceeding with barcodedata updates
     await Promise.all(
@@ -4909,7 +4893,6 @@ exports.wtwOutwardInventory = async (req, res) => {
 
     // Aggregate barcodedata
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
 
     // Convert groupedData into an array
     const groupedArray = Object.keys(groupedData).map((key) => ({
@@ -5163,7 +5146,6 @@ exports.dtdOutwardInventory = async (req, res) => {
 
     // Aggregate barcodedata
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
 
     // Update freeze quantity for each aggregated product
     await Promise.all(
@@ -5281,7 +5263,7 @@ exports.dtwOutwardInventory = async (req, res) => {
             },
           }
         );
-        console.log(updatedDTW, "updatedDTW");
+
         fromDealerWarehouseId = updatedDTW?.fromWarehouseId;
         toWarehouseId = updatedDTW?.toWarehouseId;
         return updatedDTW; // Return the updated document to ensure Promise.all works correctly
@@ -5325,7 +5307,6 @@ exports.dtwOutwardInventory = async (req, res) => {
 
     // Aggregate barcodedata
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
 
     // Update freeze quantity for each aggregated product
     await Promise.all(
@@ -5398,7 +5379,6 @@ exports.wtcOutwardInventory = async (req, res) => {
 
     // Aggregate barcodedata
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
 
     // Convert the grouped data into an array of objects
     const groupedArray = Object.keys(groupedData).map((key) => ({
@@ -5556,7 +5536,6 @@ exports.wtsOutwardInventory = async (req, res) => {
     };
 
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
 
     // Convert groupedData into an array
     const groupedArray = Object.keys(groupedData).map((key) => ({
@@ -5986,7 +5965,7 @@ exports.dealerInwardInventory = async (req, res) => {
     };
 
     const output = aggregateProducts(barcodedata);
-    console.log(output, "output");
+
     await Promise.all(
       output.map(async (item) => {
         const createdData = await addAvailableQuantity(

@@ -464,8 +464,6 @@ exports.update = async (req, res) => {
     });
     // }
   } catch (err) {
-    console.log(err);
-
     // Handle error response
     let errData = errorRes(err);
     logger.info(errData.resData);
@@ -690,7 +688,7 @@ exports.updateAuth = async (req, res) => {
         schemeId,
         dealerServingPincode[0]?.dealerId
       );
-      console.log(isInventoryExists, "isInventoryExists");
+
       if (isInventoryExists) {
         var assidnedDealerData = await dealerService?.getOneByMultiField({
           _id: dealerServingPincode[0]?.dealerId,
@@ -699,8 +697,7 @@ exports.updateAuth = async (req, res) => {
         dealerServingPincode = [];
       }
     }
-    console.log(assidnedDealerData, "assidnedDealerData");
-    console.log(dealerServingPincode, "dealerServingPincode");
+
     // getting warehouse ID
     const servingWarehouse = await getAssignWarehouse(companyId);
     const orderNumber = await getOrderNumber();
@@ -790,8 +787,13 @@ exports.updateAuth = async (req, res) => {
         // dealerAssignedId: dealerId,
       });
 
-      await addToOrderFlow(orderInquiry);
-
+      await addToOrderFlow(
+        orderInquiry?._id,
+        orderInquiry?.orderNumber,
+        "Order created ",
+        orderInquiry.status,
+        req.userData.userName
+      );
       const dataUpdated = await callService.getOneAndUpdate(
         {
           _id: idToBeSearch,
@@ -1031,7 +1033,7 @@ exports.updateAuth = async (req, res) => {
 
 //     try {
 //       const isOrder = flag || prepaidOrderFlag;
-//       // console.log(isOrder, flag, prepaidOrderFlag, "pp");
+//       //
 //       const orderInquiryData = {
 //         ...req.body,
 //         isOrder: isOrder,
@@ -1087,7 +1089,7 @@ exports.updateAuth = async (req, res) => {
 //           },
 //         }
 //       );
-//       console.log(orderQueueComplete, "orderQueueComplete");
+//
 
 //       if (orderQueueComplete) {
 //         await axios.post(
@@ -1115,7 +1117,7 @@ exports.updateAuth = async (req, res) => {
 //         });
 //       }
 //     } catch (error) {
-//       console.log("errr", error);
+//
 //       // Rollback logic
 //       // if (orderInquiry) {
 //       //   // Delete created order inquiry

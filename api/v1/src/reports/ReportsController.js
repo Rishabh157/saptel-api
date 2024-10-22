@@ -275,7 +275,7 @@ exports.allInquiryFilterPagination = async (req, res) => {
     let matchQuery = {
       $and: [],
     };
-    console.log(isUserExists.userType === userEnum.admin, ";;;;;");
+
     if (isUserExists.userType === userEnum.admin) {
       matchQuery.$and.push({ orderNumber: null });
     } else {
@@ -328,7 +328,7 @@ exports.allInquiryFilterPagination = async (req, res) => {
       matchQuery.$and.push(...datefilterQuery);
     }
     //
-    console.log(matchQuery, "matchQuery");
+
     finalAggregateQuery.push({
       $match: matchQuery,
     });
