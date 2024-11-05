@@ -5,6 +5,7 @@ const deliveryBoyValidation = require("./DeliveryBoyValidation");
 const {
   authCheckDealerMiddleware,
   authCheckMiddleware,
+  authCheckDeliveryBoyMiddleware,
   otpVerifyToken,
 } = require("../../middleware/authenticationCheck");
 
@@ -17,6 +18,13 @@ router.get(
   authCheckDealerMiddleware,
   validate(deliveryBoyValidation.get),
   deliveryBoyController.get
+);
+
+router.get(
+  "/:id",
+  authCheckDeliveryBoyMiddleware,
+  // validate(deliveryBoyValidation.get),
+  deliveryBoyController.getById
 );
 
 /**

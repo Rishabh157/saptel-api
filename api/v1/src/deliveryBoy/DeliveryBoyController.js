@@ -333,6 +333,38 @@ exports.get = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+
+// get by id
+
+exports.getById = async (req, res) => {
+  try {
+    let deliveryBoyId = req.params.id;
+    //if no default query then pass {}
+    let matchQuery = { isDeleted: false, _id: deliveryBoyId };
+
+    let dataExist = await deliveryBoyService.getOneByMultiField(matchQuery);
+
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {

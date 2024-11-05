@@ -149,6 +149,14 @@ router.get(
   orderController.getById
 );
 
+//===============get document by id for delivery boy===============
+router.get(
+  "/deliveryboy/order/:id",
+  authCheckDeliveryBoyMiddleware,
+  //   validate(orderValidation),
+  orderController.getById
+);
+
 //===============get document by id===============
 router.get(
   "/unauth/:id",

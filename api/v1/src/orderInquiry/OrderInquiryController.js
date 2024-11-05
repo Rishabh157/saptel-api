@@ -3306,26 +3306,25 @@ exports.getById = async (req, res) => {
       {
         $match: {
           _id: new mongoose.Types.ObjectId(idToBeSearch),
-          isDeleted: false,
         },
       },
     ];
-    let userRoleData = await getUserRoleData(req);
-    let fieldsToDisplay = getFieldsToDisplay(
-      moduleType.order,
-      userRoleData,
-      actionType.view
-    );
+    // let userRoleData = await getUserRoleData(req);
+    // let fieldsToDisplay = getFieldsToDisplay(
+    //   moduleType.order,
+    //   userRoleData,
+    //   actionType.view
+    // );
     let dataExist = await orderService.aggregateQuery(additionalQuery);
-    let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
+    // let allowedFields = getAllowedField(fieldsToDisplay, dataExist);
 
-    if (!allowedFields[0]) {
+    if (!dataExist[0]) {
       throw new ApiError(httpStatus.OK, "Data not found.");
     } else {
       return res.status(httpStatus.OK).send({
         message: "Successfull.",
         status: true,
-        data: allowedFields[0],
+        data: dataExist[0],
         code: "OK",
         issue: null,
       });
@@ -4887,18 +4886,33 @@ exports.allFilterPaginationDileveryBoy = async (req, res) => {
       dateFilter,
       allowedDateFiletrKeys
     );
-    // if (datefilterQuery && datefilterQuery.length) {
-    //
+    if (datefilterQuery && datefilterQuery.length) {
+      matchQuery.$and.push(...datefilterQuery);
+    }
 
-    //   matchQuery.$and.push(...datefilterQuery);
-    // }
+    finalAggregateQuery.push({
+      $match: matchQuery,
+    });
 
     //calander filter
     //----------------------------
-
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
+    let { limit, page, totalData, skip, totalpages } =
+      await getLimitAndTotalCount(
+        req.body.limit,
+        req.body.page,
+        await orderService.findCount(matchQuery),
+        req.body.isPaginationRequired
+      );
+
+    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
+    if (isPaginationRequired) {
+      finalAggregateQuery.push({ $skip: skip });
+      finalAggregateQuery.push({ $limit: limit });
+    }
+
     let additionalQuery = [
       {
         $lookup: {
@@ -4955,33 +4969,20 @@ exports.allFilterPaginationDileveryBoy = async (req, res) => {
       $match: matchQuery,
     });
 
-    //-----------------------------------
-    //
-    let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    // //-----------------------------------
+    // //
+    // let dataFound = await orderService.aggregateQuery(finalAggregateQuery);
+    // console.log(dataFound, "dataFound");
+    // if (dataFound.length === 0) {
+    //   throw new ApiError(httpStatus.OK, `No data Found`);
+    // }
 
-    if (dataFound.length === 0) {
-      throw new ApiError(httpStatus.OK, `No data Found`);
-    }
-
-    let { limit, page, totalData, skip, totalpages } =
-      await getLimitAndTotalCount(
-        req.body.limit,
-        req.body.page,
-        dataFound.length,
-        req.body.isPaginationRequired
-      );
-
-    finalAggregateQuery.push({ $sort: { [orderBy]: parseInt(orderByValue) } });
-    if (isPaginationRequired) {
-      finalAggregateQuery.push({ $skip: skip });
-      finalAggregateQuery.push({ $limit: limit });
-    }
-    // let userRoleData = await getUserRoleData(req);
-    // let fieldsToDisplay = getFieldsToDisplay(
-    //   moduleType.order,
-    //   userRoleData,
-    //   actionType.pagination
-    // );
+    // // let userRoleData = await getUserRoleData(req);
+    // // let fieldsToDisplay = getFieldsToDisplay(
+    // //   moduleType.order,
+    // //   userRoleData,
+    // //   actionType.pagination
+    // // );
     let result = await orderService.aggregateQuery(finalAggregateQuery);
     // let allowedFields = getAllowedField(fieldsToDisplay, result);
 
