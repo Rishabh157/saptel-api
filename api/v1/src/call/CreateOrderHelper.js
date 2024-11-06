@@ -128,7 +128,7 @@ const createOrderInQueue = async (data) => {
     let dealerServingPincode = [];
     let assidnedDealerData = null;
 
-    if (!prepaidOrderFlag) {
+    if (!prepaidOrderFlag || !flag) {
       dealerServingPincode = await dealerSurvingPincode(
         isPincodeExists?.pincode,
         companyId,
@@ -207,9 +207,11 @@ const createOrderInQueue = async (data) => {
           ? assidnedDealerData?.isActive
           : "",
       assignWarehouseId:
-        dealerServingPincode.length === 0 ? servingWarehouse?._id : null,
+        dealerServingPincode.length === 0 && (flag || prepaidOrderFlag)
+          ? servingWarehouse?._id
+          : null,
       assignWarehouseLabel:
-        dealerServingPincode.length === 0
+        dealerServingPincode.length === 0 && (flag || prepaidOrderFlag)
           ? servingWarehouse?.wareHouseName
           : "",
       approved: flag ? true : prepaidOrderFlag ? false : true,

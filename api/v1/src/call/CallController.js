@@ -346,12 +346,18 @@ exports.update = async (req, res) => {
       throw new ApiError(httpStatus.OK, "Invalid Agent ");
     }
 
-    const isStateExists = await stateService.findCount({
-      _id: stateId,
-      isDeleted: false,
-    });
-    if (!isStateExists) {
-      throw new ApiError(httpStatus.OK, "Invalid State.");
+    let checkValidAddress = true;
+    if (applicableCriteriaData === applicableCriteria.isInquiry) {
+      checkValidAddress = false;
+    }
+    if (checkValidAddress) {
+      const isStateExists = await stateService.findCount({
+        _id: stateId,
+        isDeleted: false,
+      });
+      if (!isStateExists) {
+        throw new ApiError(httpStatus.OK, "Invalid State.");
+      }
     }
     const iscompanyExists = await companyService.getOneByMultiField({
       _id: companyId,
@@ -385,40 +391,43 @@ exports.update = async (req, res) => {
     if (!subCatData) {
       throw new ApiError(httpStatus.OK, "Invalid Subcategory");
     }
-    const isDistrictExists = await districtService.findCount({
-      _id: districtId,
-      isDeleted: false,
-    });
-    if (!isDistrictExists) {
-      throw new ApiError(httpStatus.OK, "Invalid District.");
-    }
 
-    const isTehsilExists = await tehsilService.findCount({
-      _id: tehsilId,
-      isDeleted: false,
-    });
-    if (!isTehsilExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
-    }
+    if (checkValidAddress) {
+      const isDistrictExists = await districtService.findCount({
+        _id: districtId,
+        isDeleted: false,
+      });
+      if (!isDistrictExists) {
+        throw new ApiError(httpStatus.OK, "Invalid District.");
+      }
 
-    const isAreaExists =
-      areaId !== null
-        ? await areaService.findCount({
-            _id: areaId,
-            isDeleted: false,
-          })
-        : null;
-    if (areaId !== null && !isAreaExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Area.");
-    }
+      const isTehsilExists = await tehsilService.findCount({
+        _id: tehsilId,
+        isDeleted: false,
+      });
+      if (!isTehsilExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
+      }
 
-    const isPincodeExists = await pincodeService.getOneByMultiField({
-      _id: pincodeId,
-      isDeleted: false,
-      isActive: true,
-    });
-    if (!isPincodeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Pincode.");
+      const isAreaExists =
+        areaId !== null
+          ? await areaService.findCount({
+              _id: areaId,
+              isDeleted: false,
+            })
+          : null;
+      if (areaId !== null && !isAreaExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Area.");
+      }
+
+      const isPincodeExists = await pincodeService.getOneByMultiField({
+        _id: pincodeId,
+        isDeleted: false,
+        isActive: true,
+      });
+      if (!isPincodeExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Pincode.");
+      }
     }
 
     const isDispositionTwoExists = await dispositionTwoService.findCount({
@@ -506,6 +515,7 @@ exports.updateAuth = async (req, res) => {
       dispositionLevelThreeLabel,
       productGroupLabel,
     } = req.body;
+    console.log("here 0");
 
     const isDispositionThreeExists =
       await dispositionThreeService.getOneByMultiField({
@@ -565,17 +575,26 @@ exports.updateAuth = async (req, res) => {
       isDeleted: false,
       isActive: true,
     });
-
+    console.log("here 1");
     if (!isUserExists) {
       throw new ApiError(httpStatus.OK, "Invalid Agent ");
     }
 
-    const isStateExists = await stateService.findCount({
-      _id: stateId,
-      isDeleted: false,
-    });
-    if (!isStateExists) {
-      throw new ApiError(httpStatus.OK, "Invalid State.");
+    let checkValidAddress = true;
+    if (applicableCriteriaData === applicableCriteria.isInquiry) {
+      checkValidAddress = false;
+    }
+    console.log(checkValidAddress, "checkValidAddress");
+
+    if (checkValidAddress) {
+      const isStateExists = await stateService.findCount({
+        _id: stateId,
+        isDeleted: false,
+      });
+      if (!isStateExists) {
+        console.log("from here");
+        throw new ApiError(httpStatus.OK, "Invalid State.");
+      }
     }
     const iscompanyExists = await companyService.getOneByMultiField({
       _id: companyId,
@@ -609,40 +628,48 @@ exports.updateAuth = async (req, res) => {
     if (!subCatData) {
       throw new ApiError(httpStatus.OK, "Invalid Subcategory");
     }
-    const isDistrictExists = await districtService.findCount({
-      _id: districtId,
-      isDeleted: false,
-    });
-    if (!isDistrictExists) {
-      throw new ApiError(httpStatus.OK, "Invalid District.");
+
+    if (checkValidAddress) {
+      const isDistrictExists = await districtService.findCount({
+        _id: districtId,
+        isDeleted: false,
+      });
+      if (!isDistrictExists) {
+        throw new ApiError(httpStatus.OK, "Invalid District.");
+      }
     }
 
-    const isTehsilExists = await tehsilService.findCount({
-      _id: tehsilId,
-      isDeleted: false,
-    });
-    if (!isTehsilExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
+    if (checkValidAddress) {
+      const isTehsilExists = await tehsilService.findCount({
+        _id: tehsilId,
+        isDeleted: false,
+      });
+      if (!isTehsilExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
+      }
     }
 
-    const isAreaExists =
-      areaId !== null
-        ? await areaService.findCount({
-            _id: areaId,
-            isDeleted: false,
-          })
-        : null;
-    if (areaId !== null && !isAreaExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Area.");
+    if (checkValidAddress) {
+      const isAreaExists =
+        areaId !== null
+          ? await areaService.findCount({
+              _id: areaId,
+              isDeleted: false,
+            })
+          : null;
+      if (areaId !== null && !isAreaExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Area.");
+      }
     }
-
-    const isPincodeExists = await pincodeService.getOneByMultiField({
-      _id: pincodeId,
-      isDeleted: false,
-      isActive: true,
-    });
-    if (!isPincodeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Pincode.");
+    if (checkValidAddress) {
+      const isPincodeExists = await pincodeService.getOneByMultiField({
+        _id: pincodeId,
+        isDeleted: false,
+        isActive: true,
+      });
+      if (!isPincodeExists) {
+        throw new ApiError(httpStatus.OK, "Invalid Pincode.");
+      }
     }
 
     const isDispositionTwoExists = await dispositionTwoService.findCount({
@@ -752,9 +779,11 @@ exports.updateAuth = async (req, res) => {
             ? assidnedDealerData?.isActive
             : "",
         assignWarehouseId:
-          dealerServingPincode?.length === 0 ? servingWarehouse?._id : null,
+          dealerServingPincode?.length === 0 && (flag || prepaidOrderFlag)
+            ? servingWarehouse?._id
+            : null,
         assignWarehouseLabel:
-          dealerServingPincode?.length === 0
+          dealerServingPincode?.length === 0 && (flag || prepaidOrderFlag)
             ? servingWarehouse?.wareHouseName
             : "",
         approved: flag ? true : prepaidOrderFlag ? false : true,
