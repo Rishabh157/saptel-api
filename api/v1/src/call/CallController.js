@@ -347,7 +347,10 @@ exports.update = async (req, res) => {
     }
 
     let checkValidAddress = true;
-    if (applicableCriteriaData === applicableCriteria.isInquiry) {
+    if (
+      applicableCriteriaData === applicableCriteria.isInquiry ||
+      applicableCriteria.isCallBack
+    ) {
       checkValidAddress = false;
     }
     if (checkValidAddress) {
@@ -581,7 +584,10 @@ exports.updateAuth = async (req, res) => {
     }
 
     let checkValidAddress = true;
-    if (applicableCriteriaData === applicableCriteria.isInquiry) {
+    if (
+      applicableCriteriaData === applicableCriteria.isInquiry ||
+      applicableCriteria.isCallBack
+    ) {
       checkValidAddress = false;
     }
     console.log(checkValidAddress, "checkValidAddress");

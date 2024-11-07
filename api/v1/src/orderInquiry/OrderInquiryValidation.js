@@ -11,7 +11,7 @@ const create = {
   body: Joi.object().keys({
     orderNumber: Joi.number().required(),
     approved: Joi.boolean().required(),
-    didNo: Joi.string().required(),
+    didNo: Joi.string().allow(""),
     agentId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
@@ -92,7 +92,7 @@ const update = {
     orderStatus: Joi.string().required(),
     orderNumber: Joi.number().required(),
     approved: Joi.boolean().required(),
-    didNo: Joi.string().required(),
+    didNo: Joi.string().allow(""),
     agentId: Joi.string().custom(commonValidation.objectId).required(),
     companyId: Joi.string().custom(commonValidation.objectId).required(),
     agentName: Joi.string().required(),
