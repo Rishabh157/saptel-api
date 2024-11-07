@@ -10,7 +10,7 @@ const CallSchema = new mongoose.Schema(
   {
     didNo: {
       type: String,
-      required: true,
+      default: null,
       trim: true,
     },
     ageGroup: {
