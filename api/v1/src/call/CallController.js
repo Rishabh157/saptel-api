@@ -1202,7 +1202,7 @@ exports.allFilterPagination = async (req, res) => {
       : true;
     let finalAggregateQuery = [];
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [{}],
     };
     /**
      * to send only active data on web
@@ -1294,58 +1294,6 @@ exports.allFilterPagination = async (req, res) => {
     /**
      * for lookups , project , addfields or group in aggregate pipeline form dynamic quer in additionalQuery array
      */
-    let additionalQuery = [
-      // {
-      //   $match: matchQuery,
-      // },
-      // {
-      //   $lookup: {
-      //     from: "dispositiontwos",
-      //     localField: "dispositionLevelTwoId",
-      //     foreignField: "_id",
-      //     as: "dispositionLevelTwoData",
-      //     pipeline: [
-      //       {
-      //         $project: {
-      //           dispositionName: 1,
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
-      // {
-      //   $lookup: {
-      //     from: "dispositionthrees",
-      //     localField: "dispositionLevelThreeId",
-      //     foreignField: "_id",
-      //     as: "dispositionthreesData",
-      //     pipeline: [
-      //       {
-      //         $project: {
-      //           dispositionName: 1,
-      //         },
-      //       },
-      //     ],
-      //   },
-      // },
-      // {
-      //   $addFields: {
-      //     dispositionLevelTwoLabel: {
-      //       $arrayElemAt: ["$dispositionLevelTwoData.dispositionName", 0],
-      //     },
-      //     dispositionLevelThreeLabel: {
-      //       $arrayElemAt: ["$dispositionthreesData.dispositionName", 0],
-      //     },
-      //   },
-      // },
-      // {
-      //   $unset: ["dispositionLevelTwoData", "dispositionthreesData"],
-      // },
-    ];
-
-    if (additionalQuery.length) {
-      finalAggregateQuery.push(...additionalQuery);
-    }
 
     finalAggregateQuery.push({
       $match: matchQuery,

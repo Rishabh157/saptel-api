@@ -410,7 +410,6 @@ exports.getById = async (req, res) => {
     let additionalQuery = [
       {
         barcodeNumber: barcodeToBeSearch,
-        isDeleted: false,
       },
       {
         $lookup: {
