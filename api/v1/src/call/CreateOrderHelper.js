@@ -105,6 +105,7 @@ const createOrderInQueue = async (data) => {
     if (!isSchemeExists) {
       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
     }
+    console.log(isSchemeExists, "isSchemeExists");
 
     const schemeProductsForOrder = isSchemeExists.productInformation?.map(
       (ele) => ({

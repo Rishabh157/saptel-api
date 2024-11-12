@@ -346,14 +346,21 @@ exports.update = async (req, res) => {
     if (!isUserExists) {
       throw new ApiError(httpStatus.OK, "Invalid Agent ");
     }
-
+    console.log(applicableCriteriaData, "applicableCriteriaData");
+    console.log(
+      applicableCriteriaData === applicableCriteria.isInquiry ||
+        applicableCriteriaData === applicableCriteria.isCallBack,
+      "----------------"
+    );
     let checkValidAddress = true;
     if (
       applicableCriteriaData === applicableCriteria.isInquiry ||
-      applicableCriteria.isCallBack
+      applicableCriteriaData === applicableCriteria.isCallBack
     ) {
       checkValidAddress = false;
     }
+
+    console.log(checkValidAddress, "checkValidAddress");
     if (checkValidAddress) {
       const isStateExists = await stateService.findCount({
         _id: stateId,
@@ -423,7 +430,7 @@ exports.update = async (req, res) => {
       if (areaId !== null && !isAreaExists) {
         throw new ApiError(httpStatus.OK, "Invalid Area.");
       }
-
+      console.log(pincodeId, "pincodeId");
       const isPincodeExists = await pincodeService.getOneByMultiField({
         _id: pincodeId,
         isDeleted: false,
@@ -487,407 +494,407 @@ exports.update = async (req, res) => {
   }
 };
 
-exports.updateAuth = async (req, res) => {
-  try {
-    let {
-      stateId,
-      districtId,
-      tehsilId,
-      schemeId,
-      pincodeId,
-      areaId,
-      paymentMode,
-      companyId,
-      dispositionLevelTwoId,
-      dispositionLevelThreeId,
-      agentId,
-      agentName,
-      recordingStartTime,
-      recordingEndTime,
-      status,
-      shcemeQuantity,
-      mobileNo,
-      alternateNo,
-      productGroupId,
-      countryLabel,
-      stateLabel,
-      districtLabel,
-      tehsilLabel,
-      pincodeLabel,
-      areaLabel,
-      dispositionLevelTwoLabel,
-      dispositionLevelThreeLabel,
-      productGroupLabel,
-    } = req.body;
-    console.log("here 0");
+// exports.updateAuth = async (req, res) => {
+//   try {
+//     let {
+//       stateId,
+//       districtId,
+//       tehsilId,
+//       schemeId,
+//       pincodeId,
+//       areaId,
+//       paymentMode,
+//       companyId,
+//       dispositionLevelTwoId,
+//       dispositionLevelThreeId,
+//       agentId,
+//       agentName,
+//       recordingStartTime,
+//       recordingEndTime,
+//       status,
+//       shcemeQuantity,
+//       mobileNo,
+//       alternateNo,
+//       productGroupId,
+//       countryLabel,
+//       stateLabel,
+//       districtLabel,
+//       tehsilLabel,
+//       pincodeLabel,
+//       areaLabel,
+//       dispositionLevelTwoLabel,
+//       dispositionLevelThreeLabel,
+//       productGroupLabel,
+//     } = req.body;
+//     console.log("here 0");
 
-    const isDispositionThreeExists =
-      await dispositionThreeService.getOneByMultiField({
-        _id: dispositionLevelThreeId,
-        isDeleted: false,
-        isActive: true,
-      });
-    if (!isDispositionThreeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
-    }
-    let applicableCriteriaData =
-      isDispositionThreeExists?.applicableCriteria[0];
-    if (
-      applicableCriteriaData === applicableCriteria.isOrder ||
-      applicableCriteriaData === applicableCriteria.isPrepaid ||
-      applicableCriteriaData === applicableCriteria.isUrgent
-    ) {
-      let isOrderExists = await orderService.aggregateQuery([
-        {
-          $match: {
-            isDeleted: false,
-            isActive: true,
-            productGroupId: new mongoose.Types.ObjectId(productGroupId),
-            mobileNo: mobileNo,
-            orderNumber: { $ne: null },
+//     const isDispositionThreeExists =
+//       await dispositionThreeService.getOneByMultiField({
+//         _id: dispositionLevelThreeId,
+//         isDeleted: false,
+//         isActive: true,
+//       });
+//     if (!isDispositionThreeExists) {
+//       throw new ApiError(httpStatus.OK, "Invalid Disposition Three.");
+//     }
+//     let applicableCriteriaData =
+//       isDispositionThreeExists?.applicableCriteria[0];
+//     if (
+//       applicableCriteriaData === applicableCriteria.isOrder ||
+//       applicableCriteriaData === applicableCriteria.isPrepaid ||
+//       applicableCriteriaData === applicableCriteria.isUrgent
+//     ) {
+//       let isOrderExists = await orderService.aggregateQuery([
+//         {
+//           $match: {
+//             isDeleted: false,
+//             isActive: true,
+//             productGroupId: new mongoose.Types.ObjectId(productGroupId),
+//             mobileNo: mobileNo,
+//             orderNumber: { $ne: null },
 
-            status: {
-              $nin: [
-                orderStatusEnum.delivered,
-                orderStatusEnum.doorCancelled,
-                orderStatusEnum.rto,
-                orderStatusEnum.cancel,
-              ],
-            },
-          },
-        },
-      ]);
-      if (isOrderExists.length) {
-        throw new ApiError(
-          httpStatus.OK,
-          "Order with this number already in process"
-        );
-      }
-    }
+//             status: {
+//               $nin: [
+//                 orderStatusEnum.delivered,
+//                 orderStatusEnum.doorCancelled,
+//                 orderStatusEnum.rto,
+//                 orderStatusEnum.cancel,
+//               ],
+//             },
+//           },
+//         },
+//       ]);
+//       if (isOrderExists.length) {
+//         throw new ApiError(
+//           httpStatus.OK,
+//           "Order with this number already in process"
+//         );
+//       }
+//     }
 
-    let idToBeSearch = req.params.id;
+//     let idToBeSearch = req.params.id;
 
-    if (shcemeQuantity > 9) {
-      throw new ApiError(
-        httpStatus.OK,
-        "Scheme quantity should not be more than 9"
-      );
-    }
+//     if (shcemeQuantity > 9) {
+//       throw new ApiError(
+//         httpStatus.OK,
+//         "Scheme quantity should not be more than 9"
+//       );
+//     }
 
-    const isUserExists = await userService.getOneByMultiField({
-      _id: agentId,
-      isDeleted: false,
-      isActive: true,
-    });
-    console.log("here 1");
-    if (!isUserExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Agent ");
-    }
+//     const isUserExists = await userService.getOneByMultiField({
+//       _id: agentId,
+//       isDeleted: false,
+//       isActive: true,
+//     });
+//     console.log("here 1");
+//     if (!isUserExists) {
+//       throw new ApiError(httpStatus.OK, "Invalid Agent ");
+//     }
 
-    let checkValidAddress = true;
-    if (
-      applicableCriteriaData === applicableCriteria.isInquiry ||
-      applicableCriteria.isCallBack
-    ) {
-      checkValidAddress = false;
-    }
-    console.log(checkValidAddress, "checkValidAddress");
+//     let checkValidAddress = true;
+//     if (
+//       applicableCriteriaData === applicableCriteria.isInquiry ||
+//       applicableCriteria.isCallBack
+//     ) {
+//       checkValidAddress = false;
+//     }
+//     console.log(checkValidAddress, "checkValidAddress");
 
-    if (checkValidAddress) {
-      const isStateExists = await stateService.findCount({
-        _id: stateId,
-        isDeleted: false,
-      });
-      if (!isStateExists) {
-        console.log("from here");
-        throw new ApiError(httpStatus.OK, "Invalid State.");
-      }
-    }
-    const iscompanyExists = await companyService.getOneByMultiField({
-      _id: companyId,
-      isDeleted: false,
-    });
-    if (!iscompanyExists) {
-      throw new ApiError(httpStatus.OK, "Invalid company.");
-    }
+//     if (checkValidAddress) {
+//       const isStateExists = await stateService.findCount({
+//         _id: stateId,
+//         isDeleted: false,
+//       });
+//       if (!isStateExists) {
+//         console.log("from here");
+//         throw new ApiError(httpStatus.OK, "Invalid State.");
+//       }
+//     }
+//     const iscompanyExists = await companyService.getOneByMultiField({
+//       _id: companyId,
+//       isDeleted: false,
+//     });
+//     if (!iscompanyExists) {
+//       throw new ApiError(httpStatus.OK, "Invalid company.");
+//     }
 
-    const isSchemeExists = await schemeService.getOneByMultiField({
-      _id: schemeId,
-      isDeleted: false,
-    });
-    if (!isSchemeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Scheme.");
-    }
-    let schemeProductsForOrder = isSchemeExists.productInformation?.map(
-      (ele) => {
-        return {
-          productGroupName: ele?.productGroupName,
-          productGroupId: ele?.productGroup,
-          productQuantity: ele?.productQuantity,
-        };
-      }
-    );
+//     const isSchemeExists = await schemeService.getOneByMultiField({
+//       _id: schemeId,
+//       isDeleted: false,
+//     });
+//     if (!isSchemeExists) {
+//       throw new ApiError(httpStatus.OK, "Invalid Scheme.");
+//     }
+//     let schemeProductsForOrder = isSchemeExists.productInformation?.map(
+//       (ele) => {
+//         return {
+//           productGroupName: ele?.productGroupName,
+//           productGroupId: ele?.productGroup,
+//           productQuantity: ele?.productQuantity,
+//         };
+//       }
+//     );
 
-    let subCatData = await subcategoryService?.getOneByMultiField({
-      isDeleted: false,
-      _id: isSchemeExists.subCategory,
-    });
-    if (!subCatData) {
-      throw new ApiError(httpStatus.OK, "Invalid Subcategory");
-    }
+//     let subCatData = await subcategoryService?.getOneByMultiField({
+//       isDeleted: false,
+//       _id: isSchemeExists.subCategory,
+//     });
+//     if (!subCatData) {
+//       throw new ApiError(httpStatus.OK, "Invalid Subcategory");
+//     }
 
-    if (checkValidAddress) {
-      const isDistrictExists = await districtService.findCount({
-        _id: districtId,
-        isDeleted: false,
-      });
-      if (!isDistrictExists) {
-        throw new ApiError(httpStatus.OK, "Invalid District.");
-      }
-    }
+//     if (checkValidAddress) {
+//       const isDistrictExists = await districtService.findCount({
+//         _id: districtId,
+//         isDeleted: false,
+//       });
+//       if (!isDistrictExists) {
+//         throw new ApiError(httpStatus.OK, "Invalid District.");
+//       }
+//     }
 
-    if (checkValidAddress) {
-      const isTehsilExists = await tehsilService.findCount({
-        _id: tehsilId,
-        isDeleted: false,
-      });
-      if (!isTehsilExists) {
-        throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
-      }
-    }
+//     if (checkValidAddress) {
+//       const isTehsilExists = await tehsilService.findCount({
+//         _id: tehsilId,
+//         isDeleted: false,
+//       });
+//       if (!isTehsilExists) {
+//         throw new ApiError(httpStatus.OK, "Invalid Tehsil.");
+//       }
+//     }
 
-    if (checkValidAddress) {
-      const isAreaExists =
-        areaId !== null
-          ? await areaService.findCount({
-              _id: areaId,
-              isDeleted: false,
-            })
-          : null;
-      if (areaId !== null && !isAreaExists) {
-        throw new ApiError(httpStatus.OK, "Invalid Area.");
-      }
-    }
-    if (checkValidAddress) {
-      const isPincodeExists = await pincodeService.getOneByMultiField({
-        _id: pincodeId,
-        isDeleted: false,
-        isActive: true,
-      });
-      if (!isPincodeExists) {
-        throw new ApiError(httpStatus.OK, "Invalid Pincode.");
-      }
-    }
+//     if (checkValidAddress) {
+//       const isAreaExists =
+//         areaId !== null
+//           ? await areaService.findCount({
+//               _id: areaId,
+//               isDeleted: false,
+//             })
+//           : null;
+//       if (areaId !== null && !isAreaExists) {
+//         throw new ApiError(httpStatus.OK, "Invalid Area.");
+//       }
+//     }
+//     if (checkValidAddress) {
+//       const isPincodeExists = await pincodeService.getOneByMultiField({
+//         _id: pincodeId,
+//         isDeleted: false,
+//         isActive: true,
+//       });
+//       if (!isPincodeExists) {
+//         throw new ApiError(httpStatus.OK, "Invalid Pincode.");
+//       }
+//     }
 
-    const isDispositionTwoExists = await dispositionTwoService.findCount({
-      _id: dispositionLevelTwoId,
-      isDeleted: false,
-    });
-    if (!isDispositionTwoExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
-    }
+//     const isDispositionTwoExists = await dispositionTwoService.findCount({
+//       _id: dispositionLevelTwoId,
+//       isDeleted: false,
+//     });
+//     if (!isDispositionTwoExists) {
+//       throw new ApiError(httpStatus.OK, "Invalid Disposition Two.");
+//     }
 
-    //------------------Find data-------------------
-    let datafound = await callService.getOneByMultiField({
-      _id: idToBeSearch,
-    });
-    if (!datafound) {
-      throw new ApiError(httpStatus.OK, `Inbound not found.`);
-    }
+//     //------------------Find data-------------------
+//     let datafound = await callService.getOneByMultiField({
+//       _id: idToBeSearch,
+//     });
+//     if (!datafound) {
+//       throw new ApiError(httpStatus.OK, `Inbound not found.`);
+//     }
 
-    // let dispositionThreeId = dataCreated.dispositionLevelThreeId;
+//     // let dispositionThreeId = dataCreated.dispositionLevelThreeId;
 
-    let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
-      _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
-    });
+//     let dispositionThreeData = await dispositionThreeService.findAllWithQuery({
+//       _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
+//     });
 
-    // ---------map for order-------
-    let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
-    let prepaidOrderFlag = await isPrepaid(
-      dispositionThreeData[0]?.applicableCriteria
-    );
+//     // ---------map for order-------
+//     let flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
+//     let prepaidOrderFlag = await isPrepaid(
+//       dispositionThreeData[0]?.applicableCriteria
+//     );
 
-    // dealers who serves on this pincode
-    let dealerServingPincode = [];
-    if (!prepaidOrderFlag) {
-      let dealerServingPincodeData = await dealerSurvingPincode(
-        isPincodeExists?.pincode,
-        companyId,
-        schemeId
-      );
-      dealerServingPincode = dealerServingPincodeData;
-    }
-    if (dealerServingPincode?.length === 1) {
-      let isInventoryExists = await checkDealerHaveInventory(
-        schemeId,
-        dealerServingPincode[0]?.dealerId
-      );
+//     // dealers who serves on this pincode
+//     let dealerServingPincode = [];
+//     if (!prepaidOrderFlag) {
+//       let dealerServingPincodeData = await dealerSurvingPincode(
+//         isPincodeExists?.pincode,
+//         companyId,
+//         schemeId
+//       );
+//       dealerServingPincode = dealerServingPincodeData;
+//     }
+//     if (dealerServingPincode?.length === 1) {
+//       let isInventoryExists = await checkDealerHaveInventory(
+//         schemeId,
+//         dealerServingPincode[0]?.dealerId
+//       );
 
-      if (isInventoryExists) {
-        var assidnedDealerData = await dealerService?.getOneByMultiField({
-          _id: dealerServingPincode[0]?.dealerId,
-        });
-      } else {
-        dealerServingPincode = [];
-      }
-    }
+//       if (isInventoryExists) {
+//         var assidnedDealerData = await dealerService?.getOneByMultiField({
+//           _id: dealerServingPincode[0]?.dealerId,
+//         });
+//       } else {
+//         dealerServingPincode = [];
+//       }
+//     }
 
-    // getting warehouse ID
-    const servingWarehouse = await getAssignWarehouse(companyId);
-    const orderNumber = await getOrderNumber();
-    const inquiryNumber = await getInquiryNumber();
-    if (flag || prepaidOrderFlag) {
-      await webLeadService?.getOneAndUpdate(
-        { phone: mobileNo },
-        { $set: { leadStatus: webLeadStatusEnum.complete } }
-      );
-    } else if (
-      dispositionLevelThreeLabel.toLowerCase() ===
-      fakeOrderDisposition.toLowerCase()
-    ) {
-      await webLeadService?.getOneAndUpdate(
-        { phone: mobileNo },
-        { $set: { leadStatus: webLeadStatusEnum.fake } }
-      );
-    } else {
-      await webLeadService?.getOneAndUpdate(
-        { phone: mobileNo },
-        { $set: { leadStatus: webLeadStatusEnum.inquiry } }
-      );
-    }
-    try {
-      const orderInquiry = await orderService.createNewData({
-        ...req.body,
-        status: flag
-          ? status
-          : prepaidOrderFlag
-          ? orderStatusEnum.prepaid
-          : orderStatusEnum.inquiry,
-        orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
-        inquiryNumber: inquiryNumber,
-        isOrderAssigned:
-          dealerServingPincode?.length > 1 || servingWarehouse === undefined
-            ? false
-            : true,
-        assignDealerId:
-          dealerServingPincode?.length === 1
-            ? dealerServingPincode[0]?.dealerId
-            : null,
-        assignDealerLabel:
-          dealerServingPincode?.length === 1
-            ? assidnedDealerData?.firstName + " " + assidnedDealerData?.lastName
-            : "",
-        assignDealerCode:
-          dealerServingPincode?.length === 1
-            ? assidnedDealerData?.dealerCode
-            : "",
-        assignDealerStatus:
-          dealerServingPincode?.length === 1
-            ? assidnedDealerData?.isActive
-            : "",
-        assignWarehouseId:
-          dealerServingPincode?.length === 0 && (flag || prepaidOrderFlag)
-            ? servingWarehouse?._id
-            : null,
-        assignWarehouseLabel:
-          dealerServingPincode?.length === 0 && (flag || prepaidOrderFlag)
-            ? servingWarehouse?.wareHouseName
-            : "",
-        approved: flag ? true : prepaidOrderFlag ? false : true,
-        agentId: isUserExists?.agentId,
-        agentName: agentName,
-        recordingStartTime: recordingStartTime,
-        recordingEndTime: recordingEndTime,
-        callCenterId: isUserExists?.callCenterId,
-        branchId: isUserExists?.branchId,
-        paymentMode: prepaidOrderFlag
-          ? paymentModeType.UPI_ONLINE
-          : paymentModeType.COD,
-        isUrgentOrder:
-          dispositionThreeData[0]?.applicableCriteria ===
-          applicableCriteria.isUrgent,
-        countryLabel,
-        stateLabel,
-        districtLabel,
-        tehsilLabel,
-        pincodeLabel,
-        areaLabel,
-        dispositionLevelTwoLabel,
-        dispositionLevelThreeLabel,
-        productGroupLabel,
-        hsnCode: subCatData?.hsnCode,
-        companyAddress: iscompanyExists?.address,
-        schemeProducts: schemeProductsForOrder,
-        isFreezed: false,
-        shipyaariStatus: "",
-        // dealerAssignedId: dealerId,
-      });
+//     // getting warehouse ID
+//     const servingWarehouse = await getAssignWarehouse(companyId);
+//     const orderNumber = await getOrderNumber();
+//     const inquiryNumber = await getInquiryNumber();
+//     if (flag || prepaidOrderFlag) {
+//       await webLeadService?.getOneAndUpdate(
+//         { phone: mobileNo },
+//         { $set: { leadStatus: webLeadStatusEnum.complete } }
+//       );
+//     } else if (
+//       dispositionLevelThreeLabel.toLowerCase() ===
+//       fakeOrderDisposition.toLowerCase()
+//     ) {
+//       await webLeadService?.getOneAndUpdate(
+//         { phone: mobileNo },
+//         { $set: { leadStatus: webLeadStatusEnum.fake } }
+//       );
+//     } else {
+//       await webLeadService?.getOneAndUpdate(
+//         { phone: mobileNo },
+//         { $set: { leadStatus: webLeadStatusEnum.inquiry } }
+//       );
+//     }
+//     try {
+//       const orderInquiry = await orderService.createNewData({
+//         ...req.body,
+//         status: flag
+//           ? status
+//           : prepaidOrderFlag
+//           ? orderStatusEnum.prepaid
+//           : orderStatusEnum.inquiry,
+//         orderNumber: flag || prepaidOrderFlag ? orderNumber : null,
+//         inquiryNumber: inquiryNumber,
+//         isOrderAssigned:
+//           dealerServingPincode?.length > 1 || servingWarehouse === undefined
+//             ? false
+//             : true,
+//         assignDealerId:
+//           dealerServingPincode?.length === 1
+//             ? dealerServingPincode[0]?.dealerId
+//             : null,
+//         assignDealerLabel:
+//           dealerServingPincode?.length === 1
+//             ? assidnedDealerData?.firstName + " " + assidnedDealerData?.lastName
+//             : "",
+//         assignDealerCode:
+//           dealerServingPincode?.length === 1
+//             ? assidnedDealerData?.dealerCode
+//             : "",
+//         assignDealerStatus:
+//           dealerServingPincode?.length === 1
+//             ? assidnedDealerData?.isActive
+//             : "",
+//         assignWarehouseId:
+//           dealerServingPincode?.length === 0 && (flag || prepaidOrderFlag)
+//             ? servingWarehouse?._id
+//             : null,
+//         assignWarehouseLabel:
+//           dealerServingPincode?.length === 0 && (flag || prepaidOrderFlag)
+//             ? servingWarehouse?.wareHouseName
+//             : "",
+//         approved: flag ? true : prepaidOrderFlag ? false : true,
+//         agentId: isUserExists?.agentId,
+//         agentName: agentName,
+//         recordingStartTime: recordingStartTime,
+//         recordingEndTime: recordingEndTime,
+//         callCenterId: isUserExists?.callCenterId,
+//         branchId: isUserExists?.branchId,
+//         paymentMode: prepaidOrderFlag
+//           ? paymentModeType.UPI_ONLINE
+//           : paymentModeType.COD,
+//         isUrgentOrder:
+//           dispositionThreeData[0]?.applicableCriteria ===
+//           applicableCriteria.isUrgent,
+//         countryLabel,
+//         stateLabel,
+//         districtLabel,
+//         tehsilLabel,
+//         pincodeLabel,
+//         areaLabel,
+//         dispositionLevelTwoLabel,
+//         dispositionLevelThreeLabel,
+//         productGroupLabel,
+//         hsnCode: subCatData?.hsnCode,
+//         companyAddress: iscompanyExists?.address,
+//         schemeProducts: schemeProductsForOrder,
+//         isFreezed: false,
+//         shipyaariStatus: "",
+//         // dealerAssignedId: dealerId,
+//       });
 
-      await addToOrderFlow(
-        orderInquiry?._id,
-        orderInquiry?.orderNumber,
-        "Order created ",
-        orderInquiry.status,
-        req.userData.userName
-      );
-      const dataUpdated = await callService.getOneAndUpdate(
-        {
-          _id: idToBeSearch,
-          isDeleted: false,
-        },
-        {
-          $set: {
-            status: inquiryNumber ? orderStatusEnum.inquiry : status,
-            ...req.body,
-          },
-        }
-      );
+//       await addToOrderFlow(
+//         orderInquiry?._id,
+//         orderInquiry?.orderNumber,
+//         "Order created ",
+//         orderInquiry.status,
+//         req.userData.userName
+//       );
+//       const dataUpdated = await callService.getOneAndUpdate(
+//         {
+//           _id: idToBeSearch,
+//           isDeleted: false,
+//         },
+//         {
+//           $set: {
+//             status: inquiryNumber ? orderStatusEnum.inquiry : status,
+//             ...req.body,
+//           },
+//         }
+//       );
 
-      if (dataUpdated) {
-        return res.status(httpStatus.OK).send({
-          message: "Updated successfully.",
-          data: dataUpdated,
-          status: true,
-          code: "OK",
-          issue: null,
-        });
-      }
-    } catch (error) {
-      // Rollback logic
-      // if (orderInquiry) {
-      //   // Delete created order inquiry
-      //   await orderService.getByIdAndDelete(orderInquiry._id);
-      // }
+//       if (dataUpdated) {
+//         return res.status(httpStatus.OK).send({
+//           message: "Updated successfully.",
+//           data: dataUpdated,
+//           status: true,
+//           code: "OK",
+//           issue: null,
+//         });
+//       }
+//     } catch (error) {
+//       // Rollback logic
+//       // if (orderInquiry) {
+//       //   // Delete created order inquiry
+//       //   await orderService.getByIdAndDelete(orderInquiry._id);
+//       // }
 
-      // if (orderInquiryFlow) {
-      //   // Delete created order inquiry flow
-      //   await orderInquiryFlowService.getByIdAndDelete(orderInquiryFlow._id);
-      // }
+//       // if (orderInquiryFlow) {
+//       //   // Delete created order inquiry flow
+//       //   await orderInquiryFlowService.getByIdAndDelete(orderInquiryFlow._id);
+//       // }
 
-      // // Handle status rollback for call service
-      // await callService.getOneAndUpdate(
-      //   { _id: idToBeSearch, isDeleted: false },
-      //   { $set: { status: status } }
-      // );
+//       // // Handle status rollback for call service
+//       // await callService.getOneAndUpdate(
+//       //   { _id: idToBeSearch, isDeleted: false },
+//       //   { $set: { status: status } }
+//       // );
 
-      // Handle error response
-      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-        message: "Something went wrong!",
-        data: null,
-        status: false,
-        code: "ERROR",
-        issue: "API call failed",
-      });
-    }
-  } catch (err) {
-    let errData = errorRes(err);
-    logger.info(errData.resData);
-    let { message, status, data, code, issue } = errData.resData;
-    return res
-      .status(errData.statusCode)
-      .send({ message, status, data, code, issue });
-  }
-};
+//       // Handle error response
+//       return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+//         message: "Something went wrong!",
+//         data: null,
+//         status: false,
+//         code: "ERROR",
+//         issue: "API call failed",
+//       });
+//     }
+//   } catch (err) {
+//     let errData = errorRes(err);
+//     logger.info(errData.resData);
+//     let { message, status, data, code, issue } = errData.resData;
+//     return res
+//       .status(errData.statusCode)
+//       .send({ message, status, data, code, issue });
+//   }
+// };
 
 //update start
 // exports.update = async (req, res) => {
