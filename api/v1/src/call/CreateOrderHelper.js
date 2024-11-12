@@ -76,7 +76,7 @@ const createOrderInQueue = async (data) => {
       productGroupLabel,
       idToBeSearch: _id,
     } = data;
-
+    console.log(dispositionLevelThreeLabel, "dispositionLevelThreeLabel");
     // Fetch related data concurrently
     const [
       dispositionThreeData,
@@ -153,7 +153,12 @@ const createOrderInQueue = async (data) => {
     const servingWarehouse = await getAssignWarehouse(companyId);
     const orderNumber = await getOrderNumber();
     const inquiryNumber = await getInquiryNumber();
-
+    console.log(
+      flag,
+      prepaidOrderFlag,
+      dealerServingPincode,
+      "-----------------"
+    );
     // Update lead status
     if (flag || prepaidOrderFlag) {
       await webLeadService.getOneAndUpdate(

@@ -93,6 +93,7 @@ exports.add = async (req, res) => {
     if (!isCompanyExists) {
       throw new ApiError(httpStatus.OK, "Invalid Company");
     }
+    console.log(agentName, "agentName");
     const isUserExists =
       agentName !== null
         ? await userService.findCount({
