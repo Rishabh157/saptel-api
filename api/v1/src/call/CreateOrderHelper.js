@@ -75,55 +75,18 @@ const createOrderInQueue = async (data) => {
       dispositionLevelThreeLabel,
       productGroupLabel,
       idToBeSearch: _id,
+      applicableCriteriaData,
+      pincode,
+      callCenterId,
+      branchId,
+      address,
+      schemeCode,
+      schemeProductsForOrder,
+      hsnCode,
     } = data;
-    console.log(dispositionLevelThreeLabel, "dispositionLevelThreeLabel");
-    // Fetch related data concurrently
-    const [
-      dispositionThreeData,
-      isPincodeExists,
-      isUserExists,
-      isCompanyExists,
-      isSchemeExists,
-    ] = await Promise.all([
-      dispositionThreeService.findAllWithQuery({
-        _id: new mongoose.Types.ObjectId(dispositionLevelThreeId),
-      }),
-      pincodeService.getOneByMultiField({
-        _id: pincodeId,
-        isDeleted: false,
-        isActive: true,
-      }),
-      userService.getOneByMultiField({
-        _id: agentId,
-        isDeleted: false,
-        isActive: true,
-      }),
-      companyService.getOneByMultiField({ _id: companyId, isDeleted: false }),
-      schemeService.getOneByMultiField({ _id: schemeId, isDeleted: false }),
-    ]);
 
-    if (!isSchemeExists) {
-      throw new ApiError(httpStatus.OK, "Invalid Scheme.");
-    }
-    console.log(isSchemeExists, "isSchemeExists");
-
-    const schemeProductsForOrder = isSchemeExists.productInformation?.map(
-      (ele) => ({
-        productGroupName: ele?.productGroupName,
-        productGroupId: ele?.productGroup,
-        productQuantity: ele?.productQuantity,
-      })
-    );
-
-    const subCatData = await subcategoryService.getOneByMultiField({
-      isDeleted: false,
-      _id: isSchemeExists.subCategory,
-    });
-
-    const flag = await isOrder(dispositionThreeData[0]?.applicableCriteria);
-    const prepaidOrderFlag = await isPrepaid(
-      dispositionThreeData[0]?.applicableCriteria
-    );
+    const flag = await isOrder([applicableCriteriaData]);
+    const prepaidOrderFlag = await isPrepaid([applicableCriteriaData]);
 
     // Dealer logic
     let dealerServingPincode = [];
@@ -131,7 +94,7 @@ const createOrderInQueue = async (data) => {
 
     if (!prepaidOrderFlag || !flag) {
       dealerServingPincode = await dealerSurvingPincode(
-        isPincodeExists?.pincode,
+        pincode,
         companyId,
         schemeId
       );
@@ -222,19 +185,17 @@ const createOrderInQueue = async (data) => {
           : "",
       approved: flag ? true : prepaidOrderFlag ? false : true,
 
-      callCenterId: isUserExists?.callCenterId,
-      branchId: isUserExists?.branchId,
+      callCenterId: callCenterId,
+      branchId: branchId,
       paymentMode: prepaidOrderFlag
         ? paymentModeType.UPI_ONLINE
         : paymentModeType.COD,
-      isUrgentOrder:
-        dispositionThreeData[0]?.applicableCriteria[0] ===
-        applicableCriteria.isUrgent,
+      isUrgentOrder: applicableCriteriaData === applicableCriteria.isUrgent,
 
-      hsnCode: subCatData?.hsnCode,
-      companyAddress: isCompanyExists?.address,
+      hsnCode: hsnCode,
+      companyAddress: address,
       schemeProducts: schemeProductsForOrder,
-      schemeCode: isSchemeExists?.schemeCode,
+      schemeCode: schemeCode,
       isFreezed: false,
       shipyaariStatus: "",
     });

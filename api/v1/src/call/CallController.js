@@ -431,7 +431,7 @@ exports.update = async (req, res) => {
         throw new ApiError(httpStatus.OK, "Invalid Area.");
       }
       console.log(pincodeId, "pincodeId");
-      const isPincodeExists = await pincodeService.getOneByMultiField({
+      var isPincodeExists = await pincodeService.getOneByMultiField({
         _id: pincodeId,
         isDeleted: false,
         isActive: true,
@@ -458,7 +458,18 @@ exports.update = async (req, res) => {
     }
 
     // let dispositionThreeId = dataCreated.dispositionLevelThreeId;
-    let orderQueue = addOrder({ ...req.body, idToBeSearch });
+    let orderQueue = addOrder({
+      ...req.body,
+      idToBeSearch,
+      applicableCriteriaData,
+      pincode: isPincodeExists?.pincode,
+      callCenterId: isUserExists?.callCenterId,
+      branchId: isUserExists?.branchId,
+      address: iscompanyExists?.address,
+      schemeProductsForOrder,
+      schemeCode: isSchemeExists?.schemeCode,
+      hsnCode: subCatData?.hsnCode,
+    });
     await axios.post(
       config.dialer_url,
       {
