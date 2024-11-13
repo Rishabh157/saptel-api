@@ -610,6 +610,38 @@ exports.getAreaByPincode = async (req, res) => {
       .send({ message, status, data, code, issue });
   }
 };
+// get area by tehsil
+
+exports.getAreaByTehsil = async (req, res) => {
+  try {
+    //if no default query then pass {}
+    let idToBeSearch = req.params.id;
+    let dataExist = await areaService.findAllWithQuery({
+      tehsilId: idToBeSearch,
+      isDeleted: false,
+    });
+
+    if (!dataExist) {
+      throw new ApiError(httpStatus.OK, "Data not found.");
+    } else {
+      return res.status(httpStatus.OK).send({
+        message: "Successfull.",
+        status: true,
+        data: dataExist,
+        code: "OK",
+        issue: null,
+      });
+    }
+  } catch (err) {
+    let errData = errorRes(err);
+    logger.info(errData.resData);
+    let { message, status, data, code, issue } = errData.resData;
+    return res
+      .status(errData.statusCode)
+      .send({ message, status, data, code, issue });
+  }
+};
+
 //delete api
 exports.deleteDocument = async (req, res) => {
   try {

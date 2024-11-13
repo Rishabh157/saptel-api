@@ -42,6 +42,15 @@ router.get(
 );
 
 /**
+ * get all area by tehsil
+ */
+router.get(
+  "/get-area-by-tehsil/unauth/:id",
+  validate(areaValidation.getAreaByPincode),
+  areaController.getAreaByTehsil
+);
+
+/**
  * get all area by pincode without token
  */
 router.get(
