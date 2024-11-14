@@ -465,6 +465,21 @@ exports.getBatchOrder = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "callcentermasters",
+          localField: "callCenterId",
+          foreignField: "_id",
+          as: "callcenterdata",
+          pipeline: [
+            {
+              $project: {
+                callCenterName: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
         $addFields: {
           pincodeLabel: {
             $arrayElemAt: ["$pincodeData.pincode", 0],
@@ -479,10 +494,18 @@ exports.getBatchOrder = async (req, res) => {
               { $arrayElemAt: ["$dealer_data.lastName", 0] },
             ],
           },
+          callCenterLabel: {
+            $arrayElemAt: ["$callcenterdata.callCenterName", 0],
+          },
         },
       },
       {
-        $unset: ["pincodeData", "warehouse_data", "dealer_data"],
+        $unset: [
+          "pincodeData",
+          "warehouse_data",
+          "dealer_data",
+          "callcenterdata",
+        ],
       },
     ]);
 
