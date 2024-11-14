@@ -2349,7 +2349,7 @@ exports.getUnAuth = async (req, res) => {
     const { phno, type } = req.params;
 
     let matchQuery = {
-      $and: [{ isDeleted: false }],
+      $and: [],
     };
 
     if (type === callPageTabType.order) {
@@ -2379,7 +2379,7 @@ exports.getUnAuth = async (req, res) => {
           $match: matchQuery,
         },
         { $sort: { _id: -1 } },
-        { $limit: 15 },
+        { $limit: 10 },
       ];
     }
     if (type === callPageTabType.complaint) {
