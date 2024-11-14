@@ -1909,6 +1909,7 @@ exports.assignOrder = async (req, res) => {
     let allProducts = datafound?.schemeProducts?.map((ele) => {
       return ele?.productGroupId;
     });
+    console.log(dealerId, "dealerId");
     if (dealerId !== null) {
       var isDealerExists = await dealerService.getOneByMultiField({
         _id: dealerId,
@@ -1953,9 +1954,12 @@ exports.assignOrder = async (req, res) => {
             assignDealerId: dealerId,
             assignWarehouseId: warehouseId,
             isOrderAssigned: true,
-            assignWarehouseLabel: isWarehouseExists?.wareHouseName || "",
-            assignDealerLabel:
-              `${isDealerExists?.firstName} ${isDealerExists?.lastName}` || "",
+            assignWarehouseLabel: isWarehouseExists
+              ? isWarehouseExists?.wareHouseName
+              : "",
+            assignDealerLabel: isDealerExists
+              ? `${isDealerExists?.firstName} ${isDealerExists?.lastName}`
+              : "",
           },
         }
       )
