@@ -1083,6 +1083,7 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
               $project: {
                 firstName: 1,
                 lastName: 1,
+                dealerCode: 1,
               },
             },
           ],
@@ -1096,6 +1097,7 @@ exports.getDealerBySchemeAndPincode = async (req, res) => {
               " ",
               { $arrayElemAt: ["$dealerData.lastName", 0] },
             ],
+            dealerCode: { $arrayElemAt: ["$dealerData.dealerCode", 0] },
           },
         },
       },
