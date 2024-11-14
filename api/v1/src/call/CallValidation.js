@@ -8,7 +8,7 @@ const commonValidation = require("../../helper/CommonValidation");
  */
 const create = {
   body: Joi.object().keys({
-    didNo: Joi.string().default(null).optional(),
+    didNo: Joi.string().default(null).optional().allow(null),
     ageGroup: Joi.string().allow(""),
     // agentId: Joi.string().custom(commonValidation.objectId).required(),
     companyCode: Joi.string().required(),
