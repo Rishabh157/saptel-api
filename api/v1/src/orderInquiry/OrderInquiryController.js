@@ -2354,10 +2354,10 @@ exports.getUnAuth = async (req, res) => {
 
     if (type === callPageTabType.order) {
       matchQuery.$and.push({
-        orderNumber: { $ne: null },
+        mobileNo: phno,
       });
       matchQuery.$and.push({
-        mobileNo: phno,
+        orderNumber: { $ne: null },
       });
     }
     if (type === callPageTabType.history) {
