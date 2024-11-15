@@ -125,7 +125,7 @@ const outwardInventory = {
     transportnameId: Joi.string().custom(commonValidation.objectId).required(),
     transporterGST: Joi.string().allow(""),
     mode: Joi.string().required(),
-    distance: Joi.string().required(),
+    distance: Joi.string().allow(""),
     vehicleNumber: Joi.string().required(),
     vehicleType: Joi.string().required(),
     transportDocNo: Joi.string().required(),
