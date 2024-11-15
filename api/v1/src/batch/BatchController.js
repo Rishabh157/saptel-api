@@ -5,7 +5,6 @@ const ApiError = require("../../../utils/apiErrorUtils");
 const batchService = require("./BatchService");
 const orderService = require("../orderInquiry/OrderInquiryService");
 const userService = require("../user/UserService");
-const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const { searchKeys } = require("./BatchSchema");
 const { errorRes } = require("../../../utils/resError");
 const { getQuery } = require("../../helper/utils");
@@ -26,6 +25,9 @@ const { default: mongoose } = require("mongoose");
 const {
   getDateFilterQueryCallBackAndPreferedDate,
 } = require("../orderInquiry/OrderInquiryHelper");
+const {
+  addToOrderFlow,
+} = require("../orderInquiryFlow/OrderInquiryFlowHelper");
 
 //add start
 exports.add = async (req, res) => {
@@ -61,11 +63,13 @@ exports.add = async (req, res) => {
             },
           }
         );
-        await orderInquiryFlowService.createNewData({
-          ...updatedOrder, // Assuming updatedOrder is not undefined
-          orderId: updatedOrder?._id,
-          batchId: dataCreated?._id,
-        });
+        await addToOrderFlow(
+          updatedOrder?._id,
+          updatedOrder?.orderNumber,
+          "Batch created awaiting for mapping",
+          updatedOrder.status,
+          req.userData.userName
+        );
       });
 
       // Await all the promises

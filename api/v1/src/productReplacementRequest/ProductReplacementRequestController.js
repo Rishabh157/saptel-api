@@ -7,7 +7,6 @@ const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const complaintService = require("../complain/ComplainService");
 const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
 
-const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const userService = require("../user/UserService");
 const schemeService = require("../scheme/SchemeService");
 const productReplacementRequestLogService = require("../productReplacementRequestLog/ProductReplacementRequestLogService");

@@ -200,18 +200,20 @@ const createOrderInQueue = async (data) => {
       shipyaariStatus: "",
     });
 
+    console.log(orderInquiry, "data-----------");
     // Add order to the order flow
-    let orderFlow = await addToOrderFlow(
+    await addToOrderFlow(
       orderInquiry?._id,
       orderInquiry?.orderNumber,
       orderInquiry?.assignDealerId
         ? "Order automapped to dealer"
         : orderInquiry?.assignWarehouseId
-        ? "Order automapped to warehouse"
+        ? "Order automapped to warehouse, Awaiting for first call confirmation"
         : "Order added in batch for further mapping!",
       orderInquiry.status,
       agentName
     );
+
     // Send confirmation message if needed
     // if (flag || prepaidOrderFlag) {
     //   await axios.post(

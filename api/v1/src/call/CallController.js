@@ -5,7 +5,6 @@ const ApiError = require("../../../utils/apiErrorUtils");
 // ----service---------
 const callService = require("./CallService");
 const orderService = require("../orderInquiry/OrderInquiryService");
-const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const stateService = require("../state/StateService");
 const schemeService = require("../scheme/SchemeService");
 const districtService = require("../district/DistrictService");
@@ -430,7 +429,6 @@ exports.update = async (req, res) => {
       if (areaId !== null && !isAreaExists) {
         throw new ApiError(httpStatus.OK, "Invalid Area.");
       }
-      console.log(pincodeId, "pincodeId");
       var isPincodeExists = await pincodeService.getOneByMultiField({
         _id: pincodeId,
         isDeleted: false,

@@ -7,7 +7,6 @@ const AWS = require("aws-sdk");
 
 // ----service---------
 const orderService = require("./OrderInquiryService");
-const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 // const callService = require("./CallService");
 const countryService = require("../country/CountryService");
 const stateService = require("../state/StateService");
@@ -461,13 +460,6 @@ exports.update = async (req, res) => {
     );
 
     if (dataUpdated) {
-      await orderInquiryFlowService.createNewData({
-        ...req.body,
-        orderId: idToBeSearch,
-        approved: approved,
-        dispositionLevelTwoId,
-        dispositionLevelThreeId,
-      });
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
@@ -570,17 +562,6 @@ exports.updateDealerNdr = async (req, res) => {
     );
 
     if (dataUpdated) {
-      await orderInquiryFlowService.createNewData({
-        ...dataUpdated,
-        orderId: idToBeSearch,
-        dealerValidRemark: dealerValidRemark,
-        alternateNo: alternateNumber,
-        ndrRemark,
-        ndrDiscountApplicable,
-        status: orderStatusEnum.reattempt,
-        ndrRtoReattemptReason,
-      });
-
       await axios.post(
         "https://uat.onetelemart.com/agent/v2/click-2-hangup",
         {
@@ -771,10 +752,6 @@ exports.changeScheme = async (req, res) => {
     );
 
     if (dataUpdated) {
-      await orderInquiryFlowService.createNewData({
-        ...dataUpdated,
-        orderId: idToBeSearch,
-      });
       return res.status(httpStatus.OK).send({
         message: "Updated successfully.",
         data: dataUpdated,
@@ -856,14 +833,7 @@ exports.approveFirstCallDirectly = async (req, res) => {
     if (!datafound) {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
-    await orderInquiryFlowService.createNewData({
-      ...datafound,
-      orderId: idToBeSearch,
-      firstCallState: status,
-      firstCallApproval:
-        status === firstCallDispositions.approved ? true : false,
-      firstCallApprovedBy: req.userData?.userName,
-    });
+    let cancelStatus = status === firstCallDispositions.cancel;
 
     let dataUpdated = await orderService.getOneAndUpdate(
       {
@@ -876,9 +846,23 @@ exports.approveFirstCallDirectly = async (req, res) => {
           firstCallApproval:
             status === firstCallDispositions.approved ? true : false,
           firstCallApprovedBy: req.userData?.userName,
+          status: cancelStatus ? orderStatusEnum.cancel : datafound?.status,
         },
       }
     );
+
+    console.log(cancelStatus, "approveStatus");
+    if (cancelStatus) {
+      await addToOrderFlow(
+        dataUpdated?._id,
+        dataUpdated?.orderNumber,
+        `Rejected first call confirmation`,
+        dataUpdated.status,
+        req.userData.userName
+      );
+      throw new ApiError(httpStatus.OK, `First call rejected`);
+    }
+
     // getting prefered courier partner
     let toPincodeData = await pincodeService?.getOneByMultiField({
       _id: dataUpdated?.pincodeId,
@@ -1115,7 +1099,10 @@ exports.firstCallConfirmation = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Invalid area`);
     }
     let approveStatus = status === firstCallDispositions.approved;
-
+    let cancelStatus = status === firstCallDispositions.cancel;
+    let holdOrderStatus =
+      status === firstCallDispositions.languageBarrier ||
+      status === firstCallDispositions.callBack;
     let dataUpdated = await orderService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -1132,22 +1119,37 @@ exports.firstCallConfirmation = async (req, res) => {
           firstCallApprovedBy: req.userData?.userName,
           areaId,
           areaLabel: foundArea?.area,
+          status: cancelStatus
+            ? orderStatusEnum.cancel
+            : holdOrderStatus
+            ? orderStatusEnum.hold
+            : datafound?.status,
         },
       }
     );
+    console.log(approveStatus, cancelStatus, holdOrderStatus, "approveStatus");
+    if (cancelStatus) {
+      await addToOrderFlow(
+        dataUpdated?._id,
+        dataUpdated?.orderNumber,
+        `Rejected first call confirmation`,
+        dataUpdated.status,
+        req.userData.userName
+      );
+      throw new ApiError(httpStatus.OK, `First call rejected`);
+    }
+    if (holdOrderStatus) {
+      await addToOrderFlow(
+        dataUpdated?._id,
+        dataUpdated?.orderNumber,
+        `Order Hold from first call confirmation`,
+        dataUpdated.status,
+        req.userData.userName
+      );
+      throw new ApiError(httpStatus.OK, `First call hold`);
+    }
 
     if (dataUpdated) {
-      await orderInquiryFlowService.createNewData({
-        ...dataUpdated,
-        orderId: idToBeSearch,
-        firstCallState: status,
-        firstCallApproval: approveStatus,
-        autoFillingShippingAddress: address,
-        firstCallRemark: remark,
-
-        firstCallCallBackDate: callbackDate,
-        firstCallApprovedBy: req.userData?.userName,
-      });
       // getting prefered courier partner
       let toPincodeData = await pincodeService?.getOneByMultiField({
         _id: dataUpdated?.pincodeId,
@@ -1360,7 +1362,10 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
       throw new ApiError(httpStatus.OK, `Orders not found.`);
     }
     let approveStatus = status === firstCallDispositions.approved;
-
+    let cancelStatus = status === firstCallDispositions.cancel;
+    let holdOrderStatus =
+      status === firstCallDispositions.languageBarrier ||
+      status === firstCallDispositions.callBack;
     let dataUpdated = await orderService.getOneAndUpdate(
       {
         _id: idToBeSearch,
@@ -1375,9 +1380,35 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
           alternateNo: alternateNo,
           firstCallCallBackDate: callbackDate,
           firstCallApprovedBy: approvedBy,
+          status: cancelStatus
+            ? orderStatusEnum.cancel
+            : holdOrderStatus
+            ? orderStatusEnum.hold
+            : datafound?.status,
         },
       }
     );
+
+    if (cancelStatus) {
+      await addToOrderFlow(
+        dataUpdated?._id,
+        dataUpdated?.orderNumber,
+        `Rejected first call confirmation`,
+        dataUpdated.status,
+        req.userData.userName
+      );
+      throw new ApiError(httpStatus.OK, `First call rejected`);
+    }
+    if (holdOrderStatus) {
+      await addToOrderFlow(
+        dataUpdated?._id,
+        dataUpdated?.orderNumber,
+        `Order Hold from first call confirmation`,
+        dataUpdated.status,
+        req.userData.userName
+      );
+      throw new ApiError(httpStatus.OK, `First call hold`);
+    }
     // getting prefered courier partner
     let toPincodeData = await pincodeService?.getOneByMultiField({
       _id: dataUpdated?.pincodeId,
@@ -1496,18 +1527,6 @@ exports.firstCallConfirmationUnauth = async (req, res) => {
     }
 
     if (dataUpdated) {
-      await orderInquiryFlowService.createNewData({
-        ...dataUpdated,
-        orderId: idToBeSearch,
-        firstCallState: status,
-        firstCallApproval: approveStatus,
-        autoFillingShippingAddress: address,
-        firstCallRemark: remark,
-        alternateNo: alternateNo,
-        firstCallCallBackDate: callbackDate,
-        firstCallApprovedBy: approvedBy,
-      });
-
       await axios.post(
         "https://uat.onetelemart.com/agent/v2/click-2-hangup",
         {
@@ -1968,7 +1987,7 @@ exports.assignOrder = async (req, res) => {
           ress?._id,
           ress?.orderNumber,
           ress?.assignWarehouseLabel
-            ? `Order assigned to ${ress?.assignWarehouseLabel} warehouse from batch`
+            ? `Order assigned to ${ress?.assignWarehouseLabel} warehouse from batch, Awaiting for first call confirmation`
             : ress?.assignDealerLabel
             ? `Order assigned to ${ress?.assignDealerLabel} dealer from batch`
             : "",

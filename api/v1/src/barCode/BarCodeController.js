@@ -19,7 +19,6 @@ const vendorService = require("../vendor/VendorService");
 
 const orderInquiryService = require("../orderInquiry/OrderInquiryService");
 const customerWhReturnService = require("../customerWHReturn/CustomerWHReturnService");
-const orderInquiryFlowService = require("../orderInquiryFlow/OrderInquiryFlowService");
 const ProductGroupService = require("../productGroup/ProductGroupService");
 const amazonOrderService = require("../amazonOrder/AmazonOrderService");
 const flipkartOrderService = require("../flipkartOrder/FlipkartOrderService");
